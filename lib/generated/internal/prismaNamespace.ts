@@ -421,7 +421,9 @@ export const ModelName = {
   auth_accounts: 'auth_accounts',
   auth_sessions: 'auth_sessions',
   auth_users: 'auth_users',
-  auth_verification_tokens: 'auth_verification_tokens'
+  auth_verification_tokens: 'auth_verification_tokens',
+  registrasi: 'registrasi',
+  jobs_place: 'jobs_place'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -437,7 +439,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_accounts" | "auth_sessions" | "auth_users" | "auth_verification_tokens"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_accounts" | "auth_sessions" | "auth_users" | "auth_verification_tokens" | "registrasi" | "jobs_place"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2949,6 +2951,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    registrasi: {
+      payload: Prisma.$registrasiPayload<ExtArgs>
+      fields: Prisma.registrasiFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.registrasiFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$registrasiPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.registrasiFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$registrasiPayload>
+        }
+        findFirst: {
+          args: Prisma.registrasiFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$registrasiPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.registrasiFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$registrasiPayload>
+        }
+        findMany: {
+          args: Prisma.registrasiFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$registrasiPayload>[]
+        }
+        create: {
+          args: Prisma.registrasiCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$registrasiPayload>
+        }
+        createMany: {
+          args: Prisma.registrasiCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.registrasiDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$registrasiPayload>
+        }
+        update: {
+          args: Prisma.registrasiUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$registrasiPayload>
+        }
+        deleteMany: {
+          args: Prisma.registrasiDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.registrasiUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.registrasiUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$registrasiPayload>
+        }
+        aggregate: {
+          args: Prisma.RegistrasiAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRegistrasi>
+        }
+        groupBy: {
+          args: Prisma.registrasiGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RegistrasiGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.registrasiCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RegistrasiCountAggregateOutputType> | number
+        }
+      }
+    }
+    jobs_place: {
+      payload: Prisma.$jobs_placePayload<ExtArgs>
+      fields: Prisma.jobs_placeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.jobs_placeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$jobs_placePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.jobs_placeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$jobs_placePayload>
+        }
+        findFirst: {
+          args: Prisma.jobs_placeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$jobs_placePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.jobs_placeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$jobs_placePayload>
+        }
+        findMany: {
+          args: Prisma.jobs_placeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$jobs_placePayload>[]
+        }
+        create: {
+          args: Prisma.jobs_placeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$jobs_placePayload>
+        }
+        createMany: {
+          args: Prisma.jobs_placeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.jobs_placeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$jobs_placePayload>
+        }
+        update: {
+          args: Prisma.jobs_placeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$jobs_placePayload>
+        }
+        deleteMany: {
+          args: Prisma.jobs_placeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.jobs_placeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.jobs_placeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$jobs_placePayload>
+        }
+        aggregate: {
+          args: Prisma.Jobs_placeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateJobs_place>
+        }
+        groupBy: {
+          args: Prisma.jobs_placeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Jobs_placeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.jobs_placeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Jobs_placeCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3228,6 +3362,7 @@ export const PesertaScalarFieldEnum = {
   nowa: 'nowa',
   kotalevelup: 'kotalevelup',
   gereja: 'gereja',
+  id_tempat_kerja: 'id_tempat_kerja',
   email: 'email',
   password: 'password',
   userlevel: 'userlevel',
@@ -3460,6 +3595,26 @@ export const Auth_verification_tokensScalarFieldEnum = {
 } as const
 
 export type Auth_verification_tokensScalarFieldEnum = (typeof Auth_verification_tokensScalarFieldEnum)[keyof typeof Auth_verification_tokensScalarFieldEnum]
+
+
+export const RegistrasiScalarFieldEnum = {
+  id_registrasi: 'id_registrasi',
+  id_peserta: 'id_peserta',
+  id_event: 'id_event',
+  status: 'status',
+  created_at: 'created_at'
+} as const
+
+export type RegistrasiScalarFieldEnum = (typeof RegistrasiScalarFieldEnum)[keyof typeof RegistrasiScalarFieldEnum]
+
+
+export const Jobs_placeScalarFieldEnum = {
+  id_jobs_place: 'id_jobs_place',
+  nama: 'nama',
+  type: 'type'
+} as const
+
+export type Jobs_placeScalarFieldEnum = (typeof Jobs_placeScalarFieldEnum)[keyof typeof Jobs_placeScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3881,6 +4036,13 @@ export const auth_verification_tokensOrderByRelevanceFieldEnum = {
 export type auth_verification_tokensOrderByRelevanceFieldEnum = (typeof auth_verification_tokensOrderByRelevanceFieldEnum)[keyof typeof auth_verification_tokensOrderByRelevanceFieldEnum]
 
 
+export const jobs_placeOrderByRelevanceFieldEnum = {
+  nama: 'nama'
+} as const
+
+export type jobs_placeOrderByRelevanceFieldEnum = (typeof jobs_placeOrderByRelevanceFieldEnum)[keyof typeof jobs_placeOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -3926,6 +4088,20 @@ export type Enumpeserta_roleFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'registrasi_status'
+ */
+export type Enumregistrasi_statusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'registrasi_status'>
+    
+
+
+/**
+ * Reference to a field of type 'jobs_place_type'
+ */
+export type Enumjobs_place_typeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'jobs_place_type'>
     
 
 
@@ -4083,6 +4259,8 @@ export type GlobalOmitConfig = {
   auth_sessions?: Prisma.auth_sessionsOmit
   auth_users?: Prisma.auth_usersOmit
   auth_verification_tokens?: Prisma.auth_verification_tokensOmit
+  registrasi?: Prisma.registrasiOmit
+  jobs_place?: Prisma.jobs_placeOmit
 }
 
 /* Types for Logging */

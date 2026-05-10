@@ -26,3 +26,4 @@ export { Toaster } from './toaster';
 
 export { Table } from './table';
 export type { TableProps, TableColumn } from './table';
+

@@ -28,10 +28,12 @@ export type AggregatePeserta = {
 
 export type PesertaAvgAggregateOutputType = {
   id_peserta: number | null
+  id_tempat_kerja: number | null
 }
 
 export type PesertaSumAggregateOutputType = {
   id_peserta: number | null
+  id_tempat_kerja: number | null
 }
 
 export type PesertaMinAggregateOutputType = {
@@ -52,6 +54,7 @@ export type PesertaMinAggregateOutputType = {
   nowa: string | null
   kotalevelup: string | null
   gereja: string | null
+  id_tempat_kerja: number | null
   email: string | null
   password: string | null
   userlevel: string | null
@@ -79,6 +82,7 @@ export type PesertaMaxAggregateOutputType = {
   nowa: string | null
   kotalevelup: string | null
   gereja: string | null
+  id_tempat_kerja: number | null
   email: string | null
   password: string | null
   userlevel: string | null
@@ -106,6 +110,7 @@ export type PesertaCountAggregateOutputType = {
   nowa: number
   kotalevelup: number
   gereja: number
+  id_tempat_kerja: number
   email: number
   password: number
   userlevel: number
@@ -119,10 +124,12 @@ export type PesertaCountAggregateOutputType = {
 
 export type PesertaAvgAggregateInputType = {
   id_peserta?: true
+  id_tempat_kerja?: true
 }
 
 export type PesertaSumAggregateInputType = {
   id_peserta?: true
+  id_tempat_kerja?: true
 }
 
 export type PesertaMinAggregateInputType = {
@@ -143,6 +150,7 @@ export type PesertaMinAggregateInputType = {
   nowa?: true
   kotalevelup?: true
   gereja?: true
+  id_tempat_kerja?: true
   email?: true
   password?: true
   userlevel?: true
@@ -170,6 +178,7 @@ export type PesertaMaxAggregateInputType = {
   nowa?: true
   kotalevelup?: true
   gereja?: true
+  id_tempat_kerja?: true
   email?: true
   password?: true
   userlevel?: true
@@ -197,6 +206,7 @@ export type PesertaCountAggregateInputType = {
   nowa?: true
   kotalevelup?: true
   gereja?: true
+  id_tempat_kerja?: true
   email?: true
   password?: true
   userlevel?: true
@@ -311,6 +321,7 @@ export type PesertaGroupByOutputType = {
   nowa: string
   kotalevelup: string
   gereja: string
+  id_tempat_kerja: number | null
   email: string
   password: string
   userlevel: string
@@ -361,6 +372,7 @@ export type pesertaWhereInput = {
   nowa?: Prisma.StringFilter<"peserta"> | string
   kotalevelup?: Prisma.StringFilter<"peserta"> | string
   gereja?: Prisma.StringFilter<"peserta"> | string
+  id_tempat_kerja?: Prisma.IntNullableFilter<"peserta"> | number | null
   email?: Prisma.StringFilter<"peserta"> | string
   password?: Prisma.StringFilter<"peserta"> | string
   userlevel?: Prisma.StringFilter<"peserta"> | string
@@ -369,6 +381,8 @@ export type pesertaWhereInput = {
   status?: Prisma.Enumpeserta_statusNullableFilter<"peserta"> | $Enums.peserta_status | null
   role?: Prisma.Enumpeserta_roleNullableFilter<"peserta"> | $Enums.peserta_role | null
   auth_users?: Prisma.Auth_usersListRelationFilter
+  jobs_place?: Prisma.XOR<Prisma.Jobs_placeNullableScalarRelationFilter, Prisma.jobs_placeWhereInput> | null
+  registrasi?: Prisma.RegistrasiListRelationFilter
 }
 
 export type pesertaOrderByWithRelationInput = {
@@ -389,6 +403,7 @@ export type pesertaOrderByWithRelationInput = {
   nowa?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
   gereja?: Prisma.SortOrder
+  id_tempat_kerja?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   userlevel?: Prisma.SortOrder
@@ -397,6 +412,8 @@ export type pesertaOrderByWithRelationInput = {
   status?: Prisma.SortOrderInput | Prisma.SortOrder
   role?: Prisma.SortOrderInput | Prisma.SortOrder
   auth_users?: Prisma.auth_usersOrderByRelationAggregateInput
+  jobs_place?: Prisma.jobs_placeOrderByWithRelationInput
+  registrasi?: Prisma.registrasiOrderByRelationAggregateInput
   _relevance?: Prisma.pesertaOrderByRelevanceInput
 }
 
@@ -421,6 +438,7 @@ export type pesertaWhereUniqueInput = Prisma.AtLeast<{
   nowa?: Prisma.StringFilter<"peserta"> | string
   kotalevelup?: Prisma.StringFilter<"peserta"> | string
   gereja?: Prisma.StringFilter<"peserta"> | string
+  id_tempat_kerja?: Prisma.IntNullableFilter<"peserta"> | number | null
   email?: Prisma.StringFilter<"peserta"> | string
   password?: Prisma.StringFilter<"peserta"> | string
   userlevel?: Prisma.StringFilter<"peserta"> | string
@@ -429,6 +447,8 @@ export type pesertaWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.Enumpeserta_statusNullableFilter<"peserta"> | $Enums.peserta_status | null
   role?: Prisma.Enumpeserta_roleNullableFilter<"peserta"> | $Enums.peserta_role | null
   auth_users?: Prisma.Auth_usersListRelationFilter
+  jobs_place?: Prisma.XOR<Prisma.Jobs_placeNullableScalarRelationFilter, Prisma.jobs_placeWhereInput> | null
+  registrasi?: Prisma.RegistrasiListRelationFilter
 }, "id_peserta">
 
 export type pesertaOrderByWithAggregationInput = {
@@ -449,6 +469,7 @@ export type pesertaOrderByWithAggregationInput = {
   nowa?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
   gereja?: Prisma.SortOrder
+  id_tempat_kerja?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   userlevel?: Prisma.SortOrder
@@ -484,6 +505,7 @@ export type pesertaScalarWhereWithAggregatesInput = {
   nowa?: Prisma.StringWithAggregatesFilter<"peserta"> | string
   kotalevelup?: Prisma.StringWithAggregatesFilter<"peserta"> | string
   gereja?: Prisma.StringWithAggregatesFilter<"peserta"> | string
+  id_tempat_kerja?: Prisma.IntNullableWithAggregatesFilter<"peserta"> | number | null
   email?: Prisma.StringWithAggregatesFilter<"peserta"> | string
   password?: Prisma.StringWithAggregatesFilter<"peserta"> | string
   userlevel?: Prisma.StringWithAggregatesFilter<"peserta"> | string
@@ -518,6 +540,8 @@ export type pesertaCreateInput = {
   status?: $Enums.peserta_status | null
   role?: $Enums.peserta_role | null
   auth_users?: Prisma.auth_usersCreateNestedManyWithoutPesertaInput
+  jobs_place?: Prisma.jobs_placeCreateNestedOneWithoutPesertaInput
+  registrasi?: Prisma.registrasiCreateNestedManyWithoutPesertaInput
 }
 
 export type pesertaUncheckedCreateInput = {
@@ -538,6 +562,7 @@ export type pesertaUncheckedCreateInput = {
   nowa: string
   kotalevelup: string
   gereja: string
+  id_tempat_kerja?: number | null
   email: string
   password: string
   userlevel: string
@@ -546,6 +571,7 @@ export type pesertaUncheckedCreateInput = {
   status?: $Enums.peserta_status | null
   role?: $Enums.peserta_role | null
   auth_users?: Prisma.auth_usersUncheckedCreateNestedManyWithoutPesertaInput
+  registrasi?: Prisma.registrasiUncheckedCreateNestedManyWithoutPesertaInput
 }
 
 export type pesertaUpdateInput = {
@@ -573,6 +599,8 @@ export type pesertaUpdateInput = {
   status?: Prisma.NullableEnumpeserta_statusFieldUpdateOperationsInput | $Enums.peserta_status | null
   role?: Prisma.NullableEnumpeserta_roleFieldUpdateOperationsInput | $Enums.peserta_role | null
   auth_users?: Prisma.auth_usersUpdateManyWithoutPesertaNestedInput
+  jobs_place?: Prisma.jobs_placeUpdateOneWithoutPesertaNestedInput
+  registrasi?: Prisma.registrasiUpdateManyWithoutPesertaNestedInput
 }
 
 export type pesertaUncheckedUpdateInput = {
@@ -593,6 +621,7 @@ export type pesertaUncheckedUpdateInput = {
   nowa?: Prisma.StringFieldUpdateOperationsInput | string
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
   gereja?: Prisma.StringFieldUpdateOperationsInput | string
+  id_tempat_kerja?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   userlevel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -601,6 +630,7 @@ export type pesertaUncheckedUpdateInput = {
   status?: Prisma.NullableEnumpeserta_statusFieldUpdateOperationsInput | $Enums.peserta_status | null
   role?: Prisma.NullableEnumpeserta_roleFieldUpdateOperationsInput | $Enums.peserta_role | null
   auth_users?: Prisma.auth_usersUncheckedUpdateManyWithoutPesertaNestedInput
+  registrasi?: Prisma.registrasiUncheckedUpdateManyWithoutPesertaNestedInput
 }
 
 export type pesertaCreateManyInput = {
@@ -621,6 +651,7 @@ export type pesertaCreateManyInput = {
   nowa: string
   kotalevelup: string
   gereja: string
+  id_tempat_kerja?: number | null
   email: string
   password: string
   userlevel: string
@@ -674,6 +705,7 @@ export type pesertaUncheckedUpdateManyInput = {
   nowa?: Prisma.StringFieldUpdateOperationsInput | string
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
   gereja?: Prisma.StringFieldUpdateOperationsInput | string
+  id_tempat_kerja?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   userlevel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -707,6 +739,7 @@ export type pesertaCountOrderByAggregateInput = {
   nowa?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
   gereja?: Prisma.SortOrder
+  id_tempat_kerja?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   userlevel?: Prisma.SortOrder
@@ -718,6 +751,7 @@ export type pesertaCountOrderByAggregateInput = {
 
 export type pesertaAvgOrderByAggregateInput = {
   id_peserta?: Prisma.SortOrder
+  id_tempat_kerja?: Prisma.SortOrder
 }
 
 export type pesertaMaxOrderByAggregateInput = {
@@ -738,6 +772,7 @@ export type pesertaMaxOrderByAggregateInput = {
   nowa?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
   gereja?: Prisma.SortOrder
+  id_tempat_kerja?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   userlevel?: Prisma.SortOrder
@@ -765,6 +800,7 @@ export type pesertaMinOrderByAggregateInput = {
   nowa?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
   gereja?: Prisma.SortOrder
+  id_tempat_kerja?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   userlevel?: Prisma.SortOrder
@@ -776,11 +812,27 @@ export type pesertaMinOrderByAggregateInput = {
 
 export type pesertaSumOrderByAggregateInput = {
   id_peserta?: Prisma.SortOrder
+  id_tempat_kerja?: Prisma.SortOrder
 }
 
 export type PesertaNullableScalarRelationFilter = {
   is?: Prisma.pesertaWhereInput | null
   isNot?: Prisma.pesertaWhereInput | null
+}
+
+export type PesertaScalarRelationFilter = {
+  is?: Prisma.pesertaWhereInput
+  isNot?: Prisma.pesertaWhereInput
+}
+
+export type PesertaListRelationFilter = {
+  every?: Prisma.pesertaWhereInput
+  some?: Prisma.pesertaWhereInput
+  none?: Prisma.pesertaWhereInput
+}
+
+export type pesertaOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type NullableEnumpeserta_statusFieldUpdateOperationsInput = {
@@ -789,6 +841,14 @@ export type NullableEnumpeserta_statusFieldUpdateOperationsInput = {
 
 export type NullableEnumpeserta_roleFieldUpdateOperationsInput = {
   set?: $Enums.peserta_role | null
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type pesertaCreateNestedOneWithoutAuth_usersInput = {
@@ -805,6 +865,62 @@ export type pesertaUpdateOneWithoutAuth_usersNestedInput = {
   delete?: Prisma.pesertaWhereInput | boolean
   connect?: Prisma.pesertaWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.pesertaUpdateToOneWithWhereWithoutAuth_usersInput, Prisma.pesertaUpdateWithoutAuth_usersInput>, Prisma.pesertaUncheckedUpdateWithoutAuth_usersInput>
+}
+
+export type pesertaCreateNestedOneWithoutRegistrasiInput = {
+  create?: Prisma.XOR<Prisma.pesertaCreateWithoutRegistrasiInput, Prisma.pesertaUncheckedCreateWithoutRegistrasiInput>
+  connectOrCreate?: Prisma.pesertaCreateOrConnectWithoutRegistrasiInput
+  connect?: Prisma.pesertaWhereUniqueInput
+}
+
+export type pesertaUpdateOneRequiredWithoutRegistrasiNestedInput = {
+  create?: Prisma.XOR<Prisma.pesertaCreateWithoutRegistrasiInput, Prisma.pesertaUncheckedCreateWithoutRegistrasiInput>
+  connectOrCreate?: Prisma.pesertaCreateOrConnectWithoutRegistrasiInput
+  upsert?: Prisma.pesertaUpsertWithoutRegistrasiInput
+  connect?: Prisma.pesertaWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.pesertaUpdateToOneWithWhereWithoutRegistrasiInput, Prisma.pesertaUpdateWithoutRegistrasiInput>, Prisma.pesertaUncheckedUpdateWithoutRegistrasiInput>
+}
+
+export type pesertaCreateNestedManyWithoutJobs_placeInput = {
+  create?: Prisma.XOR<Prisma.pesertaCreateWithoutJobs_placeInput, Prisma.pesertaUncheckedCreateWithoutJobs_placeInput> | Prisma.pesertaCreateWithoutJobs_placeInput[] | Prisma.pesertaUncheckedCreateWithoutJobs_placeInput[]
+  connectOrCreate?: Prisma.pesertaCreateOrConnectWithoutJobs_placeInput | Prisma.pesertaCreateOrConnectWithoutJobs_placeInput[]
+  createMany?: Prisma.pesertaCreateManyJobs_placeInputEnvelope
+  connect?: Prisma.pesertaWhereUniqueInput | Prisma.pesertaWhereUniqueInput[]
+}
+
+export type pesertaUncheckedCreateNestedManyWithoutJobs_placeInput = {
+  create?: Prisma.XOR<Prisma.pesertaCreateWithoutJobs_placeInput, Prisma.pesertaUncheckedCreateWithoutJobs_placeInput> | Prisma.pesertaCreateWithoutJobs_placeInput[] | Prisma.pesertaUncheckedCreateWithoutJobs_placeInput[]
+  connectOrCreate?: Prisma.pesertaCreateOrConnectWithoutJobs_placeInput | Prisma.pesertaCreateOrConnectWithoutJobs_placeInput[]
+  createMany?: Prisma.pesertaCreateManyJobs_placeInputEnvelope
+  connect?: Prisma.pesertaWhereUniqueInput | Prisma.pesertaWhereUniqueInput[]
+}
+
+export type pesertaUpdateManyWithoutJobs_placeNestedInput = {
+  create?: Prisma.XOR<Prisma.pesertaCreateWithoutJobs_placeInput, Prisma.pesertaUncheckedCreateWithoutJobs_placeInput> | Prisma.pesertaCreateWithoutJobs_placeInput[] | Prisma.pesertaUncheckedCreateWithoutJobs_placeInput[]
+  connectOrCreate?: Prisma.pesertaCreateOrConnectWithoutJobs_placeInput | Prisma.pesertaCreateOrConnectWithoutJobs_placeInput[]
+  upsert?: Prisma.pesertaUpsertWithWhereUniqueWithoutJobs_placeInput | Prisma.pesertaUpsertWithWhereUniqueWithoutJobs_placeInput[]
+  createMany?: Prisma.pesertaCreateManyJobs_placeInputEnvelope
+  set?: Prisma.pesertaWhereUniqueInput | Prisma.pesertaWhereUniqueInput[]
+  disconnect?: Prisma.pesertaWhereUniqueInput | Prisma.pesertaWhereUniqueInput[]
+  delete?: Prisma.pesertaWhereUniqueInput | Prisma.pesertaWhereUniqueInput[]
+  connect?: Prisma.pesertaWhereUniqueInput | Prisma.pesertaWhereUniqueInput[]
+  update?: Prisma.pesertaUpdateWithWhereUniqueWithoutJobs_placeInput | Prisma.pesertaUpdateWithWhereUniqueWithoutJobs_placeInput[]
+  updateMany?: Prisma.pesertaUpdateManyWithWhereWithoutJobs_placeInput | Prisma.pesertaUpdateManyWithWhereWithoutJobs_placeInput[]
+  deleteMany?: Prisma.pesertaScalarWhereInput | Prisma.pesertaScalarWhereInput[]
+}
+
+export type pesertaUncheckedUpdateManyWithoutJobs_placeNestedInput = {
+  create?: Prisma.XOR<Prisma.pesertaCreateWithoutJobs_placeInput, Prisma.pesertaUncheckedCreateWithoutJobs_placeInput> | Prisma.pesertaCreateWithoutJobs_placeInput[] | Prisma.pesertaUncheckedCreateWithoutJobs_placeInput[]
+  connectOrCreate?: Prisma.pesertaCreateOrConnectWithoutJobs_placeInput | Prisma.pesertaCreateOrConnectWithoutJobs_placeInput[]
+  upsert?: Prisma.pesertaUpsertWithWhereUniqueWithoutJobs_placeInput | Prisma.pesertaUpsertWithWhereUniqueWithoutJobs_placeInput[]
+  createMany?: Prisma.pesertaCreateManyJobs_placeInputEnvelope
+  set?: Prisma.pesertaWhereUniqueInput | Prisma.pesertaWhereUniqueInput[]
+  disconnect?: Prisma.pesertaWhereUniqueInput | Prisma.pesertaWhereUniqueInput[]
+  delete?: Prisma.pesertaWhereUniqueInput | Prisma.pesertaWhereUniqueInput[]
+  connect?: Prisma.pesertaWhereUniqueInput | Prisma.pesertaWhereUniqueInput[]
+  update?: Prisma.pesertaUpdateWithWhereUniqueWithoutJobs_placeInput | Prisma.pesertaUpdateWithWhereUniqueWithoutJobs_placeInput[]
+  updateMany?: Prisma.pesertaUpdateManyWithWhereWithoutJobs_placeInput | Prisma.pesertaUpdateManyWithWhereWithoutJobs_placeInput[]
+  deleteMany?: Prisma.pesertaScalarWhereInput | Prisma.pesertaScalarWhereInput[]
 }
 
 export type pesertaCreateWithoutAuth_usersInput = {
@@ -831,6 +947,8 @@ export type pesertaCreateWithoutAuth_usersInput = {
   foto: string
   status?: $Enums.peserta_status | null
   role?: $Enums.peserta_role | null
+  jobs_place?: Prisma.jobs_placeCreateNestedOneWithoutPesertaInput
+  registrasi?: Prisma.registrasiCreateNestedManyWithoutPesertaInput
 }
 
 export type pesertaUncheckedCreateWithoutAuth_usersInput = {
@@ -851,6 +969,7 @@ export type pesertaUncheckedCreateWithoutAuth_usersInput = {
   nowa: string
   kotalevelup: string
   gereja: string
+  id_tempat_kerja?: number | null
   email: string
   password: string
   userlevel: string
@@ -858,6 +977,7 @@ export type pesertaUncheckedCreateWithoutAuth_usersInput = {
   foto: string
   status?: $Enums.peserta_status | null
   role?: $Enums.peserta_role | null
+  registrasi?: Prisma.registrasiUncheckedCreateNestedManyWithoutPesertaInput
 }
 
 export type pesertaCreateOrConnectWithoutAuth_usersInput = {
@@ -900,9 +1020,368 @@ export type pesertaUpdateWithoutAuth_usersInput = {
   foto?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumpeserta_statusFieldUpdateOperationsInput | $Enums.peserta_status | null
   role?: Prisma.NullableEnumpeserta_roleFieldUpdateOperationsInput | $Enums.peserta_role | null
+  jobs_place?: Prisma.jobs_placeUpdateOneWithoutPesertaNestedInput
+  registrasi?: Prisma.registrasiUpdateManyWithoutPesertaNestedInput
 }
 
 export type pesertaUncheckedUpdateWithoutAuth_usersInput = {
+  id_peserta?: Prisma.IntFieldUpdateOperationsInput | number
+  usercode?: Prisma.StringFieldUpdateOperationsInput | string
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
+  pendidikan?: Prisma.StringFieldUpdateOperationsInput | string
+  jurusan?: Prisma.StringFieldUpdateOperationsInput | string
+  pekerjaan?: Prisma.StringFieldUpdateOperationsInput | string
+  provinsi?: Prisma.StringFieldUpdateOperationsInput | string
+  kabupaten?: Prisma.StringFieldUpdateOperationsInput | string
+  kecamatan?: Prisma.StringFieldUpdateOperationsInput | string
+  desa?: Prisma.StringFieldUpdateOperationsInput | string
+  alamat?: Prisma.StringFieldUpdateOperationsInput | string
+  tgllahir?: Prisma.StringFieldUpdateOperationsInput | string
+  tempatlahir?: Prisma.StringFieldUpdateOperationsInput | string
+  nowa?: Prisma.StringFieldUpdateOperationsInput | string
+  kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
+  gereja?: Prisma.StringFieldUpdateOperationsInput | string
+  id_tempat_kerja?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  userlevel?: Prisma.StringFieldUpdateOperationsInput | string
+  verifikasi?: Prisma.StringFieldUpdateOperationsInput | string
+  foto?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.NullableEnumpeserta_statusFieldUpdateOperationsInput | $Enums.peserta_status | null
+  role?: Prisma.NullableEnumpeserta_roleFieldUpdateOperationsInput | $Enums.peserta_role | null
+  registrasi?: Prisma.registrasiUncheckedUpdateManyWithoutPesertaNestedInput
+}
+
+export type pesertaCreateWithoutRegistrasiInput = {
+  usercode: string
+  nama: string
+  gender: string
+  pendidikan: string
+  jurusan: string
+  pekerjaan: string
+  provinsi: string
+  kabupaten: string
+  kecamatan: string
+  desa: string
+  alamat: string
+  tgllahir: string
+  tempatlahir: string
+  nowa: string
+  kotalevelup: string
+  gereja: string
+  email: string
+  password: string
+  userlevel: string
+  verifikasi: string
+  foto: string
+  status?: $Enums.peserta_status | null
+  role?: $Enums.peserta_role | null
+  auth_users?: Prisma.auth_usersCreateNestedManyWithoutPesertaInput
+  jobs_place?: Prisma.jobs_placeCreateNestedOneWithoutPesertaInput
+}
+
+export type pesertaUncheckedCreateWithoutRegistrasiInput = {
+  id_peserta?: number
+  usercode: string
+  nama: string
+  gender: string
+  pendidikan: string
+  jurusan: string
+  pekerjaan: string
+  provinsi: string
+  kabupaten: string
+  kecamatan: string
+  desa: string
+  alamat: string
+  tgllahir: string
+  tempatlahir: string
+  nowa: string
+  kotalevelup: string
+  gereja: string
+  id_tempat_kerja?: number | null
+  email: string
+  password: string
+  userlevel: string
+  verifikasi: string
+  foto: string
+  status?: $Enums.peserta_status | null
+  role?: $Enums.peserta_role | null
+  auth_users?: Prisma.auth_usersUncheckedCreateNestedManyWithoutPesertaInput
+}
+
+export type pesertaCreateOrConnectWithoutRegistrasiInput = {
+  where: Prisma.pesertaWhereUniqueInput
+  create: Prisma.XOR<Prisma.pesertaCreateWithoutRegistrasiInput, Prisma.pesertaUncheckedCreateWithoutRegistrasiInput>
+}
+
+export type pesertaUpsertWithoutRegistrasiInput = {
+  update: Prisma.XOR<Prisma.pesertaUpdateWithoutRegistrasiInput, Prisma.pesertaUncheckedUpdateWithoutRegistrasiInput>
+  create: Prisma.XOR<Prisma.pesertaCreateWithoutRegistrasiInput, Prisma.pesertaUncheckedCreateWithoutRegistrasiInput>
+  where?: Prisma.pesertaWhereInput
+}
+
+export type pesertaUpdateToOneWithWhereWithoutRegistrasiInput = {
+  where?: Prisma.pesertaWhereInput
+  data: Prisma.XOR<Prisma.pesertaUpdateWithoutRegistrasiInput, Prisma.pesertaUncheckedUpdateWithoutRegistrasiInput>
+}
+
+export type pesertaUpdateWithoutRegistrasiInput = {
+  usercode?: Prisma.StringFieldUpdateOperationsInput | string
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
+  pendidikan?: Prisma.StringFieldUpdateOperationsInput | string
+  jurusan?: Prisma.StringFieldUpdateOperationsInput | string
+  pekerjaan?: Prisma.StringFieldUpdateOperationsInput | string
+  provinsi?: Prisma.StringFieldUpdateOperationsInput | string
+  kabupaten?: Prisma.StringFieldUpdateOperationsInput | string
+  kecamatan?: Prisma.StringFieldUpdateOperationsInput | string
+  desa?: Prisma.StringFieldUpdateOperationsInput | string
+  alamat?: Prisma.StringFieldUpdateOperationsInput | string
+  tgllahir?: Prisma.StringFieldUpdateOperationsInput | string
+  tempatlahir?: Prisma.StringFieldUpdateOperationsInput | string
+  nowa?: Prisma.StringFieldUpdateOperationsInput | string
+  kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
+  gereja?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  userlevel?: Prisma.StringFieldUpdateOperationsInput | string
+  verifikasi?: Prisma.StringFieldUpdateOperationsInput | string
+  foto?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.NullableEnumpeserta_statusFieldUpdateOperationsInput | $Enums.peserta_status | null
+  role?: Prisma.NullableEnumpeserta_roleFieldUpdateOperationsInput | $Enums.peserta_role | null
+  auth_users?: Prisma.auth_usersUpdateManyWithoutPesertaNestedInput
+  jobs_place?: Prisma.jobs_placeUpdateOneWithoutPesertaNestedInput
+}
+
+export type pesertaUncheckedUpdateWithoutRegistrasiInput = {
+  id_peserta?: Prisma.IntFieldUpdateOperationsInput | number
+  usercode?: Prisma.StringFieldUpdateOperationsInput | string
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
+  pendidikan?: Prisma.StringFieldUpdateOperationsInput | string
+  jurusan?: Prisma.StringFieldUpdateOperationsInput | string
+  pekerjaan?: Prisma.StringFieldUpdateOperationsInput | string
+  provinsi?: Prisma.StringFieldUpdateOperationsInput | string
+  kabupaten?: Prisma.StringFieldUpdateOperationsInput | string
+  kecamatan?: Prisma.StringFieldUpdateOperationsInput | string
+  desa?: Prisma.StringFieldUpdateOperationsInput | string
+  alamat?: Prisma.StringFieldUpdateOperationsInput | string
+  tgllahir?: Prisma.StringFieldUpdateOperationsInput | string
+  tempatlahir?: Prisma.StringFieldUpdateOperationsInput | string
+  nowa?: Prisma.StringFieldUpdateOperationsInput | string
+  kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
+  gereja?: Prisma.StringFieldUpdateOperationsInput | string
+  id_tempat_kerja?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  userlevel?: Prisma.StringFieldUpdateOperationsInput | string
+  verifikasi?: Prisma.StringFieldUpdateOperationsInput | string
+  foto?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.NullableEnumpeserta_statusFieldUpdateOperationsInput | $Enums.peserta_status | null
+  role?: Prisma.NullableEnumpeserta_roleFieldUpdateOperationsInput | $Enums.peserta_role | null
+  auth_users?: Prisma.auth_usersUncheckedUpdateManyWithoutPesertaNestedInput
+}
+
+export type pesertaCreateWithoutJobs_placeInput = {
+  usercode: string
+  nama: string
+  gender: string
+  pendidikan: string
+  jurusan: string
+  pekerjaan: string
+  provinsi: string
+  kabupaten: string
+  kecamatan: string
+  desa: string
+  alamat: string
+  tgllahir: string
+  tempatlahir: string
+  nowa: string
+  kotalevelup: string
+  gereja: string
+  email: string
+  password: string
+  userlevel: string
+  verifikasi: string
+  foto: string
+  status?: $Enums.peserta_status | null
+  role?: $Enums.peserta_role | null
+  auth_users?: Prisma.auth_usersCreateNestedManyWithoutPesertaInput
+  registrasi?: Prisma.registrasiCreateNestedManyWithoutPesertaInput
+}
+
+export type pesertaUncheckedCreateWithoutJobs_placeInput = {
+  id_peserta?: number
+  usercode: string
+  nama: string
+  gender: string
+  pendidikan: string
+  jurusan: string
+  pekerjaan: string
+  provinsi: string
+  kabupaten: string
+  kecamatan: string
+  desa: string
+  alamat: string
+  tgllahir: string
+  tempatlahir: string
+  nowa: string
+  kotalevelup: string
+  gereja: string
+  email: string
+  password: string
+  userlevel: string
+  verifikasi: string
+  foto: string
+  status?: $Enums.peserta_status | null
+  role?: $Enums.peserta_role | null
+  auth_users?: Prisma.auth_usersUncheckedCreateNestedManyWithoutPesertaInput
+  registrasi?: Prisma.registrasiUncheckedCreateNestedManyWithoutPesertaInput
+}
+
+export type pesertaCreateOrConnectWithoutJobs_placeInput = {
+  where: Prisma.pesertaWhereUniqueInput
+  create: Prisma.XOR<Prisma.pesertaCreateWithoutJobs_placeInput, Prisma.pesertaUncheckedCreateWithoutJobs_placeInput>
+}
+
+export type pesertaCreateManyJobs_placeInputEnvelope = {
+  data: Prisma.pesertaCreateManyJobs_placeInput | Prisma.pesertaCreateManyJobs_placeInput[]
+  skipDuplicates?: boolean
+}
+
+export type pesertaUpsertWithWhereUniqueWithoutJobs_placeInput = {
+  where: Prisma.pesertaWhereUniqueInput
+  update: Prisma.XOR<Prisma.pesertaUpdateWithoutJobs_placeInput, Prisma.pesertaUncheckedUpdateWithoutJobs_placeInput>
+  create: Prisma.XOR<Prisma.pesertaCreateWithoutJobs_placeInput, Prisma.pesertaUncheckedCreateWithoutJobs_placeInput>
+}
+
+export type pesertaUpdateWithWhereUniqueWithoutJobs_placeInput = {
+  where: Prisma.pesertaWhereUniqueInput
+  data: Prisma.XOR<Prisma.pesertaUpdateWithoutJobs_placeInput, Prisma.pesertaUncheckedUpdateWithoutJobs_placeInput>
+}
+
+export type pesertaUpdateManyWithWhereWithoutJobs_placeInput = {
+  where: Prisma.pesertaScalarWhereInput
+  data: Prisma.XOR<Prisma.pesertaUpdateManyMutationInput, Prisma.pesertaUncheckedUpdateManyWithoutJobs_placeInput>
+}
+
+export type pesertaScalarWhereInput = {
+  AND?: Prisma.pesertaScalarWhereInput | Prisma.pesertaScalarWhereInput[]
+  OR?: Prisma.pesertaScalarWhereInput[]
+  NOT?: Prisma.pesertaScalarWhereInput | Prisma.pesertaScalarWhereInput[]
+  id_peserta?: Prisma.IntFilter<"peserta"> | number
+  usercode?: Prisma.StringFilter<"peserta"> | string
+  nama?: Prisma.StringFilter<"peserta"> | string
+  gender?: Prisma.StringFilter<"peserta"> | string
+  pendidikan?: Prisma.StringFilter<"peserta"> | string
+  jurusan?: Prisma.StringFilter<"peserta"> | string
+  pekerjaan?: Prisma.StringFilter<"peserta"> | string
+  provinsi?: Prisma.StringFilter<"peserta"> | string
+  kabupaten?: Prisma.StringFilter<"peserta"> | string
+  kecamatan?: Prisma.StringFilter<"peserta"> | string
+  desa?: Prisma.StringFilter<"peserta"> | string
+  alamat?: Prisma.StringFilter<"peserta"> | string
+  tgllahir?: Prisma.StringFilter<"peserta"> | string
+  tempatlahir?: Prisma.StringFilter<"peserta"> | string
+  nowa?: Prisma.StringFilter<"peserta"> | string
+  kotalevelup?: Prisma.StringFilter<"peserta"> | string
+  gereja?: Prisma.StringFilter<"peserta"> | string
+  id_tempat_kerja?: Prisma.IntNullableFilter<"peserta"> | number | null
+  email?: Prisma.StringFilter<"peserta"> | string
+  password?: Prisma.StringFilter<"peserta"> | string
+  userlevel?: Prisma.StringFilter<"peserta"> | string
+  verifikasi?: Prisma.StringFilter<"peserta"> | string
+  foto?: Prisma.StringFilter<"peserta"> | string
+  status?: Prisma.Enumpeserta_statusNullableFilter<"peserta"> | $Enums.peserta_status | null
+  role?: Prisma.Enumpeserta_roleNullableFilter<"peserta"> | $Enums.peserta_role | null
+}
+
+export type pesertaCreateManyJobs_placeInput = {
+  id_peserta?: number
+  usercode: string
+  nama: string
+  gender: string
+  pendidikan: string
+  jurusan: string
+  pekerjaan: string
+  provinsi: string
+  kabupaten: string
+  kecamatan: string
+  desa: string
+  alamat: string
+  tgllahir: string
+  tempatlahir: string
+  nowa: string
+  kotalevelup: string
+  gereja: string
+  email: string
+  password: string
+  userlevel: string
+  verifikasi: string
+  foto: string
+  status?: $Enums.peserta_status | null
+  role?: $Enums.peserta_role | null
+}
+
+export type pesertaUpdateWithoutJobs_placeInput = {
+  usercode?: Prisma.StringFieldUpdateOperationsInput | string
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
+  pendidikan?: Prisma.StringFieldUpdateOperationsInput | string
+  jurusan?: Prisma.StringFieldUpdateOperationsInput | string
+  pekerjaan?: Prisma.StringFieldUpdateOperationsInput | string
+  provinsi?: Prisma.StringFieldUpdateOperationsInput | string
+  kabupaten?: Prisma.StringFieldUpdateOperationsInput | string
+  kecamatan?: Prisma.StringFieldUpdateOperationsInput | string
+  desa?: Prisma.StringFieldUpdateOperationsInput | string
+  alamat?: Prisma.StringFieldUpdateOperationsInput | string
+  tgllahir?: Prisma.StringFieldUpdateOperationsInput | string
+  tempatlahir?: Prisma.StringFieldUpdateOperationsInput | string
+  nowa?: Prisma.StringFieldUpdateOperationsInput | string
+  kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
+  gereja?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  userlevel?: Prisma.StringFieldUpdateOperationsInput | string
+  verifikasi?: Prisma.StringFieldUpdateOperationsInput | string
+  foto?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.NullableEnumpeserta_statusFieldUpdateOperationsInput | $Enums.peserta_status | null
+  role?: Prisma.NullableEnumpeserta_roleFieldUpdateOperationsInput | $Enums.peserta_role | null
+  auth_users?: Prisma.auth_usersUpdateManyWithoutPesertaNestedInput
+  registrasi?: Prisma.registrasiUpdateManyWithoutPesertaNestedInput
+}
+
+export type pesertaUncheckedUpdateWithoutJobs_placeInput = {
+  id_peserta?: Prisma.IntFieldUpdateOperationsInput | number
+  usercode?: Prisma.StringFieldUpdateOperationsInput | string
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
+  pendidikan?: Prisma.StringFieldUpdateOperationsInput | string
+  jurusan?: Prisma.StringFieldUpdateOperationsInput | string
+  pekerjaan?: Prisma.StringFieldUpdateOperationsInput | string
+  provinsi?: Prisma.StringFieldUpdateOperationsInput | string
+  kabupaten?: Prisma.StringFieldUpdateOperationsInput | string
+  kecamatan?: Prisma.StringFieldUpdateOperationsInput | string
+  desa?: Prisma.StringFieldUpdateOperationsInput | string
+  alamat?: Prisma.StringFieldUpdateOperationsInput | string
+  tgllahir?: Prisma.StringFieldUpdateOperationsInput | string
+  tempatlahir?: Prisma.StringFieldUpdateOperationsInput | string
+  nowa?: Prisma.StringFieldUpdateOperationsInput | string
+  kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
+  gereja?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  userlevel?: Prisma.StringFieldUpdateOperationsInput | string
+  verifikasi?: Prisma.StringFieldUpdateOperationsInput | string
+  foto?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.NullableEnumpeserta_statusFieldUpdateOperationsInput | $Enums.peserta_status | null
+  role?: Prisma.NullableEnumpeserta_roleFieldUpdateOperationsInput | $Enums.peserta_role | null
+  auth_users?: Prisma.auth_usersUncheckedUpdateManyWithoutPesertaNestedInput
+  registrasi?: Prisma.registrasiUncheckedUpdateManyWithoutPesertaNestedInput
+}
+
+export type pesertaUncheckedUpdateManyWithoutJobs_placeInput = {
   id_peserta?: Prisma.IntFieldUpdateOperationsInput | number
   usercode?: Prisma.StringFieldUpdateOperationsInput | string
   nama?: Prisma.StringFieldUpdateOperationsInput | string
@@ -936,10 +1415,12 @@ export type pesertaUncheckedUpdateWithoutAuth_usersInput = {
 
 export type PesertaCountOutputType = {
   auth_users: number
+  registrasi: number
 }
 
 export type PesertaCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   auth_users?: boolean | PesertaCountOutputTypeCountAuth_usersArgs
+  registrasi?: boolean | PesertaCountOutputTypeCountRegistrasiArgs
 }
 
 /**
@@ -957,6 +1438,13 @@ export type PesertaCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exte
  */
 export type PesertaCountOutputTypeCountAuth_usersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.auth_usersWhereInput
+}
+
+/**
+ * PesertaCountOutputType without action
+ */
+export type PesertaCountOutputTypeCountRegistrasiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.registrasiWhereInput
 }
 
 
@@ -978,6 +1466,7 @@ export type pesertaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   nowa?: boolean
   kotalevelup?: boolean
   gereja?: boolean
+  id_tempat_kerja?: boolean
   email?: boolean
   password?: boolean
   userlevel?: boolean
@@ -986,6 +1475,8 @@ export type pesertaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   status?: boolean
   role?: boolean
   auth_users?: boolean | Prisma.peserta$auth_usersArgs<ExtArgs>
+  jobs_place?: boolean | Prisma.peserta$jobs_placeArgs<ExtArgs>
+  registrasi?: boolean | Prisma.peserta$registrasiArgs<ExtArgs>
   _count?: boolean | Prisma.PesertaCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["peserta"]>
 
@@ -1009,6 +1500,7 @@ export type pesertaSelectScalar = {
   nowa?: boolean
   kotalevelup?: boolean
   gereja?: boolean
+  id_tempat_kerja?: boolean
   email?: boolean
   password?: boolean
   userlevel?: boolean
@@ -1018,9 +1510,11 @@ export type pesertaSelectScalar = {
   role?: boolean
 }
 
-export type pesertaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_peserta" | "usercode" | "nama" | "gender" | "pendidikan" | "jurusan" | "pekerjaan" | "provinsi" | "kabupaten" | "kecamatan" | "desa" | "alamat" | "tgllahir" | "tempatlahir" | "nowa" | "kotalevelup" | "gereja" | "email" | "password" | "userlevel" | "verifikasi" | "foto" | "status" | "role", ExtArgs["result"]["peserta"]>
+export type pesertaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_peserta" | "usercode" | "nama" | "gender" | "pendidikan" | "jurusan" | "pekerjaan" | "provinsi" | "kabupaten" | "kecamatan" | "desa" | "alamat" | "tgllahir" | "tempatlahir" | "nowa" | "kotalevelup" | "gereja" | "id_tempat_kerja" | "email" | "password" | "userlevel" | "verifikasi" | "foto" | "status" | "role", ExtArgs["result"]["peserta"]>
 export type pesertaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   auth_users?: boolean | Prisma.peserta$auth_usersArgs<ExtArgs>
+  jobs_place?: boolean | Prisma.peserta$jobs_placeArgs<ExtArgs>
+  registrasi?: boolean | Prisma.peserta$registrasiArgs<ExtArgs>
   _count?: boolean | Prisma.PesertaCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1028,6 +1522,8 @@ export type $pesertaPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   name: "peserta"
   objects: {
     auth_users: Prisma.$auth_usersPayload<ExtArgs>[]
+    jobs_place: Prisma.$jobs_placePayload<ExtArgs> | null
+    registrasi: Prisma.$registrasiPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id_peserta: number
@@ -1047,6 +1543,7 @@ export type $pesertaPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     nowa: string
     kotalevelup: string
     gereja: string
+    id_tempat_kerja: number | null
     email: string
     password: string
     userlevel: string
@@ -1395,6 +1892,8 @@ readonly fields: pesertaFieldRefs;
 export interface Prisma__pesertaClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   auth_users<T extends Prisma.peserta$auth_usersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.peserta$auth_usersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$auth_usersPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  jobs_place<T extends Prisma.peserta$jobs_placeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.peserta$jobs_placeArgs<ExtArgs>>): Prisma.Prisma__jobs_placeClient<runtime.Types.Result.GetResult<Prisma.$jobs_placePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  registrasi<T extends Prisma.peserta$registrasiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.peserta$registrasiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$registrasiPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1441,6 +1940,7 @@ export interface pesertaFieldRefs {
   readonly nowa: Prisma.FieldRef<"peserta", 'String'>
   readonly kotalevelup: Prisma.FieldRef<"peserta", 'String'>
   readonly gereja: Prisma.FieldRef<"peserta", 'String'>
+  readonly id_tempat_kerja: Prisma.FieldRef<"peserta", 'Int'>
   readonly email: Prisma.FieldRef<"peserta", 'String'>
   readonly password: Prisma.FieldRef<"peserta", 'String'>
   readonly userlevel: Prisma.FieldRef<"peserta", 'String'>
@@ -1817,6 +2317,49 @@ export type peserta$auth_usersArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.Auth_usersScalarFieldEnum | Prisma.Auth_usersScalarFieldEnum[]
+}
+
+/**
+ * peserta.jobs_place
+ */
+export type peserta$jobs_placeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the jobs_place
+   */
+  select?: Prisma.jobs_placeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the jobs_place
+   */
+  omit?: Prisma.jobs_placeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.jobs_placeInclude<ExtArgs> | null
+  where?: Prisma.jobs_placeWhereInput
+}
+
+/**
+ * peserta.registrasi
+ */
+export type peserta$registrasiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the registrasi
+   */
+  select?: Prisma.registrasiSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the registrasi
+   */
+  omit?: Prisma.registrasiOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.registrasiInclude<ExtArgs> | null
+  where?: Prisma.registrasiWhereInput
+  orderBy?: Prisma.registrasiOrderByWithRelationInput | Prisma.registrasiOrderByWithRelationInput[]
+  cursor?: Prisma.registrasiWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RegistrasiScalarFieldEnum | Prisma.RegistrasiScalarFieldEnum[]
 }
 
 /**

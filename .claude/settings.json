@@ -2,10 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(grep -v \"^\\\\.\\\\.$\")",
-      "Bash(sed -i '' 's/py-8 flex flex-col/py-8 pb-safe flex flex-col/g; s/py-12 flex flex-col/py-12 pb-safe flex flex-col/g' \\\\ *)"
+      "Bash(sed -i '' 's/py-8 flex flex-col/py-8 pb-safe flex flex-col/g; s/py-12 flex flex-col/py-12 pb-safe flex flex-col/g' \\\\ *)",
+      "Bash(mkdir -p app/api/auth/\\\\[...nextauth\\\\])",
+      "Bash(node -e \"const m = require\\('next-auth'\\); console.log\\(typeof m.default, Object.keys\\(m\\)\\)\")"
     ],
     "additionalDirectories": [
-      "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/tiket/[id]"
+      "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/tiket/[id]",
+      "/Users/kristian/Documents/LUP/sisko-v2/app/api/auth"
     ]
   }
 }

@@ -65,23 +65,23 @@ export default function AlkPage() {
               {foundEvent.tglDisplay} · {foundEvent.jamevent}
             </p>
           </div>
-          <Button fullWidth onClick={() => router.push('/alk/scanner')}>
+          <Button fullWidth onClick={() => router.push(`/alk/scanner?eventId=${foundEvent.id_event}`)}>
             Mulai Scanner
           </Button>
         </Card>
       )}
 
-      {showQR && foundEvent && (
+      {showQR && Number(eventIdInput) > 0 && (
         <Card variant="elevated" className="p-6 flex flex-col items-center gap-4">
-          <p className="text-xs text-muted uppercase tracking-wider">QR Event</p>
+          <p className="text-xs text-muted uppercase tracking-wider">QR Join Link</p>
           <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=EVENT-${foundEvent.id_event}&color=1c1917&bgcolor=ffffff`}
-            alt="QR Event"
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${window.location.origin}/join/${eventIdInput}`)}&color=1c1917&bgcolor=ffffff`}
+            alt="QR Join Event"
             width={200}
             height={200}
             className="rounded-input"
           />
-          <p className="text-sm font-medium text-fg">{foundEvent.nama_event}</p>
+          <p className="text-sm text-muted">{window.location.origin}/join/{eventIdInput}</p>
         </Card>
       )}
     </main>

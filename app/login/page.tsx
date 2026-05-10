@@ -1,16 +1,18 @@
 'use client'
-import { useRouter } from 'next/navigation'
+import { Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard'
 
   return (
     <main className="max-w-sm mx-auto min-h-screen bg-bg flex flex-col items-center justify-center px-6 gap-8">
       <div className="text-center">
-        <div className="w-16 h-16 rounded-full bg-accent-light mx-auto mb-4 flex items-center justify-center">
-          <span className="text-accent-dark font-bold text-sm">LU</span>
-        </div>
+        <img src="/logoutama.png" alt="LevelUp" className="h-14 mx-auto mb-6 object-contain" />
         <h1 className="text-xl font-semibold text-fg">Masuk ke Sisko</h1>
         <p className="text-sm text-muted mt-1">Gunakan akun Google kamu untuk melanjutkan</p>
       </div>
@@ -20,7 +22,7 @@ export default function LoginPage() {
           variant="secondary"
           fullWidth
           size="lg"
-          onClick={() => router.push('/daftar')}
+          onClick={() => signIn('google', { callbackUrl })}
         >
           <span className="flex items-center justify-center gap-2">
             <GoogleIcon />
@@ -36,6 +38,14 @@ export default function LoginPage() {
         ← Kembali
       </button>
     </main>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }
 

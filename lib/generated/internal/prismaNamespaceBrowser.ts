@@ -88,7 +88,9 @@ export const ModelName = {
   auth_accounts: 'auth_accounts',
   auth_sessions: 'auth_sessions',
   auth_users: 'auth_users',
-  auth_verification_tokens: 'auth_verification_tokens'
+  auth_verification_tokens: 'auth_verification_tokens',
+  registrasi: 'registrasi',
+  jobs_place: 'jobs_place'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -347,6 +349,7 @@ export const PesertaScalarFieldEnum = {
   nowa: 'nowa',
   kotalevelup: 'kotalevelup',
   gereja: 'gereja',
+  id_tempat_kerja: 'id_tempat_kerja',
   email: 'email',
   password: 'password',
   userlevel: 'userlevel',
@@ -579,6 +582,26 @@ export const Auth_verification_tokensScalarFieldEnum = {
 } as const
 
 export type Auth_verification_tokensScalarFieldEnum = (typeof Auth_verification_tokensScalarFieldEnum)[keyof typeof Auth_verification_tokensScalarFieldEnum]
+
+
+export const RegistrasiScalarFieldEnum = {
+  id_registrasi: 'id_registrasi',
+  id_peserta: 'id_peserta',
+  id_event: 'id_event',
+  status: 'status',
+  created_at: 'created_at'
+} as const
+
+export type RegistrasiScalarFieldEnum = (typeof RegistrasiScalarFieldEnum)[keyof typeof RegistrasiScalarFieldEnum]
+
+
+export const Jobs_placeScalarFieldEnum = {
+  id_jobs_place: 'id_jobs_place',
+  nama: 'nama',
+  type: 'type'
+} as const
+
+export type Jobs_placeScalarFieldEnum = (typeof Jobs_placeScalarFieldEnum)[keyof typeof Jobs_placeScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -998,4 +1021,11 @@ export const auth_verification_tokensOrderByRelevanceFieldEnum = {
 } as const
 
 export type auth_verification_tokensOrderByRelevanceFieldEnum = (typeof auth_verification_tokensOrderByRelevanceFieldEnum)[keyof typeof auth_verification_tokensOrderByRelevanceFieldEnum]
+
+
+export const jobs_placeOrderByRelevanceFieldEnum = {
+  nama: 'nama'
+} as const
+
+export type jobs_placeOrderByRelevanceFieldEnum = (typeof jobs_placeOrderByRelevanceFieldEnum)[keyof typeof jobs_placeOrderByRelevanceFieldEnum]
 

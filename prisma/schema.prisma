@@ -67,31 +67,32 @@ model dokumentasikelaswp {
 }
 
 model event {
-  id_event           Int      @id @default(autoincrement())
-  nama_event         String   @db.Text
-  tglevent           DateTime @db.Date
-  tgleventselesai    DateTime @db.Date
-  jamevent           String   @db.Text
-  alamatevent        String   @db.Text
-  danaevent          String   @db.Text
-  posterevent        String   @db.Text
-  proposalevent      String   @db.Text
-  id_cabang          String   @db.Text
-  target             String   @db.Text
-  targetpengurus     String   @db.Text
+  id_event           Int          @id @default(autoincrement())
+  nama_event         String       @db.Text
+  tglevent           DateTime     @db.Date
+  tgleventselesai    DateTime     @db.Date
+  jamevent           String       @db.Text
+  alamatevent        String       @db.Text
+  danaevent          String       @db.Text
+  posterevent        String       @db.Text
+  proposalevent      String       @db.Text
+  id_cabang          String       @db.Text
+  target             String       @db.Text
+  targetpengurus     String       @db.Text
   targetjumlah       Int
-  jenisevent         String   @db.Text
-  jamselesaievent    String   @db.Text
-  longlatevent       String   @db.Text
+  jenisevent         String       @db.Text
+  jamselesaievent    String       @db.Text
+  longlatevent       String       @db.Text
   radius             Int
-  linkevent          String   @db.Text
-  approvenasional    String   @db.Text
-  approveadmin       String   @db.Text
-  notenasional       String   @db.Text
-  noteadmin          String   @db.Text
-  qr                 String   @db.Text
-  khusus             String   @db.Text
-  suratpemberitahuan String   @db.Text
+  linkevent          String       @db.Text
+  approvenasional    String       @db.Text
+  approveadmin       String       @db.Text
+  notenasional       String       @db.Text
+  noteadmin          String       @db.Text
+  qr                 String       @db.Text
+  khusus             String       @db.Text
+  suratpemberitahuan String       @db.Text
+  registrasi         registrasi[]
 }
 
 model feedback {
@@ -174,31 +175,36 @@ model pengurus {
 }
 
 model peserta {
-  id_peserta  Int             @id @default(autoincrement())
-  usercode    String          @db.Text
-  nama        String          @db.Text
-  gender      String          @db.Text
-  pendidikan  String          @db.Text
-  jurusan     String          @db.Text
-  pekerjaan   String          @db.Text
-  provinsi    String          @db.Text
-  kabupaten   String          @db.Text
-  kecamatan   String          @db.Text
-  desa        String          @db.Text
-  alamat      String          @db.Text
-  tgllahir    String          @db.Text
-  tempatlahir String          @db.Text
-  nowa        String          @db.Text
-  kotalevelup String          @db.Text
-  gereja      String          @db.Text
-  email       String          @db.Text
-  password    String          @db.Text
-  userlevel   String          @db.Text
-  verifikasi  String          @db.Text
-  foto        String          @db.Text
-  status      peserta_status? @default(pending)
-  role        peserta_role?   @default(guest)
-  auth_users  auth_users[]
+  id_peserta      Int             @id @default(autoincrement())
+  usercode        String          @db.Text
+  nama            String          @db.Text
+  gender          String          @db.Text
+  pendidikan      String          @db.Text
+  jurusan         String          @db.Text
+  pekerjaan       String          @db.Text
+  provinsi        String          @db.Text
+  kabupaten       String          @db.Text
+  kecamatan       String          @db.Text
+  desa            String          @db.Text
+  alamat          String          @db.Text
+  tgllahir        String          @db.Text
+  tempatlahir     String          @db.Text
+  nowa            String          @db.Text
+  kotalevelup     String          @db.Text
+  gereja          String          @db.Text
+  id_tempat_kerja Int?
+  email           String          @db.Text
+  password        String          @db.Text
+  userlevel       String          @db.Text
+  verifikasi      String          @db.Text
+  foto            String          @db.Text
+  status          peserta_status? @default(pending)
+  role            peserta_role?   @default(guest)
+  auth_users      auth_users[]
+  jobs_place      jobs_place?     @relation(fields: [id_tempat_kerja], references: [id_jobs_place], map: "peserta_tempat_kerja_fk")
+  registrasi      registrasi[]
+
+  @@index([id_tempat_kerja], map: "peserta_tempat_kerja_fk")
 }
 
 model playlist_teams {
@@ -398,6 +404,26 @@ model auth_verification_tokens {
   @@id([identifier, token])
 }
 
+model registrasi {
+  id_registrasi Int               @id @default(autoincrement())
+  id_peserta    Int
+  id_event      Int
+  status        registrasi_status @default(confirmed)
+  created_at    DateTime          @default(now())
+  event         event             @relation(fields: [id_event], references: [id_event], onDelete: Cascade, map: "registrasi_event_fk")
+  peserta       peserta           @relation(fields: [id_peserta], references: [id_peserta], onDelete: Cascade, map: "registrasi_peserta_fk")
+
+  @@unique([id_peserta, id_event], map: "registrasi_unique")
+  @@index([id_event], map: "registrasi_event_fk")
+}
+
+model jobs_place {
+  id_jobs_place Int             @id @default(autoincrement())
+  nama          String          @db.VarChar(255)
+  type          jobs_place_type
+  peserta       peserta[]
+}
+
 enum peserta_status {
   active
   suspend
@@ -409,4 +435,16 @@ enum peserta_role {
   guest
   member
   admin
+}
+
+enum registrasi_status {
+  pending
+  confirmed
+  cancelled
+}
+
+enum jobs_place_type {
+  sekolah
+  universitas
+  perusahaan
 }

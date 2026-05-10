@@ -1,5 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui'
 
 export default function LandingPage() {
@@ -8,9 +9,7 @@ export default function LandingPage() {
   return (
     <main className="max-w-sm mx-auto min-h-screen bg-bg flex flex-col items-center justify-between px-6 py-16">
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-44 h-44 rounded-full bg-accent-light border-4 border-accent/20 flex items-center justify-center shadow-md">
-          <span className="text-accent-dark font-bold text-xl tracking-tight">LevelUp</span>
-        </div>
+        <img src="/logoutama.png" alt="LevelUp" className="w-64 object-contain" />
       </div>
 
       <div className="w-full flex flex-col gap-3">
@@ -18,16 +17,16 @@ export default function LandingPage() {
           variant="secondary"
           fullWidth
           size="lg"
-          onClick={() => router.push('/dashboard')}
+          onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
         >
           <span className="flex items-center justify-center gap-2">
             <GoogleIcon />
-            Google
+            Login by Google
           </span>
         </Button>
-        <Button variant="ghost" fullWidth onClick={() => router.push('/join/1')}>
+        {/* <Button variant="ghost" fullWidth onClick={() => router.push('/join/1')}>
           join squad →
-        </Button>
+        </Button> */}
       </div>
     </main>
   )

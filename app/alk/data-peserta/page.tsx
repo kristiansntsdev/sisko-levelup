@@ -1,14 +1,13 @@
 'use client'
-import { useRouter } from 'next/navigation'
+import { Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button, Alert, Card } from '@/components/ui'
 
-const PESERTA = [
-  { id: 1, nama: 'Budi Santoso', gereja: 'GBI Bethel' },
-  { id: 2, nama: 'Siti Rahayu', gereja: 'GPDI Maranatha' },
-]
-
-export default function DataPesertaPage() {
+function DataPesertaContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nama = searchParams.get('nama') ?? ''
+  const gereja = searchParams.get('gereja') ?? ''
 
   return (
     <main className="max-w-sm mx-auto min-h-screen bg-bg px-4 py-8 pb-safe flex flex-col gap-5">
@@ -28,18 +27,28 @@ export default function DataPesertaPage() {
         description="Peserta berhasil diabsen."
       />
 
-      <div className="flex flex-col gap-3">
-        {PESERTA.map((p) => (
-          <Card key={p.id} className="p-4">
-            <p className="font-medium text-fg">{p.nama}</p>
-            <p className="text-xs text-muted mt-0.5">{p.gereja}</p>
-          </Card>
-        ))}
-      </div>
+      {nama && (
+        <Card className="p-4">
+          <p className="font-medium text-fg">{nama}</p>
+          {gereja && <p className="text-xs text-muted mt-0.5">{gereja}</p>}
+        </Card>
+      )}
 
-      <Button variant="secondary" fullWidth onClick={() => router.push('/alk/scanner')}>
+      <Button
+        variant="secondary"
+        fullWidth
+        onClick={() => router.back()}
+      >
         Scan Lagi
       </Button>
     </main>
+  )
+}
+
+export default function DataPesertaPage() {
+  return (
+    <Suspense>
+      <DataPesertaContent />
+    </Suspense>
   )
 }

@@ -207,3 +207,13 @@ export type auth_users = Prisma.auth_usersModel
  * 
  */
 export type auth_verification_tokens = Prisma.auth_verification_tokensModel
+/**
+ * Model registrasi
+ * 
+ */
+export type registrasi = Prisma.registrasiModel
+/**
+ * Model jobs_place
+ * 
+ */
+export type jobs_place = Prisma.jobs_placeModel

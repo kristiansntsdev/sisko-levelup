@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui";
+import { Providers } from "@/components/providers";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -25,8 +26,10 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${dmSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-bg text-fg font-sans">
-        {children}
-        <Toaster />
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

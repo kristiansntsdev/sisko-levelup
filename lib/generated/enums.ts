@@ -26,3 +26,21 @@ export const peserta_role = {
 } as const
 
 export type peserta_role = (typeof peserta_role)[keyof typeof peserta_role]
+
+
+export const registrasi_status = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  cancelled: 'cancelled'
+} as const
+
+export type registrasi_status = (typeof registrasi_status)[keyof typeof registrasi_status]
+
+
+export const jobs_place_type = {
+  sekolah: 'sekolah',
+  universitas: 'universitas',
+  perusahaan: 'perusahaan'
+} as const
+
+export type jobs_place_type = (typeof jobs_place_type)[keyof typeof jobs_place_type]
