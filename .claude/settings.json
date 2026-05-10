@@ -6,11 +6,13 @@
       "Bash(mkdir -p app/api/auth/\\\\[...nextauth\\\\])",
       "Bash(node -e \"const m = require\\('next-auth'\\); console.log\\(typeof m.default, Object.keys\\(m\\)\\)\")",
       "Bash(git -C /Users/kristian/Documents/LUP/sisko-v2 diff --stat HEAD)",
-      "Bash(git -C /Users/kristian/Documents/LUP/sisko-v2 status --short)"
+      "Bash(git -C /Users/kristian/Documents/LUP/sisko-v2 status --short)",
+      "Bash(mkdir -p /Users/kristian/Documents/LUP/sisko-v2/.github/workflows)"
     ],
     "additionalDirectories": [
       "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/tiket/[id]",
-      "/Users/kristian/Documents/LUP/sisko-v2/app/api/auth"
+      "/Users/kristian/Documents/LUP/sisko-v2/app/api/auth",
+      "/Users/kristian/Documents/LUP/sisko-v2/.github"
     ]
   }
 }
