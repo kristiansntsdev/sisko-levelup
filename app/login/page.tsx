@@ -10,7 +10,7 @@ function LoginForm() {
   const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard'
 
   return (
-    <main className="max-w-sm mx-auto min-h-screen bg-bg flex flex-col items-center justify-center px-6 gap-8">
+    <main className="max-w-sm mx-auto min-h-screen bg-bg flex flex-col items-center justify-center px-6 gap-8 pb-32">
       <div className="text-center">
         <img src="/logoutama.png" alt="LevelUp" className="h-14 mx-auto mb-6 object-contain" />
         <h1 className="text-xl font-semibold text-fg">Masuk ke Sisko</h1>

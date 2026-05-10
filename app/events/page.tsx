@@ -83,7 +83,17 @@ export default function EventsPage() {
 
         {/* Event list */}
         {loading ? (
-          <p className="text-sm text-muted text-center py-12">Memuat...</p>
+          <div className="flex flex-col gap-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="rounded-2xl overflow-hidden bg-surface animate-pulse" style={{ border: '1px solid var(--border)' }}>
+                <div className="w-full bg-muted/20" style={{ aspectRatio: '3/4' }} />
+                <div className="px-4 py-3 flex items-center justify-between gap-3">
+                  <div className="h-4 w-32 rounded bg-muted/20" />
+                  <div className="h-8 w-16 rounded-lg bg-muted/20" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : events.length === 0 ? (
           <p className="text-sm text-muted text-center py-12">Tidak ada event ditemukan.</p>
         ) : (

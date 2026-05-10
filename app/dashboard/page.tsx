@@ -16,22 +16,26 @@ const JOIN_LABELS: Record<number, string> = {
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [registrasi, setRegistrasi] = useState<Registrasi[]>([])
-  const [nama, setNama] = useState('Peserta')
+  const [nama, setNama] = useState('')
   const [userLevel, setUserLevel] = useState<number | null>(null)
+  const [dataLoading, setDataLoading] = useState(true)
 
   useEffect(() => {
     const idPeserta = session?.user?.idPeserta
     if (!idPeserta) return
-    getRegistrasiByPeserta(idPeserta).then(setRegistrasi)
-    getPesertaById(idPeserta).then((p) => {
-      if (p) {
-        setNama(p.nama)
-        setUserLevel(Number(p.userlevel))
-      }
+    Promise.all([
+      getRegistrasiByPeserta(idPeserta),
+      getPesertaById(idPeserta),
+    ]).then(([regs, p]) => {
+      setRegistrasi(regs)
+      if (p) { setNama(p.nama); setUserLevel(Number(p.userlevel)) }
+      setDataLoading(false)
     })
   }, [session?.user?.idPeserta])
+
+  const isLoading = status === 'loading' || dataLoading
 
   const tiketAktif = registrasi[0] ?? null
 
@@ -70,11 +74,22 @@ export default function DashboardPage() {
         {/* Greeting */}
         <div>
           <p className="text-sm text-muted">Hallo,</p>
-          <h1 className="text-2xl font-bold text-fg">{nama}</h1>
+          {isLoading
+            ? <div className="h-8 w-40 rounded-lg bg-border animate-pulse mt-1" />
+            : <h1 className="text-2xl font-bold text-fg">{nama}</h1>
+          }
         </div>
 
         {/* Tiket Aktif */}
-        {tiketAktif && (
+        {isLoading ? (
+          <div className="rounded-card border border-border bg-surface p-5 flex items-center gap-3 animate-pulse">
+            <div className="w-9 h-9 rounded-lg bg-border shrink-0" />
+            <div className="flex flex-col gap-2 flex-1">
+              <div className="h-3 w-16 rounded bg-border" />
+              <div className="h-4 w-32 rounded bg-border" />
+            </div>
+          </div>
+        ) : tiketAktif ? (
           <div
             onClick={() => router.push(`/dashboard/tiket/${tiketAktif.id_registrasi}`)}
             className="cursor-pointer"
@@ -94,10 +109,21 @@ export default function DashboardPage() {
               </div>
             </Card>
           </div>
-        )}
+        ) : null}
 
         {/* Event Terdekat */}
-        {eventTerdekat && (
+        {isLoading ? (
+          <section className="flex flex-col gap-3 animate-pulse">
+            <div className="h-5 w-36 rounded bg-border" />
+            <div className="rounded-card border border-border bg-surface p-4 flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-2">
+                <div className="h-4 w-28 rounded bg-border" />
+                <div className="h-3 w-20 rounded bg-border" />
+              </div>
+              <div className="h-7 w-16 rounded-full bg-border" />
+            </div>
+          </section>
+        ) : eventTerdekat ? (
           <section className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <p className="font-semibold text-fg">Event Terdekat</p>
@@ -118,7 +144,7 @@ export default function DashboardPage() {
               </div>
             </Card>
           </section>
-        )}
+        ) : null}
 
         {/* Footer link */}
         <button
