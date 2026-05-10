@@ -2,33 +2,39 @@
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui'
 
-export default function LandingPage() {
+export default function LoginPage() {
   const router = useRouter()
 
   return (
-    <main className="max-w-sm mx-auto min-h-screen bg-bg flex flex-col items-center justify-between px-6 py-16">
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-44 h-44 rounded-full bg-accent-light border-4 border-accent/20 flex items-center justify-center shadow-md">
-          <span className="text-accent-dark font-bold text-xl tracking-tight">LevelUp</span>
+    <main className="max-w-sm mx-auto min-h-screen bg-bg flex flex-col items-center justify-center px-6 gap-8">
+      <div className="text-center">
+        <div className="w-16 h-16 rounded-full bg-accent-light mx-auto mb-4 flex items-center justify-center">
+          <span className="text-accent-dark font-bold text-sm">LU</span>
         </div>
+        <h1 className="text-xl font-semibold text-fg">Masuk ke Sisko</h1>
+        <p className="text-sm text-muted mt-1">Gunakan akun Google kamu untuk melanjutkan</p>
       </div>
 
-      <div className="w-full flex flex-col gap-3">
+      <div className="w-full">
         <Button
           variant="secondary"
           fullWidth
           size="lg"
-          onClick={() => router.push('/dashboard')}
+          onClick={() => router.push('/daftar')}
         >
           <span className="flex items-center justify-center gap-2">
             <GoogleIcon />
-            Google
+            Login By Google
           </span>
         </Button>
-        <Button variant="ghost" fullWidth onClick={() => router.push('/join/1')}>
-          join squad →
-        </Button>
       </div>
+
+      <button
+        onClick={() => router.back()}
+        className="text-sm text-muted hover:text-fg transition-colors"
+      >
+        ← Kembali
+      </button>
     </main>
   )
 }

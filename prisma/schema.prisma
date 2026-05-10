@@ -1,0 +1,412 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model SequelizeMeta {
+  name String @id @unique(map: "name") @db.VarChar(255)
+}
+
+model absen {
+  id_absen   Int      @id @default(autoincrement())
+  id_peserta String   @db.Text
+  email      String   @db.Text
+  id_event   String   @db.Text
+  hadir      String   @db.Text
+  timestamp  DateTime @default(now()) @db.Timestamp(0)
+  lampiran   String   @db.Text
+  approve    String   @db.Text
+}
+
+model absenwp {
+  id_absenwp       Int      @id @default(autoincrement())
+  id_bahanmateriwp String   @db.Text
+  id_peserta       String   @db.Text
+  timestamp        DateTime @db.Timestamp(0)
+}
+
+model admin {
+  id_admin Int    @id @default(autoincrement())
+  username String @db.Text
+  password String @db.Text
+  nama     String @db.Text
+}
+
+model bacanotifikasi {
+  id_bacanotifikasi Int    @id @default(autoincrement())
+  id_notifikasi     String @db.Text
+  id_peserta        String @db.Text
+}
+
+model bahanmateriwp {
+  id_bahanmateriwp Int    @id @default(autoincrement())
+  id_materiwp      String @db.Text
+  nama_materiwp    String @db.Text
+  jenis_materiwp   String @db.Text
+  link_materiwp    String @db.Text
+  qr               String @db.Text
+}
+
+model cabang {
+  id_cabang    Int    @id @default(autoincrement())
+  namacabang   String @db.Text
+  alamatcabang String @db.Text
+  provinsi     String @db.Text
+  kotacabang   String @db.Text
+  leadercabang String @db.Text
+}
+
+model dokumentasikelaswp {
+  id_dokumentasi Int    @id @default(autoincrement())
+  id_kelas       String @db.Text
+  link           String @db.Text
+}
+
+model event {
+  id_event           Int      @id @default(autoincrement())
+  nama_event         String   @db.Text
+  tglevent           DateTime @db.Date
+  tgleventselesai    DateTime @db.Date
+  jamevent           String   @db.Text
+  alamatevent        String   @db.Text
+  danaevent          String   @db.Text
+  posterevent        String   @db.Text
+  proposalevent      String   @db.Text
+  id_cabang          String   @db.Text
+  target             String   @db.Text
+  targetpengurus     String   @db.Text
+  targetjumlah       Int
+  jenisevent         String   @db.Text
+  jamselesaievent    String   @db.Text
+  longlatevent       String   @db.Text
+  radius             Int
+  linkevent          String   @db.Text
+  approvenasional    String   @db.Text
+  approveadmin       String   @db.Text
+  notenasional       String   @db.Text
+  noteadmin          String   @db.Text
+  qr                 String   @db.Text
+  khusus             String   @db.Text
+  suratpemberitahuan String   @db.Text
+}
+
+model feedback {
+  id_feedback Int    @id @default(autoincrement())
+  id_kelas    String @db.Text
+  feedback    String @db.Text
+}
+
+model gereja {
+  id_gereja       Int    @id @default(autoincrement())
+  nama_gereja     String @db.Text
+  alamat_gereja   String @db.Text
+  kabupaten       String @db.Text
+  email_gereja    String @db.Text
+  password_gereja String @db.Text
+}
+
+model kelaswp {
+  id_kelas    Int      @id @default(autoincrement())
+  id_gereja   String   @db.Text
+  nama_kelas  String   @db.Text
+  tanggal     DateTime @db.Date
+  id_pengajar String   @db.Text
+}
+
+model materiwp {
+  id_materi   Int    @id @default(autoincrement())
+  nama_materi String @db.Text
+  back_materi String @db.Text
+  qr          String @db.Text
+}
+
+model media {
+  id_media    Int    @id @default(autoincrement())
+  namafile    String @db.Text
+  jenismember String @db.Text
+  tipefile    String @db.Text
+  filemedia   String @db.Text
+}
+
+model mou {
+  id_mou    Int    @id @default(autoincrement())
+  id_gereja String @db.Text
+  file_mou  String @db.Text
+}
+
+model notifikasi {
+  id_notifikasi Int    @id @default(autoincrement())
+  id_peserta    String @db.Text
+  tanggal       String @db.Text
+  judul         String @db.Text
+  isi           String @db.Text
+  gambar        String @db.Text
+  target        String @db.Text
+}
+
+model pengajar {
+  id_pengajar    Int    @id @default(autoincrement())
+  id_peserta     Int
+  filesertifikat String @db.Text
+  id_gereja      String @db.Text
+}
+
+model pengaturan {
+  id_pengaturan Int    @id @default(autoincrement())
+  nama_web      String @db.Text
+  logo          String @db.Text
+  logokecil     String @db.Text
+}
+
+model pengurus {
+  id_pengurus Int          @id @default(autoincrement())
+  nama        String       @db.Text
+  nowa        String       @db.Text
+  username    String       @db.Text
+  password    String       @db.Text
+  leveladmin  String       @db.Text
+  kotalevelup String       @db.Text
+  auth_users  auth_users[]
+}
+
+model peserta {
+  id_peserta  Int             @id @default(autoincrement())
+  usercode    String          @db.Text
+  nama        String          @db.Text
+  gender      String          @db.Text
+  pendidikan  String          @db.Text
+  jurusan     String          @db.Text
+  pekerjaan   String          @db.Text
+  provinsi    String          @db.Text
+  kabupaten   String          @db.Text
+  kecamatan   String          @db.Text
+  desa        String          @db.Text
+  alamat      String          @db.Text
+  tgllahir    String          @db.Text
+  tempatlahir String          @db.Text
+  nowa        String          @db.Text
+  kotalevelup String          @db.Text
+  gereja      String          @db.Text
+  email       String          @db.Text
+  password    String          @db.Text
+  userlevel   String          @db.Text
+  verifikasi  String          @db.Text
+  foto        String          @db.Text
+  status      peserta_status? @default(pending)
+  role        peserta_role?   @default(guest)
+  auth_users  auth_users[]
+}
+
+model playlist_teams {
+  id          Int       @id @default(autoincrement())
+  playlist_id Int
+  lead_id     Int
+  is_hidden   Boolean?  @default(false)
+  createdAt   DateTime? @default(now()) @db.DateTime(0)
+  updatedAt   DateTime? @default(now()) @db.DateTime(0)
+  members     String?   @default("[]") @db.LongText
+
+  @@index([lead_id], map: "idx_lead_id")
+  @@index([playlist_id], map: "idx_playlist_id")
+}
+
+model playlists {
+  id               Int       @id @default(autoincrement())
+  playlist_name    String    @db.VarChar(255)
+  sharable_link    String?   @db.VarChar(500)
+  share_token      String?   @db.VarChar(255)
+  user_id          Int
+  playlist_team_id Int?
+  is_shared        Boolean?  @default(false)
+  is_locked        Boolean?  @default(false)
+  createdAt        DateTime? @default(now()) @db.DateTime(0)
+  updatedAt        DateTime? @default(now()) @db.DateTime(0)
+  songs            String?   @default("[]") @db.LongText
+  playlist_notes   String?   @db.LongText
+
+  @@index([playlist_team_id], map: "idx_playlist_team_id")
+  @@index([user_id], map: "idx_user_id")
+}
+
+model reimburse {
+  id_reimburse    Int    @id @default(autoincrement())
+  id_event        String @db.Text
+  ajukan          String @db.Text
+  namabank        String @db.Text
+  norek           String @db.Text
+  namarek         String @db.Text
+  danausul        String @db.Text
+  danariil        String @db.Text
+  laporan         String @db.Text
+  reimburse       String @db.Text
+  approvenasional String @db.Text
+  approvepphtgd   String @db.Text
+  approvekeuangan String @db.Text
+  notenasional    String @db.Text
+  notepphtgd      String @db.Text
+  notekeuangan    String @db.Text
+  bukti           String @db.Text
+  approveadmin    String @db.Text
+  noteadmin       String @db.Text
+  buktitf         String @db.Text
+}
+
+model siswakelaswp {
+  id_siswakelas Int    @id @default(autoincrement())
+  id_kelas      String @db.Text
+  id_peserta    String @db.Text
+  id_gereja     String @db.Text
+}
+
+model song_tags {
+  id        Int       @id @default(autoincrement())
+  song_id   Int
+  tag_id    Int
+  createdAt DateTime? @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @default(now()) @db.DateTime(0)
+  songs     songs     @relation(fields: [song_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "song_tags_ibfk_1")
+  tags      tags      @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "song_tags_ibfk_2")
+
+  @@unique([song_id, tag_id], map: "unique_song_tag")
+  @@index([tag_id], map: "tag_id")
+}
+
+model songs {
+  id                Int         @id @default(autoincrement())
+  title             String      @db.VarChar(255)
+  artist            String?     @db.LongText
+  base_chord        String?     @db.VarChar(50)
+  lyrics_and_chords String?     @db.Text
+  createdAt         DateTime?   @default(now()) @db.DateTime(0)
+  updatedAt         DateTime?   @default(now()) @db.DateTime(0)
+  song_tags         song_tags[]
+}
+
+model spjmateriwp {
+  id_spjmateriwp  Int    @id @default(autoincrement())
+  nama_pengajar   String @db.Text
+  lokasi          String @db.Text
+  laporan         String @db.Text
+  linkdokumentasi String @db.Text
+}
+
+model tags {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique(map: "name") @db.VarChar(255)
+  description String?     @db.Text
+  createdAt   DateTime?   @default(now()) @db.DateTime(0)
+  updatedAt   DateTime?   @default(now()) @db.DateTime(0)
+  song_tags   song_tags[]
+}
+
+model transaksi {
+  id_transaksi   Int    @id @default(autoincrement())
+  namatransaksi  String @db.Text
+  hargatransaksi String @db.Text
+  buktitransaksi String @db.Text
+  id_event       String @db.Text
+}
+
+model upgrade {
+  id_upgrade         Int    @id @default(autoincrement())
+  id_peserta         String @db.Text
+  member             String @db.Text
+  approveadmin       String @db.Text
+  approvesekertariat String @db.Text
+  approvenasional    String @db.Text
+}
+
+model wilayah_desa {
+  id           String  @id @db.VarChar(10)
+  kecamatan_id String? @db.VarChar(7)
+  nama         String? @db.VarChar(40)
+}
+
+model wilayah_kabupaten {
+  id          String @id @db.VarChar(4)
+  provinsi_id String @default("") @db.VarChar(2)
+  nama        String @db.VarChar(30)
+}
+
+model wilayah_kecamatan {
+  id           String @id @db.VarChar(7)
+  kabupaten_id String @default("") @db.VarChar(4)
+  nama         String @db.VarChar(30)
+}
+
+model wilayah_provinsi {
+  id   String @id @db.VarChar(2)
+  nama String @db.VarChar(30)
+}
+
+model auth_accounts {
+  id                  String     @id @db.VarChar(255)
+  user_id             String     @db.VarChar(255)
+  type                String     @db.VarChar(255)
+  provider            String     @db.VarChar(255)
+  provider_account_id String     @db.VarChar(255)
+  refresh_token       String?    @db.Text
+  access_token        String?    @db.Text
+  expires_at          Int?
+  token_type          String?    @db.VarChar(255)
+  scope               String?    @db.Text
+  id_token            String?    @db.Text
+  session_state       String?    @db.Text
+  auth_users          auth_users @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "auth_accounts_user_fk")
+
+  @@unique([provider, provider_account_id], map: "auth_accounts_provider_uq")
+  @@index([user_id], map: "auth_accounts_user_fk")
+}
+
+model auth_sessions {
+  id            String     @id @db.VarChar(255)
+  session_token String     @unique(map: "auth_sessions_token_uq") @db.VarChar(255)
+  user_id       String     @db.VarChar(255)
+  expires       DateTime
+  auth_users    auth_users @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "auth_sessions_user_fk")
+
+  @@index([user_id], map: "auth_sessions_user_fk")
+}
+
+model auth_users {
+  id             String          @id @db.VarChar(255)
+  email          String?         @unique(map: "auth_users_email_uq") @db.VarChar(255)
+  name           String?         @db.VarChar(255)
+  image          String?         @db.Text
+  email_verified DateTime?
+  id_peserta     Int?
+  id_pengurus    Int?
+  created_at     DateTime        @default(now())
+  auth_accounts  auth_accounts[]
+  auth_sessions  auth_sessions[]
+  pengurus       pengurus?       @relation(fields: [id_pengurus], references: [id_pengurus], map: "auth_users_pengurus_fk")
+  peserta        peserta?        @relation(fields: [id_peserta], references: [id_peserta], map: "auth_users_peserta_fk")
+
+  @@index([id_pengurus], map: "auth_users_pengurus_fk")
+  @@index([id_peserta], map: "auth_users_peserta_fk")
+}
+
+model auth_verification_tokens {
+  identifier String   @db.VarChar(255)
+  token      String   @db.VarChar(255)
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+enum peserta_status {
+  active
+  suspend
+  request
+  pending
+}
+
+enum peserta_role {
+  guest
+  member
+  admin
+}
