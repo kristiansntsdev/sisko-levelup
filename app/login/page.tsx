@@ -10,30 +10,33 @@ function LoginForm() {
   const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard'
 
   return (
-    <main className="max-w-sm mx-auto min-h-screen bg-bg flex flex-col items-center justify-center px-6 gap-8 pb-32">
-      <div className="text-center">
-        <img src="/logoutama.png" alt="LevelUp" className="h-14 mx-auto mb-6 object-contain" />
-        <h1 className="text-xl font-semibold text-fg">Masuk ke Sisko</h1>
-        <p className="text-sm text-muted mt-1">Gunakan akun Google kamu untuk melanjutkan</p>
-      </div>
+    <main className="max-w-sm mx-auto h-screen overflow-hidden bg-bg flex flex-col items-center justify-center px-6">
+      {/* Logo + button grouped tightly */}
+      <div className="flex flex-col items-center w-full gap-5">
+        <div className="text-center">
+          <img src="/logoutama.png" alt="LevelUp" className="h-14 mx-auto mb-4 object-contain" />
+          <h1 className="text-xl font-semibold text-fg">Masuk ke Sisko</h1>
+          <p className="text-sm text-muted mt-1">Gunakan akun Google kamu untuk melanjutkan</p>
+        </div>
 
-      <div className="w-full">
-        <Button
-          variant="secondary"
-          fullWidth
-          size="lg"
-          onClick={() => signIn('google', { callbackUrl })}
-        >
-          <span className="flex items-center justify-center gap-2">
-            <GoogleIcon />
-            Login By Google
-          </span>
-        </Button>
+        <div className="w-full">
+          <Button
+            variant="secondary"
+            fullWidth
+            size="lg"
+            onClick={() => signIn('google', { callbackUrl })}
+          >
+            <span className="flex items-center justify-center gap-2">
+              <GoogleIcon />
+              Login By Google
+            </span>
+          </Button>
+        </div>
       </div>
 
       <button
         onClick={() => router.back()}
-        className="text-sm text-muted hover:text-fg transition-colors"
+        className="absolute bottom-8 text-sm text-muted hover:text-fg transition-colors"
       >
         ← Kembali
       </button>
