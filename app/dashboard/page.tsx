@@ -37,7 +37,7 @@ export default function DashboardPage() {
 
   const isLoading = status === 'loading' || dataLoading
 
-  const tiketAktif = registrasi[0] ?? null
+  const tiketAktif = registrasi.slice(0, 3)
 
   const now = new Date()
   const eventTerdekat = registrasi.find((r) => {
@@ -82,33 +82,42 @@ export default function DashboardPage() {
 
         {/* Tiket Aktif */}
         {isLoading ? (
-          <div className="rounded-card border border-border bg-surface p-5 flex items-center gap-3 animate-pulse">
-            <div className="w-9 h-9 rounded-lg bg-border shrink-0" />
-            <div className="flex flex-col gap-2 flex-1">
-              <div className="h-3 w-16 rounded bg-border" />
-              <div className="h-4 w-32 rounded bg-border" />
-            </div>
-          </div>
-        ) : tiketAktif ? (
-          <div
-            onClick={() => router.push(`/dashboard/tiket/${tiketAktif.id_registrasi}`)}
-            className="cursor-pointer"
-          >
-            <Card variant="elevated" className="p-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-accent-light flex items-center justify-center shrink-0">
-                    <TicketIcon />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted uppercase tracking-wider mb-0.5">Tiket Aktif</p>
-                    <p className="font-semibold text-fg">{tiketAktif.nama_event}</p>
-                  </div>
-                </div>
-                <span className="text-muted text-lg">→</span>
+          <section className="flex flex-col gap-3 animate-pulse">
+            <div className="h-5 w-28 rounded bg-border" />
+            <div className="rounded-card border border-border bg-surface p-5 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-border shrink-0" />
+              <div className="flex flex-col gap-2 flex-1">
+                <div className="h-3 w-16 rounded bg-border" />
+                <div className="h-4 w-32 rounded bg-border" />
               </div>
-            </Card>
-          </div>
+            </div>
+          </section>
+        ) : tiketAktif.length > 0 ? (
+          <section className="flex flex-col gap-3">
+            <p className="font-semibold text-fg">Tiket Aktif</p>
+            {tiketAktif.map((tiket) => (
+              <div
+                key={tiket.id_registrasi}
+                onClick={() => router.push(`/dashboard/tiket/${tiket.id_registrasi}`)}
+                className="cursor-pointer"
+              >
+                <Card variant="elevated" className="p-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-accent-light flex items-center justify-center shrink-0">
+                        <TicketIcon />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted uppercase tracking-wider mb-0.5">{tiket.tglDisplay || 'Tiket'}</p>
+                        <p className="font-semibold text-fg">{tiket.nama_event}</p>
+                      </div>
+                    </div>
+                    <span className="text-muted text-lg">→</span>
+                  </div>
+                </Card>
+              </div>
+            ))}
+          </section>
         ) : null}
 
         {/* Event Terdekat */}
