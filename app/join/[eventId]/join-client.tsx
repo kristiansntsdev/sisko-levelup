@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui'
@@ -19,6 +19,7 @@ export function JoinClient({ event, isRegistered }: { event: EventSummary | null
   const posterSrc = event?.posterUrl ?? 'https://picsum.photos/seed/levelup-event/400/700'
   const [loading, setLoading] = useState(false)
   const [userLevel, setUserLevel] = useState<number | null>(null)
+  const autoJoined = useRef(false)
 
   useEffect(() => {
     if (status !== 'authenticated') return
@@ -29,17 +30,20 @@ export function JoinClient({ event, isRegistered }: { event: EventSummary | null
     })
   }, [status, session])
 
+  // Auto-join after redirect back from Google login
+  useEffect(() => {
+    if (status !== 'authenticated' || isRegistered || autoJoined.current) return
+    autoJoined.current = true
+    doJoin(session)
+  }, [status])
+
   const joinLabel = userLevel !== null ? JOIN_LABELS[userLevel] : 'Join / Daftar'
   const showButton = userLevel === null || userLevel < 3
 
-  async function handleJoin() {
+  async function doJoin(sess: typeof session) {
     if (!event) return
     const daftarUrl = `/daftar?eventId=${event.id_event}`
-    if (!session) {
-      router.push(`/login?callbackUrl=${encodeURIComponent(daftarUrl)}`)
-      return
-    }
-    const idPeserta = session.user?.idPeserta
+    const idPeserta = sess?.user?.idPeserta
     if (!idPeserta) { router.push(daftarUrl); return }
     setLoading(true)
     const peserta = await getPesertaById(idPeserta)
@@ -49,6 +53,15 @@ export function JoinClient({ event, isRegistered }: { event: EventSummary | null
     } else {
       router.push(daftarUrl)
     }
+  }
+
+  async function handleJoin() {
+    if (!event) return
+    if (!session) {
+      router.push(`/login?callbackUrl=${encodeURIComponent(`/join/${event.id_event}`)}`)
+      return
+    }
+    await doJoin(session)
   }
 
   if (isRegistered) {
