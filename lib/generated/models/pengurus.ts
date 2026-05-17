@@ -42,6 +42,7 @@ export type PengurusMinAggregateOutputType = {
   password: string | null
   leveladmin: string | null
   kotalevelup: string | null
+  divisi: string | null
 }
 
 export type PengurusMaxAggregateOutputType = {
@@ -52,6 +53,7 @@ export type PengurusMaxAggregateOutputType = {
   password: string | null
   leveladmin: string | null
   kotalevelup: string | null
+  divisi: string | null
 }
 
 export type PengurusCountAggregateOutputType = {
@@ -62,6 +64,7 @@ export type PengurusCountAggregateOutputType = {
   password: number
   leveladmin: number
   kotalevelup: number
+  divisi: number
   _all: number
 }
 
@@ -82,6 +85,7 @@ export type PengurusMinAggregateInputType = {
   password?: true
   leveladmin?: true
   kotalevelup?: true
+  divisi?: true
 }
 
 export type PengurusMaxAggregateInputType = {
@@ -92,6 +96,7 @@ export type PengurusMaxAggregateInputType = {
   password?: true
   leveladmin?: true
   kotalevelup?: true
+  divisi?: true
 }
 
 export type PengurusCountAggregateInputType = {
@@ -102,6 +107,7 @@ export type PengurusCountAggregateInputType = {
   password?: true
   leveladmin?: true
   kotalevelup?: true
+  divisi?: true
   _all?: true
 }
 
@@ -199,6 +205,7 @@ export type PengurusGroupByOutputType = {
   password: string
   leveladmin: string
   kotalevelup: string
+  divisi: string | null
   _count: PengurusCountAggregateOutputType | null
   _avg: PengurusAvgAggregateOutputType | null
   _sum: PengurusSumAggregateOutputType | null
@@ -232,6 +239,7 @@ export type pengurusWhereInput = {
   password?: Prisma.StringFilter<"pengurus"> | string
   leveladmin?: Prisma.StringFilter<"pengurus"> | string
   kotalevelup?: Prisma.StringFilter<"pengurus"> | string
+  divisi?: Prisma.StringNullableFilter<"pengurus"> | string | null
   auth_users?: Prisma.Auth_usersListRelationFilter
 }
 
@@ -243,6 +251,7 @@ export type pengurusOrderByWithRelationInput = {
   password?: Prisma.SortOrder
   leveladmin?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
+  divisi?: Prisma.SortOrderInput | Prisma.SortOrder
   auth_users?: Prisma.auth_usersOrderByRelationAggregateInput
   _relevance?: Prisma.pengurusOrderByRelevanceInput
 }
@@ -258,6 +267,7 @@ export type pengurusWhereUniqueInput = Prisma.AtLeast<{
   password?: Prisma.StringFilter<"pengurus"> | string
   leveladmin?: Prisma.StringFilter<"pengurus"> | string
   kotalevelup?: Prisma.StringFilter<"pengurus"> | string
+  divisi?: Prisma.StringNullableFilter<"pengurus"> | string | null
   auth_users?: Prisma.Auth_usersListRelationFilter
 }, "id_pengurus">
 
@@ -269,6 +279,7 @@ export type pengurusOrderByWithAggregationInput = {
   password?: Prisma.SortOrder
   leveladmin?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
+  divisi?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.pengurusCountOrderByAggregateInput
   _avg?: Prisma.pengurusAvgOrderByAggregateInput
   _max?: Prisma.pengurusMaxOrderByAggregateInput
@@ -287,6 +298,7 @@ export type pengurusScalarWhereWithAggregatesInput = {
   password?: Prisma.StringWithAggregatesFilter<"pengurus"> | string
   leveladmin?: Prisma.StringWithAggregatesFilter<"pengurus"> | string
   kotalevelup?: Prisma.StringWithAggregatesFilter<"pengurus"> | string
+  divisi?: Prisma.StringNullableWithAggregatesFilter<"pengurus"> | string | null
 }
 
 export type pengurusCreateInput = {
@@ -296,6 +308,7 @@ export type pengurusCreateInput = {
   password: string
   leveladmin: string
   kotalevelup: string
+  divisi?: string | null
   auth_users?: Prisma.auth_usersCreateNestedManyWithoutPengurusInput
 }
 
@@ -307,6 +320,7 @@ export type pengurusUncheckedCreateInput = {
   password: string
   leveladmin: string
   kotalevelup: string
+  divisi?: string | null
   auth_users?: Prisma.auth_usersUncheckedCreateNestedManyWithoutPengurusInput
 }
 
@@ -317,6 +331,7 @@ export type pengurusUpdateInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   leveladmin?: Prisma.StringFieldUpdateOperationsInput | string
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
+  divisi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   auth_users?: Prisma.auth_usersUpdateManyWithoutPengurusNestedInput
 }
 
@@ -328,6 +343,7 @@ export type pengurusUncheckedUpdateInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   leveladmin?: Prisma.StringFieldUpdateOperationsInput | string
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
+  divisi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   auth_users?: Prisma.auth_usersUncheckedUpdateManyWithoutPengurusNestedInput
 }
 
@@ -339,6 +355,7 @@ export type pengurusCreateManyInput = {
   password: string
   leveladmin: string
   kotalevelup: string
+  divisi?: string | null
 }
 
 export type pengurusUpdateManyMutationInput = {
@@ -348,6 +365,7 @@ export type pengurusUpdateManyMutationInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   leveladmin?: Prisma.StringFieldUpdateOperationsInput | string
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
+  divisi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type pengurusUncheckedUpdateManyInput = {
@@ -358,6 +376,7 @@ export type pengurusUncheckedUpdateManyInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   leveladmin?: Prisma.StringFieldUpdateOperationsInput | string
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
+  divisi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type pengurusOrderByRelevanceInput = {
@@ -374,6 +393,7 @@ export type pengurusCountOrderByAggregateInput = {
   password?: Prisma.SortOrder
   leveladmin?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
+  divisi?: Prisma.SortOrder
 }
 
 export type pengurusAvgOrderByAggregateInput = {
@@ -388,6 +408,7 @@ export type pengurusMaxOrderByAggregateInput = {
   password?: Prisma.SortOrder
   leveladmin?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
+  divisi?: Prisma.SortOrder
 }
 
 export type pengurusMinOrderByAggregateInput = {
@@ -398,6 +419,7 @@ export type pengurusMinOrderByAggregateInput = {
   password?: Prisma.SortOrder
   leveladmin?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
+  divisi?: Prisma.SortOrder
 }
 
 export type pengurusSumOrderByAggregateInput = {
@@ -407,6 +429,10 @@ export type pengurusSumOrderByAggregateInput = {
 export type PengurusNullableScalarRelationFilter = {
   is?: Prisma.pengurusWhereInput | null
   isNot?: Prisma.pengurusWhereInput | null
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type pengurusCreateNestedOneWithoutAuth_usersInput = {
@@ -432,6 +458,7 @@ export type pengurusCreateWithoutAuth_usersInput = {
   password: string
   leveladmin: string
   kotalevelup: string
+  divisi?: string | null
 }
 
 export type pengurusUncheckedCreateWithoutAuth_usersInput = {
@@ -442,6 +469,7 @@ export type pengurusUncheckedCreateWithoutAuth_usersInput = {
   password: string
   leveladmin: string
   kotalevelup: string
+  divisi?: string | null
 }
 
 export type pengurusCreateOrConnectWithoutAuth_usersInput = {
@@ -467,6 +495,7 @@ export type pengurusUpdateWithoutAuth_usersInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   leveladmin?: Prisma.StringFieldUpdateOperationsInput | string
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
+  divisi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type pengurusUncheckedUpdateWithoutAuth_usersInput = {
@@ -477,6 +506,7 @@ export type pengurusUncheckedUpdateWithoutAuth_usersInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   leveladmin?: Prisma.StringFieldUpdateOperationsInput | string
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
+  divisi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -518,6 +548,7 @@ export type pengurusSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   password?: boolean
   leveladmin?: boolean
   kotalevelup?: boolean
+  divisi?: boolean
   auth_users?: boolean | Prisma.pengurus$auth_usersArgs<ExtArgs>
   _count?: boolean | Prisma.PengurusCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pengurus"]>
@@ -532,9 +563,10 @@ export type pengurusSelectScalar = {
   password?: boolean
   leveladmin?: boolean
   kotalevelup?: boolean
+  divisi?: boolean
 }
 
-export type pengurusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_pengurus" | "nama" | "nowa" | "username" | "password" | "leveladmin" | "kotalevelup", ExtArgs["result"]["pengurus"]>
+export type pengurusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_pengurus" | "nama" | "nowa" | "username" | "password" | "leveladmin" | "kotalevelup" | "divisi", ExtArgs["result"]["pengurus"]>
 export type pengurusInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   auth_users?: boolean | Prisma.pengurus$auth_usersArgs<ExtArgs>
   _count?: boolean | Prisma.PengurusCountOutputTypeDefaultArgs<ExtArgs>
@@ -553,6 +585,7 @@ export type $pengurusPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     password: string
     leveladmin: string
     kotalevelup: string
+    divisi: string | null
   }, ExtArgs["result"]["pengurus"]>
   composites: {}
 }
@@ -930,6 +963,7 @@ export interface pengurusFieldRefs {
   readonly password: Prisma.FieldRef<"pengurus", 'String'>
   readonly leveladmin: Prisma.FieldRef<"pengurus", 'String'>
   readonly kotalevelup: Prisma.FieldRef<"pengurus", 'String'>
+  readonly divisi: Prisma.FieldRef<"pengurus", 'String'>
 }
     
 

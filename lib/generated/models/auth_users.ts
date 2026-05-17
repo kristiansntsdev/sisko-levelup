@@ -244,8 +244,6 @@ export type auth_usersWhereInput = {
   id_peserta?: Prisma.IntNullableFilter<"auth_users"> | number | null
   id_pengurus?: Prisma.IntNullableFilter<"auth_users"> | number | null
   created_at?: Prisma.DateTimeFilter<"auth_users"> | Date | string
-  auth_accounts?: Prisma.Auth_accountsListRelationFilter
-  auth_sessions?: Prisma.Auth_sessionsListRelationFilter
   pengurus?: Prisma.XOR<Prisma.PengurusNullableScalarRelationFilter, Prisma.pengurusWhereInput> | null
   peserta?: Prisma.XOR<Prisma.PesertaNullableScalarRelationFilter, Prisma.pesertaWhereInput> | null
 }
@@ -259,8 +257,6 @@ export type auth_usersOrderByWithRelationInput = {
   id_peserta?: Prisma.SortOrderInput | Prisma.SortOrder
   id_pengurus?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
-  auth_accounts?: Prisma.auth_accountsOrderByRelationAggregateInput
-  auth_sessions?: Prisma.auth_sessionsOrderByRelationAggregateInput
   pengurus?: Prisma.pengurusOrderByWithRelationInput
   peserta?: Prisma.pesertaOrderByWithRelationInput
   _relevance?: Prisma.auth_usersOrderByRelevanceInput
@@ -278,8 +274,6 @@ export type auth_usersWhereUniqueInput = Prisma.AtLeast<{
   id_peserta?: Prisma.IntNullableFilter<"auth_users"> | number | null
   id_pengurus?: Prisma.IntNullableFilter<"auth_users"> | number | null
   created_at?: Prisma.DateTimeFilter<"auth_users"> | Date | string
-  auth_accounts?: Prisma.Auth_accountsListRelationFilter
-  auth_sessions?: Prisma.Auth_sessionsListRelationFilter
   pengurus?: Prisma.XOR<Prisma.PengurusNullableScalarRelationFilter, Prisma.pengurusWhereInput> | null
   peserta?: Prisma.XOR<Prisma.PesertaNullableScalarRelationFilter, Prisma.pesertaWhereInput> | null
 }, "id" | "email">
@@ -321,8 +315,6 @@ export type auth_usersCreateInput = {
   image?: string | null
   email_verified?: Date | string | null
   created_at?: Date | string
-  auth_accounts?: Prisma.auth_accountsCreateNestedManyWithoutAuth_usersInput
-  auth_sessions?: Prisma.auth_sessionsCreateNestedManyWithoutAuth_usersInput
   pengurus?: Prisma.pengurusCreateNestedOneWithoutAuth_usersInput
   peserta?: Prisma.pesertaCreateNestedOneWithoutAuth_usersInput
 }
@@ -336,8 +328,6 @@ export type auth_usersUncheckedCreateInput = {
   id_peserta?: number | null
   id_pengurus?: number | null
   created_at?: Date | string
-  auth_accounts?: Prisma.auth_accountsUncheckedCreateNestedManyWithoutAuth_usersInput
-  auth_sessions?: Prisma.auth_sessionsUncheckedCreateNestedManyWithoutAuth_usersInput
 }
 
 export type auth_usersUpdateInput = {
@@ -347,8 +337,6 @@ export type auth_usersUpdateInput = {
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_accounts?: Prisma.auth_accountsUpdateManyWithoutAuth_usersNestedInput
-  auth_sessions?: Prisma.auth_sessionsUpdateManyWithoutAuth_usersNestedInput
   pengurus?: Prisma.pengurusUpdateOneWithoutAuth_usersNestedInput
   peserta?: Prisma.pesertaUpdateOneWithoutAuth_usersNestedInput
 }
@@ -362,8 +350,6 @@ export type auth_usersUncheckedUpdateInput = {
   id_peserta?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   id_pengurus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_accounts?: Prisma.auth_accountsUncheckedUpdateManyWithoutAuth_usersNestedInput
-  auth_sessions?: Prisma.auth_sessionsUncheckedUpdateManyWithoutAuth_usersNestedInput
 }
 
 export type auth_usersCreateManyInput = {
@@ -405,11 +391,6 @@ export type Auth_usersListRelationFilter = {
 
 export type auth_usersOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type Auth_usersScalarRelationFilter = {
-  is?: Prisma.auth_usersWhereInput
-  isNot?: Prisma.auth_usersWhereInput
 }
 
 export type auth_usersOrderByRelevanceInput = {
@@ -545,34 +526,6 @@ export type auth_usersUncheckedUpdateManyWithoutPesertaNestedInput = {
   deleteMany?: Prisma.auth_usersScalarWhereInput | Prisma.auth_usersScalarWhereInput[]
 }
 
-export type auth_usersCreateNestedOneWithoutAuth_accountsInput = {
-  create?: Prisma.XOR<Prisma.auth_usersCreateWithoutAuth_accountsInput, Prisma.auth_usersUncheckedCreateWithoutAuth_accountsInput>
-  connectOrCreate?: Prisma.auth_usersCreateOrConnectWithoutAuth_accountsInput
-  connect?: Prisma.auth_usersWhereUniqueInput
-}
-
-export type auth_usersUpdateOneRequiredWithoutAuth_accountsNestedInput = {
-  create?: Prisma.XOR<Prisma.auth_usersCreateWithoutAuth_accountsInput, Prisma.auth_usersUncheckedCreateWithoutAuth_accountsInput>
-  connectOrCreate?: Prisma.auth_usersCreateOrConnectWithoutAuth_accountsInput
-  upsert?: Prisma.auth_usersUpsertWithoutAuth_accountsInput
-  connect?: Prisma.auth_usersWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.auth_usersUpdateToOneWithWhereWithoutAuth_accountsInput, Prisma.auth_usersUpdateWithoutAuth_accountsInput>, Prisma.auth_usersUncheckedUpdateWithoutAuth_accountsInput>
-}
-
-export type auth_usersCreateNestedOneWithoutAuth_sessionsInput = {
-  create?: Prisma.XOR<Prisma.auth_usersCreateWithoutAuth_sessionsInput, Prisma.auth_usersUncheckedCreateWithoutAuth_sessionsInput>
-  connectOrCreate?: Prisma.auth_usersCreateOrConnectWithoutAuth_sessionsInput
-  connect?: Prisma.auth_usersWhereUniqueInput
-}
-
-export type auth_usersUpdateOneRequiredWithoutAuth_sessionsNestedInput = {
-  create?: Prisma.XOR<Prisma.auth_usersCreateWithoutAuth_sessionsInput, Prisma.auth_usersUncheckedCreateWithoutAuth_sessionsInput>
-  connectOrCreate?: Prisma.auth_usersCreateOrConnectWithoutAuth_sessionsInput
-  upsert?: Prisma.auth_usersUpsertWithoutAuth_sessionsInput
-  connect?: Prisma.auth_usersWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.auth_usersUpdateToOneWithWhereWithoutAuth_sessionsInput, Prisma.auth_usersUpdateWithoutAuth_sessionsInput>, Prisma.auth_usersUncheckedUpdateWithoutAuth_sessionsInput>
-}
-
 export type auth_usersCreateWithoutPengurusInput = {
   id: string
   email?: string | null
@@ -580,8 +533,6 @@ export type auth_usersCreateWithoutPengurusInput = {
   image?: string | null
   email_verified?: Date | string | null
   created_at?: Date | string
-  auth_accounts?: Prisma.auth_accountsCreateNestedManyWithoutAuth_usersInput
-  auth_sessions?: Prisma.auth_sessionsCreateNestedManyWithoutAuth_usersInput
   peserta?: Prisma.pesertaCreateNestedOneWithoutAuth_usersInput
 }
 
@@ -593,8 +544,6 @@ export type auth_usersUncheckedCreateWithoutPengurusInput = {
   email_verified?: Date | string | null
   id_peserta?: number | null
   created_at?: Date | string
-  auth_accounts?: Prisma.auth_accountsUncheckedCreateNestedManyWithoutAuth_usersInput
-  auth_sessions?: Prisma.auth_sessionsUncheckedCreateNestedManyWithoutAuth_usersInput
 }
 
 export type auth_usersCreateOrConnectWithoutPengurusInput = {
@@ -644,8 +593,6 @@ export type auth_usersCreateWithoutPesertaInput = {
   image?: string | null
   email_verified?: Date | string | null
   created_at?: Date | string
-  auth_accounts?: Prisma.auth_accountsCreateNestedManyWithoutAuth_usersInput
-  auth_sessions?: Prisma.auth_sessionsCreateNestedManyWithoutAuth_usersInput
   pengurus?: Prisma.pengurusCreateNestedOneWithoutAuth_usersInput
 }
 
@@ -657,8 +604,6 @@ export type auth_usersUncheckedCreateWithoutPesertaInput = {
   email_verified?: Date | string | null
   id_pengurus?: number | null
   created_at?: Date | string
-  auth_accounts?: Prisma.auth_accountsUncheckedCreateNestedManyWithoutAuth_usersInput
-  auth_sessions?: Prisma.auth_sessionsUncheckedCreateNestedManyWithoutAuth_usersInput
 }
 
 export type auth_usersCreateOrConnectWithoutPesertaInput = {
@@ -687,134 +632,6 @@ export type auth_usersUpdateManyWithWhereWithoutPesertaInput = {
   data: Prisma.XOR<Prisma.auth_usersUpdateManyMutationInput, Prisma.auth_usersUncheckedUpdateManyWithoutPesertaInput>
 }
 
-export type auth_usersCreateWithoutAuth_accountsInput = {
-  id: string
-  email?: string | null
-  name?: string | null
-  image?: string | null
-  email_verified?: Date | string | null
-  created_at?: Date | string
-  auth_sessions?: Prisma.auth_sessionsCreateNestedManyWithoutAuth_usersInput
-  pengurus?: Prisma.pengurusCreateNestedOneWithoutAuth_usersInput
-  peserta?: Prisma.pesertaCreateNestedOneWithoutAuth_usersInput
-}
-
-export type auth_usersUncheckedCreateWithoutAuth_accountsInput = {
-  id: string
-  email?: string | null
-  name?: string | null
-  image?: string | null
-  email_verified?: Date | string | null
-  id_peserta?: number | null
-  id_pengurus?: number | null
-  created_at?: Date | string
-  auth_sessions?: Prisma.auth_sessionsUncheckedCreateNestedManyWithoutAuth_usersInput
-}
-
-export type auth_usersCreateOrConnectWithoutAuth_accountsInput = {
-  where: Prisma.auth_usersWhereUniqueInput
-  create: Prisma.XOR<Prisma.auth_usersCreateWithoutAuth_accountsInput, Prisma.auth_usersUncheckedCreateWithoutAuth_accountsInput>
-}
-
-export type auth_usersUpsertWithoutAuth_accountsInput = {
-  update: Prisma.XOR<Prisma.auth_usersUpdateWithoutAuth_accountsInput, Prisma.auth_usersUncheckedUpdateWithoutAuth_accountsInput>
-  create: Prisma.XOR<Prisma.auth_usersCreateWithoutAuth_accountsInput, Prisma.auth_usersUncheckedCreateWithoutAuth_accountsInput>
-  where?: Prisma.auth_usersWhereInput
-}
-
-export type auth_usersUpdateToOneWithWhereWithoutAuth_accountsInput = {
-  where?: Prisma.auth_usersWhereInput
-  data: Prisma.XOR<Prisma.auth_usersUpdateWithoutAuth_accountsInput, Prisma.auth_usersUncheckedUpdateWithoutAuth_accountsInput>
-}
-
-export type auth_usersUpdateWithoutAuth_accountsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  email_verified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_sessions?: Prisma.auth_sessionsUpdateManyWithoutAuth_usersNestedInput
-  pengurus?: Prisma.pengurusUpdateOneWithoutAuth_usersNestedInput
-  peserta?: Prisma.pesertaUpdateOneWithoutAuth_usersNestedInput
-}
-
-export type auth_usersUncheckedUpdateWithoutAuth_accountsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  email_verified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  id_peserta?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  id_pengurus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_sessions?: Prisma.auth_sessionsUncheckedUpdateManyWithoutAuth_usersNestedInput
-}
-
-export type auth_usersCreateWithoutAuth_sessionsInput = {
-  id: string
-  email?: string | null
-  name?: string | null
-  image?: string | null
-  email_verified?: Date | string | null
-  created_at?: Date | string
-  auth_accounts?: Prisma.auth_accountsCreateNestedManyWithoutAuth_usersInput
-  pengurus?: Prisma.pengurusCreateNestedOneWithoutAuth_usersInput
-  peserta?: Prisma.pesertaCreateNestedOneWithoutAuth_usersInput
-}
-
-export type auth_usersUncheckedCreateWithoutAuth_sessionsInput = {
-  id: string
-  email?: string | null
-  name?: string | null
-  image?: string | null
-  email_verified?: Date | string | null
-  id_peserta?: number | null
-  id_pengurus?: number | null
-  created_at?: Date | string
-  auth_accounts?: Prisma.auth_accountsUncheckedCreateNestedManyWithoutAuth_usersInput
-}
-
-export type auth_usersCreateOrConnectWithoutAuth_sessionsInput = {
-  where: Prisma.auth_usersWhereUniqueInput
-  create: Prisma.XOR<Prisma.auth_usersCreateWithoutAuth_sessionsInput, Prisma.auth_usersUncheckedCreateWithoutAuth_sessionsInput>
-}
-
-export type auth_usersUpsertWithoutAuth_sessionsInput = {
-  update: Prisma.XOR<Prisma.auth_usersUpdateWithoutAuth_sessionsInput, Prisma.auth_usersUncheckedUpdateWithoutAuth_sessionsInput>
-  create: Prisma.XOR<Prisma.auth_usersCreateWithoutAuth_sessionsInput, Prisma.auth_usersUncheckedCreateWithoutAuth_sessionsInput>
-  where?: Prisma.auth_usersWhereInput
-}
-
-export type auth_usersUpdateToOneWithWhereWithoutAuth_sessionsInput = {
-  where?: Prisma.auth_usersWhereInput
-  data: Prisma.XOR<Prisma.auth_usersUpdateWithoutAuth_sessionsInput, Prisma.auth_usersUncheckedUpdateWithoutAuth_sessionsInput>
-}
-
-export type auth_usersUpdateWithoutAuth_sessionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  email_verified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_accounts?: Prisma.auth_accountsUpdateManyWithoutAuth_usersNestedInput
-  pengurus?: Prisma.pengurusUpdateOneWithoutAuth_usersNestedInput
-  peserta?: Prisma.pesertaUpdateOneWithoutAuth_usersNestedInput
-}
-
-export type auth_usersUncheckedUpdateWithoutAuth_sessionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  email_verified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  id_peserta?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  id_pengurus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_accounts?: Prisma.auth_accountsUncheckedUpdateManyWithoutAuth_usersNestedInput
-}
-
 export type auth_usersCreateManyPengurusInput = {
   id: string
   email?: string | null
@@ -832,8 +649,6 @@ export type auth_usersUpdateWithoutPengurusInput = {
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_accounts?: Prisma.auth_accountsUpdateManyWithoutAuth_usersNestedInput
-  auth_sessions?: Prisma.auth_sessionsUpdateManyWithoutAuth_usersNestedInput
   peserta?: Prisma.pesertaUpdateOneWithoutAuth_usersNestedInput
 }
 
@@ -845,8 +660,6 @@ export type auth_usersUncheckedUpdateWithoutPengurusInput = {
   email_verified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   id_peserta?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_accounts?: Prisma.auth_accountsUncheckedUpdateManyWithoutAuth_usersNestedInput
-  auth_sessions?: Prisma.auth_sessionsUncheckedUpdateManyWithoutAuth_usersNestedInput
 }
 
 export type auth_usersUncheckedUpdateManyWithoutPengurusInput = {
@@ -876,8 +689,6 @@ export type auth_usersUpdateWithoutPesertaInput = {
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email_verified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_accounts?: Prisma.auth_accountsUpdateManyWithoutAuth_usersNestedInput
-  auth_sessions?: Prisma.auth_sessionsUpdateManyWithoutAuth_usersNestedInput
   pengurus?: Prisma.pengurusUpdateOneWithoutAuth_usersNestedInput
 }
 
@@ -889,8 +700,6 @@ export type auth_usersUncheckedUpdateWithoutPesertaInput = {
   email_verified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   id_pengurus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_accounts?: Prisma.auth_accountsUncheckedUpdateManyWithoutAuth_usersNestedInput
-  auth_sessions?: Prisma.auth_sessionsUncheckedUpdateManyWithoutAuth_usersNestedInput
 }
 
 export type auth_usersUncheckedUpdateManyWithoutPesertaInput = {
@@ -904,44 +713,6 @@ export type auth_usersUncheckedUpdateManyWithoutPesertaInput = {
 }
 
 
-/**
- * Count Type Auth_usersCountOutputType
- */
-
-export type Auth_usersCountOutputType = {
-  auth_accounts: number
-  auth_sessions: number
-}
-
-export type Auth_usersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  auth_accounts?: boolean | Auth_usersCountOutputTypeCountAuth_accountsArgs
-  auth_sessions?: boolean | Auth_usersCountOutputTypeCountAuth_sessionsArgs
-}
-
-/**
- * Auth_usersCountOutputType without action
- */
-export type Auth_usersCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Auth_usersCountOutputType
-   */
-  select?: Prisma.Auth_usersCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * Auth_usersCountOutputType without action
- */
-export type Auth_usersCountOutputTypeCountAuth_accountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.auth_accountsWhereInput
-}
-
-/**
- * Auth_usersCountOutputType without action
- */
-export type Auth_usersCountOutputTypeCountAuth_sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.auth_sessionsWhereInput
-}
-
 
 export type auth_usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -952,11 +723,8 @@ export type auth_usersSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   id_peserta?: boolean
   id_pengurus?: boolean
   created_at?: boolean
-  auth_accounts?: boolean | Prisma.auth_users$auth_accountsArgs<ExtArgs>
-  auth_sessions?: boolean | Prisma.auth_users$auth_sessionsArgs<ExtArgs>
   pengurus?: boolean | Prisma.auth_users$pengurusArgs<ExtArgs>
   peserta?: boolean | Prisma.auth_users$pesertaArgs<ExtArgs>
-  _count?: boolean | Prisma.Auth_usersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["auth_users"]>
 
 
@@ -974,18 +742,13 @@ export type auth_usersSelectScalar = {
 
 export type auth_usersOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "image" | "email_verified" | "id_peserta" | "id_pengurus" | "created_at", ExtArgs["result"]["auth_users"]>
 export type auth_usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  auth_accounts?: boolean | Prisma.auth_users$auth_accountsArgs<ExtArgs>
-  auth_sessions?: boolean | Prisma.auth_users$auth_sessionsArgs<ExtArgs>
   pengurus?: boolean | Prisma.auth_users$pengurusArgs<ExtArgs>
   peserta?: boolean | Prisma.auth_users$pesertaArgs<ExtArgs>
-  _count?: boolean | Prisma.Auth_usersCountOutputTypeDefaultArgs<ExtArgs>
 }
 
 export type $auth_usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "auth_users"
   objects: {
-    auth_accounts: Prisma.$auth_accountsPayload<ExtArgs>[]
-    auth_sessions: Prisma.$auth_sessionsPayload<ExtArgs>[]
     pengurus: Prisma.$pengurusPayload<ExtArgs> | null
     peserta: Prisma.$pesertaPayload<ExtArgs> | null
   }
@@ -1338,8 +1101,6 @@ readonly fields: auth_usersFieldRefs;
  */
 export interface Prisma__auth_usersClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  auth_accounts<T extends Prisma.auth_users$auth_accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.auth_users$auth_accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$auth_accountsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  auth_sessions<T extends Prisma.auth_users$auth_sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.auth_users$auth_sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$auth_sessionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pengurus<T extends Prisma.auth_users$pengurusArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.auth_users$pengurusArgs<ExtArgs>>): Prisma.Prisma__pengurusClient<runtime.Types.Result.GetResult<Prisma.$pengurusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   peserta<T extends Prisma.auth_users$pesertaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.auth_users$pesertaArgs<ExtArgs>>): Prisma.Prisma__pesertaClient<runtime.Types.Result.GetResult<Prisma.$pesertaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -1724,54 +1485,6 @@ export type auth_usersDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many auth_users to delete.
    */
   limit?: number
-}
-
-/**
- * auth_users.auth_accounts
- */
-export type auth_users$auth_accountsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the auth_accounts
-   */
-  select?: Prisma.auth_accountsSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the auth_accounts
-   */
-  omit?: Prisma.auth_accountsOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.auth_accountsInclude<ExtArgs> | null
-  where?: Prisma.auth_accountsWhereInput
-  orderBy?: Prisma.auth_accountsOrderByWithRelationInput | Prisma.auth_accountsOrderByWithRelationInput[]
-  cursor?: Prisma.auth_accountsWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.Auth_accountsScalarFieldEnum | Prisma.Auth_accountsScalarFieldEnum[]
-}
-
-/**
- * auth_users.auth_sessions
- */
-export type auth_users$auth_sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the auth_sessions
-   */
-  select?: Prisma.auth_sessionsSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the auth_sessions
-   */
-  omit?: Prisma.auth_sessionsOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.auth_sessionsInclude<ExtArgs> | null
-  where?: Prisma.auth_sessionsWhereInput
-  orderBy?: Prisma.auth_sessionsOrderByWithRelationInput | Prisma.auth_sessionsOrderByWithRelationInput[]
-  cursor?: Prisma.auth_sessionsWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.Auth_sessionsScalarFieldEnum | Prisma.Auth_sessionsScalarFieldEnum[]
 }
 
 /**

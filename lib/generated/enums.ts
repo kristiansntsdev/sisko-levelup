@@ -44,3 +44,19 @@ export const jobs_place_type = {
 } as const
 
 export type jobs_place_type = (typeof jobs_place_type)[keyof typeof jobs_place_type]
+
+
+export const kas_kota_txn_tipe = {
+  masuk: 'masuk',
+  keluar: 'keluar'
+} as const
+
+export type kas_kota_txn_tipe = (typeof kas_kota_txn_tipe)[keyof typeof kas_kota_txn_tipe]
+
+
+export const kas_kota_txn_kategori = {
+  harian: 'harian',
+  event: 'event'
+} as const
+
+export type kas_kota_txn_kategori = (typeof kas_kota_txn_kategori)[keyof typeof kas_kota_txn_kategori]

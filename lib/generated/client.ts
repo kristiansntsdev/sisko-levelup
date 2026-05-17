@@ -212,25 +212,10 @@ export type wilayah_kecamatan = Prisma.wilayah_kecamatanModel
  */
 export type wilayah_provinsi = Prisma.wilayah_provinsiModel
 /**
- * Model auth_accounts
- * 
- */
-export type auth_accounts = Prisma.auth_accountsModel
-/**
- * Model auth_sessions
- * 
- */
-export type auth_sessions = Prisma.auth_sessionsModel
-/**
  * Model auth_users
  * 
  */
 export type auth_users = Prisma.auth_usersModel
-/**
- * Model auth_verification_tokens
- * 
- */
-export type auth_verification_tokens = Prisma.auth_verification_tokensModel
 /**
  * Model registrasi
  * 
@@ -241,3 +226,13 @@ export type registrasi = Prisma.registrasiModel
  * 
  */
 export type jobs_place = Prisma.jobs_placeModel
+/**
+ * Model kas_kota
+ * 
+ */
+export type kas_kota = Prisma.kas_kotaModel
+/**
+ * Model kas_kota_txn
+ * 
+ */
+export type kas_kota_txn = Prisma.kas_kota_txnModel

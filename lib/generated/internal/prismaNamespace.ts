@@ -418,12 +418,11 @@ export const ModelName = {
   wilayah_kabupaten: 'wilayah_kabupaten',
   wilayah_kecamatan: 'wilayah_kecamatan',
   wilayah_provinsi: 'wilayah_provinsi',
-  auth_accounts: 'auth_accounts',
-  auth_sessions: 'auth_sessions',
   auth_users: 'auth_users',
-  auth_verification_tokens: 'auth_verification_tokens',
   registrasi: 'registrasi',
-  jobs_place: 'jobs_place'
+  jobs_place: 'jobs_place',
+  kas_kota: 'kas_kota',
+  kas_kota_txn: 'kas_kota_txn'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -439,7 +438,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_accounts" | "auth_sessions" | "auth_users" | "auth_verification_tokens" | "registrasi" | "jobs_place"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2687,138 +2686,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    auth_accounts: {
-      payload: Prisma.$auth_accountsPayload<ExtArgs>
-      fields: Prisma.auth_accountsFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.auth_accountsFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_accountsPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.auth_accountsFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_accountsPayload>
-        }
-        findFirst: {
-          args: Prisma.auth_accountsFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_accountsPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.auth_accountsFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_accountsPayload>
-        }
-        findMany: {
-          args: Prisma.auth_accountsFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_accountsPayload>[]
-        }
-        create: {
-          args: Prisma.auth_accountsCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_accountsPayload>
-        }
-        createMany: {
-          args: Prisma.auth_accountsCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.auth_accountsDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_accountsPayload>
-        }
-        update: {
-          args: Prisma.auth_accountsUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_accountsPayload>
-        }
-        deleteMany: {
-          args: Prisma.auth_accountsDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.auth_accountsUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.auth_accountsUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_accountsPayload>
-        }
-        aggregate: {
-          args: Prisma.Auth_accountsAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAuth_accounts>
-        }
-        groupBy: {
-          args: Prisma.auth_accountsGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.Auth_accountsGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.auth_accountsCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.Auth_accountsCountAggregateOutputType> | number
-        }
-      }
-    }
-    auth_sessions: {
-      payload: Prisma.$auth_sessionsPayload<ExtArgs>
-      fields: Prisma.auth_sessionsFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.auth_sessionsFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.auth_sessionsFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
-        }
-        findFirst: {
-          args: Prisma.auth_sessionsFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.auth_sessionsFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
-        }
-        findMany: {
-          args: Prisma.auth_sessionsFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>[]
-        }
-        create: {
-          args: Prisma.auth_sessionsCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
-        }
-        createMany: {
-          args: Prisma.auth_sessionsCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.auth_sessionsDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
-        }
-        update: {
-          args: Prisma.auth_sessionsUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
-        }
-        deleteMany: {
-          args: Prisma.auth_sessionsDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.auth_sessionsUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.auth_sessionsUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_sessionsPayload>
-        }
-        aggregate: {
-          args: Prisma.Auth_sessionsAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAuth_sessions>
-        }
-        groupBy: {
-          args: Prisma.auth_sessionsGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.Auth_sessionsGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.auth_sessionsCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.Auth_sessionsCountAggregateOutputType> | number
-        }
-      }
-    }
     auth_users: {
       payload: Prisma.$auth_usersPayload<ExtArgs>
       fields: Prisma.auth_usersFieldRefs
@@ -2882,72 +2749,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.auth_usersCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.Auth_usersCountAggregateOutputType> | number
-        }
-      }
-    }
-    auth_verification_tokens: {
-      payload: Prisma.$auth_verification_tokensPayload<ExtArgs>
-      fields: Prisma.auth_verification_tokensFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.auth_verification_tokensFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_verification_tokensPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.auth_verification_tokensFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_verification_tokensPayload>
-        }
-        findFirst: {
-          args: Prisma.auth_verification_tokensFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_verification_tokensPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.auth_verification_tokensFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_verification_tokensPayload>
-        }
-        findMany: {
-          args: Prisma.auth_verification_tokensFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_verification_tokensPayload>[]
-        }
-        create: {
-          args: Prisma.auth_verification_tokensCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_verification_tokensPayload>
-        }
-        createMany: {
-          args: Prisma.auth_verification_tokensCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.auth_verification_tokensDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_verification_tokensPayload>
-        }
-        update: {
-          args: Prisma.auth_verification_tokensUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_verification_tokensPayload>
-        }
-        deleteMany: {
-          args: Prisma.auth_verification_tokensDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.auth_verification_tokensUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.auth_verification_tokensUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$auth_verification_tokensPayload>
-        }
-        aggregate: {
-          args: Prisma.Auth_verification_tokensAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateAuth_verification_tokens>
-        }
-        groupBy: {
-          args: Prisma.auth_verification_tokensGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.Auth_verification_tokensGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.auth_verification_tokensCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.Auth_verification_tokensCountAggregateOutputType> | number
         }
       }
     }
@@ -3080,6 +2881,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.jobs_placeCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.Jobs_placeCountAggregateOutputType> | number
+        }
+      }
+    }
+    kas_kota: {
+      payload: Prisma.$kas_kotaPayload<ExtArgs>
+      fields: Prisma.kas_kotaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.kas_kotaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kotaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.kas_kotaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kotaPayload>
+        }
+        findFirst: {
+          args: Prisma.kas_kotaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kotaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.kas_kotaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kotaPayload>
+        }
+        findMany: {
+          args: Prisma.kas_kotaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kotaPayload>[]
+        }
+        create: {
+          args: Prisma.kas_kotaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kotaPayload>
+        }
+        createMany: {
+          args: Prisma.kas_kotaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.kas_kotaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kotaPayload>
+        }
+        update: {
+          args: Prisma.kas_kotaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kotaPayload>
+        }
+        deleteMany: {
+          args: Prisma.kas_kotaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.kas_kotaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.kas_kotaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kotaPayload>
+        }
+        aggregate: {
+          args: Prisma.Kas_kotaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKas_kota>
+        }
+        groupBy: {
+          args: Prisma.kas_kotaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Kas_kotaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.kas_kotaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Kas_kotaCountAggregateOutputType> | number
+        }
+      }
+    }
+    kas_kota_txn: {
+      payload: Prisma.$kas_kota_txnPayload<ExtArgs>
+      fields: Prisma.kas_kota_txnFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.kas_kota_txnFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kota_txnPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.kas_kota_txnFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kota_txnPayload>
+        }
+        findFirst: {
+          args: Prisma.kas_kota_txnFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kota_txnPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.kas_kota_txnFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kota_txnPayload>
+        }
+        findMany: {
+          args: Prisma.kas_kota_txnFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kota_txnPayload>[]
+        }
+        create: {
+          args: Prisma.kas_kota_txnCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kota_txnPayload>
+        }
+        createMany: {
+          args: Prisma.kas_kota_txnCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.kas_kota_txnDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kota_txnPayload>
+        }
+        update: {
+          args: Prisma.kas_kota_txnUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kota_txnPayload>
+        }
+        deleteMany: {
+          args: Prisma.kas_kota_txnDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.kas_kota_txnUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.kas_kota_txnUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$kas_kota_txnPayload>
+        }
+        aggregate: {
+          args: Prisma.Kas_kota_txnAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKas_kota_txn>
+        }
+        groupBy: {
+          args: Prisma.kas_kota_txnGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Kas_kota_txnGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.kas_kota_txnCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Kas_kota_txnCountAggregateOutputType> | number
         }
       }
     }
@@ -3338,7 +3271,8 @@ export const PengurusScalarFieldEnum = {
   username: 'username',
   password: 'password',
   leveladmin: 'leveladmin',
-  kotalevelup: 'kotalevelup'
+  kotalevelup: 'kotalevelup',
+  divisi: 'divisi'
 } as const
 
 export type PengurusScalarFieldEnum = (typeof PengurusScalarFieldEnum)[keyof typeof PengurusScalarFieldEnum]
@@ -3546,34 +3480,6 @@ export const Wilayah_provinsiScalarFieldEnum = {
 export type Wilayah_provinsiScalarFieldEnum = (typeof Wilayah_provinsiScalarFieldEnum)[keyof typeof Wilayah_provinsiScalarFieldEnum]
 
 
-export const Auth_accountsScalarFieldEnum = {
-  id: 'id',
-  user_id: 'user_id',
-  type: 'type',
-  provider: 'provider',
-  provider_account_id: 'provider_account_id',
-  refresh_token: 'refresh_token',
-  access_token: 'access_token',
-  expires_at: 'expires_at',
-  token_type: 'token_type',
-  scope: 'scope',
-  id_token: 'id_token',
-  session_state: 'session_state'
-} as const
-
-export type Auth_accountsScalarFieldEnum = (typeof Auth_accountsScalarFieldEnum)[keyof typeof Auth_accountsScalarFieldEnum]
-
-
-export const Auth_sessionsScalarFieldEnum = {
-  id: 'id',
-  session_token: 'session_token',
-  user_id: 'user_id',
-  expires: 'expires'
-} as const
-
-export type Auth_sessionsScalarFieldEnum = (typeof Auth_sessionsScalarFieldEnum)[keyof typeof Auth_sessionsScalarFieldEnum]
-
-
 export const Auth_usersScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -3586,15 +3492,6 @@ export const Auth_usersScalarFieldEnum = {
 } as const
 
 export type Auth_usersScalarFieldEnum = (typeof Auth_usersScalarFieldEnum)[keyof typeof Auth_usersScalarFieldEnum]
-
-
-export const Auth_verification_tokensScalarFieldEnum = {
-  identifier: 'identifier',
-  token: 'token',
-  expires: 'expires'
-} as const
-
-export type Auth_verification_tokensScalarFieldEnum = (typeof Auth_verification_tokensScalarFieldEnum)[keyof typeof Auth_verification_tokensScalarFieldEnum]
 
 
 export const RegistrasiScalarFieldEnum = {
@@ -3615,6 +3512,30 @@ export const Jobs_placeScalarFieldEnum = {
 } as const
 
 export type Jobs_placeScalarFieldEnum = (typeof Jobs_placeScalarFieldEnum)[keyof typeof Jobs_placeScalarFieldEnum]
+
+
+export const Kas_kotaScalarFieldEnum = {
+  id_kas_kota: 'id_kas_kota',
+  id_cabang: 'id_cabang',
+  saldo: 'saldo',
+  updated_at: 'updated_at'
+} as const
+
+export type Kas_kotaScalarFieldEnum = (typeof Kas_kotaScalarFieldEnum)[keyof typeof Kas_kotaScalarFieldEnum]
+
+
+export const Kas_kota_txnScalarFieldEnum = {
+  id_txn: 'id_txn',
+  id_cabang: 'id_cabang',
+  tanggal: 'tanggal',
+  keterangan: 'keterangan',
+  jumlah: 'jumlah',
+  tipe: 'tipe',
+  kategori: 'kategori',
+  created_at: 'created_at'
+} as const
+
+export type Kas_kota_txnScalarFieldEnum = (typeof Kas_kota_txnScalarFieldEnum)[keyof typeof Kas_kota_txnScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3809,24 +3730,25 @@ export const pengaturanOrderByRelevanceFieldEnum = {
 export type pengaturanOrderByRelevanceFieldEnum = (typeof pengaturanOrderByRelevanceFieldEnum)[keyof typeof pengaturanOrderByRelevanceFieldEnum]
 
 
-export const pengurusOrderByRelevanceFieldEnum = {
-  nama: 'nama',
-  nowa: 'nowa',
-  username: 'username',
-  password: 'password',
-  leveladmin: 'leveladmin',
-  kotalevelup: 'kotalevelup'
-} as const
-
-export type pengurusOrderByRelevanceFieldEnum = (typeof pengurusOrderByRelevanceFieldEnum)[keyof typeof pengurusOrderByRelevanceFieldEnum]
-
-
 export const NullsOrder = {
   first: 'first',
   last: 'last'
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const pengurusOrderByRelevanceFieldEnum = {
+  nama: 'nama',
+  nowa: 'nowa',
+  username: 'username',
+  password: 'password',
+  leveladmin: 'leveladmin',
+  kotalevelup: 'kotalevelup',
+  divisi: 'divisi'
+} as const
+
+export type pengurusOrderByRelevanceFieldEnum = (typeof pengurusOrderByRelevanceFieldEnum)[keyof typeof pengurusOrderByRelevanceFieldEnum]
 
 
 export const pesertaOrderByRelevanceFieldEnum = {
@@ -3992,32 +3914,6 @@ export const wilayah_provinsiOrderByRelevanceFieldEnum = {
 export type wilayah_provinsiOrderByRelevanceFieldEnum = (typeof wilayah_provinsiOrderByRelevanceFieldEnum)[keyof typeof wilayah_provinsiOrderByRelevanceFieldEnum]
 
 
-export const auth_accountsOrderByRelevanceFieldEnum = {
-  id: 'id',
-  user_id: 'user_id',
-  type: 'type',
-  provider: 'provider',
-  provider_account_id: 'provider_account_id',
-  refresh_token: 'refresh_token',
-  access_token: 'access_token',
-  token_type: 'token_type',
-  scope: 'scope',
-  id_token: 'id_token',
-  session_state: 'session_state'
-} as const
-
-export type auth_accountsOrderByRelevanceFieldEnum = (typeof auth_accountsOrderByRelevanceFieldEnum)[keyof typeof auth_accountsOrderByRelevanceFieldEnum]
-
-
-export const auth_sessionsOrderByRelevanceFieldEnum = {
-  id: 'id',
-  session_token: 'session_token',
-  user_id: 'user_id'
-} as const
-
-export type auth_sessionsOrderByRelevanceFieldEnum = (typeof auth_sessionsOrderByRelevanceFieldEnum)[keyof typeof auth_sessionsOrderByRelevanceFieldEnum]
-
-
 export const auth_usersOrderByRelevanceFieldEnum = {
   id: 'id',
   email: 'email',
@@ -4028,19 +3924,18 @@ export const auth_usersOrderByRelevanceFieldEnum = {
 export type auth_usersOrderByRelevanceFieldEnum = (typeof auth_usersOrderByRelevanceFieldEnum)[keyof typeof auth_usersOrderByRelevanceFieldEnum]
 
 
-export const auth_verification_tokensOrderByRelevanceFieldEnum = {
-  identifier: 'identifier',
-  token: 'token'
-} as const
-
-export type auth_verification_tokensOrderByRelevanceFieldEnum = (typeof auth_verification_tokensOrderByRelevanceFieldEnum)[keyof typeof auth_verification_tokensOrderByRelevanceFieldEnum]
-
-
 export const jobs_placeOrderByRelevanceFieldEnum = {
   nama: 'nama'
 } as const
 
 export type jobs_placeOrderByRelevanceFieldEnum = (typeof jobs_placeOrderByRelevanceFieldEnum)[keyof typeof jobs_placeOrderByRelevanceFieldEnum]
+
+
+export const kas_kota_txnOrderByRelevanceFieldEnum = {
+  keterangan: 'keterangan'
+} as const
+
+export type kas_kota_txnOrderByRelevanceFieldEnum = (typeof kas_kota_txnOrderByRelevanceFieldEnum)[keyof typeof kas_kota_txnOrderByRelevanceFieldEnum]
 
 
 
@@ -4102,6 +3997,27 @@ export type Enumregistrasi_statusFieldRefInput<$PrismaModel> = FieldRefInputType
  * Reference to a field of type 'jobs_place_type'
  */
 export type Enumjobs_place_typeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'jobs_place_type'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'kas_kota_txn_tipe'
+ */
+export type Enumkas_kota_txn_tipeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'kas_kota_txn_tipe'>
+    
+
+
+/**
+ * Reference to a field of type 'kas_kota_txn_kategori'
+ */
+export type Enumkas_kota_txn_kategoriFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'kas_kota_txn_kategori'>
     
 
 
@@ -4255,12 +4171,11 @@ export type GlobalOmitConfig = {
   wilayah_kabupaten?: Prisma.wilayah_kabupatenOmit
   wilayah_kecamatan?: Prisma.wilayah_kecamatanOmit
   wilayah_provinsi?: Prisma.wilayah_provinsiOmit
-  auth_accounts?: Prisma.auth_accountsOmit
-  auth_sessions?: Prisma.auth_sessionsOmit
   auth_users?: Prisma.auth_usersOmit
-  auth_verification_tokens?: Prisma.auth_verification_tokensOmit
   registrasi?: Prisma.registrasiOmit
   jobs_place?: Prisma.jobs_placeOmit
+  kas_kota?: Prisma.kas_kotaOmit
+  kas_kota_txn?: Prisma.kas_kota_txnOmit
 }
 
 /* Types for Logging */

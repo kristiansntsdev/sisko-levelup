@@ -3,9 +3,21 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button, Card } from '@/components/ui'
 import { createAbsen, getPesertaPreview } from '@/lib/actions/absen'
+import { getEventLocation } from '@/lib/actions/event'
 import { decodeQR, type QRPayload } from '@/lib/qr'
 
 type ScanStatus = 'loading' | 'scanning' | 'stopped' | 'error' | 'unsupported'
+type LocationStatus = 'idle' | 'checking' | 'inside' | 'outside' | 'unavailable'
+
+function haversineM(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLon = (lon2 - lon1) * Math.PI / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
 
 type Preview = {
   payload: QRPayload
@@ -13,7 +25,7 @@ type Preview = {
   gereja: string
 }
 
-export function ScannerClient() {
+export function ScannerClient({ backUrl = '/alk' }: { backUrl?: string }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const eventId = searchParams.get('eventId') ?? ''
@@ -22,6 +34,7 @@ export function ScannerClient() {
   const streamRef = useRef<MediaStream | null>(null)
   const rafRef = useRef<number>(0)
   const facingModeRef = useRef<'environment' | 'user'>('environment')
+  const watchIdRef = useRef<number>(-1)
 
   const [scanStatus, setScanStatus] = useState<ScanStatus>('loading')
   const [errorMsg, setErrorMsg] = useState('')
@@ -29,6 +42,35 @@ export function ScannerClient() {
   const [confirming, setConfirming] = useState(false)
   const [confirmError, setConfirmError] = useState('')
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment')
+  const [locationStatus, setLocationStatus] = useState<LocationStatus>('idle')
+  const [locationDistance, setLocationDistance] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!eventId || !('geolocation' in navigator)) return
+    let evLat: number, evLon: number, evRadius: number
+
+    async function init() {
+      setLocationStatus('checking')
+      const loc = await getEventLocation(Number(eventId))
+      if (!loc || !loc.longlatevent) { setLocationStatus('idle'); return }
+      const parts = loc.longlatevent.split(',').map(Number)
+      if (parts.length < 2 || parts.some(isNaN) || loc.radius <= 0) { setLocationStatus('idle'); return }
+      ;[evLat, evLon] = parts
+      evRadius = loc.radius
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (pos) => {
+          const dist = haversineM(pos.coords.latitude, pos.coords.longitude, evLat, evLon)
+          setLocationDistance(Math.round(dist))
+          setLocationStatus(dist <= evRadius ? 'inside' : 'outside')
+        },
+        () => setLocationStatus('unavailable'),
+        { enableHighAccuracy: true, timeout: 10000 },
+      )
+    }
+
+    init()
+    return () => { if (watchIdRef.current !== -1) navigator.geolocation.clearWatch(watchIdRef.current) }
+  }, [eventId])
 
   const stopCamera = useCallback(() => {
     cancelAnimationFrame(rafRef.current)
@@ -160,7 +202,7 @@ export function ScannerClient() {
       <nav className="w-full sticky top-0 z-10 bg-surface border-b border-border">
         <div className="max-w-sm mx-auto px-5 pt-6 pb-4 flex items-center justify-between">
           <button
-            onClick={() => { stopCamera(); router.push('/alk') }}
+            onClick={() => { stopCamera(); router.push(backUrl) }}
             className="text-sm text-muted hover:text-fg transition-colors"
           >
             ← Kembali
@@ -184,12 +226,21 @@ export function ScannerClient() {
               </svg>
               Event #{preview.payload.ev} sesuai
             </div>
+            {locationStatus === 'outside' && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-[10px] bg-red-light">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <p className="text-[12px] text-red font-semibold">Anda diluar lokasi event, tidak bisa absen.</p>
+              </div>
+            )}
             {confirmError && <p className="text-sm text-red font-medium">{confirmError}</p>}
             <div className="flex gap-2">
               <Button variant="secondary" fullWidth onClick={handleScanAgain} disabled={confirming}>
                 Scan Ulang
               </Button>
-              <Button fullWidth onClick={handleConfirm} disabled={confirming}>
+              <Button fullWidth onClick={handleConfirm} disabled={confirming || locationStatus === 'outside'}>
                 {confirming ? 'Menyimpan...' : 'Absen Peserta'}
               </Button>
             </div>
@@ -244,6 +295,19 @@ export function ScannerClient() {
                     <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-accent" />
                     <div className="absolute inset-x-0 top-0 h-0.5 bg-accent opacity-80" style={{ animation: 'scan-line 2s ease-in-out infinite' }} />
                   </div>
+                </div>
+              )}
+
+              {locationStatus === 'outside' && (
+                <div className="absolute bottom-0 inset-x-0 bg-red/85 px-4 py-3 flex items-center gap-2.5">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  <p className="text-white text-[13px] font-semibold flex-1">Anda sedang diluar lokasi event</p>
+                  {locationDistance !== null && (
+                    <span className="text-white/80 text-[11px] shrink-0">{locationDistance}m</span>
+                  )}
                 </div>
               )}
             </div>

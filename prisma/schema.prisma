@@ -171,6 +171,7 @@ model pengurus {
   password    String       @db.Text
   leveladmin  String       @db.Text
   kotalevelup String       @db.Text
+  divisi      String?      @db.VarChar(255)
   auth_users  auth_users[]
 }
 
@@ -349,59 +350,20 @@ model wilayah_provinsi {
   nama String @db.VarChar(30)
 }
 
-model auth_accounts {
-  id                  String     @id @db.VarChar(255)
-  user_id             String     @db.VarChar(255)
-  type                String     @db.VarChar(255)
-  provider            String     @db.VarChar(255)
-  provider_account_id String     @db.VarChar(255)
-  refresh_token       String?    @db.Text
-  access_token        String?    @db.Text
-  expires_at          Int?
-  token_type          String?    @db.VarChar(255)
-  scope               String?    @db.Text
-  id_token            String?    @db.Text
-  session_state       String?    @db.Text
-  auth_users          auth_users @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "auth_accounts_user_fk")
-
-  @@unique([provider, provider_account_id], map: "auth_accounts_provider_uq")
-  @@index([user_id], map: "auth_accounts_user_fk")
-}
-
-model auth_sessions {
-  id            String     @id @db.VarChar(255)
-  session_token String     @unique(map: "auth_sessions_token_uq") @db.VarChar(255)
-  user_id       String     @db.VarChar(255)
-  expires       DateTime
-  auth_users    auth_users @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "auth_sessions_user_fk")
-
-  @@index([user_id], map: "auth_sessions_user_fk")
-}
-
 model auth_users {
-  id             String          @id @db.VarChar(255)
-  email          String?         @unique(map: "auth_users_email_uq") @db.VarChar(255)
-  name           String?         @db.VarChar(255)
-  image          String?         @db.Text
+  id             String    @id @db.VarChar(255)
+  email          String?   @unique(map: "auth_users_email_uq") @db.VarChar(255)
+  name           String?   @db.VarChar(255)
+  image          String?   @db.Text
   email_verified DateTime?
   id_peserta     Int?
   id_pengurus    Int?
-  created_at     DateTime        @default(now())
-  auth_accounts  auth_accounts[]
-  auth_sessions  auth_sessions[]
-  pengurus       pengurus?       @relation(fields: [id_pengurus], references: [id_pengurus], map: "auth_users_pengurus_fk")
-  peserta        peserta?        @relation(fields: [id_peserta], references: [id_peserta], map: "auth_users_peserta_fk")
+  created_at     DateTime  @default(now())
+  pengurus       pengurus? @relation(fields: [id_pengurus], references: [id_pengurus], map: "auth_users_pengurus_fk")
+  peserta        peserta?  @relation(fields: [id_peserta], references: [id_peserta], map: "auth_users_peserta_fk")
 
   @@index([id_pengurus], map: "auth_users_pengurus_fk")
   @@index([id_peserta], map: "auth_users_peserta_fk")
-}
-
-model auth_verification_tokens {
-  identifier String   @db.VarChar(255)
-  token      String   @db.VarChar(255)
-  expires    DateTime
-
-  @@id([identifier, token])
 }
 
 model registrasi {
@@ -422,6 +384,26 @@ model jobs_place {
   nama          String          @db.VarChar(255)
   type          jobs_place_type
   peserta       peserta[]
+}
+
+model kas_kota {
+  id_kas_kota Int       @id @default(autoincrement())
+  id_cabang   Int       @unique(map: "uq_kas_kota_cabang")
+  saldo       Decimal   @default(0.00) @db.Decimal(15, 2)
+  updated_at  DateTime? @default(now()) @db.DateTime(0)
+}
+
+model kas_kota_txn {
+  id_txn     Int                   @id @default(autoincrement())
+  id_cabang  Int
+  tanggal    DateTime              @db.Date
+  keterangan String                @db.Text
+  jumlah     Decimal               @db.Decimal(15, 2)
+  tipe       kas_kota_txn_tipe
+  kategori   kas_kota_txn_kategori @default(harian)
+  created_at DateTime?             @default(now()) @db.DateTime(0)
+
+  @@index([id_cabang], map: "idx_id_cabang")
 }
 
 enum peserta_status {
@@ -447,4 +429,14 @@ enum jobs_place_type {
   sekolah
   universitas
   perusahaan
+}
+
+enum kas_kota_txn_tipe {
+  masuk
+  keluar
+}
+
+enum kas_kota_txn_kategori {
+  harian
+  event
 }

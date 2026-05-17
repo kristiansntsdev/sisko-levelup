@@ -85,12 +85,11 @@ export const ModelName = {
   wilayah_kabupaten: 'wilayah_kabupaten',
   wilayah_kecamatan: 'wilayah_kecamatan',
   wilayah_provinsi: 'wilayah_provinsi',
-  auth_accounts: 'auth_accounts',
-  auth_sessions: 'auth_sessions',
   auth_users: 'auth_users',
-  auth_verification_tokens: 'auth_verification_tokens',
   registrasi: 'registrasi',
-  jobs_place: 'jobs_place'
+  jobs_place: 'jobs_place',
+  kas_kota: 'kas_kota',
+  kas_kota_txn: 'kas_kota_txn'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -325,7 +324,8 @@ export const PengurusScalarFieldEnum = {
   username: 'username',
   password: 'password',
   leveladmin: 'leveladmin',
-  kotalevelup: 'kotalevelup'
+  kotalevelup: 'kotalevelup',
+  divisi: 'divisi'
 } as const
 
 export type PengurusScalarFieldEnum = (typeof PengurusScalarFieldEnum)[keyof typeof PengurusScalarFieldEnum]
@@ -533,34 +533,6 @@ export const Wilayah_provinsiScalarFieldEnum = {
 export type Wilayah_provinsiScalarFieldEnum = (typeof Wilayah_provinsiScalarFieldEnum)[keyof typeof Wilayah_provinsiScalarFieldEnum]
 
 
-export const Auth_accountsScalarFieldEnum = {
-  id: 'id',
-  user_id: 'user_id',
-  type: 'type',
-  provider: 'provider',
-  provider_account_id: 'provider_account_id',
-  refresh_token: 'refresh_token',
-  access_token: 'access_token',
-  expires_at: 'expires_at',
-  token_type: 'token_type',
-  scope: 'scope',
-  id_token: 'id_token',
-  session_state: 'session_state'
-} as const
-
-export type Auth_accountsScalarFieldEnum = (typeof Auth_accountsScalarFieldEnum)[keyof typeof Auth_accountsScalarFieldEnum]
-
-
-export const Auth_sessionsScalarFieldEnum = {
-  id: 'id',
-  session_token: 'session_token',
-  user_id: 'user_id',
-  expires: 'expires'
-} as const
-
-export type Auth_sessionsScalarFieldEnum = (typeof Auth_sessionsScalarFieldEnum)[keyof typeof Auth_sessionsScalarFieldEnum]
-
-
 export const Auth_usersScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -573,15 +545,6 @@ export const Auth_usersScalarFieldEnum = {
 } as const
 
 export type Auth_usersScalarFieldEnum = (typeof Auth_usersScalarFieldEnum)[keyof typeof Auth_usersScalarFieldEnum]
-
-
-export const Auth_verification_tokensScalarFieldEnum = {
-  identifier: 'identifier',
-  token: 'token',
-  expires: 'expires'
-} as const
-
-export type Auth_verification_tokensScalarFieldEnum = (typeof Auth_verification_tokensScalarFieldEnum)[keyof typeof Auth_verification_tokensScalarFieldEnum]
 
 
 export const RegistrasiScalarFieldEnum = {
@@ -602,6 +565,30 @@ export const Jobs_placeScalarFieldEnum = {
 } as const
 
 export type Jobs_placeScalarFieldEnum = (typeof Jobs_placeScalarFieldEnum)[keyof typeof Jobs_placeScalarFieldEnum]
+
+
+export const Kas_kotaScalarFieldEnum = {
+  id_kas_kota: 'id_kas_kota',
+  id_cabang: 'id_cabang',
+  saldo: 'saldo',
+  updated_at: 'updated_at'
+} as const
+
+export type Kas_kotaScalarFieldEnum = (typeof Kas_kotaScalarFieldEnum)[keyof typeof Kas_kotaScalarFieldEnum]
+
+
+export const Kas_kota_txnScalarFieldEnum = {
+  id_txn: 'id_txn',
+  id_cabang: 'id_cabang',
+  tanggal: 'tanggal',
+  keterangan: 'keterangan',
+  jumlah: 'jumlah',
+  tipe: 'tipe',
+  kategori: 'kategori',
+  created_at: 'created_at'
+} as const
+
+export type Kas_kota_txnScalarFieldEnum = (typeof Kas_kota_txnScalarFieldEnum)[keyof typeof Kas_kota_txnScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -796,24 +783,25 @@ export const pengaturanOrderByRelevanceFieldEnum = {
 export type pengaturanOrderByRelevanceFieldEnum = (typeof pengaturanOrderByRelevanceFieldEnum)[keyof typeof pengaturanOrderByRelevanceFieldEnum]
 
 
-export const pengurusOrderByRelevanceFieldEnum = {
-  nama: 'nama',
-  nowa: 'nowa',
-  username: 'username',
-  password: 'password',
-  leveladmin: 'leveladmin',
-  kotalevelup: 'kotalevelup'
-} as const
-
-export type pengurusOrderByRelevanceFieldEnum = (typeof pengurusOrderByRelevanceFieldEnum)[keyof typeof pengurusOrderByRelevanceFieldEnum]
-
-
 export const NullsOrder = {
   first: 'first',
   last: 'last'
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const pengurusOrderByRelevanceFieldEnum = {
+  nama: 'nama',
+  nowa: 'nowa',
+  username: 'username',
+  password: 'password',
+  leveladmin: 'leveladmin',
+  kotalevelup: 'kotalevelup',
+  divisi: 'divisi'
+} as const
+
+export type pengurusOrderByRelevanceFieldEnum = (typeof pengurusOrderByRelevanceFieldEnum)[keyof typeof pengurusOrderByRelevanceFieldEnum]
 
 
 export const pesertaOrderByRelevanceFieldEnum = {
@@ -979,32 +967,6 @@ export const wilayah_provinsiOrderByRelevanceFieldEnum = {
 export type wilayah_provinsiOrderByRelevanceFieldEnum = (typeof wilayah_provinsiOrderByRelevanceFieldEnum)[keyof typeof wilayah_provinsiOrderByRelevanceFieldEnum]
 
 
-export const auth_accountsOrderByRelevanceFieldEnum = {
-  id: 'id',
-  user_id: 'user_id',
-  type: 'type',
-  provider: 'provider',
-  provider_account_id: 'provider_account_id',
-  refresh_token: 'refresh_token',
-  access_token: 'access_token',
-  token_type: 'token_type',
-  scope: 'scope',
-  id_token: 'id_token',
-  session_state: 'session_state'
-} as const
-
-export type auth_accountsOrderByRelevanceFieldEnum = (typeof auth_accountsOrderByRelevanceFieldEnum)[keyof typeof auth_accountsOrderByRelevanceFieldEnum]
-
-
-export const auth_sessionsOrderByRelevanceFieldEnum = {
-  id: 'id',
-  session_token: 'session_token',
-  user_id: 'user_id'
-} as const
-
-export type auth_sessionsOrderByRelevanceFieldEnum = (typeof auth_sessionsOrderByRelevanceFieldEnum)[keyof typeof auth_sessionsOrderByRelevanceFieldEnum]
-
-
 export const auth_usersOrderByRelevanceFieldEnum = {
   id: 'id',
   email: 'email',
@@ -1015,17 +977,16 @@ export const auth_usersOrderByRelevanceFieldEnum = {
 export type auth_usersOrderByRelevanceFieldEnum = (typeof auth_usersOrderByRelevanceFieldEnum)[keyof typeof auth_usersOrderByRelevanceFieldEnum]
 
 
-export const auth_verification_tokensOrderByRelevanceFieldEnum = {
-  identifier: 'identifier',
-  token: 'token'
-} as const
-
-export type auth_verification_tokensOrderByRelevanceFieldEnum = (typeof auth_verification_tokensOrderByRelevanceFieldEnum)[keyof typeof auth_verification_tokensOrderByRelevanceFieldEnum]
-
-
 export const jobs_placeOrderByRelevanceFieldEnum = {
   nama: 'nama'
 } as const
 
 export type jobs_placeOrderByRelevanceFieldEnum = (typeof jobs_placeOrderByRelevanceFieldEnum)[keyof typeof jobs_placeOrderByRelevanceFieldEnum]
+
+
+export const kas_kota_txnOrderByRelevanceFieldEnum = {
+  keterangan: 'keterangan'
+} as const
+
+export type kas_kota_txnOrderByRelevanceFieldEnum = (typeof kas_kota_txnOrderByRelevanceFieldEnum)[keyof typeof kas_kota_txnOrderByRelevanceFieldEnum]
 
