@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import type { EventDetailFull } from '@/lib/actions/event'
 
+
+
 function fmtRp(s: string) {
   const n = parseInt(s.replace(/\D/g, ''), 10)
   if (isNaN(n)) return s
@@ -47,9 +49,15 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
           <Link href={backUrl} className="text-sm text-muted hover:text-fg transition-colors shrink-0">
             ← Kembali
           </Link>
-          <p className="text-[14px] font-semibold text-fg truncate flex-1 text-center pr-14">
+          <p className="text-[14px] font-semibold text-fg truncate flex-1 text-center">
             Detail Event
           </p>
+          <Link
+            href={`/dashboard/kota/alk/event/${event.id_event}/edit`}
+            className="text-sm text-accent font-medium hover:opacity-80 transition-opacity shrink-0"
+          >
+            Edit
+          </Link>
         </div>
       </nav>
 

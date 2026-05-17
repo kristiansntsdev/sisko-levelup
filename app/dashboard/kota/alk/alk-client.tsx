@@ -324,11 +324,19 @@ function EventTab({ events }: { events: EventDashboard[] }) {
 
   return (
     <div className="max-w-[480px] mx-auto px-4 flex flex-col gap-4 pb-6">
-      <div className="pt-5">
-        <h1 className="text-[22px] font-bold text-fg">Event</h1>
-        <p className="text-[12px] text-muted mt-0.5">
-          {counts.approved} disetujui · {counts.pending} belum approve
-        </p>
+      <div className="pt-5 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-[22px] font-bold text-fg">Event</h1>
+          <p className="text-[12px] text-muted mt-0.5">
+            {counts.approved} disetujui · {counts.pending} belum approve
+          </p>
+        </div>
+        <button
+          onClick={() => router.push('/dashboard/kota/alk/event/new')}
+          className="mt-1 shrink-0 px-3.5 py-2 bg-accent text-white rounded-full text-[13px] font-semibold flex items-center gap-1.5"
+        >
+          <span>+</span> Buat Event
+        </button>
       </div>
 
       <HeroCard

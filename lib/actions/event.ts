@@ -1,5 +1,6 @@
 'use server'
 import { db } from '@/lib/db'
+import { revalidatePath } from 'next/cache'
 
 const POSTER_BASE = 'https://sisko.levelupgen.com/uploads/poster/'
 
@@ -157,6 +158,8 @@ export type EventDetailFull = {
   nama_event: string
   tglDisplay: string
   tglSelesaiDisplay: string
+  tglRaw: string
+  tglSelesaiRaw: string
   jamevent: string
   jamselesaievent: string
   alamatevent: string
@@ -168,6 +171,9 @@ export type EventDetailFull = {
   radius: number
   approvenasional: string
   targetjumlah: number
+  target: string
+  targetpengurus: string
+  suratpemberitahuan: string
   registrasi: RegistrasiRow[]
   absen: AbsenRow[]
 }
@@ -182,6 +188,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       alamatevent: true, danaevent: true, posterevent: true,
       jenisevent: true, linkevent: true, longlatevent: true,
       radius: true, approvenasional: true, targetjumlah: true,
+      target: true, targetpengurus: true, suratpemberitahuan: true,
       registrasi: {
         select: {
           id_registrasi: true,
@@ -216,17 +223,22 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
     tglSelesaiDisplay: event.tgleventselesai.toLocaleDateString('id-ID', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     }),
+    tglRaw: event.tglevent.toISOString().split('T')[0],
+    tglSelesaiRaw: event.tgleventselesai.toISOString().split('T')[0],
     jamevent: event.jamevent,
     jamselesaievent: event.jamselesaievent,
     alamatevent: event.alamatevent,
     danaevent: event.danaevent,
-    posterUrl: `${POSTER_BASE}${event.posterevent}`,
+    posterUrl: event.posterevent ? `${POSTER_BASE}${event.posterevent}` : '',
     jenisevent: event.jenisevent,
     linkevent: event.linkevent,
     longlatevent: event.longlatevent,
     radius: event.radius,
     approvenasional: event.approvenasional,
     targetjumlah: event.targetjumlah,
+    target: event.target,
+    targetpengurus: event.targetpengurus,
+    suratpemberitahuan: event.suratpemberitahuan,
     registrasi: event.registrasi.map((r) => ({
       id_registrasi: r.id_registrasi,
       nama: r.peserta.nama,
@@ -268,4 +280,93 @@ export async function getEventById(id: number): Promise<EventSummary | null> {
     jamevent: event.jamevent,
     posterUrl: `${POSTER_BASE}${event.posterevent}`,
   }
+}
+
+// ── Create / Update ────────────────────────────────────────────
+
+export type EventFormPayload = {
+  idCabang: string
+  nama_event: string
+  jenisevent: string
+  target: string
+  targetpengurus: string
+  targetjumlah: number
+  tglevent: Date
+  tgleventselesai: Date
+  jamevent: string
+  jamselesaievent: string
+  alamatevent: string
+  longlatevent: string
+  radius: number
+  danaevent: string
+  suratpemberitahuan: string
+}
+
+export async function createEvent(payload: EventFormPayload): Promise<number> {
+  const created = await db.event.create({
+    data: {
+      nama_event: payload.nama_event,
+      tglevent: payload.tglevent,
+      tgleventselesai: payload.tgleventselesai,
+      jamevent: payload.jamevent,
+      jamselesaievent: payload.jamselesaievent,
+      alamatevent: payload.alamatevent,
+      danaevent: payload.danaevent,
+      posterevent: '',
+      proposalevent: '',
+      id_cabang: payload.idCabang,
+      target: payload.target,
+      targetpengurus: payload.targetpengurus,
+      targetjumlah: payload.targetjumlah,
+      jenisevent: payload.jenisevent,
+      longlatevent: payload.longlatevent,
+      radius: payload.radius,
+      linkevent: '',
+      approvenasional: '0',
+      approveadmin: '0',
+      notenasional: '',
+      noteadmin: '',
+      qr: '',
+      khusus: '',
+      suratpemberitahuan: payload.suratpemberitahuan,
+    },
+    select: { id_event: true },
+  })
+
+  const id = created.id_event
+  const baseUrl = (process.env.AUTH_URL ?? '').replace(/\/$/, '')
+  await db.event.update({
+    where: { id_event: id },
+    data: { linkevent: `${baseUrl}/join/${id}` },
+  })
+
+  revalidatePath('/dashboard/kota/alk')
+  return id
+}
+
+export async function updateEvent(
+  id: number,
+  payload: Omit<EventFormPayload, 'idCabang'>,
+): Promise<void> {
+  await db.event.update({
+    where: { id_event: id },
+    data: {
+      nama_event: payload.nama_event,
+      jenisevent: payload.jenisevent,
+      target: payload.target,
+      targetpengurus: payload.targetpengurus,
+      targetjumlah: payload.targetjumlah,
+      tglevent: payload.tglevent,
+      tgleventselesai: payload.tgleventselesai,
+      jamevent: payload.jamevent,
+      jamselesaievent: payload.jamselesaievent,
+      alamatevent: payload.alamatevent,
+      longlatevent: payload.longlatevent,
+      radius: payload.radius,
+      danaevent: payload.danaevent,
+      suratpemberitahuan: payload.suratpemberitahuan,
+    },
+  })
+  revalidatePath('/dashboard/kota/alk')
+  revalidatePath(`/dashboard/kota/alk/event/${id}`)
 }
