@@ -8,12 +8,14 @@
       "Bash(git -C /Users/kristian/Documents/LUP/sisko-v2 diff --stat HEAD)",
       "Bash(git -C /Users/kristian/Documents/LUP/sisko-v2 status --short)",
       "Bash(mkdir -p /Users/kristian/Documents/LUP/sisko-v2/.github/workflows)",
-      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('deps:', list\\(d.get\\('dependencies',{}\\).keys\\(\\)\\)\\)\")"
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('deps:', list\\(d.get\\('dependencies',{}\\).keys\\(\\)\\)\\)\")",
+      "Bash(mkdir -p /Users/kristian/Documents/LUP/sisko-v2/app/dashboard/kota/alk/event/\\\\[id\\\\])"
     ],
     "additionalDirectories": [
       "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/tiket/[id]",
       "/Users/kristian/Documents/LUP/sisko-v2/app/api/auth",
-      "/Users/kristian/Documents/LUP/sisko-v2/.github"
+      "/Users/kristian/Documents/LUP/sisko-v2/.github",
+      "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/kota/alk/event"
     ]
   }
 }

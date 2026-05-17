@@ -193,6 +193,7 @@ function fmtShort(n: number) {
 
 // ── Beranda tab ────────────────────────────────────────────────
 function BerandaTab({ pengurus, events, namaCabang, saldo }: { pengurus: Pengurus; events: EventDashboard[]; namaCabang: string; saldo: number }) {
+  const router = useRouter()
   const [showQR, setShowQR] = useState(false)
   const [showScan, setShowScan] = useState(false)
 
@@ -282,7 +283,7 @@ function BerandaTab({ pengurus, events, namaCabang, saldo }: { pengurus: Penguru
         ) : (
           <div className="flex flex-col gap-2.5">
             {thisMonthEvents.map((e) => (
-              <EventDateCard key={e.id_event} event={e} />
+              <EventDateCard key={e.id_event} event={e} onClick={() => router.push(`/dashboard/kota/alk/event/${e.id_event}`)} />
             ))}
           </div>
         )}
@@ -300,6 +301,7 @@ function BerandaTab({ pengurus, events, namaCabang, saldo }: { pengurus: Penguru
 
 // ── Event tab ──────────────────────────────────────────────────
 function EventTab({ events }: { events: EventDashboard[] }) {
+  const router = useRouter()
   const [filter, setFilter] = useState('all')
 
   const { filtered, counts } = useMemo(() => {
@@ -347,7 +349,7 @@ function EventTab({ events }: { events: EventDashboard[] }) {
       ) : (
         <div className="flex flex-col gap-2.5">
           {filtered.map((e) => (
-            <EventDateCard key={e.id_event} event={e} />
+            <EventDateCard key={e.id_event} event={e} onClick={() => router.push(`/dashboard/kota/alk/event/${e.id_event}`)} />
           ))}
         </div>
       )}

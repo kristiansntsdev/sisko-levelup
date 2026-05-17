@@ -1,5 +1,6 @@
 'use client'
 import { useActionState } from 'react'
+import Image from 'next/image'
 import { Button, Input } from '@/components/ui'
 import { loginPengurus } from './actions'
 
@@ -11,7 +12,7 @@ export default function AdminLoginPage() {
 
       <nav className="w-full sticky top-0 z-10 bg-surface border-b border-border">
         <div className="max-w-sm mx-auto px-5 pt-4 pb-4">
-          <span className="text-sm font-medium text-muted">Panel Admin</span>
+          <Image src="/logoutama.png" alt="LevelUp" width={96} height={32} className="h-8 w-auto object-contain" />
         </div>
       </nav>
 
@@ -40,7 +41,10 @@ export default function AdminLoginPage() {
           />
 
           {state?.error && (
-            <p className="text-sm text-red font-medium">{state.error}</p>
+            <div className="flex items-start gap-2.5 px-3.5 py-3 rounded-[12px] border border-red/30 bg-red-light text-red text-sm font-medium">
+              <span className="shrink-0 mt-px">⚠️</span>
+              <span>{state.error}</span>
+            </div>
           )}
 
           <Button type="submit" fullWidth size="lg" loading={pending}>
