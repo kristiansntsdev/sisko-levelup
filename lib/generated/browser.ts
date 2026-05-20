@@ -217,3 +217,8 @@ export type kas_kota = Prisma.kas_kotaModel
  * 
  */
 export type kas_kota_txn = Prisma.kas_kota_txnModel
+/**
+ * Model dokumentasi_kota
+ * 
+ */
+export type dokumentasi_kota = Prisma.dokumentasi_kotaModel

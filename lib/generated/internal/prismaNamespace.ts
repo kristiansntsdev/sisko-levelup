@@ -423,7 +423,8 @@ export const ModelName = {
   registrasi: 'registrasi',
   jobs_place: 'jobs_place',
   kas_kota: 'kas_kota',
-  kas_kota_txn: 'kas_kota_txn'
+  kas_kota_txn: 'kas_kota_txn',
+  dokumentasi_kota: 'dokumentasi_kota'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -439,7 +440,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3083,6 +3084,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    dokumentasi_kota: {
+      payload: Prisma.$dokumentasi_kotaPayload<ExtArgs>
+      fields: Prisma.dokumentasi_kotaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.dokumentasi_kotaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dokumentasi_kotaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.dokumentasi_kotaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dokumentasi_kotaPayload>
+        }
+        findFirst: {
+          args: Prisma.dokumentasi_kotaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dokumentasi_kotaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.dokumentasi_kotaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dokumentasi_kotaPayload>
+        }
+        findMany: {
+          args: Prisma.dokumentasi_kotaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dokumentasi_kotaPayload>[]
+        }
+        create: {
+          args: Prisma.dokumentasi_kotaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dokumentasi_kotaPayload>
+        }
+        createMany: {
+          args: Prisma.dokumentasi_kotaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.dokumentasi_kotaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dokumentasi_kotaPayload>
+        }
+        update: {
+          args: Prisma.dokumentasi_kotaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dokumentasi_kotaPayload>
+        }
+        deleteMany: {
+          args: Prisma.dokumentasi_kotaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.dokumentasi_kotaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.dokumentasi_kotaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$dokumentasi_kotaPayload>
+        }
+        aggregate: {
+          args: Prisma.Dokumentasi_kotaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDokumentasi_kota>
+        }
+        groupBy: {
+          args: Prisma.dokumentasi_kotaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Dokumentasi_kotaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.dokumentasi_kotaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Dokumentasi_kotaCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3621,6 +3688,16 @@ export const Kas_kota_txnScalarFieldEnum = {
 export type Kas_kota_txnScalarFieldEnum = (typeof Kas_kota_txnScalarFieldEnum)[keyof typeof Kas_kota_txnScalarFieldEnum]
 
 
+export const Dokumentasi_kotaScalarFieldEnum = {
+  id: 'id',
+  id_event: 'id_event',
+  kotalevelup: 'kotalevelup',
+  gdrive_link: 'gdrive_link'
+} as const
+
+export type Dokumentasi_kotaScalarFieldEnum = (typeof Dokumentasi_kotaScalarFieldEnum)[keyof typeof Dokumentasi_kotaScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -4034,6 +4111,14 @@ export const kas_kota_txnOrderByRelevanceFieldEnum = {
 export type kas_kota_txnOrderByRelevanceFieldEnum = (typeof kas_kota_txnOrderByRelevanceFieldEnum)[keyof typeof kas_kota_txnOrderByRelevanceFieldEnum]
 
 
+export const dokumentasi_kotaOrderByRelevanceFieldEnum = {
+  kotalevelup: 'kotalevelup',
+  gdrive_link: 'gdrive_link'
+} as const
+
+export type dokumentasi_kotaOrderByRelevanceFieldEnum = (typeof dokumentasi_kotaOrderByRelevanceFieldEnum)[keyof typeof dokumentasi_kotaOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -4273,6 +4358,7 @@ export type GlobalOmitConfig = {
   jobs_place?: Prisma.jobs_placeOmit
   kas_kota?: Prisma.kas_kotaOmit
   kas_kota_txn?: Prisma.kas_kota_txnOmit
+  dokumentasi_kota?: Prisma.dokumentasi_kotaOmit
 }
 
 /* Types for Logging */

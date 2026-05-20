@@ -6,7 +6,7 @@ import { DEFAULT_ORG } from './lib/types'
 import { loadOrg, saveOrg, loadDrafts, saveDrafts } from './lib/storage'
 import { TemplatePicker } from './components/TemplatePicker'
 import { Editor } from './components/Editor'
-import { OrgModal, DraftsSheet, SaveDraftSheet } from './components/Sheets'
+import { OrgModal, DraftsSheet, SaveDraftSheet, ConfirmDialog } from './components/Sheets'
 
 interface Props {
   kotaLogo: string
@@ -22,6 +22,11 @@ export function PamfletClient({ kotaLogo }: Props) {
   const [showDrafts, setShowDrafts] = useState(false)
   const [showSave, setShowSave] = useState(false)
   const [toast, setToast] = useState<{ msg: string; kind: 'success' | 'error' } | null>(null)
+  const [confirmDlg, setConfirmDlg] = useState<{ msg: string; label: string; onConfirm: () => void } | null>(null)
+
+  const askConfirm = useCallback((msg: string, label: string, fn: () => void) => {
+    setConfirmDlg({ msg, label, onConfirm: fn })
+  }, [])
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setOrg(loadOrg()); setDrafts(loadDrafts()) }, [])
@@ -71,9 +76,9 @@ export function PamfletClient({ kotaLogo }: Props) {
           doc={doc}
           setDoc={setDocFn}
           kotaLogo={kotaLogo}
-          onBack={() => { if (confirm('Kembali ke pilihan template? Perubahan yang belum disimpan akan hilang.')) setDoc(null) }}
+          onBack={() => askConfirm('Kembali ke pilihan template? Perubahan yang belum disimpan akan hilang.', 'Kembali', () => setDoc(null))}
           onSave={() => setShowSave(true)}
-          onSwitchTemplate={() => { if (confirm('Ganti template? Perubahan saat ini akan hilang.')) setDoc(null) }}
+          onSwitchTemplate={() => askConfirm('Ganti template? Perubahan saat ini akan hilang.', 'Ganti Template', () => setDoc(null))}
           showToast={showToast}
         />
       ) : (
@@ -95,6 +100,14 @@ export function PamfletClient({ kotaLogo }: Props) {
         defaultName={`Pamflet ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}`}
         onSave={saveDraft}
         onClose={() => setShowSave(false)} />
+
+      <ConfirmDialog
+        open={!!confirmDlg}
+        message={confirmDlg?.msg ?? ''}
+        confirmLabel={confirmDlg?.label}
+        onConfirm={() => { confirmDlg?.onConfirm(); setConfirmDlg(null) }}
+        onCancel={() => setConfirmDlg(null)}
+      />
 
       {toast && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[200] px-4 py-3 rounded-xl text-white text-sm font-semibold shadow-xl"

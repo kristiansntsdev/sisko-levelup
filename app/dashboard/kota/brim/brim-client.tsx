@@ -1,5 +1,5 @@
 'use client'
-import { useActionState, useEffect, useRef, useState, useTransition } from 'react'
+import { startTransition, useActionState, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui'
 import { KotaShell, type KotaTab } from '@/components/kota'
@@ -64,7 +64,7 @@ function HomeTab({ nama, kotalevelup }: { nama: string; kotalevelup: string }) {
         </div>
         <div className="min-w-0">
           <h1 className="text-base font-bold text-fg leading-snug">{getGreeting()}, {nama}</h1>
-          <p className="text-xs text-muted mt-0.5">Pengurus BRIM · LevelUP {kotalevelup}</p>
+          <p className="text-xs text-muted mt-0.5">Pengurus BRIM · {kotalevelup}</p>
         </div>
       </div>
 
@@ -84,6 +84,29 @@ function HomeTab({ nama, kotalevelup }: { nama: string; kotalevelup: string }) {
                 <div>
                   <p className="font-semibold text-fg">Flyer Generator</p>
                   <p className="text-xs text-muted mt-0.5">Buat pamflet acara dalam hitungan detik</p>
+                </div>
+              </div>
+              <span className="text-muted text-lg">→</span>
+            </div>
+          </Card>
+        </button>
+        <button
+          type="button"
+          onClick={() => router.push('/dashboard/kota/brim/dokumentasi')}
+          className="text-left"
+        >
+          <Card variant="elevated" className="p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 12l-10 10L2 12 7 2h10z"/>
+                    <path d="M22 12H2"/><path d="M12 22V12"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-semibold text-fg">Dokumentasi Kota</p>
+                  <p className="text-xs text-muted mt-0.5">Link Drive & akses anggota per event</p>
                 </div>
               </div>
               <span className="text-muted text-lg">→</span>
@@ -116,7 +139,7 @@ function SettingsTab({ pengaturan }: { pengaturan: Pengaturan | null }) {
     e.preventDefault()
     const fd = new FormData()
     fd.set('logo', logo)
-    action(fd)
+    startTransition(() => action(fd))
   }
 
   return (

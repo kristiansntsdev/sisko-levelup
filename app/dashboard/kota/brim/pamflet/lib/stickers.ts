@@ -1,5 +1,4 @@
-// Curated sticker library. SVG strings using viewBox 0 0 100 100 and `currentColor`
-// so the StickerEl color can recolor them at render time.
+// Shape library — SVG viewBox 0 0 100 100, fill="currentColor" so StickerEl color applies.
 
 export interface StickerDef {
   id: string
@@ -7,68 +6,92 @@ export interface StickerDef {
   svg: string
 }
 
-const make = (inner: string) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" fill="currentColor" stroke="currentColor">${inner}</svg>`
+const s = (inner: string) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" fill="currentColor">${inner}</svg>`
 
 export const STICKERS: StickerDef[] = [
+  // Row 1 — rectangles + circle
   {
-    id: 'arrow',
-    name: 'Arrow',
-    svg: make('<path d="M10 50 H80 M60 30 L80 50 L60 70" fill="none" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>'),
+    id: 'rect',
+    name: 'Persegi',
+    svg: s('<rect x="5" y="5" width="90" height="90"/>'),
   },
   {
-    id: 'star',
-    name: 'Star',
-    svg: make('<path d="M50 8 L62 38 L94 40 L68 60 L78 92 L50 74 L22 92 L32 60 L6 40 L38 38 Z"/>'),
+    id: 'rect-rounded',
+    name: 'Persegi Bulat',
+    svg: s('<rect x="5" y="5" width="90" height="90" rx="22"/>'),
   },
   {
-    id: 'sparkle',
-    name: 'Sparkle',
-    svg: make('<path d="M50 10 L55 45 L90 50 L55 55 L50 90 L45 55 L10 50 L45 45 Z"/>'),
+    id: 'circle',
+    name: 'Lingkaran',
+    svg: s('<circle cx="50" cy="50" r="45"/>'),
+  },
+
+  // Row 2 — triangles + diamond
+  {
+    id: 'triangle-up',
+    name: 'Segitiga',
+    svg: s('<polygon points="50,5 95,90 5,90"/>'),
   },
   {
-    id: 'frame-corner',
-    name: 'Frame',
-    svg: make('<path d="M10 30 V10 H30 M70 10 H90 V30 M90 70 V90 H70 M30 90 H10 V70" fill="none" stroke-width="6" stroke-linecap="round"/>'),
+    id: 'triangle-down',
+    name: 'Segitiga Bawah',
+    svg: s('<polygon points="5,10 95,10 50,95"/>'),
   },
   {
-    id: 'blob',
-    name: 'Blob',
-    svg: make('<path d="M50 8 C75 8 92 28 92 50 C92 80 65 92 45 92 C20 92 8 70 8 50 C8 25 25 8 50 8 Z"/>'),
+    id: 'diamond',
+    name: 'Belah Ketupat',
+    svg: s('<polygon points="50,5 95,50 50,95 5,50"/>'),
+  },
+
+  // Row 3 — cross, hexagon, octagon
+  {
+    id: 'cross',
+    name: 'Plus',
+    svg: s('<path d="M35 5 H65 V35 H95 V65 H65 V95 H35 V65 H5 V35 H35 Z"/>'),
   },
   {
-    id: 'ribbon',
-    name: 'Ribbon',
-    svg: make('<path d="M15 30 H85 V70 L75 60 L65 70 L55 60 L45 70 L35 60 L25 70 L15 60 Z"/>'),
+    id: 'hexagon',
+    name: 'Heksagon',
+    svg: s('<polygon points="50,5 91,27 91,73 50,95 9,73 9,27"/>'),
   },
   {
-    id: 'badge',
-    name: 'Badge',
-    svg: make('<circle cx="50" cy="50" r="36" fill="none" stroke-width="6"/><circle cx="50" cy="50" r="24"/>'),
+    id: 'octagon',
+    name: 'Oktagon',
+    svg: s('<polygon points="30,5 70,5 95,30 95,70 70,95 30,95 5,70 5,30"/>'),
+  },
+
+  // Row 4 — parallelogram + trapezoids
+  {
+    id: 'parallelogram',
+    name: 'Jajaran Genjang',
+    svg: s('<polygon points="30,8 95,8 70,92 5,92"/>'),
   },
   {
-    id: 'underline-squiggle',
-    name: 'Squiggle',
-    svg: make('<path d="M5 60 Q20 30 35 60 T65 60 T95 60" fill="none" stroke-width="6" stroke-linecap="round"/>'),
+    id: 'trapezoid-narrow-top',
+    name: 'Trapesium',
+    svg: s('<polygon points="22,8 78,8 95,92 5,92"/>'),
   },
   {
-    id: 'divider',
-    name: 'Divider',
-    svg: make('<rect x="5" y="47" width="90" height="6" rx="3"/>'),
+    id: 'trapezoid-narrow-bottom',
+    name: 'Trapesium Bawah',
+    svg: s('<polygon points="5,8 95,8 78,92 22,92"/>'),
+  },
+
+  // Row 5 — inverted trapezoid + tombstone + arch
+  {
+    id: 'trapezoid-wide-top',
+    name: 'Trapesium Lebar',
+    svg: s('<polygon points="5,8 95,8 70,92 30,92"/>'),
   },
   {
-    id: 'heart',
-    name: 'Heart',
-    svg: make('<path d="M50 85 C20 65 10 45 10 30 C10 15 25 8 35 8 C42 8 47 12 50 18 C53 12 58 8 65 8 C75 8 90 15 90 30 C90 45 80 65 50 85 Z"/>'),
+    id: 'tombstone',
+    name: 'Nisan',
+    svg: s('<path d="M20,92 L20,48 A30,30,0,0,1,80,48 L80,92 Z"/>'),
   },
   {
-    id: 'lightning',
-    name: 'Lightning',
-    svg: make('<path d="M55 5 L20 55 L45 55 L40 95 L80 40 L55 40 Z"/>'),
-  },
-  {
-    id: 'dot-pattern',
-    name: 'Dots',
-    svg: make([20, 50, 80].flatMap(cy => [20, 50, 80].map(cx => `<circle cx="${cx}" cy="${cy}" r="6"/>`)).join('')),
+    id: 'arch',
+    name: 'Gerbang',
+    svg: s('<path d="M8,92 L8,60 A42,35,0,0,1,92,60 L92,92 Z"/>'),
   },
 ]

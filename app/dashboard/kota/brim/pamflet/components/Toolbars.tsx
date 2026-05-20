@@ -14,6 +14,18 @@ export function TBtn({ icon, label, onClick, active }: {
   )
 }
 
+// ── Layer-order buttons (shared by every element toolbar) ─────
+function LayerButtons({ onForward, onBackward }: { onForward: () => void; onBackward: () => void }) {
+  return (
+    <>
+      <TBtn label="Maju" onClick={onForward}
+        icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="21" x2="12" y2="3"/><polyline points="6 9 12 3 18 9"/></svg>} />
+      <TBtn label="Mundur" onClick={onBackward}
+        icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><polyline points="6 15 12 21 18 15"/></svg>} />
+    </>
+  )
+}
+
 // ── Idle toolbar (nothing selected) ──────────────────────────
 export function IdleToolbar({ onAddText, onAddImage, onAddSticker, onChangeBg, onChangeTemplate }: {
   onAddText: () => void
@@ -41,13 +53,15 @@ export function IdleToolbar({ onAddText, onAddImage, onAddSticker, onChangeBg, o
 }
 
 // ── Text toolbar ──────────────────────────────────────────────
-export function TextToolbar({ el, onEdit, onFont, onSize, onColor, onResetRot, onDuplicate, onDelete }: {
+export function TextToolbar({ el, onEdit, onFont, onSize, onColor, onResetRot, onForward, onBackward, onDuplicate, onDelete }: {
   el: TextEl
   onEdit: () => void
   onFont: () => void
   onSize: () => void
   onColor: () => void
   onResetRot: () => void
+  onForward: () => void
+  onBackward: () => void
   onDuplicate: () => void
   onDelete: () => void
 }) {
@@ -64,6 +78,7 @@ export function TextToolbar({ el, onEdit, onFont, onSize, onColor, onResetRot, o
           icon={<span style={{ width: 18, height: 18, borderRadius: 5, background: el.font.color, border: '1.5px solid #e7e5e4', display: 'inline-block' }} />} />
         <TBtn label="Reset" onClick={onResetRot}
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/></svg>} />
+        <LayerButtons onForward={onForward} onBackward={onBackward} />
         <TBtn label="Salin" onClick={onDuplicate}
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>} />
         <TBtn label="Hapus" onClick={onDelete}
@@ -74,12 +89,14 @@ export function TextToolbar({ el, onEdit, onFont, onSize, onColor, onResetRot, o
 }
 
 // ── Image / Sticker toolbar ───────────────────────────────────
-export function ImageToolbar({ el, onReplace, onFitToggle, onCrop, onResetRot, onDuplicate, onDelete }: {
+export function ImageToolbar({ el, onReplace, onFitToggle, onCrop, onResetRot, onForward, onBackward, onDuplicate, onDelete }: {
   el: ImageEl
   onReplace: () => void
   onFitToggle: () => void
   onCrop: () => void
   onResetRot: () => void
+  onForward: () => void
+  onBackward: () => void
   onDuplicate: () => void
   onDelete: () => void
 }) {
@@ -94,6 +111,7 @@ export function ImageToolbar({ el, onReplace, onFitToggle, onCrop, onResetRot, o
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2v14a2 2 0 002 2h14"/><path d="M18 22V8a2 2 0 00-2-2H2"/></svg>} />
         <TBtn label="Reset" onClick={onResetRot}
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/></svg>} />
+        <LayerButtons onForward={onForward} onBackward={onBackward} />
         <TBtn label="Salin" onClick={onDuplicate}
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>} />
         <TBtn label="Hapus" onClick={onDelete}
@@ -104,10 +122,12 @@ export function ImageToolbar({ el, onReplace, onFitToggle, onCrop, onResetRot, o
 }
 
 // ── Shape / Sticker toolbar (single colour + delete) ──────────
-export function ShapeToolbar({ el, onColor, onResetRot, onDuplicate, onDelete }: {
+export function ShapeToolbar({ el, onColor, onResetRot, onForward, onBackward, onDuplicate, onDelete }: {
   el: ShapeEl | StickerEl
   onColor: () => void
   onResetRot: () => void
+  onForward: () => void
+  onBackward: () => void
   onDuplicate: () => void
   onDelete: () => void
 }) {
@@ -119,6 +139,7 @@ export function ShapeToolbar({ el, onColor, onResetRot, onDuplicate, onDelete }:
           icon={<span style={{ width: 18, height: 18, borderRadius: 5, background: color, border: '1.5px solid #e7e5e4', display: 'inline-block' }} />} />
         <TBtn label="Reset" onClick={onResetRot}
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/></svg>} />
+        <LayerButtons onForward={onForward} onBackward={onBackward} />
         <TBtn label="Salin" onClick={onDuplicate}
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>} />
         <TBtn label="Hapus" onClick={onDelete}

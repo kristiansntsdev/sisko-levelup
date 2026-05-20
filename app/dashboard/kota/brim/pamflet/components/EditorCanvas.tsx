@@ -16,6 +16,9 @@ interface Props {
   onSelect: (id: string | null) => void
   onChange: (updater: (doc: PamfletDoc) => PamfletDoc) => void
   onCroppingChange?: (cropping: boolean) => void
+  drawMode?: boolean
+  onFreeformDone?: (svg: string, x: number, y: number, w: number, h: number) => void
+  onDrawCancel?: () => void
 }
 
 export interface EditorCanvasHandle {
@@ -31,7 +34,7 @@ const CROP_ACCENT = '#f59e0b'
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
 
 export const EditorCanvas = forwardRef<EditorCanvasHandle, Props>(function EditorCanvas(
-  { doc, selectedId, onSelect, onChange, onCroppingChange }, ref,
+  { doc, selectedId, onSelect, onChange, onCroppingChange, drawMode, onFreeformDone, onDrawCancel }, ref,
 ) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<Konva.Stage>(null)
@@ -41,6 +44,8 @@ export const EditorCanvas = forwardRef<EditorCanvasHandle, Props>(function Edito
   const [scale, setScale] = useState(0)
   const [mounted, setMounted] = useState(false)
   const [cropId, setCropId] = useState<string | null>(null)
+  const [drawPts, setDrawPts] = useState<{ x: number; y: number }[]>([])
+  const isDrawingRef = useRef(false)
 
   useEffect(() => setMounted(true), [])
 
@@ -102,15 +107,74 @@ export const EditorCanvas = forwardRef<EditorCanvasHandle, Props>(function Edito
     },
   }), [scale, doc.elements, selectedId])
 
+  // Clear draw state when drawMode turns off externally.
+  useEffect(() => {
+    if (!drawMode) { setDrawPts([]); isDrawingRef.current = false }
+  }, [drawMode])
+
   const dispW = doc.canvas.w * scale
   const dispH = doc.canvas.h * scale
 
-  const backdrop = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-    const t = e.target
-    if (t === t.getStage() || t.name() === 'background') onSelect(null)
+  // ── Freeform drawing helpers ──────────────────────────────────
+  const getCanvasPos = () => {
+    const pos = stageRef.current?.getPointerPosition()
+    if (!pos || scale <= 0) return null
+    return { x: pos.x / scale, y: pos.y / scale }
   }
 
-  const isImgSticker = selected?.type === 'image' || selected?.type === 'sticker'
+  const finalizeDraw = (pts: { x: number; y: number }[]) => {
+    setDrawPts([])
+    if (pts.length < 8) return
+    const xs = pts.map(p => p.x), ys = pts.map(p => p.y)
+    const minX = Math.min(...xs), maxX = Math.max(...xs)
+    const minY = Math.min(...ys), maxY = Math.max(...ys)
+    const w = maxX - minX, h = maxY - minY
+    if (w < 30 || h < 30) return
+    const norm = pts.map(p => ({ x: p.x - minX, y: p.y - minY }))
+    // Smooth closed path: quadratic bezier through midpoints.
+    let d = `M${norm[0].x.toFixed(1)},${norm[0].y.toFixed(1)}`
+    for (let i = 1; i < norm.length - 1; i++) {
+      const mx = ((norm[i].x + norm[i + 1].x) / 2).toFixed(1)
+      const my = ((norm[i].y + norm[i + 1].y) / 2).toFixed(1)
+      d += ` Q${norm[i].x.toFixed(1)},${norm[i].y.toFixed(1)} ${mx},${my}`
+    }
+    d += ' Z'
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${Math.round(w)} ${Math.round(h)}" width="100%" height="100%" fill="currentColor"><path d="${d}"/></svg>`
+    onFreeformDone?.(svg, minX, minY, Math.round(w), Math.round(h))
+  }
+
+  const handlePointerDown = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
+    if (drawMode) {
+      isDrawingRef.current = true
+      const pos = getCanvasPos()
+      if (pos) setDrawPts([pos])
+    } else {
+      const t = e.target
+      if (t === t.getStage() || t.name() === 'background') onSelect(null)
+    }
+  }
+
+  const handlePointerMove = () => {
+    if (!drawMode || !isDrawingRef.current) return
+    const pos = getCanvasPos()
+    if (!pos) return
+    setDrawPts(prev => {
+      const last = prev[prev.length - 1]
+      if (last && Math.hypot(pos.x - last.x, pos.y - last.y) < 4) return prev
+      return [...prev, pos]
+    })
+  }
+
+  const handlePointerUp = () => {
+    if (!drawMode || !isDrawingRef.current) return
+    isDrawingRef.current = false
+    setDrawPts(prev => { finalizeDraw(prev); return [] })
+  }
+
+  const backdrop = (_e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {}
+
+  // Stickers (SVG icons) stay proportional; images/text/shapes resize freely.
+  const lockRatio = selected?.type === 'sticker'
 
   const handleSelesai = () => {
     cropCommitRef.current?.()
@@ -128,9 +192,13 @@ export const EditorCanvas = forwardRef<EditorCanvasHandle, Props>(function Edito
           ref={stageRef}
           width={dispW} height={dispH}
           scaleX={scale} scaleY={scale}
-          onMouseDown={backdrop}
-          onTouchStart={backdrop}
-          style={{ boxShadow: '0 6px 24px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.06)' }}
+          onMouseDown={handlePointerDown}
+          onTouchStart={handlePointerDown}
+          onMouseMove={handlePointerMove}
+          onTouchMove={handlePointerMove}
+          onMouseUp={handlePointerUp}
+          onTouchEnd={handlePointerUp}
+          style={{ boxShadow: '0 6px 24px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.06)', cursor: drawMode ? 'crosshair' : undefined }}
         >
           <Layer ref={layerRef}>
             <CanvasBackground bg={doc.canvas.bg} w={doc.canvas.w} h={doc.canvas.h} />
@@ -150,8 +218,8 @@ export const EditorCanvas = forwardRef<EditorCanvasHandle, Props>(function Edito
               <Transformer
                 ref={trRef}
                 rotateEnabled
-                keepRatio={!!isImgSticker}
-                enabledAnchors={isImgSticker
+                keepRatio={lockRatio}
+                enabledAnchors={lockRatio
                   ? ['top-left', 'top-right', 'bottom-left', 'bottom-right']
                   : undefined}
                 anchorStroke={ACCENT}
@@ -176,6 +244,17 @@ export const EditorCanvas = forwardRef<EditorCanvasHandle, Props>(function Edito
                 stageScale={scale}
               />
             )}
+            {drawMode && drawPts.length > 1 && (
+              <Line
+                points={drawPts.flatMap(p => [p.x, p.y])}
+                tension={0.4}
+                closed
+                fill="rgba(91,91,214,0.22)"
+                stroke={ACCENT}
+                strokeWidth={scale > 0 ? 3 / scale : 3}
+                listening={false}
+              />
+            )}
           </Layer>
         </Stage>
       )}
@@ -194,6 +273,30 @@ export const EditorCanvas = forwardRef<EditorCanvasHandle, Props>(function Edito
               fontSize: 13, fontWeight: 600, color: '#fff', background: CROP_ACCENT,
               padding: '8px 18px', borderRadius: 10, border: 'none', cursor: 'pointer',
             }}>Selesai</button>
+          </div>
+        </div>
+      )}
+
+      {drawMode && (
+        <div style={{
+          position: 'absolute', top: 14, left: 0, right: 0,
+          display: 'flex', justifyContent: 'center', pointerEvents: 'none',
+        }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <span style={{
+              fontSize: 12, color: '#fff', background: 'rgba(0,0,0,.62)',
+              padding: '6px 12px', borderRadius: 8,
+            }}>
+              {drawPts.length < 2 ? 'Gambar bentuk dengan jari' : 'Angkat jari untuk selesai…'}
+            </span>
+            <button
+              onClick={() => { setDrawPts([]); onDrawCancel?.() }}
+              style={{
+                fontSize: 13, fontWeight: 600, color: '#fff', background: '#dc2626',
+                padding: '8px 18px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                pointerEvents: 'all',
+              }}
+            >Batal</button>
           </div>
         </div>
       )}

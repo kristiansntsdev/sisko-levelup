@@ -79,9 +79,20 @@ export function imageDrawAttrs(el: ImageEl, natural: { width: number; height: nu
   const { width: nw, height: nh } = natural
   if (nw <= 0 || nh <= 0) return { x: 0, y: 0, width: el.w, height: el.h }
 
-  // Explicit crop window (set in crop mode) — draw it filling the box.
+  // Explicit crop window (set in crop mode). Cover-fit it into the box so
+  // free-resizing the element never distorts the image; when the box keeps
+  // the crop's aspect ratio this is the whole crop window unchanged.
   if (el.crop) {
-    return { x: 0, y: 0, width: el.w, height: el.h, crop: el.crop }
+    const sub = coverCrop(el.w, el.h, el.crop.width, el.crop.height)
+    return {
+      x: 0, y: 0, width: el.w, height: el.h,
+      crop: {
+        x: el.crop.x + sub.x,
+        y: el.crop.y + sub.y,
+        width: sub.width,
+        height: sub.height,
+      },
+    }
   }
 
   if (el.fit === 'cover') {

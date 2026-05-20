@@ -27,14 +27,22 @@
       "Read(//tmp/konva-crop-demo/src/**)",
       "Read(//private/tmp/konva-crop-demo/src/**)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:3000/dashboard/kota/brim/pamflet\")"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:3000/dashboard/kota/brim/pamflet\")",
+      "Bash(mysql -u u4977953_levelupgen -plevelupgen123 -h 185.229.118.53 u4977953_levelupgen -e \"SELECT p.id_pengurus, p.nama, p.kotalevelup, c.id_cabang, c.namacabang, c.kotacabang FROM pengurus p LEFT JOIN cabang c ON c.id_cabang = CAST\\(p.kotalevelup AS UNSIGNED\\) WHERE p.divisi = 'brim' LIMIT 10;\")",
+      "Bash(cat > *)",
+      "Bash(node -e ' *)",
+      "Bash(npx tsx -e ' *)",
+      "Bash(npx tsx *)",
+      "Bash(sed -n '68,75p' /Users/kristian/Documents/LUP/sisko-v2/prisma/schema.prisma)",
+      "Bash(sed -n '164,195p' /Users/kristian/Documents/LUP/sisko-v2/prisma/schema.prisma)"
     ],
     "additionalDirectories": [
       "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/tiket/[id]",
       "/Users/kristian/Documents/LUP/sisko-v2/app/api/auth",
       "/Users/kristian/Documents/LUP/sisko-v2/.github",
       "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/kota/alk/event",
-      "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/kota/alk/event/[id]"
+      "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/kota/alk/event/[id]",
+      "/tmp"
     ]
   }
 }

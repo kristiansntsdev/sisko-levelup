@@ -449,6 +449,13 @@ enum jobs_place_type {
   perusahaan
 }
 
+model dokumentasi_kota {
+  id          Int    @id @default(autoincrement())
+  id_event    Int    @unique
+  kotalevelup String @db.VarChar(255)
+  gdrive_link String @db.Text
+}
+
 enum kas_kota_txn_tipe {
   masuk
   keluar

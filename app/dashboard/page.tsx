@@ -5,6 +5,8 @@ import { signOut, useSession } from 'next-auth/react'
 import { Badge, Card } from '@/components/ui'
 import { getRegistrasiByPeserta } from '@/lib/actions/registrasi'
 import { getPesertaById } from '@/lib/actions/peserta'
+import { getDokumentasiForPeserta } from '@/lib/actions/dokumentasi'
+import type { DokumentasiPeserta } from '@/lib/actions/dokumentasi'
 
 type Registrasi = Awaited<ReturnType<typeof getRegistrasiByPeserta>>[number]
 
@@ -20,6 +22,7 @@ export default function DashboardPage() {
   const [registrasi, setRegistrasi] = useState<Registrasi[]>([])
   const [nama, setNama] = useState('')
   const [userLevel, setUserLevel] = useState<number | null>(null)
+  const [dokumentasi, setDokumentasi] = useState<DokumentasiPeserta[]>([])
   const [dataLoading, setDataLoading] = useState(true)
 
   useEffect(() => {
@@ -28,8 +31,10 @@ export default function DashboardPage() {
     Promise.all([
       getRegistrasiByPeserta(idPeserta),
       getPesertaById(idPeserta),
-    ]).then(([regs, p]) => {
+      getDokumentasiForPeserta(idPeserta),
+    ]).then(([regs, p, docs]) => {
       setRegistrasi(regs)
+      setDokumentasi(docs)
       if (p) { setNama(p.nama); setUserLevel(Number(p.userlevel)) }
       setDataLoading(false)
     })
@@ -164,20 +169,45 @@ export default function DashboardPage() {
         </button>
 
         {/* Dokumentasi */}
-        <section className="flex flex-col gap-3">
-          <div>
-            <p className="font-semibold text-fg">Dokumentasi</p>
-            <p className="text-xs text-muted mt-0.5">Terbuka apabila kamu sudah absen acara</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {['Dokumentasi 1', 'Dokumentasi 2'].map((label) => (
-              <Card key={label} className="p-4 flex flex-col items-center justify-center gap-2.5 aspect-square opacity-60">
-                <LockIcon />
-                <p className="text-xs text-muted text-center">{label}</p>
-              </Card>
-            ))}
-          </div>
-        </section>
+        {(isLoading || dokumentasi.length > 0) && (
+          <section className="flex flex-col gap-3">
+            <div>
+              <p className="font-semibold text-fg">Dokumentasi</p>
+              <p className="text-xs text-muted mt-0.5">Terbuka apabila kamu sudah absen acara</p>
+            </div>
+            {isLoading ? (
+              <div className="grid grid-cols-2 gap-3 animate-pulse">
+                {[0, 1].map(i => (
+                  <div key={i} className="aspect-square rounded-card bg-border" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {dokumentasi.map((doc) =>
+                  doc.unlocked ? (
+                    <a
+                      key={doc.id_event}
+                      href={doc.gdrive_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <Card className="p-4 flex flex-col items-center justify-center gap-2.5 aspect-square hover:border-accent transition-colors">
+                        <DriveIcon />
+                        <p className="text-xs font-medium text-fg text-center line-clamp-2">{doc.nama_event}</p>
+                      </Card>
+                    </a>
+                  ) : (
+                    <Card key={doc.id_event} className="p-4 flex flex-col items-center justify-center gap-2.5 aspect-square opacity-50">
+                      <LockIcon />
+                      <p className="text-xs text-muted text-center line-clamp-2">{doc.nama_event}</p>
+                    </Card>
+                  )
+                )}
+              </div>
+            )}
+          </section>
+        )}
 
       </div>
     </main>
@@ -197,6 +227,15 @@ function LockIcon() {
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted">
       <rect x="3" y="11" width="18" height="11" rx="2" />
       <path d="M7 11V7a5 5 0 0110 0v4" />
+    </svg>
+  )
+}
+
+function DriveIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
+      <path d="M22 12l-10 10L2 12 7 2h10z"/>
+      <path d="M22 12H2"/><path d="M12 22V12"/>
     </svg>
   )
 }

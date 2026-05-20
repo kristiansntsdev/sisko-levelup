@@ -19,14 +19,14 @@ export default async function BrimDashboardPage() {
     getPengaturanKota(pengurus.kotalevelup),
     db.cabang.findUnique({
       where: { id_cabang: Number(pengurus.kotalevelup) },
-      select: { kotacabang: true },
+      select: { namacabang: true },
     }),
   ])
 
   return (
     <BrimClient
       nama={pengurus.nama}
-      kotalevelup={cabang?.kotacabang ?? pengurus.kotalevelup}
+      kotalevelup={cabang?.namacabang ?? pengurus.kotalevelup}
       pengaturan={pengaturan ?? null}
     />
   )

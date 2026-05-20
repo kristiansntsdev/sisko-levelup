@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useRef, useState } from 'react'
-import type { PamfletDoc, AnyElement, TextEl, ImageEl } from '../lib/types'
+import type { PamfletDoc, AnyElement, TextEl, ImageEl, StickerEl } from '../lib/types'
 import { uid } from '../lib/types'
 import { EditorCanvas, type EditorCanvasHandle } from './EditorCanvas'
 import { IdleToolbar, TextToolbar, ImageToolbar, ShapeToolbar, selectedToolbarKind } from './Toolbars'
@@ -36,6 +36,7 @@ export function Editor({ doc, setDoc, kotaLogo, onBack, onSave, onSwitchTemplate
   const [sheet, setSheet] = useState<SheetKind>(null)
   const [exporting, setExporting] = useState(false)
   const [cropping, setCropping] = useState(false)
+  const [drawMode, setDrawMode] = useState(false)
   const canvasRef = useRef<EditorCanvasHandle>(null)
 
   const selected = selectedId ? doc.elements.find(e => e.id === selectedId) ?? null : null
@@ -67,6 +68,18 @@ export function Editor({ doc, setDoc, kotaLogo, onBack, onSave, onSwitchTemplate
       const el = d.elements.find(e => e.id === id); if (!el) return d
       const clone = { ...el, id: uid(el.type[0]), x: el.x + 30, y: el.y + 30 } as AnyElement
       return { ...d, elements: [...d.elements, clone] }
+    })
+  }, [setDoc])
+
+  // Reorder z-stack: 'up' = toward the front, 'down' = toward the back.
+  const moveLayer = useCallback((id: string, dir: 'up' | 'down') => {
+    setDoc(d => {
+      const i = d.elements.findIndex(e => e.id === id)
+      const j = dir === 'up' ? i + 1 : i - 1
+      if (i < 0 || j < 0 || j >= d.elements.length) return d
+      const els = [...d.elements]
+      ;[els[i], els[j]] = [els[j], els[i]]
+      return { ...d, elements: els }
     })
   }, [setDoc])
 
@@ -194,10 +207,23 @@ export function Editor({ doc, setDoc, kotaLogo, onBack, onSave, onSwitchTemplate
           onSelect={setSelectedId}
           onChange={setDoc}
           onCroppingChange={setCropping}
+          drawMode={drawMode}
+          onFreeformDone={(svg, x, y, w, h) => {
+            setDoc(d => ({
+              ...d,
+              elements: [...d.elements, {
+                id: uid('s'), type: 'sticker',
+                x, y, w, h, rotation: 0,
+                src: svg, color: '#5b5bd6',
+              } as StickerEl],
+            }))
+            setDrawMode(false)
+          }}
+          onDrawCancel={() => setDrawMode(false)}
         />
       </div>
 
-      {!cropping && toolbarKind === 'idle' && (
+      {!cropping && !drawMode && toolbarKind === 'idle' && (
         <IdleToolbar
           onAddText={addText}
           onAddImage={() => setSheet({ kind: 'image-pick' })}
@@ -206,29 +232,35 @@ export function Editor({ doc, setDoc, kotaLogo, onBack, onSave, onSwitchTemplate
           onChangeTemplate={onSwitchTemplate}
         />
       )}
-      {!cropping && toolbarKind === 'text' && selected?.type === 'text' && (
+      {!cropping && !drawMode && toolbarKind === 'text' && selected?.type === 'text' && (
         <TextToolbar el={selected}
           onEdit={() => setSheet({ kind: 'text-edit' })}
           onFont={() => setSheet({ kind: 'font' })}
           onSize={() => setSheet({ kind: 'size' })}
           onColor={() => setSheet({ kind: 'color-text' })}
           onResetRot={() => patchEl(selected.id, { rotation: 0 } as Partial<TextEl>)}
+          onForward={() => moveLayer(selected.id, 'up')}
+          onBackward={() => moveLayer(selected.id, 'down')}
           onDuplicate={() => duplicateEl(selected.id)}
           onDelete={() => deleteEl(selected.id)} />
       )}
-      {!cropping && toolbarKind === 'image' && selected?.type === 'image' && (
+      {!cropping && !drawMode && toolbarKind === 'image' && selected?.type === 'image' && (
         <ImageToolbar el={selected}
           onReplace={() => setSheet({ kind: 'image-replace' })}
           onFitToggle={() => patchEl<ImageEl>(selected.id, { fit: selected.fit === 'cover' ? 'contain' : 'cover' })}
           onCrop={() => canvasRef.current?.startCrop()}
           onResetRot={() => patchEl(selected.id, { rotation: 0 } as Partial<ImageEl>)}
+          onForward={() => moveLayer(selected.id, 'up')}
+          onBackward={() => moveLayer(selected.id, 'down')}
           onDuplicate={() => duplicateEl(selected.id)}
           onDelete={() => deleteEl(selected.id)} />
       )}
-      {!cropping && toolbarKind === 'shape' && selected && (selected.type === 'shape' || selected.type === 'sticker') && (
+      {!cropping && !drawMode && toolbarKind === 'shape' && selected && (selected.type === 'shape' || selected.type === 'sticker') && (
         <ShapeToolbar el={selected}
           onColor={() => setSheet({ kind: 'color-shape' })}
           onResetRot={() => patchEl(selected.id, { rotation: 0 })}
+          onForward={() => moveLayer(selected.id, 'up')}
+          onBackward={() => moveLayer(selected.id, 'down')}
           onDuplicate={() => duplicateEl(selected.id)}
           onDelete={() => deleteEl(selected.id)} />
       )}
@@ -276,6 +308,7 @@ export function Editor({ doc, setDoc, kotaLogo, onBack, onSave, onSwitchTemplate
         onPick={addSticker}
         onPickLogo={addLogo}
         onPickSosmed={addSosmedBar}
+        onStartDraw={() => { setSheet(null); setSelectedId(null); setDrawMode(true) }}
         onClose={() => setSheet(null)} />
       <BackgroundSheet open={sheet?.kind === 'bg'}
         value={doc.canvas.bg}

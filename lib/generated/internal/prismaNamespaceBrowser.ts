@@ -90,7 +90,8 @@ export const ModelName = {
   registrasi: 'registrasi',
   jobs_place: 'jobs_place',
   kas_kota: 'kas_kota',
-  kas_kota_txn: 'kas_kota_txn'
+  kas_kota_txn: 'kas_kota_txn',
+  dokumentasi_kota: 'dokumentasi_kota'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -608,6 +609,16 @@ export const Kas_kota_txnScalarFieldEnum = {
 export type Kas_kota_txnScalarFieldEnum = (typeof Kas_kota_txnScalarFieldEnum)[keyof typeof Kas_kota_txnScalarFieldEnum]
 
 
+export const Dokumentasi_kotaScalarFieldEnum = {
+  id: 'id',
+  id_event: 'id_event',
+  kotalevelup: 'kotalevelup',
+  gdrive_link: 'gdrive_link'
+} as const
+
+export type Dokumentasi_kotaScalarFieldEnum = (typeof Dokumentasi_kotaScalarFieldEnum)[keyof typeof Dokumentasi_kotaScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1019,4 +1030,12 @@ export const kas_kota_txnOrderByRelevanceFieldEnum = {
 } as const
 
 export type kas_kota_txnOrderByRelevanceFieldEnum = (typeof kas_kota_txnOrderByRelevanceFieldEnum)[keyof typeof kas_kota_txnOrderByRelevanceFieldEnum]
+
+
+export const dokumentasi_kotaOrderByRelevanceFieldEnum = {
+  kotalevelup: 'kotalevelup',
+  gdrive_link: 'gdrive_link'
+} as const
+
+export type dokumentasi_kotaOrderByRelevanceFieldEnum = (typeof dokumentasi_kotaOrderByRelevanceFieldEnum)[keyof typeof dokumentasi_kotaOrderByRelevanceFieldEnum]
 

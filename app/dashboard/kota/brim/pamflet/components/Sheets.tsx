@@ -4,6 +4,45 @@ import type { OrgInfo, TextEl, Background } from '../lib/types'
 import { DEFAULT_ORG } from '../lib/types'
 import { STICKERS } from '../lib/stickers'
 
+// ── Confirm dialog (centered, replaces browser confirm()) ─────
+export function ConfirmDialog({ open, message, confirmLabel = 'Ya, lanjutkan', cancelLabel = 'Batal', onConfirm, onCancel }: {
+  open: boolean
+  message: string
+  confirmLabel?: string
+  cancelLabel?: string
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  if (!open) return null
+  return (
+    <div onClick={onCancel} style={{
+      position: 'fixed', inset: 0, zIndex: 200,
+      background: 'rgba(15,14,12,0.55)', backdropFilter: 'blur(6px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '0 20px',
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: '#fff', width: '100%', maxWidth: 380,
+        borderRadius: 20, padding: '24px 20px 20px',
+        boxShadow: '0 8px 40px rgba(0,0,0,.22)',
+        display: 'flex', flexDirection: 'column', gap: 16,
+      }}>
+        <p className="text-sm text-fg font-medium leading-relaxed text-center">{message}</p>
+        <div className="flex gap-2">
+          <button onClick={onCancel}
+            className="flex-1 py-3 rounded-xl border border-border font-semibold text-fg text-sm">
+            {cancelLabel}
+          </button>
+          <button onClick={onConfirm}
+            className="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold text-sm">
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Generic bottom-sheet shell ───────────────────────────────
 export function Sheet({ open, onClose, title, children, footer }: {
   open: boolean
@@ -280,12 +319,13 @@ const SOSMED_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 72
 
 const SOSMED_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(SOSMED_SVG)}`
 
-export function StickerSheet({ open, kotaLogo, onPick, onPickLogo, onPickSosmed, onClose }: {
+export function StickerSheet({ open, kotaLogo, onPick, onPickLogo, onPickSosmed, onStartDraw, onClose }: {
   open: boolean
   kotaLogo?: string
   onPick: (svg: string) => void
   onPickLogo: (src: string) => void
   onPickSosmed: (src: string) => void
+  onStartDraw?: () => void
   onClose: () => void
 }) {
   const logos = kotaLogo
@@ -321,9 +361,29 @@ export function StickerSheet({ open, kotaLogo, onPick, onPickLogo, onPickSosmed,
           </div>
         </div>
 
-        {/* Stickers */}
+        {/* Freeform draw */}
+        {onStartDraw && (
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">Gambar Bebas</div>
+            <button
+              onClick={() => { onStartDraw(); onClose() }}
+              className="w-full border-2 border-dashed border-accent rounded-xl bg-surface hover:bg-accent/10 transition-colors p-4 flex items-center gap-3 text-accent"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9"/>
+                <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+              <div className="text-left">
+                <div className="text-sm font-semibold text-accent">Gambar Bebas</div>
+                <div className="text-xs text-muted">Gambar bentuk sendiri dengan jari</div>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Shapes */}
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">Stiker</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">Bentuk Dasar</div>
           <div className="grid grid-cols-4 gap-3">
             {STICKERS.map(s => (
               <button key={s.id} onClick={() => { onPick(s.svg); onClose() }}
