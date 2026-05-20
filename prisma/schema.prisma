@@ -12,14 +12,19 @@ model SequelizeMeta {
 }
 
 model absen {
-  id_absen   Int      @id @default(autoincrement())
-  id_peserta String   @db.Text
-  email      String   @db.Text
-  id_event   String   @db.Text
-  hadir      String   @db.Text
-  timestamp  DateTime @default(now()) @db.Timestamp(0)
-  lampiran   String   @db.Text
-  approve    String   @db.Text
+  id_absen       Int      @id @default(autoincrement())
+  id_peserta     String   @db.Text
+  id_peserta_int Int?
+  email          String   @db.Text
+  id_event       String   @db.Text
+  id_event_int   Int?
+  hadir          String   @db.Text
+  timestamp      DateTime @default(now()) @db.Timestamp(0)
+  lampiran       String   @db.Text
+  approve        String   @db.Text
+
+  @@index([id_event_int], map: "idx_absen_event_int")
+  @@index([id_peserta_int], map: "idx_absen_peserta_int")
 }
 
 model absenwp {
@@ -161,6 +166,17 @@ model pengaturan {
   nama_web      String @db.Text
   logo          String @db.Text
   logokecil     String @db.Text
+}
+
+model pengaturan_kota {
+  id          Int    @id @default(autoincrement())
+  kotalevelup String @unique @db.VarChar(255)
+  logo        String @db.LongText
+  instagram   String @db.Text
+  tiktok      String @db.Text
+  facebook    String @db.Text
+  youtube     String @db.Text
+  twitter     String @db.Text
 }
 
 model pengurus {
@@ -423,6 +439,8 @@ enum registrasi_status {
   pending
   confirmed
   cancelled
+  attend
+  absence
 }
 
 enum jobs_place_type {

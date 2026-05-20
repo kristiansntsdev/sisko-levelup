@@ -28,17 +28,23 @@ export type AggregateAbsen = {
 
 export type AbsenAvgAggregateOutputType = {
   id_absen: number | null
+  id_peserta_int: number | null
+  id_event_int: number | null
 }
 
 export type AbsenSumAggregateOutputType = {
   id_absen: number | null
+  id_peserta_int: number | null
+  id_event_int: number | null
 }
 
 export type AbsenMinAggregateOutputType = {
   id_absen: number | null
   id_peserta: string | null
+  id_peserta_int: number | null
   email: string | null
   id_event: string | null
+  id_event_int: number | null
   hadir: string | null
   timestamp: Date | null
   lampiran: string | null
@@ -48,8 +54,10 @@ export type AbsenMinAggregateOutputType = {
 export type AbsenMaxAggregateOutputType = {
   id_absen: number | null
   id_peserta: string | null
+  id_peserta_int: number | null
   email: string | null
   id_event: string | null
+  id_event_int: number | null
   hadir: string | null
   timestamp: Date | null
   lampiran: string | null
@@ -59,8 +67,10 @@ export type AbsenMaxAggregateOutputType = {
 export type AbsenCountAggregateOutputType = {
   id_absen: number
   id_peserta: number
+  id_peserta_int: number
   email: number
   id_event: number
+  id_event_int: number
   hadir: number
   timestamp: number
   lampiran: number
@@ -71,17 +81,23 @@ export type AbsenCountAggregateOutputType = {
 
 export type AbsenAvgAggregateInputType = {
   id_absen?: true
+  id_peserta_int?: true
+  id_event_int?: true
 }
 
 export type AbsenSumAggregateInputType = {
   id_absen?: true
+  id_peserta_int?: true
+  id_event_int?: true
 }
 
 export type AbsenMinAggregateInputType = {
   id_absen?: true
   id_peserta?: true
+  id_peserta_int?: true
   email?: true
   id_event?: true
+  id_event_int?: true
   hadir?: true
   timestamp?: true
   lampiran?: true
@@ -91,8 +107,10 @@ export type AbsenMinAggregateInputType = {
 export type AbsenMaxAggregateInputType = {
   id_absen?: true
   id_peserta?: true
+  id_peserta_int?: true
   email?: true
   id_event?: true
+  id_event_int?: true
   hadir?: true
   timestamp?: true
   lampiran?: true
@@ -102,8 +120,10 @@ export type AbsenMaxAggregateInputType = {
 export type AbsenCountAggregateInputType = {
   id_absen?: true
   id_peserta?: true
+  id_peserta_int?: true
   email?: true
   id_event?: true
+  id_event_int?: true
   hadir?: true
   timestamp?: true
   lampiran?: true
@@ -200,8 +220,10 @@ export type absenGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type AbsenGroupByOutputType = {
   id_absen: number
   id_peserta: string
+  id_peserta_int: number | null
   email: string
   id_event: string
+  id_event_int: number | null
   hadir: string
   timestamp: Date
   lampiran: string
@@ -234,8 +256,10 @@ export type absenWhereInput = {
   NOT?: Prisma.absenWhereInput | Prisma.absenWhereInput[]
   id_absen?: Prisma.IntFilter<"absen"> | number
   id_peserta?: Prisma.StringFilter<"absen"> | string
+  id_peserta_int?: Prisma.IntNullableFilter<"absen"> | number | null
   email?: Prisma.StringFilter<"absen"> | string
   id_event?: Prisma.StringFilter<"absen"> | string
+  id_event_int?: Prisma.IntNullableFilter<"absen"> | number | null
   hadir?: Prisma.StringFilter<"absen"> | string
   timestamp?: Prisma.DateTimeFilter<"absen"> | Date | string
   lampiran?: Prisma.StringFilter<"absen"> | string
@@ -245,8 +269,10 @@ export type absenWhereInput = {
 export type absenOrderByWithRelationInput = {
   id_absen?: Prisma.SortOrder
   id_peserta?: Prisma.SortOrder
+  id_peserta_int?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   id_event?: Prisma.SortOrder
+  id_event_int?: Prisma.SortOrderInput | Prisma.SortOrder
   hadir?: Prisma.SortOrder
   timestamp?: Prisma.SortOrder
   lampiran?: Prisma.SortOrder
@@ -260,8 +286,10 @@ export type absenWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.absenWhereInput[]
   NOT?: Prisma.absenWhereInput | Prisma.absenWhereInput[]
   id_peserta?: Prisma.StringFilter<"absen"> | string
+  id_peserta_int?: Prisma.IntNullableFilter<"absen"> | number | null
   email?: Prisma.StringFilter<"absen"> | string
   id_event?: Prisma.StringFilter<"absen"> | string
+  id_event_int?: Prisma.IntNullableFilter<"absen"> | number | null
   hadir?: Prisma.StringFilter<"absen"> | string
   timestamp?: Prisma.DateTimeFilter<"absen"> | Date | string
   lampiran?: Prisma.StringFilter<"absen"> | string
@@ -271,8 +299,10 @@ export type absenWhereUniqueInput = Prisma.AtLeast<{
 export type absenOrderByWithAggregationInput = {
   id_absen?: Prisma.SortOrder
   id_peserta?: Prisma.SortOrder
+  id_peserta_int?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   id_event?: Prisma.SortOrder
+  id_event_int?: Prisma.SortOrderInput | Prisma.SortOrder
   hadir?: Prisma.SortOrder
   timestamp?: Prisma.SortOrder
   lampiran?: Prisma.SortOrder
@@ -290,8 +320,10 @@ export type absenScalarWhereWithAggregatesInput = {
   NOT?: Prisma.absenScalarWhereWithAggregatesInput | Prisma.absenScalarWhereWithAggregatesInput[]
   id_absen?: Prisma.IntWithAggregatesFilter<"absen"> | number
   id_peserta?: Prisma.StringWithAggregatesFilter<"absen"> | string
+  id_peserta_int?: Prisma.IntNullableWithAggregatesFilter<"absen"> | number | null
   email?: Prisma.StringWithAggregatesFilter<"absen"> | string
   id_event?: Prisma.StringWithAggregatesFilter<"absen"> | string
+  id_event_int?: Prisma.IntNullableWithAggregatesFilter<"absen"> | number | null
   hadir?: Prisma.StringWithAggregatesFilter<"absen"> | string
   timestamp?: Prisma.DateTimeWithAggregatesFilter<"absen"> | Date | string
   lampiran?: Prisma.StringWithAggregatesFilter<"absen"> | string
@@ -300,8 +332,10 @@ export type absenScalarWhereWithAggregatesInput = {
 
 export type absenCreateInput = {
   id_peserta: string
+  id_peserta_int?: number | null
   email: string
   id_event: string
+  id_event_int?: number | null
   hadir: string
   timestamp?: Date | string
   lampiran: string
@@ -311,8 +345,10 @@ export type absenCreateInput = {
 export type absenUncheckedCreateInput = {
   id_absen?: number
   id_peserta: string
+  id_peserta_int?: number | null
   email: string
   id_event: string
+  id_event_int?: number | null
   hadir: string
   timestamp?: Date | string
   lampiran: string
@@ -321,8 +357,10 @@ export type absenUncheckedCreateInput = {
 
 export type absenUpdateInput = {
   id_peserta?: Prisma.StringFieldUpdateOperationsInput | string
+  id_peserta_int?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   id_event?: Prisma.StringFieldUpdateOperationsInput | string
+  id_event_int?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hadir?: Prisma.StringFieldUpdateOperationsInput | string
   timestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lampiran?: Prisma.StringFieldUpdateOperationsInput | string
@@ -332,8 +370,10 @@ export type absenUpdateInput = {
 export type absenUncheckedUpdateInput = {
   id_absen?: Prisma.IntFieldUpdateOperationsInput | number
   id_peserta?: Prisma.StringFieldUpdateOperationsInput | string
+  id_peserta_int?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   id_event?: Prisma.StringFieldUpdateOperationsInput | string
+  id_event_int?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hadir?: Prisma.StringFieldUpdateOperationsInput | string
   timestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lampiran?: Prisma.StringFieldUpdateOperationsInput | string
@@ -343,8 +383,10 @@ export type absenUncheckedUpdateInput = {
 export type absenCreateManyInput = {
   id_absen?: number
   id_peserta: string
+  id_peserta_int?: number | null
   email: string
   id_event: string
+  id_event_int?: number | null
   hadir: string
   timestamp?: Date | string
   lampiran: string
@@ -353,8 +395,10 @@ export type absenCreateManyInput = {
 
 export type absenUpdateManyMutationInput = {
   id_peserta?: Prisma.StringFieldUpdateOperationsInput | string
+  id_peserta_int?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   id_event?: Prisma.StringFieldUpdateOperationsInput | string
+  id_event_int?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hadir?: Prisma.StringFieldUpdateOperationsInput | string
   timestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lampiran?: Prisma.StringFieldUpdateOperationsInput | string
@@ -364,8 +408,10 @@ export type absenUpdateManyMutationInput = {
 export type absenUncheckedUpdateManyInput = {
   id_absen?: Prisma.IntFieldUpdateOperationsInput | number
   id_peserta?: Prisma.StringFieldUpdateOperationsInput | string
+  id_peserta_int?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   id_event?: Prisma.StringFieldUpdateOperationsInput | string
+  id_event_int?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hadir?: Prisma.StringFieldUpdateOperationsInput | string
   timestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lampiran?: Prisma.StringFieldUpdateOperationsInput | string
@@ -381,8 +427,10 @@ export type absenOrderByRelevanceInput = {
 export type absenCountOrderByAggregateInput = {
   id_absen?: Prisma.SortOrder
   id_peserta?: Prisma.SortOrder
+  id_peserta_int?: Prisma.SortOrder
   email?: Prisma.SortOrder
   id_event?: Prisma.SortOrder
+  id_event_int?: Prisma.SortOrder
   hadir?: Prisma.SortOrder
   timestamp?: Prisma.SortOrder
   lampiran?: Prisma.SortOrder
@@ -391,13 +439,17 @@ export type absenCountOrderByAggregateInput = {
 
 export type absenAvgOrderByAggregateInput = {
   id_absen?: Prisma.SortOrder
+  id_peserta_int?: Prisma.SortOrder
+  id_event_int?: Prisma.SortOrder
 }
 
 export type absenMaxOrderByAggregateInput = {
   id_absen?: Prisma.SortOrder
   id_peserta?: Prisma.SortOrder
+  id_peserta_int?: Prisma.SortOrder
   email?: Prisma.SortOrder
   id_event?: Prisma.SortOrder
+  id_event_int?: Prisma.SortOrder
   hadir?: Prisma.SortOrder
   timestamp?: Prisma.SortOrder
   lampiran?: Prisma.SortOrder
@@ -407,8 +459,10 @@ export type absenMaxOrderByAggregateInput = {
 export type absenMinOrderByAggregateInput = {
   id_absen?: Prisma.SortOrder
   id_peserta?: Prisma.SortOrder
+  id_peserta_int?: Prisma.SortOrder
   email?: Prisma.SortOrder
   id_event?: Prisma.SortOrder
+  id_event_int?: Prisma.SortOrder
   hadir?: Prisma.SortOrder
   timestamp?: Prisma.SortOrder
   lampiran?: Prisma.SortOrder
@@ -417,6 +471,16 @@ export type absenMinOrderByAggregateInput = {
 
 export type absenSumOrderByAggregateInput = {
   id_absen?: Prisma.SortOrder
+  id_peserta_int?: Prisma.SortOrder
+  id_event_int?: Prisma.SortOrder
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -436,8 +500,10 @@ export type IntFieldUpdateOperationsInput = {
 export type absenSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id_absen?: boolean
   id_peserta?: boolean
+  id_peserta_int?: boolean
   email?: boolean
   id_event?: boolean
+  id_event_int?: boolean
   hadir?: boolean
   timestamp?: boolean
   lampiran?: boolean
@@ -449,15 +515,17 @@ export type absenSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type absenSelectScalar = {
   id_absen?: boolean
   id_peserta?: boolean
+  id_peserta_int?: boolean
   email?: boolean
   id_event?: boolean
+  id_event_int?: boolean
   hadir?: boolean
   timestamp?: boolean
   lampiran?: boolean
   approve?: boolean
 }
 
-export type absenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_absen" | "id_peserta" | "email" | "id_event" | "hadir" | "timestamp" | "lampiran" | "approve", ExtArgs["result"]["absen"]>
+export type absenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_absen" | "id_peserta" | "id_peserta_int" | "email" | "id_event" | "id_event_int" | "hadir" | "timestamp" | "lampiran" | "approve", ExtArgs["result"]["absen"]>
 
 export type $absenPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "absen"
@@ -465,8 +533,10 @@ export type $absenPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id_absen: number
     id_peserta: string
+    id_peserta_int: number | null
     email: string
     id_event: string
+    id_event_int: number | null
     hadir: string
     timestamp: Date
     lampiran: string
@@ -842,8 +912,10 @@ export interface Prisma__absenClient<T, Null = never, ExtArgs extends runtime.Ty
 export interface absenFieldRefs {
   readonly id_absen: Prisma.FieldRef<"absen", 'Int'>
   readonly id_peserta: Prisma.FieldRef<"absen", 'String'>
+  readonly id_peserta_int: Prisma.FieldRef<"absen", 'Int'>
   readonly email: Prisma.FieldRef<"absen", 'String'>
   readonly id_event: Prisma.FieldRef<"absen", 'String'>
+  readonly id_event_int: Prisma.FieldRef<"absen", 'Int'>
   readonly hadir: Prisma.FieldRef<"absen", 'String'>
   readonly timestamp: Prisma.FieldRef<"absen", 'DateTime'>
   readonly lampiran: Prisma.FieldRef<"absen", 'String'>

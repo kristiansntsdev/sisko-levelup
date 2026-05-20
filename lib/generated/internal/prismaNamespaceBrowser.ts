@@ -69,6 +69,7 @@ export const ModelName = {
   notifikasi: 'notifikasi',
   pengajar: 'pengajar',
   pengaturan: 'pengaturan',
+  pengaturan_kota: 'pengaturan_kota',
   pengurus: 'pengurus',
   peserta: 'peserta',
   playlist_teams: 'playlist_teams',
@@ -118,8 +119,10 @@ export type SequelizeMetaScalarFieldEnum = (typeof SequelizeMetaScalarFieldEnum)
 export const AbsenScalarFieldEnum = {
   id_absen: 'id_absen',
   id_peserta: 'id_peserta',
+  id_peserta_int: 'id_peserta_int',
   email: 'email',
   id_event: 'id_event',
+  id_event_int: 'id_event_int',
   hadir: 'hadir',
   timestamp: 'timestamp',
   lampiran: 'lampiran',
@@ -315,6 +318,20 @@ export const PengaturanScalarFieldEnum = {
 } as const
 
 export type PengaturanScalarFieldEnum = (typeof PengaturanScalarFieldEnum)[keyof typeof PengaturanScalarFieldEnum]
+
+
+export const Pengaturan_kotaScalarFieldEnum = {
+  id: 'id',
+  kotalevelup: 'kotalevelup',
+  logo: 'logo',
+  instagram: 'instagram',
+  tiktok: 'tiktok',
+  facebook: 'facebook',
+  youtube: 'youtube',
+  twitter: 'twitter'
+} as const
+
+export type Pengaturan_kotaScalarFieldEnum = (typeof Pengaturan_kotaScalarFieldEnum)[keyof typeof Pengaturan_kotaScalarFieldEnum]
 
 
 export const PengurusScalarFieldEnum = {
@@ -606,6 +623,14 @@ export const SequelizeMetaOrderByRelevanceFieldEnum = {
 export type SequelizeMetaOrderByRelevanceFieldEnum = (typeof SequelizeMetaOrderByRelevanceFieldEnum)[keyof typeof SequelizeMetaOrderByRelevanceFieldEnum]
 
 
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
 export const absenOrderByRelevanceFieldEnum = {
   id_peserta: 'id_peserta',
   email: 'email',
@@ -783,12 +808,17 @@ export const pengaturanOrderByRelevanceFieldEnum = {
 export type pengaturanOrderByRelevanceFieldEnum = (typeof pengaturanOrderByRelevanceFieldEnum)[keyof typeof pengaturanOrderByRelevanceFieldEnum]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
+export const pengaturan_kotaOrderByRelevanceFieldEnum = {
+  kotalevelup: 'kotalevelup',
+  logo: 'logo',
+  instagram: 'instagram',
+  tiktok: 'tiktok',
+  facebook: 'facebook',
+  youtube: 'youtube',
+  twitter: 'twitter'
 } as const
 
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+export type pengaturan_kotaOrderByRelevanceFieldEnum = (typeof pengaturan_kotaOrderByRelevanceFieldEnum)[keyof typeof pengaturan_kotaOrderByRelevanceFieldEnum]
 
 
 export const pengurusOrderByRelevanceFieldEnum = {

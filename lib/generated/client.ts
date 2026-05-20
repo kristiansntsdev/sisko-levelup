@@ -132,6 +132,11 @@ export type pengajar = Prisma.pengajarModel
  */
 export type pengaturan = Prisma.pengaturanModel
 /**
+ * Model pengaturan_kota
+ * 
+ */
+export type pengaturan_kota = Prisma.pengaturan_kotaModel
+/**
  * Model pengurus
  * 
  */

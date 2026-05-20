@@ -843,14 +843,6 @@ export type NullableEnumpeserta_roleFieldUpdateOperationsInput = {
   set?: $Enums.peserta_role | null
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type pesertaCreateNestedOneWithoutAuth_usersInput = {
   create?: Prisma.XOR<Prisma.pesertaCreateWithoutAuth_usersInput, Prisma.pesertaUncheckedCreateWithoutAuth_usersInput>
   connectOrCreate?: Prisma.pesertaCreateOrConnectWithoutAuth_usersInput

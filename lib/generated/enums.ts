@@ -31,7 +31,9 @@ export type peserta_role = (typeof peserta_role)[keyof typeof peserta_role]
 export const registrasi_status = {
   pending: 'pending',
   confirmed: 'confirmed',
-  cancelled: 'cancelled'
+  cancelled: 'cancelled',
+  attend: 'attend',
+  absence: 'absence'
 } as const
 
 export type registrasi_status = (typeof registrasi_status)[keyof typeof registrasi_status]

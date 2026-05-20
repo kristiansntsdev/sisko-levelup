@@ -48,6 +48,17 @@ export async function getRegistrasiDetail(idRegistrasi: number) {
 }
 
 export async function getRegistrasiByPeserta(idPeserta: number) {
+  // Mark any confirmed tickets whose event has already ended as absence
+  const now = new Date()
+  await db.registrasi.updateMany({
+    where: {
+      id_peserta: idPeserta,
+      status: 'confirmed',
+      event: { tgleventselesai: { lt: now } },
+    },
+    data: { status: 'absence' },
+  })
+
   const rows = await db.registrasi.findMany({
     where: { id_peserta: idPeserta, status: 'confirmed' },
     select: {

@@ -402,6 +402,7 @@ export const ModelName = {
   notifikasi: 'notifikasi',
   pengajar: 'pengajar',
   pengaturan: 'pengaturan',
+  pengaturan_kota: 'pengaturan_kota',
   pengurus: 'pengurus',
   peserta: 'peserta',
   playlist_teams: 'playlist_teams',
@@ -438,7 +439,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1627,6 +1628,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.pengaturanCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PengaturanCountAggregateOutputType> | number
+        }
+      }
+    }
+    pengaturan_kota: {
+      payload: Prisma.$pengaturan_kotaPayload<ExtArgs>
+      fields: Prisma.pengaturan_kotaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.pengaturan_kotaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pengaturan_kotaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.pengaturan_kotaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pengaturan_kotaPayload>
+        }
+        findFirst: {
+          args: Prisma.pengaturan_kotaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pengaturan_kotaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.pengaturan_kotaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pengaturan_kotaPayload>
+        }
+        findMany: {
+          args: Prisma.pengaturan_kotaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pengaturan_kotaPayload>[]
+        }
+        create: {
+          args: Prisma.pengaturan_kotaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pengaturan_kotaPayload>
+        }
+        createMany: {
+          args: Prisma.pengaturan_kotaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.pengaturan_kotaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pengaturan_kotaPayload>
+        }
+        update: {
+          args: Prisma.pengaturan_kotaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pengaturan_kotaPayload>
+        }
+        deleteMany: {
+          args: Prisma.pengaturan_kotaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.pengaturan_kotaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.pengaturan_kotaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pengaturan_kotaPayload>
+        }
+        aggregate: {
+          args: Prisma.Pengaturan_kotaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePengaturan_kota>
+        }
+        groupBy: {
+          args: Prisma.pengaturan_kotaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Pengaturan_kotaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.pengaturan_kotaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Pengaturan_kotaCountAggregateOutputType> | number
         }
       }
     }
@@ -3065,8 +3132,10 @@ export type SequelizeMetaScalarFieldEnum = (typeof SequelizeMetaScalarFieldEnum)
 export const AbsenScalarFieldEnum = {
   id_absen: 'id_absen',
   id_peserta: 'id_peserta',
+  id_peserta_int: 'id_peserta_int',
   email: 'email',
   id_event: 'id_event',
+  id_event_int: 'id_event_int',
   hadir: 'hadir',
   timestamp: 'timestamp',
   lampiran: 'lampiran',
@@ -3262,6 +3331,20 @@ export const PengaturanScalarFieldEnum = {
 } as const
 
 export type PengaturanScalarFieldEnum = (typeof PengaturanScalarFieldEnum)[keyof typeof PengaturanScalarFieldEnum]
+
+
+export const Pengaturan_kotaScalarFieldEnum = {
+  id: 'id',
+  kotalevelup: 'kotalevelup',
+  logo: 'logo',
+  instagram: 'instagram',
+  tiktok: 'tiktok',
+  facebook: 'facebook',
+  youtube: 'youtube',
+  twitter: 'twitter'
+} as const
+
+export type Pengaturan_kotaScalarFieldEnum = (typeof Pengaturan_kotaScalarFieldEnum)[keyof typeof Pengaturan_kotaScalarFieldEnum]
 
 
 export const PengurusScalarFieldEnum = {
@@ -3553,6 +3636,14 @@ export const SequelizeMetaOrderByRelevanceFieldEnum = {
 export type SequelizeMetaOrderByRelevanceFieldEnum = (typeof SequelizeMetaOrderByRelevanceFieldEnum)[keyof typeof SequelizeMetaOrderByRelevanceFieldEnum]
 
 
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
 export const absenOrderByRelevanceFieldEnum = {
   id_peserta: 'id_peserta',
   email: 'email',
@@ -3730,12 +3821,17 @@ export const pengaturanOrderByRelevanceFieldEnum = {
 export type pengaturanOrderByRelevanceFieldEnum = (typeof pengaturanOrderByRelevanceFieldEnum)[keyof typeof pengaturanOrderByRelevanceFieldEnum]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
+export const pengaturan_kotaOrderByRelevanceFieldEnum = {
+  kotalevelup: 'kotalevelup',
+  logo: 'logo',
+  instagram: 'instagram',
+  tiktok: 'tiktok',
+  facebook: 'facebook',
+  youtube: 'youtube',
+  twitter: 'twitter'
 } as const
 
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+export type pengaturan_kotaOrderByRelevanceFieldEnum = (typeof pengaturan_kotaOrderByRelevanceFieldEnum)[keyof typeof pengaturan_kotaOrderByRelevanceFieldEnum]
 
 
 export const pengurusOrderByRelevanceFieldEnum = {
@@ -4155,6 +4251,7 @@ export type GlobalOmitConfig = {
   notifikasi?: Prisma.notifikasiOmit
   pengajar?: Prisma.pengajarOmit
   pengaturan?: Prisma.pengaturanOmit
+  pengaturan_kota?: Prisma.pengaturan_kotaOmit
   pengurus?: Prisma.pengurusOmit
   peserta?: Prisma.pesertaOmit
   playlist_teams?: Prisma.playlist_teamsOmit
