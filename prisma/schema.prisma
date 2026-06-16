@@ -465,3 +465,12 @@ enum kas_kota_txn_kategori {
   harian
   event
 }
+
+model event_detail {
+  id           Int      @id @default(autoincrement())
+  id_event     Int      @unique
+  pembicara    String?  @default("[]") @db.LongText
+  rundown_pra  String?  @db.LongText
+  rundown_on   String?  @db.LongText
+  updated_at   DateTime @default(now()) @db.DateTime(0)
+}

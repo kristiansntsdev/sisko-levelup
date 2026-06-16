@@ -34,7 +34,8 @@
       "Bash(npx tsx -e ' *)",
       "Bash(npx tsx *)",
       "Bash(sed -n '68,75p' /Users/kristian/Documents/LUP/sisko-v2/prisma/schema.prisma)",
-      "Bash(sed -n '164,195p' /Users/kristian/Documents/LUP/sisko-v2/prisma/schema.prisma)"
+      "Bash(sed -n '164,195p' /Users/kristian/Documents/LUP/sisko-v2/prisma/schema.prisma)",
+      "Bash(mkdir -p /Users/kristian/Documents/LUP/sisko-v2/app/dashboard/kota/vol/event/\\\\[id\\\\])"
     ],
     "additionalDirectories": [
       "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/tiket/[id]",
@@ -42,7 +43,8 @@
       "/Users/kristian/Documents/LUP/sisko-v2/.github",
       "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/kota/alk/event",
       "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/kota/alk/event/[id]",
-      "/tmp"
+      "/tmp",
+      "/Users/kristian/Documents/LUP/sisko-v2/app/dashboard/kota/vol/event"
     ]
   }
 }

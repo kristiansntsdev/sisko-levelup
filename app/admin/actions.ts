@@ -27,6 +27,7 @@ export async function loginPengurus(
 
   if (pengurus.divisi === 'alk') redirect('/dashboard/kota/alk')
   if (pengurus.divisi === 'brim') redirect('/dashboard/kota/brim')
+  if (pengurus.divisi === 'vol') redirect('/dashboard/kota/vol')
   redirect('/dashboard/kota')
 }
 

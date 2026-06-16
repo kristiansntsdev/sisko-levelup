@@ -91,7 +91,8 @@ export const ModelName = {
   jobs_place: 'jobs_place',
   kas_kota: 'kas_kota',
   kas_kota_txn: 'kas_kota_txn',
-  dokumentasi_kota: 'dokumentasi_kota'
+  dokumentasi_kota: 'dokumentasi_kota',
+  event_detail: 'event_detail'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -619,6 +620,18 @@ export const Dokumentasi_kotaScalarFieldEnum = {
 export type Dokumentasi_kotaScalarFieldEnum = (typeof Dokumentasi_kotaScalarFieldEnum)[keyof typeof Dokumentasi_kotaScalarFieldEnum]
 
 
+export const Event_detailScalarFieldEnum = {
+  id: 'id',
+  id_event: 'id_event',
+  pembicara: 'pembicara',
+  rundown_pra: 'rundown_pra',
+  rundown_on: 'rundown_on',
+  updated_at: 'updated_at'
+} as const
+
+export type Event_detailScalarFieldEnum = (typeof Event_detailScalarFieldEnum)[keyof typeof Event_detailScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1038,4 +1051,13 @@ export const dokumentasi_kotaOrderByRelevanceFieldEnum = {
 } as const
 
 export type dokumentasi_kotaOrderByRelevanceFieldEnum = (typeof dokumentasi_kotaOrderByRelevanceFieldEnum)[keyof typeof dokumentasi_kotaOrderByRelevanceFieldEnum]
+
+
+export const event_detailOrderByRelevanceFieldEnum = {
+  pembicara: 'pembicara',
+  rundown_pra: 'rundown_pra',
+  rundown_on: 'rundown_on'
+} as const
+
+export type event_detailOrderByRelevanceFieldEnum = (typeof event_detailOrderByRelevanceFieldEnum)[keyof typeof event_detailOrderByRelevanceFieldEnum]
 

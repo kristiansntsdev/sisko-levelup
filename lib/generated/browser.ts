@@ -222,3 +222,8 @@ export type kas_kota_txn = Prisma.kas_kota_txnModel
  * 
  */
 export type dokumentasi_kota = Prisma.dokumentasi_kotaModel
+/**
+ * Model event_detail
+ * 
+ */
+export type event_detail = Prisma.event_detailModel

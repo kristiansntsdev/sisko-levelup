@@ -424,7 +424,8 @@ export const ModelName = {
   jobs_place: 'jobs_place',
   kas_kota: 'kas_kota',
   kas_kota_txn: 'kas_kota_txn',
-  dokumentasi_kota: 'dokumentasi_kota'
+  dokumentasi_kota: 'dokumentasi_kota',
+  event_detail: 'event_detail'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -440,7 +441,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3150,6 +3151,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    event_detail: {
+      payload: Prisma.$event_detailPayload<ExtArgs>
+      fields: Prisma.event_detailFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.event_detailFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_detailPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.event_detailFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_detailPayload>
+        }
+        findFirst: {
+          args: Prisma.event_detailFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_detailPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.event_detailFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_detailPayload>
+        }
+        findMany: {
+          args: Prisma.event_detailFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_detailPayload>[]
+        }
+        create: {
+          args: Prisma.event_detailCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_detailPayload>
+        }
+        createMany: {
+          args: Prisma.event_detailCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.event_detailDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_detailPayload>
+        }
+        update: {
+          args: Prisma.event_detailUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_detailPayload>
+        }
+        deleteMany: {
+          args: Prisma.event_detailDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.event_detailUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.event_detailUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_detailPayload>
+        }
+        aggregate: {
+          args: Prisma.Event_detailAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEvent_detail>
+        }
+        groupBy: {
+          args: Prisma.event_detailGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Event_detailGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.event_detailCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Event_detailCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3698,6 +3765,18 @@ export const Dokumentasi_kotaScalarFieldEnum = {
 export type Dokumentasi_kotaScalarFieldEnum = (typeof Dokumentasi_kotaScalarFieldEnum)[keyof typeof Dokumentasi_kotaScalarFieldEnum]
 
 
+export const Event_detailScalarFieldEnum = {
+  id: 'id',
+  id_event: 'id_event',
+  pembicara: 'pembicara',
+  rundown_pra: 'rundown_pra',
+  rundown_on: 'rundown_on',
+  updated_at: 'updated_at'
+} as const
+
+export type Event_detailScalarFieldEnum = (typeof Event_detailScalarFieldEnum)[keyof typeof Event_detailScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -4119,6 +4198,15 @@ export const dokumentasi_kotaOrderByRelevanceFieldEnum = {
 export type dokumentasi_kotaOrderByRelevanceFieldEnum = (typeof dokumentasi_kotaOrderByRelevanceFieldEnum)[keyof typeof dokumentasi_kotaOrderByRelevanceFieldEnum]
 
 
+export const event_detailOrderByRelevanceFieldEnum = {
+  pembicara: 'pembicara',
+  rundown_pra: 'rundown_pra',
+  rundown_on: 'rundown_on'
+} as const
+
+export type event_detailOrderByRelevanceFieldEnum = (typeof event_detailOrderByRelevanceFieldEnum)[keyof typeof event_detailOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -4359,6 +4447,7 @@ export type GlobalOmitConfig = {
   kas_kota?: Prisma.kas_kotaOmit
   kas_kota_txn?: Prisma.kas_kota_txnOmit
   dokumentasi_kota?: Prisma.dokumentasi_kotaOmit
+  event_detail?: Prisma.event_detailOmit
 }
 
 /* Types for Logging */

@@ -6,7 +6,7 @@ import {
   KotaShell, KotaTab,
   EventDateCard, getEventStatus,
   SummaryTile, HeroCard, FilterTabs,
-  KasTab,
+  KasTab, SuratTab,
 } from '@/components/kota'
 import type { KasKotaData } from '@/components/kota'
 import type { EventDashboard } from '@/lib/actions/event'
@@ -54,6 +54,14 @@ function WalletIcon() {
       <rect x="2" y="5" width="20" height="14" rx="2"/>
       <path d="M16 12h2"/>
       <path d="M2 10h20"/>
+    </svg>
+  )
+}
+function MailIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <polyline points="2,4 12,13 22,4"/>
     </svg>
   )
 }
@@ -430,6 +438,7 @@ const TABS: KotaTab[] = [
   { id: 'beranda', label: 'Beranda', icon: <HomeIcon /> },
   { id: 'event',   label: 'Event',   icon: <CalendarIcon /> },
   { id: 'kas',     label: 'Kas',     icon: <WalletIcon /> },
+  { id: 'surat',   label: 'Surat',   icon: <MailIcon /> },
   { id: 'akun',    label: 'Akun',    icon: <UserIcon /> },
 ]
 
@@ -440,6 +449,7 @@ export function AlkClient({ pengurus, events, namaCabang, kasKota }: AlkClientPr
     beranda: <BerandaTab pengurus={pengurus} events={events} namaCabang={namaCabang} saldo={kasKota.saldo} />,
     event:   <EventTab events={events} />,
     kas:     <KasTab kasKota={kasKota} />,
+    surat:   <SuratTab pengurus={pengurus} />,
     akun:    <AkunTab pengurus={pengurus} namaCabang={namaCabang} />,
   }
 
