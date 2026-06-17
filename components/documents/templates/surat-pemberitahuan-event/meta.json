@@ -1,0 +1,7 @@
+{
+  "id": "surat-pemberitahuan-event",
+  "version": "1",
+  "name": "Surat Pemberitahuan Event",
+  "pdfReference": "template/FORMAT SURAT PEMBERITAHUAN EVENT LUP - KORWIL(1).pdf",
+  "pageCount": 2
+}

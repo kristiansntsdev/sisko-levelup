@@ -1,0 +1,145 @@
+{
+  "sections": [
+    {
+      "id": "permohonan",
+      "title": "Halaman 1 — Permohonan",
+      "fields": [
+        {
+          "id": "kota",
+          "label": "Kota",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nomorSurat",
+          "label": "Nomor Surat",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalSurat",
+          "label": "Tanggal Surat",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "kepada",
+          "label": "Kepada",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "hal",
+          "label": "Perihal",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "acara",
+          "label": "Nama Acara",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "jumlahDana",
+          "label": "Jumlah Dana Dimohonkan",
+          "type": "currency",
+          "required": true
+        },
+        {
+          "id": "keteranganDana",
+          "label": "Keterangan Penggunaan Dana",
+          "type": "textarea",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "lpj",
+      "title": "Halaman 2 — LPJ",
+      "fields": [
+        {
+          "id": "tanggalKegiatan",
+          "label": "Tanggal Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tempatKegiatan",
+          "label": "Tempat Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "ringkasanKegiatan",
+          "label": "Ringkasan Kegiatan",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "hasilKegiatan",
+          "label": "Hasil Kegiatan",
+          "type": "textarea",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "keuangan",
+      "title": "Halaman 3 — Rincian Keuangan",
+      "fields": [
+        {
+          "id": "rincianKeuangan",
+          "label": "Rincian Anggaran",
+          "type": "repeat",
+          "required": true,
+          "minRows": 2,
+          "columns": [
+            {
+              "id": "uraian",
+              "label": "Uraian",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "jumlah",
+              "label": "Jumlah (Rp)",
+              "type": "currency",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        {
+          "id": "korwilName",
+          "label": "Nama Korwil PPHTGD",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "picName",
+          "label": "Nama PIC",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "picKeuanganName",
+          "label": "Nama PIC Keuangan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "picKegiatanName",
+          "label": "Nama PIC Kegiatan",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

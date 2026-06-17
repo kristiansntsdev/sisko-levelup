@@ -1,0 +1,112 @@
+{
+  "sections": [
+    {
+      "id": "surat",
+      "title": "Informasi Surat",
+      "fields": [
+        {
+          "id": "kota",
+          "label": "Kota",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nomorSurat",
+          "label": "Nomor Surat",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalSurat",
+          "label": "Tanggal Surat",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "kepada",
+          "label": "Kepada",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "hal",
+          "label": "Perihal",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "acara",
+          "label": "Nama Acara (untuk QR)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "namaKegiatan",
+          "label": "Nama Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalKegiatan",
+          "label": "Tanggal Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "jamKegiatan",
+          "label": "Jam Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tempatKegiatan",
+          "label": "Tempat Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "jumlahPeserta",
+          "label": "Jumlah Peserta",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "lampiran1",
+          "label": "Lampiran 1",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "lampiran2",
+          "label": "Lampiran 2",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        {
+          "id": "ketuaPanitiaName",
+          "label": "Nama Ketua Panitia",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "picName",
+          "label": "Nama PIC",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "korwilName",
+          "label": "Nama Korwil PPHTGD",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

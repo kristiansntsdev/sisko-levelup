@@ -1,0 +1,7 @@
+{
+  "id": "izin-kuliah-kantor",
+  "version": "1",
+  "name": "Surat Izin Kuliah / Kantor",
+  "pdfReference": "template/Surat Izin Kuliah_Kantor.pdf",
+  "pageCount": 1
+}

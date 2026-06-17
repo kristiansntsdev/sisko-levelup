@@ -1,0 +1,109 @@
+{
+  "sections": [
+    {
+      "id": "surat",
+      "title": "Informasi Surat",
+      "fields": [
+        {
+          "id": "kota",
+          "label": "Kota",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nomorSurat",
+          "label": "Nomor Surat",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalSurat",
+          "label": "Tanggal Surat",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "kepada",
+          "label": "Kepada",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "hal",
+          "label": "Perihal",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "acara",
+          "label": "Nama Acara (untuk QR)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalPinjam",
+          "label": "Tanggal Pinjam",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalKembali",
+          "label": "Tanggal Kembali",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "keperluan",
+          "label": "Keperluan",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "daftarBarang",
+          "label": "Daftar Barang",
+          "type": "repeat",
+          "required": true,
+          "minRows": 1,
+          "columns": [
+            {
+              "id": "namaBarang",
+              "label": "Nama Barang",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "jumlah",
+              "label": "Jumlah",
+              "type": "text",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        {
+          "id": "ketuaPanitiaName",
+          "label": "Nama Ketua Panitia",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "picName",
+          "label": "Nama PIC",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "korwilName",
+          "label": "Nama Korwil PPHTGD",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

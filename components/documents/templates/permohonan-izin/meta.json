@@ -1,0 +1,7 @@
+{
+  "id": "permohonan-izin",
+  "version": "1",
+  "name": "Surat Permohonan Izin",
+  "pdfReference": "template/Template Surat Permohonan Izin.pdf",
+  "pageCount": 1
+}

@@ -1,0 +1,94 @@
+{
+  "sections": [
+    {
+      "id": "surat",
+      "title": "Informasi Surat",
+      "fields": [
+        {
+          "id": "kota",
+          "label": "Kota",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nomorSurat",
+          "label": "Nomor Surat",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalSurat",
+          "label": "Tanggal Surat",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "kepada",
+          "label": "Kepada",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "hal",
+          "label": "Perihal",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "acara",
+          "label": "Nama Acara (untuk QR)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nama",
+          "label": "Nama",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nim",
+          "label": "NIM / NIP",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "institusi",
+          "label": "Institusi / Perusahaan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalMulai",
+          "label": "Tanggal Mulai",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalSelesai",
+          "label": "Tanggal Selesai",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "alasan",
+          "label": "Alasan",
+          "type": "textarea",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        {
+          "id": "picName",
+          "label": "Nama PIC",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

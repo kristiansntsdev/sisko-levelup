@@ -1,0 +1,32 @@
+{
+  "kota": "Ngawi",
+  "nomorSurat": "003/LUP-NGW/IV/2026",
+  "tanggalSurat": "2026-04-20",
+  "kepada": "Bapak Korwil PPHTGD\nDi Tempat",
+  "hal": "Permohonan Support Dana & LPJ",
+  "acara": "We Worship",
+  "jumlahDana": "15000000",
+  "keteranganDana": "Dana operasional kegiatan We Worship LevelUP Ngawi",
+  "tanggalKegiatan": "14–15 Mei 2026",
+  "tempatKegiatan": "Villa Tawangmangu",
+  "ringkasanKegiatan": "Kegiatan We Worship telah dilaksanakan sesuai rencana.",
+  "hasilKegiatan": "Partisipasi komunitas meningkat, acara berjalan lancar.",
+  "rincianKeuangan": [
+    {
+      "uraian": "Transportasi",
+      "jumlah": "3000000"
+    },
+    {
+      "uraian": "Konsumsi",
+      "jumlah": "5000000"
+    },
+    {
+      "uraian": "Perlengkapan",
+      "jumlah": "7000000"
+    }
+  ],
+  "korwilName": "Pdt. Winsan Iksan, S.Th",
+  "picName": "Yosef Dian Wahyu Nugraha",
+  "picKeuanganName": "Budi Santoso",
+  "picKegiatanName": "Kristian Epa Froditus Santoso"
+}

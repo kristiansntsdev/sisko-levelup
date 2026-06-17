@@ -1,0 +1,24 @@
+{
+  "kota": "Ngawi",
+  "nomorSurat": "001/LUP-NGW/IV/2026",
+  "tanggalSurat": "2026-04-20",
+  "ketuaPanitiaName": "Kristian Epa Froditus Santoso",
+  "picName": "Yosef Dian Wahyu Nugraha",
+  "korwilName": "Pdt. Winsan Iksan, S.Th",
+  "kepada": "Bapak Pengurus Gereja\nDi Tempat",
+  "hal": "Surat Peminjaman Barang",
+  "acara": "We Worship",
+  "tanggalPinjam": "10 Mei 2026",
+  "tanggalKembali": "16 Mei 2026",
+  "keperluan": "Peminjaman peralatan untuk kegiatan We Worship",
+  "daftarBarang": [
+    {
+      "namaBarang": "Sound System",
+      "jumlah": "1 set"
+    },
+    {
+      "namaBarang": "Proyektor",
+      "jumlah": "2 unit"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "sections": [
+    {
+      "id": "townhall",
+      "title": "Informasi Town Hall",
+      "fields": [
+        {
+          "id": "kota",
+          "label": "Kota",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "thmTanggal",
+          "label": "Tanggal",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "thmJam",
+          "label": "Jam",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "thmTempat",
+          "label": "Tempat",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "acara",
+          "label": "Acara",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "daftar",
+      "title": "Daftar Hadir",
+      "fields": [
+        {
+          "id": "daftarHadir",
+          "label": "Peserta",
+          "type": "repeat",
+          "required": true,
+          "minRows": 3,
+          "columns": [
+            {
+              "id": "nama",
+              "label": "Nama",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "asal",
+              "label": "Asal",
+              "type": "text",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        {
+          "id": "korwilName",
+          "label": "Nama Korwil PPHTGD",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "coreAmbassadorName",
+          "label": "Nama Core Ambassador",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
