@@ -251,6 +251,81 @@
   text-align: right;
 }
 
+.doc-page .doc-info-section {
+  margin: 14px 0;
+}
+
+.doc-page .doc-info-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.doc-page .doc-checklist-title {
+  margin: 14px 0 6px;
+  font-weight: 700;
+  text-indent: 0;
+}
+
+.doc-page .doc-checklist {
+  margin: 0 0 14px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.doc-page .doc-checklist li {
+  margin-bottom: 4px;
+  text-indent: 0;
+}
+
+.doc-page .doc-lampiran-section {
+  margin-top: 28px;
+  font-size: 11pt;
+}
+
+.doc-page .doc-lampiran-section-spaced {
+  margin-top: 40px;
+}
+
+.doc-page .doc-lampiran-heading {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.doc-page .doc-lampiran-meta {
+  margin-top: 2px;
+}
+
+.doc-page .doc-lampiran-meta-right {
+  text-align: right;
+  margin-bottom: 12px;
+}
+
+.doc-page .doc-financial-table {
+  font-size: 9.5pt;
+}
+
+.doc-page .doc-financial-table th,
+.doc-page .doc-financial-table td {
+  padding: 3px 5px;
+}
+
+.doc-page .doc-financial-amount {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.doc-page .doc-financial-summary td {
+  font-weight: 700;
+}
+
+.doc-page .doc-financial-summary-label {
+  text-align: left;
+}
+
+.doc-page .doc-dokumentasi-meta {
+  margin-top: 12px;
+}
+
 .doc-page .doc-signatures {
   margin-top: 48px;
   font-size: 12pt;

@@ -1,28 +1,53 @@
 {
   "kota": "Ngawi",
-  "nomorSurat": "003/LUP-NGW/IV/2026",
   "tanggalSurat": "2026-04-20",
-  "kepada": "Bapak Korwil PPHTGD\nDi Tempat",
-  "hal": "Permohonan Support Dana & LPJ",
-  "acara": "We Worship",
-  "jumlahDana": "15000000",
-  "keteranganDana": "Dana operasional kegiatan We Worship LevelUP Ngawi",
-  "tanggalKegiatan": "14–15 Mei 2026",
+  "kepada": "Yth. Pdt. Himawan Leenardo\nPengurus PPHTGD Pusat\ndi tempat",
+  "acara": "Worship for Everyone",
+  "namaKoordinator": "Yosef Dian Wahyu Nugraha",
+  "tanggalEvent": "14–15 Mei 2026",
+  "tempatPelaksanaan": "Villa Tawangmangu",
+  "jumlahPeserta": "120",
+  "pengajuanDana": "15000000",
+  "bankPenerima": "BCA",
+  "nomorRekening": "1234567890",
+  "namaPemilikRekening": "Yayasan LevelUP Ngawi",
+  "hariKegiatan": "Sabtu",
+  "tanggalKegiatan": "14 Mei 2026",
+  "pukulKegiatan": "18.00 – 21.00 WIB",
   "tempatKegiatan": "Villa Tawangmangu",
-  "ringkasanKegiatan": "Kegiatan We Worship telah dilaksanakan sesuai rencana.",
-  "hasilKegiatan": "Partisipasi komunitas meningkat, acara berjalan lancar.",
+  "tema": "Bersama Melayani Tuhan",
+  "pembicara": "Pdt. Winsan Iksan, S.Th",
+  "pengeluaranRiil": "14500000",
+  "jumlahPesertaRiil": "118",
+  "tanggalLaporanKeuangan": "2026-04-20",
   "rincianKeuangan": [
     {
-      "uraian": "Transportasi",
-      "jumlah": "3000000"
+      "tanggal": "14/05/2026",
+      "item": "Transportasi",
+      "jumlahSatuan": "1",
+      "pengeluaran": "3000000",
+      "pemasukan": ""
     },
     {
-      "uraian": "Konsumsi",
-      "jumlah": "5000000"
+      "tanggal": "14/05/2026",
+      "item": "Konsumsi",
+      "jumlahSatuan": "1",
+      "pengeluaran": "5000000",
+      "pemasukan": ""
     },
     {
-      "uraian": "Perlengkapan",
-      "jumlah": "7000000"
+      "tanggal": "15/05/2026",
+      "item": "Perlengkapan",
+      "jumlahSatuan": "1",
+      "pengeluaran": "6500000",
+      "pemasukan": ""
+    },
+    {
+      "tanggal": "15/05/2026",
+      "item": "Dana Support PPHTGD",
+      "jumlahSatuan": "1",
+      "pengeluaran": "",
+      "pemasukan": "15000000"
     }
   ],
   "korwilName": "Pdt. Winsan Iksan, S.Th",

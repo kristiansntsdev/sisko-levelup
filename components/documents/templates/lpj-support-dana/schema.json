@@ -2,17 +2,11 @@
   "sections": [
     {
       "id": "permohonan",
-      "title": "Halaman 1 — Permohonan",
+      "title": "Halaman 1 — Permohonan Support Dana",
       "fields": [
         {
           "id": "kota",
           "label": "Kota",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "nomorSurat",
-          "label": "Nomor Surat",
           "type": "text",
           "required": true
         },
@@ -26,13 +20,8 @@
           "id": "kepada",
           "label": "Kepada",
           "type": "textarea",
-          "required": true
-        },
-        {
-          "id": "hal",
-          "label": "Perihal",
-          "type": "text",
-          "required": true
+          "required": true,
+          "placeholder": "Yth. Pdt. ...\nPengurus PPHTGD Pusat\ndi tempat"
         },
         {
           "id": "acara",
@@ -41,15 +30,51 @@
           "required": true
         },
         {
-          "id": "jumlahDana",
-          "label": "Jumlah Dana Dimohonkan",
+          "id": "namaKoordinator",
+          "label": "Nama Koordinator",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalEvent",
+          "label": "Tanggal Event",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tempatPelaksanaan",
+          "label": "Tempat Pelaksanaan Event",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "jumlahPeserta",
+          "label": "Jumlah Peserta",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "pengajuanDana",
+          "label": "Pengajuan Dana",
           "type": "currency",
           "required": true
         },
         {
-          "id": "keteranganDana",
-          "label": "Keterangan Penggunaan Dana",
-          "type": "textarea",
+          "id": "bankPenerima",
+          "label": "Bank Penerima",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nomorRekening",
+          "label": "Nomor Rekening",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "namaPemilikRekening",
+          "label": "Nama Pemilik Rekening",
+          "type": "text",
           "required": true
         }
       ]
@@ -59,8 +84,21 @@
       "title": "Halaman 2 — LPJ",
       "fields": [
         {
+          "id": "hariKegiatan",
+          "label": "Hari Kegiatan",
+          "type": "text",
+          "required": true,
+          "placeholder": "Sabtu"
+        },
+        {
           "id": "tanggalKegiatan",
           "label": "Tanggal Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "pukulKegiatan",
+          "label": "Pukul",
           "type": "text",
           "required": true
         },
@@ -71,15 +109,27 @@
           "required": true
         },
         {
-          "id": "ringkasanKegiatan",
-          "label": "Ringkasan Kegiatan",
-          "type": "textarea",
+          "id": "tema",
+          "label": "Tema",
+          "type": "text",
           "required": true
         },
         {
-          "id": "hasilKegiatan",
-          "label": "Hasil Kegiatan",
-          "type": "textarea",
+          "id": "pembicara",
+          "label": "Pembicara",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "pengeluaranRiil",
+          "label": "Pengeluaran Riil",
+          "type": "currency",
+          "required": true
+        },
+        {
+          "id": "jumlahPesertaRiil",
+          "label": "Jumlah Peserta Riil",
+          "type": "text",
           "required": true
         }
       ]
@@ -89,23 +139,47 @@
       "title": "Halaman 3 — Rincian Keuangan",
       "fields": [
         {
+          "id": "tanggalLaporanKeuangan",
+          "label": "Tanggal Laporan Keuangan",
+          "type": "date",
+          "required": true
+        },
+        {
           "id": "rincianKeuangan",
-          "label": "Rincian Anggaran",
+          "label": "Rincian Keuangan",
           "type": "repeat",
           "required": true,
-          "minRows": 2,
+          "minRows": 1,
           "columns": [
             {
-              "id": "uraian",
-              "label": "Uraian",
+              "id": "tanggal",
+              "label": "Tanggal",
               "type": "text",
               "required": true
             },
             {
-              "id": "jumlah",
-              "label": "Jumlah (Rp)",
-              "type": "currency",
+              "id": "item",
+              "label": "Item",
+              "type": "text",
               "required": true
+            },
+            {
+              "id": "jumlahSatuan",
+              "label": "Jumlah Satuan",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "pengeluaran",
+              "label": "Pengeluaran (Rp)",
+              "type": "currency",
+              "required": false
+            },
+            {
+              "id": "pemasukan",
+              "label": "Pemasukan (Rp)",
+              "type": "currency",
+              "required": false
             }
           ]
         }
