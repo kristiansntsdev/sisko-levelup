@@ -1,7 +1,7 @@
 import type { DocumentTemplateProps } from '@/components/documents/types/template-schema'
 import { LetterLayout } from '@/components/documents/_shared/letter-layout'
 import { FieldTable } from '@/components/documents/_shared/field-table'
-import { ThreeColSignatures } from '@/components/documents/_shared/signature-block'
+import { TwoTierApprovalSignatures } from '@/components/documents/_shared/signature-block'
 import { str } from '@/components/documents/templates/_helpers'
 import '@/components/documents/_shared/document-print.css'
 
@@ -23,38 +23,52 @@ export function PermohonanIzinDocument({
       tanggalSurat={str(data.tanggalSurat)}
       kepada={str(data.kepada)}
       hal={str(data.hal)}
+      kepadaLabel="Kepada"
+      nomorLabel="No. Surat"
+      metaOrder={['kepada', 'hal', 'nomor']}
+      tanggalAlign="nomor"
     >
-      <p>Dengan hormat,</p>
-      <p>Yang bertanda tangan di bawah ini:</p>
+      <p className="doc-salutation">Dengan Hormat,</p>
+      <p>
+        Sehubungan dengan akan dilaksanakan kegiatan {acara} pada tanggal{' '}
+        {str(data.tanggalKegiatan)} yang bertempat di {str(data.tempatKegiatan)}, dengan ini
+        kami selaku panitia Acara {str(data.namaPanitia)} memohon kepada Bapak / Ibu untuk
+        memberikan izin kepada :
+      </p>
+
       <FieldTable
+        className="doc-keputusan doc-keputusan-wide"
         rows={[
           { label: 'Nama', value: str(data.namaPemohon) },
-          { label: 'Jabatan', value: str(data.jabatan) },
-          { label: 'Instansi', value: str(data.instansi) },
           { label: 'Alamat', value: str(data.alamat) },
+          { label: 'Jabatan/NIM/Kelas', value: str(data.jabatanNimKelas) },
         ]}
       />
-      <p>Dengan ini mengajukan permohonan izin untuk melaksanakan kegiatan pada:</p>
-      <FieldTable
-        rows={[
-          { label: 'Tanggal', value: str(data.tanggalKegiatan) },
-          { label: 'Jam', value: str(data.jamKegiatan) },
-          { label: 'Tempat', value: str(data.tempatKegiatan) },
-        ]}
-      />
-      <p>{str(data.keterangan)}</p>
+
       <p>
-        Demikian permohonan ini kami sampaikan. Atas perhatian dan izin Bapak/Ibu, kami
-        ucapkan terima kasih.
+        Bahwa yang bersangkutan pada tanggal {str(data.tanggalTidakHadir)} tidak dapat
+        melaksanakan kewajiban pekerjaannya/perkuliahan/pembelajaran dikarenakan mengikuti
+        kegiatan pelayanan pada {str(data.tanggalPelayanan)} sebagai{' '}
+        {str(data.peranPelayanan)}.
       </p>
-      <ThreeColSignatures
+      <p>
+        Demikian surat ini kami ajukan, atas perhatian dan dukungan dari Bapak/Ibu, kami
+        mengucapkan terima kasih.
+      </p>
+
+      <TwoTierApprovalSignatures
         templateId={TEMPLATE_ID}
         kota={kota}
         acara={acara}
         kotaLogo={kotaLogo}
         approved={approved}
         stampSlots={stampSlots}
-        slotIds={['ketuaPanitia', 'pic', 'korwil']}
+        hormatLabel="Hormat kami,"
+        hormatAlign="right"
+        approvalLabel="Mengetahui,"
+        ketuaRole="Ketua Panitia (bila ada)"
+        picRole={`LEADER/CPIC Level Up ${kota.trim()}`}
+        korwilRole="Korwil PPHTGD"
       />
     </LetterLayout>
   )

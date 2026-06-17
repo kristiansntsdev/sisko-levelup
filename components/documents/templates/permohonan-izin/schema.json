@@ -5,19 +5,26 @@
       "title": "Informasi Surat",
       "fields": [
         { "id": "kota", "label": "Kota", "type": "text", "required": true },
-        { "id": "nomorSurat", "label": "Nomor Surat", "type": "text", "required": true },
+        { "id": "nomorSurat", "label": "No. Surat", "type": "text", "required": true },
         { "id": "tanggalSurat", "label": "Tanggal Surat", "type": "date", "required": true },
         { "id": "kepada", "label": "Kepada", "type": "textarea", "required": true },
         { "id": "hal", "label": "Perihal", "type": "text", "required": true },
-        { "id": "acara", "label": "Nama Acara (untuk QR)", "type": "text", "required": true },
-        { "id": "namaPemohon", "label": "Nama Pemohon", "type": "text", "required": true },
-        { "id": "jabatan", "label": "Jabatan", "type": "text", "required": true },
-        { "id": "instansi", "label": "Instansi", "type": "text", "required": true },
-        { "id": "alamat", "label": "Alamat", "type": "textarea", "required": true },
+        { "id": "acara", "label": "Nama Kegiatan", "type": "text", "required": true },
         { "id": "tanggalKegiatan", "label": "Tanggal Kegiatan", "type": "text", "required": true },
-        { "id": "jamKegiatan", "label": "Jam Kegiatan", "type": "text", "required": true },
         { "id": "tempatKegiatan", "label": "Tempat Kegiatan", "type": "text", "required": true },
-        { "id": "keterangan", "label": "Keterangan", "type": "textarea", "required": true }
+        { "id": "namaPanitia", "label": "Nama Panitia Acara", "type": "text", "required": true }
+      ]
+    },
+    {
+      "id": "pemohon",
+      "title": "Data Pemohon Izin",
+      "fields": [
+        { "id": "namaPemohon", "label": "Nama", "type": "text", "required": true },
+        { "id": "alamat", "label": "Alamat", "type": "textarea", "required": true },
+        { "id": "jabatanNimKelas", "label": "Jabatan/NIM/Kelas", "type": "text", "required": true },
+        { "id": "tanggalTidakHadir", "label": "Tanggal Tidak Hadir", "type": "text", "required": true },
+        { "id": "tanggalPelayanan", "label": "Tanggal Kegiatan Pelayanan", "type": "text", "required": true },
+        { "id": "peranPelayanan", "label": "Peran dalam Pelayanan", "type": "text", "required": true }
       ]
     },
     {
@@ -25,7 +32,7 @@
       "title": "Penandatangan",
       "fields": [
         { "id": "ketuaPanitiaName", "label": "Nama Ketua Panitia", "type": "text", "required": true },
-        { "id": "picName", "label": "Nama PIC", "type": "text", "required": true },
+        { "id": "picName", "label": "Nama Leader/CPIC", "type": "text", "required": true },
         { "id": "korwilName", "label": "Nama Korwil PPHTGD", "type": "text", "required": true }
       ]
     }

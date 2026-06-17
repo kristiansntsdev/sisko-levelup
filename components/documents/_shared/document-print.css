@@ -136,6 +136,11 @@
   width: 12px;
 }
 
+.doc-page .doc-keputusan-wide .label {
+  width: 160px;
+  min-width: 160px;
+}
+
 .doc-page .doc-letter-head {
   display: flex;
   justify-content: space-between;
@@ -193,6 +198,7 @@
 
 .doc-page .doc-letter-to-name {
   font-weight: 700;
+  white-space: pre-line;
 }
 
 .doc-page .doc-table {
@@ -277,6 +283,10 @@
   text-align: left;
   padding-top: 0;
   font-size: 12pt;
+}
+
+.doc-page .doc-signatures-event .doc-sign-hormat-right {
+  text-align: right;
 }
 
 .doc-page .doc-signatures-event .doc-sign-spacer-top {

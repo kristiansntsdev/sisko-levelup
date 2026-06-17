@@ -1,7 +1,28 @@
 {
   "slots": [
-    { "id": "ketuaPanitia", "label": "Ketua Panitia", "signerNameField": "ketuaPanitiaName", "page": 1, "qrSize": 90, "pdf": { "x": 15, "y": 42, "width": 32, "height": 32 } },
-    { "id": "pic", "label": "PIC LevelUP", "signerNameField": "picName", "page": 1, "qrSize": 90, "pdf": { "x": 75, "y": 42, "width": 32, "height": 32 } },
-    { "id": "korwil", "label": "Korwil PPHTGD", "signerNameField": "korwilName", "page": 1, "qrSize": 90, "pdf": { "x": 135, "y": 42, "width": 32, "height": 32 } }
+    {
+      "id": "ketuaPanitia",
+      "label": "Ketua Panitia (bila ada)",
+      "signerNameField": "ketuaPanitiaName",
+      "page": 1,
+      "qrSize": 90,
+      "pdf": { "x": 15, "y": 42, "width": 32, "height": 32 }
+    },
+    {
+      "id": "pic",
+      "label": "LEADER/CPIC Level Up",
+      "signerNameField": "picName",
+      "page": 1,
+      "qrSize": 90,
+      "pdf": { "x": 75, "y": 42, "width": 32, "height": 32 }
+    },
+    {
+      "id": "korwil",
+      "label": "Korwil PPHTGD",
+      "signerNameField": "korwilName",
+      "page": 1,
+      "qrSize": 90,
+      "pdf": { "x": 135, "y": 42, "width": 32, "height": 32 }
+    }
   ]
 }

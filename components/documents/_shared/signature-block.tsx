@@ -184,32 +184,51 @@ export function ThreeColSignatures(props: SlotPickerProps) {
   )
 }
 
-/** SPH Event: 2 tanda tangan atas (Ketua Panitia + PIC), 1 tengah bawah (Korwil) */
-export function EventApprovalSignatures({
+/** 2 tanda tangan atas + 1 tengah bawah (Korwil) */
+export function TwoTierApprovalSignatures({
   templateId,
   kota,
   acara,
   kotaLogo,
   approved,
   stampSlots,
-}: Omit<SlotPickerProps, 'slotIds' | 'labels' | 'mengetahuiLabel'>) {
+  hormatLabel = 'Hormat Kami,',
+  hormatAlign = 'left',
+  approvalLabel = 'Telah Menyetujui,',
+  ketuaRole = 'KETUA PANITIA ACARA',
+  picRole,
+  korwilRole = 'KORWIL PPHTGD',
+}: Omit<SlotPickerProps, 'slotIds' | 'labels' | 'mengetahuiLabel'> & {
+  hormatLabel?: string
+  hormatAlign?: 'left' | 'right'
+  approvalLabel?: string
+  ketuaRole?: string
+  picRole?: string
+  korwilRole?: string
+}) {
   const ketua = stampSlots.find((s) => s.id === 'ketuaPanitia')
   const pic = stampSlots.find((s) => s.id === 'pic')
   const korwil = stampSlots.find((s) => s.id === 'korwil')
   if (!ketua || !pic || !korwil) return null
 
-  const kotaUpper = kota.trim()
+  const kotaUpper = kota.trim().toUpperCase()
+  const picRoleLabel = picRole ?? `LEADER/CPIC LEVELUP ${kotaUpper}`
+  const hormatClass =
+    hormatAlign === 'right'
+      ? 'doc-sign-hormat doc-sign-hormat-right'
+      : 'doc-sign-hormat'
+
   return (
     <table className="doc-signatures doc-signatures-event">
       <tbody>
         <tr>
-          <td colSpan={2} className="doc-sign-hormat">
-            Hormat Kami,
+          <td colSpan={2} className={hormatClass}>
+            {hormatLabel}
           </td>
         </tr>
         <tr>
-          <td className="doc-sign-role">KETUA PANITIA ACARA</td>
-          <td className="doc-sign-role">LEADER/CPIC LEVELUP {kotaUpper.toUpperCase()}</td>
+          <td className="doc-sign-role">{ketuaRole}</td>
+          <td className="doc-sign-role">{picRoleLabel}</td>
         </tr>
         <tr>
           <SignatureCell
@@ -231,12 +250,12 @@ export function EventApprovalSignatures({
         </tr>
         <tr>
           <td colSpan={2} className="doc-sign-mengetahui doc-sign-spacer-top">
-            Telah Menyetujui,
+            {approvalLabel}
           </td>
         </tr>
         <tr>
           <td colSpan={2} className="doc-sign-role">
-            KORWIL PPHTGD
+            {korwilRole}
           </td>
         </tr>
         <tr>
@@ -254,6 +273,13 @@ export function EventApprovalSignatures({
       </tbody>
     </table>
   )
+}
+
+/** SPH Event: 2 tanda tangan atas (Ketua Panitia + PIC), 1 tengah bawah (Korwil) */
+export function EventApprovalSignatures(
+  props: Omit<SlotPickerProps, 'slotIds' | 'labels' | 'mengetahuiLabel'>,
+) {
+  return <TwoTierApprovalSignatures {...props} />
 }
 
 export function SingleSignature({
