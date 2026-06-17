@@ -6,6 +6,7 @@
   margin: 0 auto;
   padding: 18mm 20mm 20mm;
   --doc-text-inset: 8mm;
+  --doc-paragraph-indent: 1.27cm;
   background: #fff;
   color: #1c1917;
   font-family: 'Times New Roman', Times, serif;
@@ -106,7 +107,7 @@
 }
 
 .doc-page .doc-body p:not(.doc-salutation):not(.doc-blessing) {
-  text-indent: 1.27cm;
+  text-indent: var(--doc-paragraph-indent);
 }
 
 .doc-page .doc-body p {
@@ -118,7 +119,7 @@
 }
 
 .doc-page .doc-body .doc-keputusan {
-  margin-left: 1cm;
+  margin-left: var(--doc-paragraph-indent);
 }
 
 .doc-page .doc-keputusan td {

@@ -35,46 +35,46 @@ export function BeritaAcaraThmDocument({
     <div className="doc-page">
       <DocumentHeader kota={kota} />
 
-      <h1 className="doc-title">BERITA ACARA</h1>
-      <h2 className="doc-subtitle">TOWN HALL MEETING</h2>
-      <h2 className="doc-subtitle">LEVELUP {kotaUpper}</h2>
+      <div className="doc-content">
+        <h1 className="doc-title">BERITA ACARA</h1>
+        <h2 className="doc-subtitle">TOWN HALL MEETING</h2>
+        <h2 className="doc-subtitle">LEVELUP {kotaUpper}</h2>
 
-      <div className="doc-body">
-        <p>
-          Telah dilaksanakan Town Hall Meeting LevelUP {kota.trim()}, pada hari{' '}
-          {hari} tanggal {tanggal}, pukul {str(data, 'thmJam').trim()}, di{' '}
-          {str(data, 'thmTempat').trim()}
-        </p>
-        <p>
-          Dihadiri oleh Perangkat LevelUP {kota.trim()}.
-          {num(data, 'jumlahCoreAmbassador') > 0 &&
-            ` Jumlah Core Ambassador: ${num(data, 'jumlahCoreAmbassador')}.`}
-          {str(data, 'hadirBamag') && ` Hadir BAMAG: ${str(data, 'hadirBamag')}.`}
-          {str(data, 'hadirKomunitas') &&
-            ` Hadir Komunitas: ${str(data, 'hadirKomunitas')}.`}
-          {' '}(Terlampir daftar hadir)
-        </p>
-        <p>Berikut hasil keputusan town hall meeting LevelUP {kota.trim()}:</p>
+        <div className="doc-body">
+          <p>
+            Telah dilaksanakan Town Hall Meeting LevelUP {kota.trim()}, pada hari{' '}
+            {hari} tanggal {tanggal}, pukul {str(data, 'thmJam').trim()}, di{' '}
+            {str(data, 'thmTempat').trim()}
+          </p>
+          <p>
+            Dihadiri oleh Perangkat LevelUP {kota.trim()}.
+            {num(data, 'jumlahCoreAmbassador') > 0 &&
+              ` Jumlah Core Ambassador: ${num(data, 'jumlahCoreAmbassador')}.`}
+            {str(data, 'hadirBamag') && ` Hadir BAMAG: ${str(data, 'hadirBamag')}.`}
+            {str(data, 'hadirKomunitas') &&
+              ` Hadir Komunitas: ${str(data, 'hadirKomunitas')}.`}
+            {' '}(Terlampir daftar hadir)
+          </p>
+          <p>Berikut hasil keputusan town hall meeting LevelUP {kota.trim()}:</p>
+
+          <FieldTable rows={rows} />
+
+          <p>
+            Demikian berita acara ini dibuat berdasarkan keputusan bersama yang telah
+            disepakati oleh Perangkat Inti LevelUP Kota dan diketahui oleh Korwil PPHTGD,
+          </p>
+        </div>
+
+        <SignatureBlock
+          slots={stampSlots}
+          templateId={TEMPLATE_ID}
+          kota={kota}
+          subject={str(data, 'acara')}
+          kotaLogo={kotaLogo}
+          approved={approved}
+          columns={2}
+        />
       </div>
-
-      <FieldTable rows={rows} />
-
-      <div className="doc-body">
-        <p>
-          Demikian berita acara ini dibuat berdasarkan keputusan bersama yang telah
-          disepakati oleh Perangkat Inti LevelUP Kota dan diketahui oleh Korwil PPHTGD,
-        </p>
-      </div>
-
-      <SignatureBlock
-        slots={stampSlots}
-        templateId={TEMPLATE_ID}
-        kota={kota}
-        subject={str(data, 'acara')}
-        kotaLogo={kotaLogo}
-        approved={approved}
-        columns={2}
-      />
     </div>
   )
 }
