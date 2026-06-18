@@ -35,32 +35,32 @@
           "required": true
         },
         {
+          "id": "namaPartnerKerjasama",
+          "label": "Nama Partner Kerjasama",
+          "type": "text",
+          "required": true
+        },
+        {
           "id": "acara",
-          "label": "Nama Acara (untuk QR)",
+          "label": "Nama Acara",
           "type": "text",
           "required": true
         },
         {
-          "id": "namaPembicara",
-          "label": "Nama Pembicara",
+          "id": "hariTanggal",
+          "label": "Hari, Tanggal",
           "type": "text",
           "required": true
         },
         {
-          "id": "tanggalKegiatan",
-          "label": "Tanggal Kegiatan",
+          "id": "waktu",
+          "label": "Waktu",
           "type": "text",
           "required": true
         },
         {
-          "id": "tempatKegiatan",
-          "label": "Tempat Kegiatan",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "tema",
-          "label": "Tema",
+          "id": "tempat",
+          "label": "Tempat",
           "type": "text",
           "required": true
         }
