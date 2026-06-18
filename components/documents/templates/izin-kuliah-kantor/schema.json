@@ -1,0 +1,95 @@
+{
+  "sections": [
+    {
+      "id": "surat",
+      "title": "Informasi Surat",
+      "fields": [
+        {
+          "id": "kota",
+          "label": "Kota",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nomorSurat",
+          "label": "Nomor Surat",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalSurat",
+          "label": "Tanggal Surat",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "kepada",
+          "label": "Kepada",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "hal",
+          "label": "Perihal",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "acara",
+          "label": "Nama Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalKegiatan",
+          "label": "Tanggal Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tempatKegiatan",
+          "label": "Tempat Kegiatan",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "pemohon",
+      "title": "Data Pemohon Izin",
+      "fields": [
+        {
+          "id": "nama",
+          "label": "Nama",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "jabatanNim",
+          "label": "Jabatan/NIM",
+          "type": "text",
+          "required": true,
+          "placeholder": "NIM bagi mahasiswa"
+        },
+        {
+          "id": "jurusan",
+          "label": "Jurusan",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        {
+          "id": "picName",
+          "label": "Nama Leader/CPIC",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

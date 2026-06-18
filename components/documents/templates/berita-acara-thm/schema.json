@@ -1,0 +1,38 @@
+{
+  "sections": [
+    {
+      "id": "townhall",
+      "title": "Informasi Town Hall Meeting",
+      "fields": [
+        { "id": "kota", "label": "Kota", "type": "text", "required": true },
+        { "id": "thmTanggal", "label": "Tanggal", "type": "date", "required": true },
+        { "id": "thmJam", "label": "Jam", "type": "text", "required": true, "placeholder": "13.00" },
+        { "id": "thmTempat", "label": "Tempat", "type": "text", "required": true },
+        { "id": "jumlahCoreAmbassador", "label": "Jumlah Core Ambassador", "type": "number" },
+        { "id": "hadirBamag", "label": "Hadir BAMAG (opsional)", "type": "text" },
+        { "id": "hadirKomunitas", "label": "Hadir Komunitas (opsional)", "type": "text" }
+      ]
+    },
+    {
+      "id": "keputusan",
+      "title": "Hasil Keputusan",
+      "fields": [
+        { "id": "acara", "label": "Acara", "type": "text", "required": true },
+        { "id": "tema", "label": "Tema", "type": "text" },
+        { "id": "tanggalAcara", "label": "Tanggal Acara", "type": "text", "required": true },
+        { "id": "jamAcara", "label": "Jam Acara", "type": "text", "required": true },
+        { "id": "tempatAcara", "label": "Tempat Acara", "type": "text", "required": true },
+        { "id": "pembicara", "label": "Penyampai Pesan", "type": "text", "required": true },
+        { "id": "anggaran", "label": "Anggaran", "type": "currency" }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        { "id": "korwilName", "label": "Nama Korwil PPHTGD", "type": "text", "required": true },
+        { "id": "coreAmbassadorName", "label": "Nama Core Ambassador", "type": "text", "required": true }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "sections": [
+    {
+      "id": "surat",
+      "title": "Informasi Surat",
+      "fields": [
+        {
+          "id": "kota",
+          "label": "Kota",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nomorSurat",
+          "label": "Nomor Surat",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalSurat",
+          "label": "Tanggal Surat",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "kepada",
+          "label": "Kepada",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "hal",
+          "label": "Perihal",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tujuanKegiatan",
+          "label": "Tujuan / Rangka Kegiatan",
+          "type": "text",
+          "required": true,
+          "placeholder": "Doa Bagi Bangsa menjelang PEMILU/Natal/dll"
+        },
+        {
+          "id": "namaPartnerKerjasama",
+          "label": "Partner Kerjasama (opsional)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "id": "acara",
+          "label": "Nama Acara",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "hariTanggal",
+          "label": "Hari, Tanggal",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "waktu",
+          "label": "Waktu",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tempat",
+          "label": "Tempat",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        {
+          "id": "ketuaPanitiaName",
+          "label": "Nama Ketua Panitia",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "picName",
+          "label": "Nama PIC",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "korwilName",
+          "label": "Nama Korwil PPHTGD",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

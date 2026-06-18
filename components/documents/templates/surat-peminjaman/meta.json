@@ -1,0 +1,7 @@
+{
+  "id": "surat-peminjaman",
+  "version": "1",
+  "name": "Surat Peminjaman",
+  "pdfReference": "template/Template Surat Peminjaman.pdf",
+  "pageCount": 1
+}

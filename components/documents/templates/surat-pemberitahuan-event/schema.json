@@ -1,0 +1,40 @@
+{
+  "sections": [
+    {
+      "id": "surat",
+      "title": "Informasi Surat",
+      "fields": [
+        { "id": "kota", "label": "Kota", "type": "text", "required": true },
+        { "id": "nomorSurat", "label": "Nomor Surat", "type": "text", "required": true },
+        { "id": "tanggalSurat", "label": "Tanggal Surat", "type": "date", "required": true },
+        { "id": "kepada", "label": "Kepada", "type": "text", "required": true },
+        { "id": "hal", "label": "Perihal", "type": "text", "required": true },
+        { "id": "acara", "label": "Nama Event", "type": "text", "required": true }
+      ]
+    },
+    {
+      "id": "rincian",
+      "title": "Rincian Kegiatan (A–H)",
+      "fields": [
+        { "id": "tanggalKegiatan", "label": "A. Pelaksanaan Event", "type": "text", "required": true },
+        { "id": "jamKegiatan", "label": "B. Pukul", "type": "text", "required": true },
+        { "id": "tempatKegiatan", "label": "C. Tempat", "type": "text", "required": true },
+        { "id": "pembicara", "label": "D. Pembicara", "type": "text", "required": true },
+        { "id": "jumlahKehadiran", "label": "E. Jumlah kehadiran Gereja", "type": "text", "required": true },
+        { "id": "susunanAcara", "label": "F. Susunan Acara", "type": "text", "required": true },
+        { "id": "susunanPanitia", "label": "G. Susunan Panitia", "type": "text", "required": true },
+        { "id": "rencanaAnggaran", "label": "H. Rencana Anggaran Dana", "type": "text", "required": true },
+        { "id": "lampiranIsi", "label": "Isi Lampiran (hal 2)", "type": "textarea", "required": false }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        { "id": "ketuaPanitiaName", "label": "Nama Ketua Panitia Acara", "type": "text", "required": true },
+        { "id": "picName", "label": "Nama Leader/CPIC LevelUP", "type": "text", "required": true },
+        { "id": "korwilName", "label": "Nama Korwil PPHTGD", "type": "text", "required": true }
+      ]
+    }
+  ]
+}

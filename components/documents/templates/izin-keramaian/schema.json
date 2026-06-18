@@ -1,0 +1,120 @@
+{
+  "sections": [
+    {
+      "id": "surat",
+      "title": "Informasi Surat",
+      "fields": [
+        {
+          "id": "kota",
+          "label": "Kota",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nomorSurat",
+          "label": "Nomor Surat",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalSurat",
+          "label": "Tanggal Surat",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "kepada",
+          "label": "Kepada",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "hal",
+          "label": "Perihal",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "acara",
+          "label": "Subjek QR (internal)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "lokasiKegiatan",
+          "label": "Lokasi Kegiatan",
+          "type": "text",
+          "required": true,
+          "placeholder": "lapangan/gedung/fasilitas lainnya"
+        },
+        {
+          "id": "instansiTerkait",
+          "label": "Instansi Terkait",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "hariTanggal",
+          "label": "Hari/Tanggal",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "pukul",
+          "label": "Pukul",
+          "type": "text",
+          "required": true,
+          "placeholder": "17.00 - selesai"
+        },
+        {
+          "id": "bentukKegiatan",
+          "label": "Bentuk Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "pembicaraNarasumber",
+          "label": "Pembicara/Narasumber",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "susunanPanitia",
+          "label": "Susunan Panitia",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "susunanAcara",
+          "label": "Susunan Acara",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        {
+          "id": "ketuaPanitiaName",
+          "label": "Nama Ketua Panitia",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "picName",
+          "label": "Nama PIC",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "korwilName",
+          "label": "Nama Korwil PPHTGD",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

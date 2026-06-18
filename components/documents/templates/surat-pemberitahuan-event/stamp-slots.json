@@ -1,0 +1,28 @@
+{
+  "slots": [
+    {
+      "id": "ketuaPanitia",
+      "label": "KETUA PANITIA ACARA",
+      "signerNameField": "ketuaPanitiaName",
+      "page": 1,
+      "qrSize": 90,
+      "pdf": { "x": 28, "y": 52, "width": 32, "height": 32 }
+    },
+    {
+      "id": "pic",
+      "label": "LEADER/CPIC LEVELUP",
+      "signerNameField": "picName",
+      "page": 1,
+      "qrSize": 90,
+      "pdf": { "x": 120, "y": 52, "width": 32, "height": 32 }
+    },
+    {
+      "id": "korwil",
+      "label": "KORWIL PPHTGD",
+      "signerNameField": "korwilName",
+      "page": 1,
+      "qrSize": 90,
+      "pdf": { "x": 75, "y": 28, "width": 32, "height": 32 }
+    }
+  ]
+}

@@ -1,0 +1,219 @@
+{
+  "sections": [
+    {
+      "id": "permohonan",
+      "title": "Halaman 1 — Permohonan Support Dana",
+      "fields": [
+        {
+          "id": "kota",
+          "label": "Kota",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalSurat",
+          "label": "Tanggal Surat",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "kepada",
+          "label": "Kepada",
+          "type": "textarea",
+          "required": true,
+          "placeholder": "Yth. Pdt. ...\nPengurus PPHTGD Pusat\ndi tempat"
+        },
+        {
+          "id": "acara",
+          "label": "Nama Acara",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "namaKoordinator",
+          "label": "Nama Koordinator",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalEvent",
+          "label": "Tanggal Event",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tempatPelaksanaan",
+          "label": "Tempat Pelaksanaan Event",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "jumlahPeserta",
+          "label": "Jumlah Peserta",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "pengajuanDana",
+          "label": "Pengajuan Dana",
+          "type": "currency",
+          "required": true
+        },
+        {
+          "id": "bankPenerima",
+          "label": "Bank Penerima",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nomorRekening",
+          "label": "Nomor Rekening",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "namaPemilikRekening",
+          "label": "Nama Pemilik Rekening",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "lpj",
+      "title": "Halaman 2 — LPJ",
+      "fields": [
+        {
+          "id": "hariKegiatan",
+          "label": "Hari Kegiatan",
+          "type": "text",
+          "required": true,
+          "placeholder": "Sabtu"
+        },
+        {
+          "id": "tanggalKegiatan",
+          "label": "Tanggal Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "pukulKegiatan",
+          "label": "Pukul",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tempatKegiatan",
+          "label": "Tempat Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tema",
+          "label": "Tema",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "pembicara",
+          "label": "Pembicara",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "pengeluaranRiil",
+          "label": "Pengeluaran Riil",
+          "type": "currency",
+          "required": true
+        },
+        {
+          "id": "jumlahPesertaRiil",
+          "label": "Jumlah Peserta Riil",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "keuangan",
+      "title": "Halaman 3 — Rincian Keuangan",
+      "fields": [
+        {
+          "id": "tanggalLaporanKeuangan",
+          "label": "Tanggal Laporan Keuangan",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "rincianKeuangan",
+          "label": "Rincian Keuangan",
+          "type": "repeat",
+          "required": true,
+          "minRows": 1,
+          "columns": [
+            {
+              "id": "tanggal",
+              "label": "Tanggal",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "item",
+              "label": "Item",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "jumlahSatuan",
+              "label": "Jumlah Satuan",
+              "type": "text",
+              "required": false
+            },
+            {
+              "id": "pengeluaran",
+              "label": "Pengeluaran (Rp)",
+              "type": "currency",
+              "required": false
+            },
+            {
+              "id": "pemasukan",
+              "label": "Pemasukan (Rp)",
+              "type": "currency",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        {
+          "id": "korwilName",
+          "label": "Nama Korwil PPHTGD",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "picName",
+          "label": "Nama PIC",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "picKeuanganName",
+          "label": "Nama PIC Keuangan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "picKegiatanName",
+          "label": "Nama PIC Kegiatan",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

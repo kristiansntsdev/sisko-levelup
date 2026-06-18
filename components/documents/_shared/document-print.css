@@ -1,0 +1,456 @@
+/* Scoped print styles for generated documents — not Tailwind */
+
+.doc-page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 18mm 20mm 20mm;
+  --doc-text-inset: 8mm;
+  --doc-paragraph-indent: 1.27cm;
+  background: #fff;
+  color: #1c1917;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.doc-page + .doc-page {
+  page-break-before: always;
+  margin-top: 16px;
+}
+
+.doc-page table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.doc-page .doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 100%;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+/* Teks & konten dipersempit agar sejajar dengan batas visual logo */
+.doc-page .doc-content {
+  padding-left: var(--doc-text-inset);
+  padding-right: var(--doc-text-inset);
+  box-sizing: border-box;
+}
+
+.doc-page > :not(.doc-header):not(.doc-content) {
+  padding-left: var(--doc-text-inset);
+  padding-right: var(--doc-text-inset);
+  box-sizing: border-box;
+}
+
+.doc-page .doc-header-logo {
+  flex: 0 1 auto;
+  min-width: 0;
+  text-align: left;
+}
+
+.doc-page .doc-header-logo img {
+  height: 78px;
+  width: auto;
+  max-width: 100%;
+  display: block;
+  margin-right: auto;
+}
+
+.doc-page .doc-header-address {
+  flex: 0 1 auto;
+  min-width: 0;
+  text-align: right;
+  margin-left: auto;
+}
+
+.doc-page .doc-header-address img {
+  height: 108px;
+  width: auto;
+  max-width: 100%;
+  display: block;
+  margin-left: auto;
+}
+
+.doc-page .doc-kota {
+  text-align: right;
+  font-weight: 700;
+  font-size: 13pt;
+  margin-top: 6px;
+  margin-right: var(--doc-text-inset);
+  letter-spacing: 0.3px;
+  color: #7c0003;
+}
+
+.doc-page .doc-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 13pt;
+  letter-spacing: 0.5px;
+  margin: 16px 0 0;
+}
+
+.doc-page .doc-subtitle {
+  text-align: center;
+  font-weight: 700;
+  font-size: 12pt;
+  margin: 2px 0 0;
+}
+
+.doc-page .doc-body {
+  margin-top: 18px;
+  text-align: justify;
+}
+
+.doc-page .doc-body p:not(.doc-salutation):not(.doc-blessing) {
+  text-indent: var(--doc-paragraph-indent);
+}
+
+.doc-page .doc-body p {
+  margin: 0 0 10px;
+}
+
+.doc-page .doc-keputusan {
+  margin: 14px 0;
+}
+
+.doc-page .doc-body .doc-keputusan {
+  margin-left: var(--doc-paragraph-indent);
+}
+
+.doc-page .doc-keputusan td {
+  padding: 2px 0;
+  vertical-align: top;
+}
+
+.doc-page .doc-keputusan .label {
+  width: 130px;
+  white-space: nowrap;
+}
+
+.doc-page .doc-keputusan .sep {
+  width: 12px;
+}
+
+.doc-page .doc-keputusan-wide .label {
+  width: 160px;
+  min-width: 160px;
+}
+
+.doc-page .doc-letter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.doc-page .doc-letter-meta-table {
+  flex: 1;
+  width: auto;
+  margin-top: 0;
+  border-collapse: collapse;
+  font-size: 12pt;
+}
+
+.doc-page .doc-letter-meta-table td {
+  padding: 0;
+  vertical-align: top;
+  line-height: 1.35;
+}
+
+.doc-page .doc-letter-meta-table tr + tr td {
+  padding-top: 2px;
+}
+
+.doc-page .doc-letter-meta-table .doc-letter-label {
+  width: 80px;
+  min-width: 80px;
+  white-space: nowrap;
+  padding-right: 0;
+}
+
+.doc-page .doc-letter-meta-table .doc-letter-sep {
+  width: 12px;
+  padding-right: 0;
+}
+
+.doc-page .doc-letter-meta-table .doc-letter-value {
+  width: auto;
+}
+
+.doc-page .doc-letter-right {
+  flex-shrink: 0;
+  text-align: right;
+  padding-top: 0;
+}
+
+.doc-page .doc-letter-meta-table .doc-tempat-tanggal,
+.doc-page .doc-letter-right .doc-tempat-tanggal {
+  white-space: nowrap;
+  font-size: 12pt;
+  line-height: 1.35;
+}
+
+.doc-page .doc-letter-to-name {
+  font-weight: 700;
+  white-space: pre-line;
+}
+
+.doc-page .doc-table {
+  margin: 14px 0;
+  font-size: 10.5pt;
+}
+
+.doc-page .doc-table th,
+.doc-page .doc-table td {
+  border: 1px solid #444;
+  padding: 4px 8px;
+  vertical-align: top;
+}
+
+.doc-page .doc-table th {
+  background: #f5f5f4;
+  font-weight: 700;
+  text-align: center;
+}
+
+.doc-page .doc-table-no {
+  width: 36px;
+  text-align: center;
+}
+
+.doc-page .doc-list-alpha {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.doc-page .doc-list-alpha li {
+  margin-bottom: 6px;
+}
+
+.doc-page .doc-list-bullet {
+  margin: 8px 0 12px;
+  padding-left: calc(var(--doc-paragraph-indent) + 4px);
+  list-style: none;
+}
+
+.doc-page .doc-list-bullet li {
+  margin-bottom: 4px;
+  text-indent: 0;
+}
+
+.doc-page .doc-list-bullet li::before {
+  content: '●\00a0';
+}
+
+.doc-page .doc-lampiran {
+  margin-top: 24px;
+  font-style: italic;
+}
+
+.doc-page .doc-lampiran-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 12pt;
+  margin: 16px 0 12px;
+}
+
+.doc-page .doc-financial-total {
+  margin-top: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.doc-page .doc-info-section {
+  margin: 14px 0;
+}
+
+.doc-page .doc-info-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.doc-page .doc-checklist-title {
+  margin: 14px 0 6px;
+  font-weight: 700;
+  text-indent: 0;
+}
+
+.doc-page .doc-checklist {
+  margin: 0 0 14px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.doc-page .doc-checklist li {
+  margin-bottom: 4px;
+  text-indent: 0;
+}
+
+.doc-page .doc-lampiran-section {
+  margin-top: 28px;
+  font-size: 11pt;
+}
+
+.doc-page .doc-lampiran-section-spaced {
+  margin-top: 40px;
+}
+
+.doc-page .doc-lampiran-heading {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.doc-page .doc-lampiran-meta {
+  margin-top: 2px;
+}
+
+.doc-page .doc-lampiran-meta-right {
+  text-align: right;
+  margin-bottom: 12px;
+}
+
+.doc-page .doc-financial-table {
+  font-size: 9.5pt;
+}
+
+.doc-page .doc-financial-table th,
+.doc-page .doc-financial-table td {
+  padding: 3px 5px;
+}
+
+.doc-page .doc-financial-amount {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.doc-page .doc-financial-summary td {
+  font-weight: 700;
+}
+
+.doc-page .doc-financial-summary-label {
+  text-align: left;
+}
+
+.doc-page .doc-dokumentasi-meta {
+  margin-top: 12px;
+}
+
+.doc-page .doc-signatures {
+  margin-top: 48px;
+  font-size: 12pt;
+}
+
+.doc-page .doc-signatures td {
+  width: 50%;
+  text-align: center;
+  vertical-align: top;
+  padding-top: 10px;
+  line-height: 1.6;
+}
+
+.doc-page .doc-signatures-single td {
+  width: 100%;
+}
+
+.doc-page .doc-signatures .doc-sign-mengetahui {
+  font-size: 12pt;
+  padding-top: 0;
+  text-align: center;
+}
+
+.doc-page .doc-signatures .doc-sign-role {
+  font-size: 12pt;
+  margin-top: 14px;
+}
+
+.doc-page .doc-signatures-event .doc-sign-hormat {
+  text-align: left;
+  padding-top: 0;
+  font-size: 12pt;
+}
+
+.doc-page .doc-signatures-event .doc-sign-hormat-right {
+  text-align: right;
+}
+
+.doc-page .doc-signatures-event .doc-sign-spacer-top {
+  padding-top: 28px;
+}
+
+.doc-page .doc-signatures-event td.doc-sign-role[colspan='2'] {
+  text-align: center;
+}
+
+.doc-page .doc-signatures-event .doc-sign-korwil {
+  width: 100%;
+  text-align: center;
+  padding-top: 4px;
+}
+
+.doc-page .doc-signatures-event .doc-sign-korwil .doc-sign-name {
+  text-align: center;
+}
+
+.doc-page .doc-salutation {
+  margin-bottom: 12px;
+}
+
+.doc-page .doc-blessing {
+  text-align: center;
+  font-weight: 700;
+  margin: 20px 0 8px;
+  letter-spacing: 0.3px;
+}
+
+.doc-page .doc-sign-qr {
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.doc-page .doc-sign-qr-placeholder {
+  display: inline-block;
+  margin-top: 8px;
+  background: transparent;
+  border: none;
+  visibility: hidden;
+}
+
+.doc-page .doc-sign-name {
+  font-weight: 700;
+  font-size: 12pt;
+  margin-top: 8px;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .doc-print-area,
+  .doc-print-area * {
+    visibility: visible;
+  }
+
+  .doc-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .doc-page {
+    box-shadow: none;
+    margin: 0;
+  }
+
+  .doc-page + .doc-page {
+    margin-top: 0;
+  }
+}

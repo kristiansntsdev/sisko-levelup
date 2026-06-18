@@ -1,0 +1,134 @@
+{
+  "sections": [
+    {
+      "id": "surat",
+      "title": "Informasi Surat",
+      "fields": [
+        {
+          "id": "kota",
+          "label": "Kota",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "nomorSurat",
+          "label": "Nomor Surat",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tanggalSurat",
+          "label": "Tanggal Surat",
+          "type": "date",
+          "required": true
+        },
+        {
+          "id": "kepada",
+          "label": "Kepada",
+          "type": "textarea",
+          "required": true
+        },
+        {
+          "id": "hal",
+          "label": "Perihal",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "namaGembala",
+          "label": "Nama Gembala",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "namaGereja",
+          "label": "Nama Gereja",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "kategoriBarang",
+          "label": "Kategori Barang Dipinjam",
+          "type": "text",
+          "required": true,
+          "placeholder": "peralatan sound system"
+        },
+        {
+          "id": "acara",
+          "label": "Nama Acara",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "hariTanggal",
+          "label": "Hari/Tanggal Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "pukul",
+          "label": "Pukul",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tema",
+          "label": "Tema",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tempat",
+          "label": "Tempat",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "daftarBarang",
+          "label": "Daftar Barang",
+          "type": "repeat",
+          "required": true,
+          "minRows": 1,
+          "columns": [
+            {
+              "id": "namaBarang",
+              "label": "Nama Barang",
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "jumlah",
+              "label": "Jumlah",
+              "type": "text",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "penandatangan",
+      "title": "Penandatangan",
+      "fields": [
+        {
+          "id": "ketuaPanitiaName",
+          "label": "Nama Ketua Panitia",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "picName",
+          "label": "Nama PIC",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "korwilName",
+          "label": "Nama Korwil PPHTGD",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

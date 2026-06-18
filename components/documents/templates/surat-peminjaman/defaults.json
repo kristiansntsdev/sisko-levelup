@@ -1,0 +1,32 @@
+{
+  "kota": "Ngawi",
+  "nomorSurat": "001/LUP-NGW/IV/2026",
+  "tanggalSurat": "2026-04-20",
+  "kepada": "Bapak/Ibu Gembala\nDi Tempat",
+  "hal": "Surat Peminjaman",
+  "namaGembala": "Pdt. Himawan Leenardo",
+  "namaGereja": "Gereja Bethany Ngawi",
+  "kategoriBarang": "peralatan sound system dan multimedia",
+  "acara": "We Worship",
+  "hariTanggal": "Sabtu, 10 Mei 2026",
+  "pukul": "18.00 – 21.00 WIB",
+  "tema": "Bersama Melayani Tuhan",
+  "tempat": "Gereja Bethany Ngawi",
+  "daftarBarang": [
+    {
+      "namaBarang": "Sound System",
+      "jumlah": "1 set"
+    },
+    {
+      "namaBarang": "Proyektor",
+      "jumlah": "2 unit"
+    },
+    {
+      "namaBarang": "Layar Proyeksi",
+      "jumlah": "1 unit"
+    }
+  ],
+  "ketuaPanitiaName": "Kristian Epa Froditus Santoso",
+  "picName": "Yosef Dian Wahyu Nugraha",
+  "korwilName": "Pdt. Winsan Iksan, S.Th"
+}

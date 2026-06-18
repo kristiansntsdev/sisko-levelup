@@ -1,0 +1,30 @@
+{
+  "slots": [
+    {
+      "id": "korwil",
+      "label": "Korwil PPHTGD",
+      "signerNameField": "korwilName",
+      "page": 1,
+      "qrSize": 100,
+      "pdf": {
+        "x": 28,
+        "y": 42,
+        "width": 35,
+        "height": 35
+      }
+    },
+    {
+      "id": "coreAmbassador",
+      "label": "Core Ambassador",
+      "signerNameField": "coreAmbassadorName",
+      "page": 1,
+      "qrSize": 100,
+      "pdf": {
+        "x": 120,
+        "y": 42,
+        "width": 35,
+        "height": 35
+      }
+    }
+  ]
+}
