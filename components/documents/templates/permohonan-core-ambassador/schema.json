@@ -36,27 +36,16 @@
         },
         {
           "id": "acara",
-          "label": "Nama Acara (untuk QR)",
+          "label": "Subjek QR (internal)",
           "type": "text",
           "required": true
         },
         {
-          "id": "namaCalon",
-          "label": "Nama Calon",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "asalKomunitas",
-          "label": "Asal Komunitas",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "alasan",
-          "label": "Alasan / Keterangan",
+          "id": "kontakLeaderCpic",
+          "label": "Kontak Leader/CPIC",
           "type": "textarea",
-          "required": true
+          "required": true,
+          "placeholder": "Nama — 08xx-xxxx-xxxx"
         }
       ]
     },
