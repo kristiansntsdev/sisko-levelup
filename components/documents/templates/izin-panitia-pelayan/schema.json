@@ -35,38 +35,39 @@
           "required": true
         },
         {
+          "id": "tujuanKegiatan",
+          "label": "Tujuan / Rangka Kegiatan",
+          "type": "text",
+          "required": true,
+          "placeholder": "Doa Bagi Bangsa menjelang PEMILU/Natal/dll"
+        },
+        {
+          "id": "namaPartnerKerjasama",
+          "label": "Partner Kerjasama (opsional)",
+          "type": "text",
+          "required": false
+        },
+        {
           "id": "acara",
-          "label": "Nama Acara (untuk QR)",
+          "label": "Nama Acara",
           "type": "text",
           "required": true
         },
         {
-          "id": "namaKegiatan",
-          "label": "Nama Kegiatan",
+          "id": "hariTanggal",
+          "label": "Hari, Tanggal",
           "type": "text",
           "required": true
         },
         {
-          "id": "tanggalMulai",
-          "label": "Tanggal Mulai",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "tanggalSelesai",
-          "label": "Tanggal Selesai",
+          "id": "waktu",
+          "label": "Waktu",
           "type": "text",
           "required": true
         },
         {
           "id": "tempat",
           "label": "Tempat",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "refLampiran",
-          "label": "Referensi Lampiran Panitia",
           "type": "text",
           "required": true
         }
