@@ -2,7 +2,7 @@
   "slots": [
     {
       "id": "pic",
-      "label": "PIC LevelUP",
+      "label": "Leader/CPIC LevelUP",
       "signerNameField": "picName",
       "page": 1,
       "qrSize": 100,

@@ -36,10 +36,28 @@
         },
         {
           "id": "acara",
-          "label": "Nama Acara (untuk QR)",
+          "label": "Nama Kegiatan",
           "type": "text",
           "required": true
         },
+        {
+          "id": "tanggalKegiatan",
+          "label": "Tanggal Kegiatan",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tempatKegiatan",
+          "label": "Tempat Kegiatan",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "pemohon",
+      "title": "Data Pemohon Izin",
+      "fields": [
         {
           "id": "nama",
           "label": "Nama",
@@ -47,33 +65,16 @@
           "required": true
         },
         {
-          "id": "nim",
-          "label": "NIM / NIP",
+          "id": "jabatanNim",
+          "label": "Jabatan/NIM",
           "type": "text",
-          "required": true
+          "required": true,
+          "placeholder": "NIM bagi mahasiswa"
         },
         {
-          "id": "institusi",
-          "label": "Institusi / Perusahaan",
+          "id": "jurusan",
+          "label": "Jurusan",
           "type": "text",
-          "required": true
-        },
-        {
-          "id": "tanggalMulai",
-          "label": "Tanggal Mulai",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "tanggalSelesai",
-          "label": "Tanggal Selesai",
-          "type": "text",
-          "required": true
-        },
-        {
-          "id": "alasan",
-          "label": "Alasan",
-          "type": "textarea",
           "required": true
         }
       ]
@@ -84,7 +85,7 @@
       "fields": [
         {
           "id": "picName",
-          "label": "Nama PIC",
+          "label": "Nama Leader/CPIC",
           "type": "text",
           "required": true
         }

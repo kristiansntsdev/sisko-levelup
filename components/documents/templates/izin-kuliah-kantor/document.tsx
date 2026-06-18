@@ -7,19 +7,63 @@ import '@/components/documents/_shared/document-print.css'
 
 const TEMPLATE_ID = 'izin-kuliah-kantor'
 
-export function IzinKuliahKantorDocument({ data, kotaLogo, approved, stampSlots }: DocumentTemplateProps) {
+export function IzinKuliahKantorDocument({
+  data,
+  kotaLogo,
+  approved,
+  stampSlots,
+}: DocumentTemplateProps) {
   const kota = str(data.kota)
   const acara = str(data.acara)
-  const mulai = str(data.tanggalMulai)
-  const selesai = str(data.tanggalSelesai)
+
   return (
-    <LetterLayout kota={kota} nomorSurat={str(data.nomorSurat)} tanggalSurat={str(data.tanggalSurat)} kepada={str(data.kepada)} hal={str(data.hal)}>
-      <p>Dengan hormat,</p>
-      <p>Yang bertanda tangan di bawah ini menerangkan bahwa:</p>
-      <FieldTable rows={[{ label: 'Nama', value: str(data.nama) }, { label: 'NIM/NIP', value: str(data.nim) }, { label: 'Institusi', value: str(data.institusi) }]} />
-      <p>Tidak dapat hadir pada tanggal {mulai}{selesai !== mulai ? ' s/d ' + selesai : ''} karena {str(data.alasan)}.</p>
-      <p>Demikian surat keterangan ini dibuat untuk dipergunakan sebagaimana mestinya.</p>
-      <SingleSignature templateId={TEMPLATE_ID} kota={kota} acara={acara} kotaLogo={kotaLogo} approved={approved} stampSlots={stampSlots} slotId="pic" label={'PIC LevelUP ' + kota} />
+    <LetterLayout
+      kota={kota}
+      nomorSurat={str(data.nomorSurat)}
+      tanggalSurat={str(data.tanggalSurat)}
+      kepada={str(data.kepada)}
+      hal={str(data.hal)}
+      kepadaLabel="Kepada"
+      nomorLabel="No. Surat"
+      metaOrder={['kepada', 'hal', 'nomor']}
+    >
+      <p className="doc-salutation">Dengan Hormat,</p>
+      <p>
+        Sehubungan dengan akan dilaksanakan kegiatan <strong>{acara}</strong> pada tanggal{' '}
+        {str(data.tanggalKegiatan)} yang bertempat di {str(data.tempatKegiatan)}, dengan ini
+        kami selaku Pengurus LevelUP {kota} memohon kepada Bapak / Ibu untuk memberikan izin
+        kepada :
+      </p>
+
+      <FieldTable
+        className="doc-keputusan doc-keputusan-wide"
+        rows={[
+          { label: 'Nama', value: str(data.nama) },
+          { label: 'Jabatan/NIM', value: str(data.jabatanNim) },
+          { label: 'Jurusan', value: str(data.jurusan) },
+        ]}
+      />
+
+      <p>
+        Bahwa yang bersangkutan tidak dapat mengikuti pembelajaran dikarenakan mengikuti
+        kegiatan <strong>{acara}</strong> sebagai perwakilan dari LevelUP {kota}.
+      </p>
+      <p>
+        Demikian surat ini kami ajukan, atas perhatian dan dukungan dari Bapak/Ibu, kami
+        mengucapkan terima kasih.
+      </p>
+
+      <SingleSignature
+        templateId={TEMPLATE_ID}
+        kota={kota}
+        acara={acara}
+        kotaLogo={kotaLogo}
+        approved={approved}
+        stampSlots={stampSlots}
+        slotId="pic"
+        label={`Leader/CPIC LevelUP ${kota}`}
+        mengetahuiLabel="Hormat kami,"
+      />
     </LetterLayout>
   )
 }
