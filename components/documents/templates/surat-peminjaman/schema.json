@@ -35,27 +35,52 @@
           "required": true
         },
         {
+          "id": "namaGembala",
+          "label": "Nama Gembala",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "namaGereja",
+          "label": "Nama Gereja",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "kategoriBarang",
+          "label": "Kategori Barang Dipinjam",
+          "type": "text",
+          "required": true,
+          "placeholder": "peralatan sound system"
+        },
+        {
           "id": "acara",
-          "label": "Nama Acara (untuk QR)",
+          "label": "Nama Acara",
           "type": "text",
           "required": true
         },
         {
-          "id": "tanggalPinjam",
-          "label": "Tanggal Pinjam",
+          "id": "hariTanggal",
+          "label": "Hari/Tanggal Kegiatan",
           "type": "text",
           "required": true
         },
         {
-          "id": "tanggalKembali",
-          "label": "Tanggal Kembali",
+          "id": "pukul",
+          "label": "Pukul",
           "type": "text",
           "required": true
         },
         {
-          "id": "keperluan",
-          "label": "Keperluan",
-          "type": "textarea",
+          "id": "tema",
+          "label": "Tema",
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "tempat",
+          "label": "Tempat",
+          "type": "text",
           "required": true
         },
         {
@@ -75,7 +100,7 @@
               "id": "jumlah",
               "label": "Jumlah",
               "type": "text",
-              "required": true
+              "required": false
             }
           ]
         }

@@ -84,6 +84,7 @@
   margin-top: 6px;
   margin-right: var(--doc-text-inset);
   letter-spacing: 0.3px;
+  color: #7c0003;
 }
 
 .doc-page .doc-title {
@@ -186,7 +187,7 @@
 .doc-page .doc-letter-right {
   flex-shrink: 0;
   text-align: right;
-  padding-top: 2px;
+  padding-top: 0;
 }
 
 .doc-page .doc-letter-meta-table .doc-tempat-tanggal,
@@ -231,6 +232,21 @@
 
 .doc-page .doc-list-alpha li {
   margin-bottom: 6px;
+}
+
+.doc-page .doc-list-bullet {
+  margin: 8px 0 12px;
+  padding-left: calc(var(--doc-paragraph-indent) + 4px);
+  list-style: none;
+}
+
+.doc-page .doc-list-bullet li {
+  margin-bottom: 4px;
+  text-indent: 0;
+}
+
+.doc-page .doc-list-bullet li::before {
+  content: '●\00a0';
 }
 
 .doc-page .doc-lampiran {

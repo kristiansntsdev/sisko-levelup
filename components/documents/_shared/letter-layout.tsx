@@ -19,7 +19,7 @@ type Props = {
   nomorLabel?: string
   /** Default: Nomor → Kepada → Hal. Permohonan izin: Kepada → Hal → No. Surat */
   metaOrder?: MetaRow[]
-  /** Baris meta yang sejajar dengan tanggal di kanan */
+  /** @deprecated Tanggal selalu disejajarkan dengan baris meta pertama */
   tanggalAlign?: MetaRow
 }
 
@@ -41,7 +41,6 @@ export function LetterLayout({
   kepadaLabel = 'Kepada Yth.',
   nomorLabel = 'Nomor',
   metaOrder = ['nomor', 'kepada', 'hal'],
-  tanggalAlign = 'nomor',
 }: Props) {
   const metaRows: MetaRowData[] = [
     { key: 'nomor', label: nomorLabel, value: nomorSurat },
@@ -52,8 +51,6 @@ export function LetterLayout({
   const orderedRows = metaOrder
     .map((key) => metaRows.find((row) => row.key === key))
     .filter((row): row is MetaRowData => row != null)
-
-  const tanggalRowIndex = Math.max(0, orderedRows.findIndex((row) => row.key === tanggalAlign))
 
   return (
     <div className="doc-page">
@@ -80,10 +77,7 @@ export function LetterLayout({
               ))}
             </tbody>
           </table>
-          <div
-            className="doc-letter-right"
-            style={tanggalRowIndex > 0 ? { paddingTop: `${tanggalRowIndex * 1.45}em` } : undefined}
-          >
+          <div className="doc-letter-right">
             <div className="doc-tempat-tanggal">
               {kota.trim()}, {formatTanggalSurat(tanggalSurat)}
             </div>

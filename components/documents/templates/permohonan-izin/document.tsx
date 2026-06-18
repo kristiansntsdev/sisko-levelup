@@ -26,7 +26,6 @@ export function PermohonanIzinDocument({
       kepadaLabel="Kepada"
       nomorLabel="No. Surat"
       metaOrder={['kepada', 'hal', 'nomor']}
-      tanggalAlign="nomor"
     >
       <p className="doc-salutation">Dengan Hormat,</p>
       <p>
