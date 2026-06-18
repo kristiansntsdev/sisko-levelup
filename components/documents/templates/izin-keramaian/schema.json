@@ -36,51 +36,59 @@
         },
         {
           "id": "acara",
-          "label": "Nama Acara (untuk QR)",
+          "label": "Subjek QR (internal)",
           "type": "text",
           "required": true
         },
         {
-          "id": "namaKegiatan",
-          "label": "Nama Kegiatan",
+          "id": "lokasiKegiatan",
+          "label": "Lokasi Kegiatan",
+          "type": "text",
+          "required": true,
+          "placeholder": "lapangan/gedung/fasilitas lainnya"
+        },
+        {
+          "id": "instansiTerkait",
+          "label": "Instansi Terkait",
           "type": "text",
           "required": true
         },
         {
-          "id": "tanggalKegiatan",
-          "label": "Tanggal Kegiatan",
+          "id": "hariTanggal",
+          "label": "Hari/Tanggal",
           "type": "text",
           "required": true
         },
         {
-          "id": "jamKegiatan",
-          "label": "Jam Kegiatan",
+          "id": "pukul",
+          "label": "Pukul",
+          "type": "text",
+          "required": true,
+          "placeholder": "17.00 - selesai"
+        },
+        {
+          "id": "bentukKegiatan",
+          "label": "Bentuk Kegiatan",
           "type": "text",
           "required": true
         },
         {
-          "id": "tempatKegiatan",
-          "label": "Tempat Kegiatan",
+          "id": "pembicaraNarasumber",
+          "label": "Pembicara/Narasumber",
           "type": "text",
           "required": true
         },
         {
-          "id": "jumlahPeserta",
-          "label": "Jumlah Peserta",
+          "id": "susunanPanitia",
+          "label": "Susunan Panitia",
           "type": "text",
           "required": true
         },
         {
-          "id": "lampiran1",
-          "label": "Lampiran 1",
+          "id": "susunanAcara",
+          "label": "Susunan Acara",
           "type": "text",
-          "required": false
-        },
-        {
-          "id": "lampiran2",
-          "label": "Lampiran 2",
-          "type": "text",
-          "required": false
+          "required": true
         }
       ]
     },
