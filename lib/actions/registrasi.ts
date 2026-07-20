@@ -1,10 +1,11 @@
 'use server'
 import { db } from '@/lib/db'
 
-export async function updatePesertaProfile(idPeserta: number, data: { nowa: string; gereja: string; sekolah: string; idTempatKerja: number | null }) {
+export async function updatePesertaProfile(idPeserta: number, data: { nama: string; nowa: string; gereja: string; sekolah: string; idTempatKerja: number | null }) {
   await db.peserta.update({
     where: { id_peserta: idPeserta },
     data: {
+      nama: data.nama,
       nowa: data.nowa,
       gereja: data.gereja,
       pekerjaan: data.sekolah,

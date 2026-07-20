@@ -36,13 +36,14 @@ function DaftarForm() {
     const idPeserta = session?.user?.idPeserta
     if (!idPeserta) { setError('Sesi tidak ditemukan, coba login ulang.'); return }
     if (!eventId) { setError('Event tidak ditemukan.'); return }
+    if (!nama.trim()) { setError('Nama wajib diisi.'); return }
     if (!nowa.trim()) { setError('Nomor WA wajib diisi.'); return }
 
     setError('')
     setLoading(true)
     try {
       const idTempatKerja = sekolah.trim() ? await upsertJobsPlace(sekolah.trim()) : null
-      await updatePesertaProfile(idPeserta, { nowa, gereja, sekolah, idTempatKerja })
+      await updatePesertaProfile(idPeserta, { nama: nama.trim(), nowa, gereja, sekolah, idTempatKerja })
       await createRegistrasi(idPeserta, eventId)
       router.push('/dashboard')
     } catch (e) {
@@ -82,7 +83,12 @@ function DaftarForm() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <Input label="Nama" value={nama} disabled />
+          <Input
+            label="Nama"
+            placeholder="Nama lengkap"
+            value={nama}
+            onChange={(e) => setNama(e.target.value)}
+          />
           <Input
             label="Nomor WA"
             placeholder="08123456789"
