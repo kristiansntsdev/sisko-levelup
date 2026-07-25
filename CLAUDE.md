@@ -38,6 +38,7 @@ next.config.ts      # Next.js config (empty scaffold — add options here)
 
 ## Recent Updates [2026-07-25]
 
+- Fix createAbsen: transaction (absen then attend), try/catch, revalidatePath isolated; decodeQR allows empty email; Presensi query uses id_event_int OR id_event
 - Event detail: pagination (10/page) for konfirmasi kehadiran + presensi; show total registrasi in detail + badge
 - Scan ALK: `createAbsen` flips `absence`→`attend`; auto-absence only after event end date (not during event day)
 

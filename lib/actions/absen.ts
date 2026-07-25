@@ -1,5 +1,6 @@
 'use server'
 import { db } from '@/lib/db'
+import { revalidatePath } from 'next/cache'
 import type { QRPayload } from '@/lib/qr'
 
 export async function getPesertaPreview(idPeserta: number) {
@@ -17,41 +18,63 @@ export async function createAbsen(payload: QRPayload): Promise<
   const idEvent = Number(payload.ev)
   if (!idPeserta || !idEvent) return { success: false, reason: 'invalid_payload' }
 
-  const existing = await db.absen.findFirst({
-    where: { id_peserta: payload.p, id_event: payload.ev },
-    select: { id_absen: true },
-  })
-  if (existing) return { success: false, reason: 'already_scanned' }
+  const idPesertaStr = String(payload.p)
+  const idEventStr = String(payload.ev)
 
-  const peserta = await db.peserta.findUnique({
-    where: { id_peserta: idPeserta },
-    select: { nama: true, gereja: true },
-  })
-
-  await Promise.all([
-    db.absen.create({
-      data: {
-        id_peserta: payload.p,
-        id_peserta_int: idPeserta,
-        email: payload.e,
-        id_event: payload.ev,
-        id_event_int: idEvent,
-        hadir: '1',
-        timestamp: new Date(),
-        lampiran: '',
-        approve: '',
-      },
-    }),
-    // Scan wins even if auto-absence already flipped confirmed → absence
-    db.registrasi.updateMany({
+  try {
+    const existing = await db.absen.findFirst({
       where: {
-        id_peserta: idPeserta,
-        id_event: idEvent,
-        status: { in: ['confirmed', 'absence'] },
+        OR: [
+          { id_peserta: idPesertaStr, id_event: idEventStr },
+          { id_peserta_int: idPeserta, id_event_int: idEvent },
+        ],
       },
-      data: { status: 'attend' },
-    }),
-  ])
+      select: { id_absen: true },
+    })
+    if (existing) return { success: false, reason: 'already_scanned' }
 
-  return { success: true, nama: peserta?.nama ?? '', gereja: peserta?.gereja ?? '' }
+    const peserta = await db.peserta.findUnique({
+      where: { id_peserta: idPeserta },
+      select: { nama: true, gereja: true },
+    })
+
+    // Absen row first (Presensi source of truth), then flip registrasi status.
+    await db.$transaction(async (tx) => {
+      await tx.absen.create({
+        data: {
+          id_peserta: idPesertaStr,
+          id_peserta_int: idPeserta,
+          email: payload.e || '',
+          id_event: idEventStr,
+          id_event_int: idEvent,
+          hadir: '1',
+          timestamp: new Date(),
+          lampiran: '',
+          approve: '',
+        },
+      })
+      // Scan wins even if auto-absence already flipped confirmed → absence
+      await tx.registrasi.updateMany({
+        where: {
+          id_peserta: idPeserta,
+          id_event: idEvent,
+          status: { in: ['confirmed', 'absence'] },
+        },
+        data: { status: 'attend' },
+      })
+    })
+
+    // Don't let cache revalidation flip a successful write into a client error
+    try {
+      revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
+      revalidatePath('/dashboard/kota/alk')
+    } catch {
+      /* ok outside request scope (scripts/tests) */
+    }
+
+    return { success: true, nama: peserta?.nama ?? '', gereja: peserta?.gereja ?? '' }
+  } catch (err) {
+    console.error('[createAbsen]', err)
+    return { success: false, reason: 'error' }
+  }
 }

@@ -200,7 +200,9 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
   if (!event) return null
 
   const absenRows = await db.absen.findMany({
-    where: { id_event: String(id) },
+    where: {
+      OR: [{ id_event_int: id }, { id_event: String(id) }],
+    },
     orderBy: { timestamp: 'asc' },
     select: { id_absen: true, id_peserta: true, email: true, timestamp: true },
   })

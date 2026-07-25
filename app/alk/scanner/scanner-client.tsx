@@ -171,16 +171,23 @@ export function ScannerClient({ backUrl = '/alk' }: { backUrl?: string }) {
     if (!preview) return
     setConfirming(true)
     setConfirmError('')
-    const result = await createAbsen(preview.payload)
-    if (result.success) {
-      router.push(`/alk/data-peserta?nama=${encodeURIComponent(result.nama)}&gereja=${encodeURIComponent(result.gereja)}`)
-    } else if (result.reason === 'already_scanned') {
-      setConfirmError('Peserta ini sudah diabsen sebelumnya.')
-      setConfirming(false)
-    } else {
-      setConfirmError('Gagal menyimpan absen. Coba lagi.')
-      setConfirming(false)
+    try {
+      const result = await createAbsen(preview.payload)
+      if (result.success) {
+        router.push(`/alk/data-peserta?nama=${encodeURIComponent(result.nama)}&gereja=${encodeURIComponent(result.gereja)}`)
+        return
+      }
+      if (result.reason === 'already_scanned') {
+        setConfirmError('Peserta ini sudah diabsen sebelumnya.')
+      } else if (result.reason === 'invalid_payload') {
+        setConfirmError('QR tidak lengkap. Minta peserta buka ulang tiketnya.')
+      } else {
+        setConfirmError('Gagal menyimpan absen. Coba lagi.')
+      }
+    } catch {
+      setConfirmError('Gagal menyimpan absen. Cek koneksi lalu coba lagi.')
     }
+    setConfirming(false)
   }
 
   function handleScanAgain() {
