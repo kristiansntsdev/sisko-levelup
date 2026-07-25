@@ -42,8 +42,13 @@ export async function createAbsen(payload: QRPayload): Promise<
         approve: '',
       },
     }),
+    // Scan wins even if auto-absence already flipped confirmed → absence
     db.registrasi.updateMany({
-      where: { id_peserta: idPeserta, id_event: idEvent, status: 'confirmed' },
+      where: {
+        id_peserta: idPeserta,
+        id_event: idEvent,
+        status: { in: ['confirmed', 'absence'] },
+      },
       data: { status: 'attend' },
     }),
   ])

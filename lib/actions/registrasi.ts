@@ -49,13 +49,15 @@ export async function getRegistrasiDetail(idRegistrasi: number) {
 }
 
 export async function getRegistrasiByPeserta(idPeserta: number) {
-  // Mark any confirmed tickets whose event has already ended as absence
-  const now = new Date()
+  // tgleventselesai is DATE (midnight). Compare against start of today so
+  // the event day itself is not treated as already ended.
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
   await db.registrasi.updateMany({
     where: {
       id_peserta: idPeserta,
       status: 'confirmed',
-      event: { tgleventselesai: { lt: now } },
+      event: { tgleventselesai: { lt: startOfToday } },
     },
     data: { status: 'absence' },
   })

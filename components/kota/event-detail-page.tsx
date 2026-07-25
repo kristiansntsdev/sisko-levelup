@@ -1,7 +1,10 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import type { EventDetailFull } from '@/lib/actions/event'
 
-
+const PAGE_SIZE = 10
 
 function fmtRp(s: string) {
   const n = parseInt(s.replace(/\D/g, ''), 10)
@@ -16,12 +19,50 @@ function fmtTs(iso: string) {
   })
 }
 
+function Pagination({
+  page,
+  totalPages,
+  onPrev,
+  onNext,
+}: {
+  page: number
+  totalPages: number
+  onPrev: () => void
+  onNext: () => void
+}) {
+  if (totalPages <= 1) return null
+  return (
+    <div className="flex items-center justify-between px-4 py-2.5 border-t border-border gap-2">
+      <button
+        type="button"
+        onClick={onPrev}
+        disabled={page === 0}
+        className="text-[13px] px-3 py-1 rounded-[10px] border border-border bg-bg cursor-pointer disabled:opacity-40"
+      >
+        ← Prev
+      </button>
+      <span className="text-[12px] text-muted">{page + 1} / {totalPages}</span>
+      <button
+        type="button"
+        onClick={onNext}
+        disabled={page >= totalPages - 1}
+        className="text-[13px] px-3 py-1 rounded-[10px] border border-border bg-bg cursor-pointer disabled:opacity-40"
+      >
+        Next →
+      </button>
+    </div>
+  )
+}
+
 interface EventDetailPageProps {
   event: EventDetailFull
   backUrl: string
 }
 
 export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
+  const [regPage, setRegPage] = useState(0)
+  const [absenPage, setAbsenPage] = useState(0)
+
   const mapSrc = (() => {
     if (!event.longlatevent) return ''
     const parts = event.longlatevent.split(',').map(Number)
@@ -32,12 +73,21 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
   const isApproved = event.approvenasional === '1'
   const sameDates = event.tglDisplay === event.tglSelesaiDisplay
 
+  const totalRegistrasi = event.registrasi.length
+  const regTotalPages = Math.max(1, Math.ceil(totalRegistrasi / PAGE_SIZE))
+  const pagedReg = event.registrasi.slice(regPage * PAGE_SIZE, (regPage + 1) * PAGE_SIZE)
+
+  const totalAbsen = event.absen.length
+  const absenTotalPages = Math.max(1, Math.ceil(totalAbsen / PAGE_SIZE))
+  const pagedAbsen = event.absen.slice(absenPage * PAGE_SIZE, (absenPage + 1) * PAGE_SIZE)
+
   const infoRows = [
     { label: 'Jenis Event', value: event.jenisevent },
     { label: 'Alamat', value: event.alamatevent },
     { label: 'Jam', value: `${event.jamevent} – ${event.jamselesaievent}` },
     { label: 'Dana', value: fmtRp(event.danaevent) },
     { label: 'Target Peserta', value: `${event.targetjumlah} orang` },
+    { label: 'Total Registrasi', value: `${totalRegistrasi} orang` },
     ...(event.linkevent && event.linkevent !== '0' ? [{ label: 'Link', value: event.linkevent }] : []),
   ]
 
@@ -135,25 +185,35 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
           <div className="px-4 py-3 border-b border-border flex items-center justify-between">
             <p className="text-[13px] font-semibold text-fg">Konfirmasi Kehadiran</p>
             <span className="text-[11px] text-muted bg-bg px-2 py-0.5 rounded-full border border-border">
-              {event.registrasi.length} peserta
+              Total {totalRegistrasi} registrasi
             </span>
           </div>
-          {event.registrasi.length === 0 ? (
+          {totalRegistrasi === 0 ? (
             <div className="px-4 py-8 text-center">
               <p className="text-[13px] text-muted">Belum ada peserta.</p>
             </div>
           ) : (
-            <div className="divide-y divide-border">
-              {event.registrasi.map((r, i) => (
-                <div key={r.id_registrasi} className="flex items-center gap-3 px-4 py-3">
-                  <span className="text-[12px] text-muted w-6 shrink-0 text-right">{i + 1}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-fg truncate">{r.nama}</p>
-                    <p className="text-[11px] text-muted truncate">{r.email}</p>
+            <>
+              <div className="divide-y divide-border">
+                {pagedReg.map((r, i) => (
+                  <div key={r.id_registrasi} className="flex items-center gap-3 px-4 py-3">
+                    <span className="text-[12px] text-muted w-6 shrink-0 text-right">
+                      {regPage * PAGE_SIZE + i + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium text-fg truncate">{r.nama}</p>
+                      <p className="text-[11px] text-muted truncate">{r.email}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+              <Pagination
+                page={regPage}
+                totalPages={regTotalPages}
+                onPrev={() => setRegPage((p) => p - 1)}
+                onNext={() => setRegPage((p) => p + 1)}
+              />
+            </>
           )}
         </div>
 
@@ -162,28 +222,38 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
           <div className="px-4 py-3 border-b border-border flex items-center justify-between">
             <p className="text-[13px] font-semibold text-fg">Presensi (Scan QR)</p>
             <span className="text-[11px] text-muted bg-bg px-2 py-0.5 rounded-full border border-border">
-              {event.absen.length} hadir
+              {totalAbsen} hadir
             </span>
           </div>
-          {event.absen.length === 0 ? (
+          {totalAbsen === 0 ? (
             <div className="px-4 py-8 text-center">
               <p className="text-[13px] text-muted">Belum ada presensi.</p>
             </div>
           ) : (
-            <div className="divide-y divide-border">
-              {event.absen.map((a, i) => (
-                <div key={a.id_absen} className="flex items-center gap-3 px-4 py-3">
-                  <span className="text-[12px] text-muted w-6 shrink-0 text-right">{i + 1}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-fg truncate">{a.nama}</p>
-                    <p className="text-[11px] text-muted truncate">{a.email}</p>
+            <>
+              <div className="divide-y divide-border">
+                {pagedAbsen.map((a, i) => (
+                  <div key={a.id_absen} className="flex items-center gap-3 px-4 py-3">
+                    <span className="text-[12px] text-muted w-6 shrink-0 text-right">
+                      {absenPage * PAGE_SIZE + i + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium text-fg truncate">{a.nama}</p>
+                      <p className="text-[11px] text-muted truncate">{a.email}</p>
+                    </div>
+                    <p className="text-[11px] text-muted shrink-0 text-right leading-tight">
+                      {fmtTs(a.timestamp)}
+                    </p>
                   </div>
-                  <p className="text-[11px] text-muted shrink-0 text-right leading-tight">
-                    {fmtTs(a.timestamp)}
-                  </p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+              <Pagination
+                page={absenPage}
+                totalPages={absenTotalPages}
+                onPrev={() => setAbsenPage((p) => p - 1)}
+                onNext={() => setAbsenPage((p) => p + 1)}
+              />
+            </>
           )}
         </div>
 
