@@ -243,8 +243,8 @@ function TxnForm({
               </div>
             ) : (
               <select
-                value={selectedEvent}
-                onChange={(e) => setSelectedEvent(e.target.value)}
+                value={selectedEventId}
+                onChange={(e) => setSelectedEventId(e.target.value)}
                 required
                 className="w-full px-3.5 py-3 border-[1.5px] border-border rounded-input text-[15px] bg-surface text-fg outline-none focus:border-accent transition-colors appearance-none"
               >
