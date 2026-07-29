@@ -136,6 +136,7 @@ function TxnForm({
   const [kategori, setKategori] = useState<'harian' | 'event'>(initialKategori)
   const [events, setEvents] = useState<EventOption[]>([])
   const [eventsLoading, setEventsLoading] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState('')
   const submittingRef = useRef(false)
 
   useEffect(() => {
@@ -151,9 +152,12 @@ function TxnForm({
     e.preventDefault()
     if (submittingRef.current || isPending) return
     const jumlah = parseInt(parseRupiah(jumlahDisplay), 10)
-    if (!jumlah || !keterangan) return
+    if (!jumlah || (kategori === 'harian' && !keterangan) || (kategori === 'event' && !selectedEvent)) return
     submittingRef.current = true
-    onSubmit({ tipe, jumlah, keterangan, tanggal, kategori })
+    const finalKeterangan = kategori === 'event'
+      ? (keterangan ? `${selectedEvent} - ${keterangan}` : selectedEvent)
+      : keterangan
+    onSubmit({ tipe, jumlah, keterangan: finalKeterangan, tanggal, kategori })
   }
 
   const segBase = 'flex-1 py-2.5 rounded-[9px] text-[14px] font-medium transition-all duration-150 cursor-pointer border-none'
@@ -204,29 +208,38 @@ function TxnForm({
       </div>
 
       {kategori === 'event' ? (
-        <div>
-          <p className="text-[13px] font-medium text-fg2 mb-1.5">Event</p>
-          {eventsLoading ? (
-            <div className="w-full px-3.5 py-3 border-[1.5px] border-border rounded-input text-[15px] bg-surface text-muted">
-              Memuat event...
-            </div>
-          ) : (
-            <select
-              value={events.find((e) => e.nama_event === keterangan)?.id_event ?? ''}
-              onChange={(e) => {
-                const ev = events.find((ev) => ev.id_event === Number(e.target.value))
-                if (ev) setKeterangan(ev.nama_event)
-              }}
-              required
-              className="w-full px-3.5 py-3 border-[1.5px] border-border rounded-input text-[15px] bg-surface text-fg outline-none focus:border-accent transition-colors appearance-none"
-            >
-              <option value="" disabled>Pilih event...</option>
+        <>
+          <div>
+            <p className="text-[13px] font-medium text-fg2 mb-1.5">Event</p>
+            {eventsLoading ? (
+              <div className="w-full px-3.5 py-3 border-[1.5px] border-border rounded-input text-[15px] bg-surface text-muted">
+                Memuat event...
+              </div>
+            ) : (
+              <select
+                value={selectedEvent}
+                onChange={(e) => setSelectedEvent(e.target.value)}
+                required
+                className="w-full px-3.5 py-3 border-[1.5px] border-border rounded-input text-[15px] bg-surface text-fg outline-none focus:border-accent transition-colors appearance-none"
+              >
+                <option value="" disabled>Pilih event...</option>
               {events.map((ev) => (
-                <option key={ev.id_event} value={ev.id_event}>{ev.nama_event}</option>
+                <option key={ev.id_event} value={ev.nama_event}>{ev.nama_event}</option>
               ))}
-            </select>
-          )}
-        </div>
+              </select>
+            )}
+          </div>
+          <div>
+            <p className="text-[13px] font-medium text-fg2 mb-1.5">Keterangan</p>
+            <input
+              type="text"
+              value={keterangan}
+              onChange={(e) => setKeterangan(e.target.value)}
+              placeholder="Keterangan transaksi event..."
+              className="w-full px-3.5 py-3 border-[1.5px] border-border rounded-input text-[15px] bg-surface text-fg outline-none focus:border-accent transition-colors"
+            />
+          </div>
+        </>
       ) : (
         <div>
           <p className="text-[13px] font-medium text-fg2 mb-1.5">Keterangan</p>
