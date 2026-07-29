@@ -42,6 +42,10 @@ next.config.ts      # Next.js config (empty scaffold — add options here)
 - Event detail: pagination (10/page) for konfirmasi kehadiran + presensi; show total registrasi in detail + badge
 - Scan ALK: `createAbsen` flips `absence`→`attend`; auto-absence only after event end date (not during event day)
 
+## Recent Updates [2026-07-29]
+
+- Kas Kota: dropdown event tampilkan tanggal event (contoh `10 November 2025`) dan pakai `id_event` supaya tidak ketuker untuk nama yang sama
+
 ## File Map
 
 Global db: `~/.claude/file-map.db` — see root CLAUDE.md for full query reference.

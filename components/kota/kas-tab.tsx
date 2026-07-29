@@ -26,6 +26,12 @@ function fmtDate(iso: string) {
   return `${d.getDate()} ${ID_MONTHS[d.getMonth()]} ${d.getFullYear()}`
 }
 
+function fmtEventDateShort(tglDisplay: string) {
+  // tglDisplay dari server biasanya formatnya: "Rabu, 10 November 2025"
+  // Kita strip part weekday agar jadi "10 November 2025"
+  return tglDisplay.replace(/^[^,]+,\s*/, '')
+}
+
 function todayStr() {
   return new Date().toISOString().slice(0, 10)
 }
@@ -96,7 +102,7 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
 
 // ── Transaction Form ───────────────────────────────────────────
 
-type EventOption = { id_event: number; nama_event: string }
+type EventOption = { id_event: number; nama_event: string; tglDisplay: string }
 
 interface TxnFormProps {
   kotalevelup: string
@@ -131,12 +137,27 @@ function TxnForm({
   const [jumlahDisplay, setJumlahDisplay] = useState(
     initialJumlah ? formatRupiah(initialJumlah) : ''
   )
-  const [keterangan, setKeterangan] = useState(initialKeterangan)
+  const sep = ' - '
+  const initialIdx = initialKategori === 'event' ? initialKeterangan.indexOf(sep) : -1
+  const initialEventNameParsed =
+    initialKategori !== 'event'
+      ? ''
+      : initialIdx >= 0
+        ? initialKeterangan.slice(0, initialIdx)
+        : initialKeterangan
+  const initialExtraParsed =
+    initialKategori !== 'event'
+      ? initialKeterangan
+      : initialIdx >= 0
+        ? initialKeterangan.slice(initialIdx + sep.length)
+        : ''
+
+  const [keterangan, setKeterangan] = useState(initialExtraParsed)
   const [tanggal, setTanggal] = useState(initialTanggal)
   const [kategori, setKategori] = useState<'harian' | 'event'>(initialKategori)
   const [events, setEvents] = useState<EventOption[]>([])
   const [eventsLoading, setEventsLoading] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState('')
+  const [selectedEventId, setSelectedEventId] = useState('')
   const submittingRef = useRef(false)
 
   useEffect(() => {
@@ -144,6 +165,10 @@ function TxnForm({
     setEventsLoading(true)
     getAllEventsByKotalevelup(kotalevelup).then((evts) => {
       setEvents(evts)
+      if (initialEventNameParsed && !selectedEventId) {
+        const ev = evts.find((x) => x.nama_event === initialEventNameParsed)
+        if (ev) setSelectedEventId(String(ev.id_event))
+      }
       setEventsLoading(false)
     })
   }, [kategori, kotalevelup])
@@ -152,10 +177,11 @@ function TxnForm({
     e.preventDefault()
     if (submittingRef.current || isPending) return
     const jumlah = parseInt(parseRupiah(jumlahDisplay), 10)
-    if (!jumlah || (kategori === 'harian' && !keterangan) || (kategori === 'event' && !selectedEvent)) return
+    if (!jumlah || (kategori === 'harian' && !keterangan) || (kategori === 'event' && !selectedEventId)) return
     submittingRef.current = true
+    const selectedEventName = events.find((ev) => String(ev.id_event) === selectedEventId)?.nama_event ?? ''
     const finalKeterangan = kategori === 'event'
-      ? (keterangan ? `${selectedEvent} - ${keterangan}` : selectedEvent)
+      ? (keterangan ? `${selectedEventName} - ${keterangan}` : selectedEventName)
       : keterangan
     onSubmit({ tipe, jumlah, keterangan: finalKeterangan, tanggal, kategori })
   }
@@ -224,7 +250,9 @@ function TxnForm({
               >
                 <option value="" disabled>Pilih event...</option>
               {events.map((ev) => (
-                <option key={ev.id_event} value={ev.nama_event}>{ev.nama_event}</option>
+                <option key={ev.id_event} value={String(ev.id_event)}>
+                  {ev.nama_event} ({fmtEventDateShort(ev.tglDisplay)})
+                </option>
               ))}
               </select>
             )}
