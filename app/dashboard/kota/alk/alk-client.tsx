@@ -448,7 +448,7 @@ export function AlkClient({ pengurus, events, namaCabang, kasKota }: AlkClientPr
   const tabContent = {
     beranda: <BerandaTab pengurus={pengurus} events={events} namaCabang={namaCabang} saldo={kasKota.saldo} />,
     event:   <EventTab events={events} />,
-    kas:     <KasTab kasKota={kasKota} />,
+    kas:     <KasTab kasKota={kasKota} events={events} cabangName={namaCabang} />,
     surat:   <SuratTab pengurus={pengurus} />,
     akun:    <AkunTab pengurus={pengurus} namaCabang={namaCabang} />,
   }
