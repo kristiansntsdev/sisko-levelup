@@ -6,6 +6,13 @@ import type { EventDetailFull } from '@/lib/actions/event'
 
 const PAGE_SIZE = 10
 
+const USERLEVEL_LABEL: Record<string, string> = {
+  '1': 'volunteer',
+  '2': 'squad',
+  '3': 'core',
+  '4': 'pic',
+}
+
 function fmtRp(s: string) {
   const n = parseInt(s.replace(/\D/g, ''), 10)
   if (isNaN(n)) return s
@@ -238,7 +245,14 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
                       {absenPage * PAGE_SIZE + i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-medium text-fg truncate">{a.nama}</p>
+                      <p className="text-[13px] font-medium text-fg truncate flex items-center gap-1.5">
+                        <span className="truncate">{a.nama}</span>
+                        {USERLEVEL_LABEL[a.userlevel] && (
+                          <span className="shrink-0 text-[10px] font-semibold text-muted bg-bg px-1.5 py-0.5 rounded border border-border capitalize">
+                            {USERLEVEL_LABEL[a.userlevel]}
+                          </span>
+                        )}
+                      </p>
                       <p className="text-[11px] text-muted truncate">{a.email}</p>
                     </div>
                     <p className="text-[11px] text-muted shrink-0 text-right leading-tight">
