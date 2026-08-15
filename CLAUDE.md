@@ -36,6 +36,10 @@ app/
 next.config.ts      # Next.js config (empty scaffold — add options here)
 ```
 
+## Recent Updates [2026-08-15]
+
+- Internal API: `POST /api/internal/verify-member` (Bearer `INTERNAL_API_SECRET`) looks up `auth_users`/`peserta` by email or usercode for winner-principle LevelUp login
+
 ## Recent Updates [2026-07-25]
 
 - Fix createAbsen: transaction (absen then attend), try/catch, revalidatePath isolated; decodeQR allows empty email; Presensi query uses id_event_int OR id_event
