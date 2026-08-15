@@ -7,6 +7,7 @@ import type { EventDetailFull } from '@/lib/actions/event'
 const PAGE_SIZE = 10
 
 const USERLEVEL_LABEL: Record<string, string> = {
+  '0': 'tamu',
   '1': 'volunteer',
   '2': 'squad',
   '3': 'core',
