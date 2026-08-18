@@ -7,11 +7,13 @@ import { getRegistrasiByPeserta } from '@/lib/actions/registrasi'
 import { getPesertaById } from '@/lib/actions/peserta'
 import { getDokumentasiForPeserta } from '@/lib/actions/dokumentasi'
 import type { DokumentasiPeserta } from '@/lib/actions/dokumentasi'
+import { joinVolunteer, joinSquad, getPendingSquadForMe } from '@/lib/actions/upgrade'
 
 type Registrasi = Awaited<ReturnType<typeof getRegistrasiByPeserta>>[number]
 
+// ponytail: membership approval baru sampai squad (userlevel 2). Core (3) belum.
 const JOIN_LABELS: Record<number, string> = {
-  0: 'join member →',
+  0: 'join volunteer →',
   1: 'join squad →',
   2: 'join core →',
 }
@@ -23,6 +25,8 @@ export default function DashboardPage() {
   const [nama, setNama] = useState('')
   const [userLevel, setUserLevel] = useState<number | null>(null)
   const [dokumentasi, setDokumentasi] = useState<DokumentasiPeserta[]>([])
+  const [pendingSquad, setPendingSquad] = useState(false)
+  const [joinLoading, setJoinLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
 
   useEffect(() => {
@@ -32,13 +36,32 @@ export default function DashboardPage() {
       getRegistrasiByPeserta(idPeserta),
       getPesertaById(idPeserta),
       getDokumentasiForPeserta(idPeserta),
-    ]).then(([regs, p, docs]) => {
+      getPendingSquadForMe(),
+    ]).then(([regs, p, docs, pending]) => {
       setRegistrasi(regs)
       setDokumentasi(docs)
+      setPendingSquad(pending)
       if (p) { setNama(p.nama); setUserLevel(Number(p.userlevel)) }
       setDataLoading(false)
     })
   }, [session?.user?.idPeserta])
+
+  async function handleJoin() {
+    if (joinLoading || userLevel === null) return
+    if (userLevel === 0) {
+      setJoinLoading(true)
+      const res = await joinVolunteer()
+      if (res.ok) setUserLevel(1)
+      setJoinLoading(false)
+      return
+    }
+    if (userLevel === 1 && !pendingSquad) {
+      setJoinLoading(true)
+      const res = await joinSquad()
+      if (res.ok) setPendingSquad(true)
+      setJoinLoading(false)
+    }
+  }
 
   const isLoading = status === 'loading' || dataLoading
 
@@ -59,10 +82,11 @@ export default function DashboardPage() {
         <div className="max-w-sm mx-auto px-5 pt-4 pb-4 flex items-center justify-end gap-3">
           {userLevel !== null && userLevel < 3 && (
             <button
-              onClick={() => router.push('/join/1')}
-              className="text-xs font-medium text-accent bg-accent-light px-3 py-1.5 rounded-full"
+              onClick={handleJoin}
+              disabled={joinLoading || (userLevel === 1 && pendingSquad) || userLevel === 2}
+              className="text-xs font-medium text-accent bg-accent-light px-3 py-1.5 rounded-full disabled:opacity-50"
             >
-              {JOIN_LABELS[userLevel]}
+              {userLevel === 1 && pendingSquad ? 'menunggu approval' : JOIN_LABELS[userLevel]}
             </button>
           )}
           <button

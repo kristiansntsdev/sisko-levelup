@@ -4,12 +4,12 @@ import { useRouter } from 'next/navigation'
 import { Avatar, Button } from '@/components/ui'
 import {
   KotaShell, KotaTab,
-  EventDateCard, getEventStatus,
-  SummaryTile, HeroCard, FilterTabs,
+  EventDateCard,
+  HeroCard, FilterTabs,
   KasTab, SuratTab,
 } from '@/components/kota'
 import type { KasKotaData } from '@/components/kota'
-import type { EventDashboard } from '@/lib/actions/event'
+import type { AlkBerandaStats, EventDashboard } from '@/lib/actions/event'
 import { logoutPengurus } from '@/app/admin/actions'
 
 interface Pengurus {
@@ -24,6 +24,8 @@ interface AlkClientProps {
   events: EventDashboard[]
   namaCabang: string
   kasKota: KasKotaData
+  stats: AlkBerandaStats
+  pendingApprovals: number
 }
 
 // ── Icons ──────────────────────────────────────────────────────
@@ -87,7 +89,10 @@ const FILTER_LABELS: Record<string, string> = {
   all: 'Semua', approved: 'Disetujui', pending: 'Belum Approve',
 }
 
-// ── QR Sheet ──────────────────────────────────────────────────
+function eventOptionLabel(e: EventDashboard) {
+  const tgl = e.tglDisplay.replace(/^[^,]+,\s*/, '')
+  return `${e.nama_event} - ${tgl}`
+}
 function QRSheet({ events, onClose }: { events: EventDashboard[]; onClose: () => void }) {
   const [selectedId, setSelectedId] = useState<number>(events[0]?.id_event ?? 0)
   const [origin, setOrigin] = useState('')
@@ -120,7 +125,7 @@ function QRSheet({ events, onClose }: { events: EventDashboard[]; onClose: () =>
                 className="w-full px-3.5 py-3 border-[1.5px] border-border rounded-input text-[15px] bg-surface text-fg outline-none focus:border-accent appearance-none"
               >
                 {events.map((e) => (
-                  <option key={e.id_event} value={e.id_event}>{e.nama_event}</option>
+                  <option key={e.id_event} value={e.id_event}>{eventOptionLabel(e)}</option>
                 ))}
               </select>
             </div>
@@ -175,7 +180,7 @@ function ScanSheet({ events, onClose }: { events: EventDashboard[]; onClose: () 
                 className="w-full px-3.5 py-3 border-[1.5px] border-border rounded-input text-[15px] bg-surface text-fg outline-none focus:border-accent appearance-none"
               >
                 {events.map((e) => (
-                  <option key={e.id_event} value={e.id_event}>{e.nama_event}</option>
+                  <option key={e.id_event} value={e.id_event}>{eventOptionLabel(e)}</option>
                 ))}
               </select>
             </div>
@@ -193,30 +198,29 @@ function ScanSheet({ events, onClose }: { events: EventDashboard[]; onClose: () 
   )
 }
 
-function fmtShort(n: number) {
-  if (n >= 1_000_000) return `Rp ${(n / 1_000_000).toFixed(1).replace('.', ',')} jt`
-  if (n >= 1_000) return `Rp ${(n / 1_000).toFixed(1).replace('.', ',')} rb`
-  return `Rp ${n}`
+function fmtRp(n: number) {
+  return `Rp ${Math.round(n).toLocaleString('id-ID')}`
+}
+
+function StatCard({ value, label, onClick }: { value: string | number; label: string; onClick?: () => void }) {
+  const className = `bg-surface border border-border rounded-card p-4 flex flex-col gap-1${onClick ? ' w-full text-left cursor-pointer transition-all hover:shadow-md active:scale-[0.99]' : ''}`
+  const inner = (
+    <>
+      <p className="text-[20px] font-bold text-fg leading-tight">{value}</p>
+      <p className="text-[11px] text-muted leading-snug">{label}</p>
+    </>
+  )
+  if (onClick) return <button type="button" onClick={onClick} className={className}>{inner}</button>
+  return <div className={className}>{inner}</div>
 }
 
 // ── Beranda tab ────────────────────────────────────────────────
-function BerandaTab({ pengurus, events, namaCabang, saldo }: { pengurus: Pengurus; events: EventDashboard[]; namaCabang: string; saldo: number }) {
+function BerandaTab({ pengurus, events, namaCabang, stats, saldo, pendingApprovals }: { pengurus: Pengurus; events: EventDashboard[]; namaCabang: string; stats: AlkBerandaStats; saldo: number; pendingApprovals: number }) {
   const router = useRouter()
   const [showQR, setShowQR] = useState(false)
   const [showScan, setShowScan] = useState(false)
 
   const now = new Date()
-
-  const counts = useMemo(() => {
-    let upcoming = 0, ongoing = 0, past = 0
-    for (const e of events) {
-      const s = getEventStatus(e.tglMs)
-      if (s === 'upcoming') upcoming++
-      else if (s === 'ongoing') ongoing++
-      else past++
-    }
-    return { upcoming, ongoing, past }
-  }, [events])
 
   const thisMonthEvents = useMemo(() => {
     return events.filter((e) => {
@@ -239,26 +243,23 @@ function BerandaTab({ pengurus, events, namaCabang, saldo }: { pengurus: Penguru
         </div>
       </div>
 
-      {/* Key metrics */}
+      {/* Saldo + approval */}
       <div className="grid grid-cols-2 gap-2.5">
-        <div className="bg-surface border border-border rounded-card p-4 flex flex-col gap-1">
-          <p className="text-[11px] text-muted uppercase tracking-wider">Saldo Kas</p>
-          <p className="text-[20px] font-bold text-green leading-tight">{fmtShort(saldo)}</p>
-        </div>
-        <div className="bg-surface border border-border rounded-card p-4 flex flex-col gap-1">
-          <p className="text-[11px] text-muted uppercase tracking-wider">Total Event</p>
-          <p className="text-[20px] font-bold text-accent leading-tight">{events.length}</p>
-          <p className="text-[11px] text-muted">event</p>
-        </div>
+        <StatCard value={fmtRp(saldo)} label="Saldo Kas" />
+        <StatCard
+          value={pendingApprovals}
+          label="Approval Member"
+          onClick={() => router.push('/dashboard/kota/alk/approval')}
+        />
       </div>
 
       {/* Quick actions */}
       <div className="grid grid-cols-2 gap-2.5">
         <button
           onClick={() => setShowQR(true)}
-          className="bg-surface border border-border rounded-card p-3.5 flex flex-col items-start gap-2 cursor-pointer text-left transition-all hover:border-accent hover:bg-accent-light"
+          className="bg-purple-light shadow-sm rounded-card p-3.5 flex flex-col items-start gap-2 cursor-pointer text-left transition-all hover:shadow-md active:scale-[0.99]"
         >
-          <div className="w-9 h-9 rounded-[10px] bg-purple-light text-purple flex items-center justify-center">
+          <div className="w-9 h-9 rounded-[10px] bg-surface text-purple flex items-center justify-center">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
               <rect x="3" y="14" width="7" height="7" rx="1"/>
@@ -269,9 +270,9 @@ function BerandaTab({ pengurus, events, namaCabang, saldo }: { pengurus: Penguru
         </button>
         <button
           onClick={() => setShowScan(true)}
-          className="bg-surface border border-border rounded-card p-3.5 flex flex-col items-start gap-2 cursor-pointer text-left transition-all hover:border-accent hover:bg-accent-light"
+          className="bg-green-light shadow-sm rounded-card p-3.5 flex flex-col items-start gap-2 cursor-pointer text-left transition-all hover:shadow-md active:scale-[0.99]"
         >
-          <div className="w-9 h-9 rounded-[10px] bg-green-light text-green flex items-center justify-center">
+          <div className="w-9 h-9 rounded-[10px] bg-surface text-green flex items-center justify-center">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
               <circle cx="12" cy="13" r="4"/>
@@ -295,6 +296,25 @@ function BerandaTab({ pengurus, events, namaCabang, saldo }: { pengurus: Penguru
             ))}
           </div>
         )}
+      </div>
+
+      <div className="h-px bg-border" />
+
+      {/* Informasi Kota */}
+      <div className="flex flex-col gap-2.5">
+        <p className="text-[15px] font-bold text-fg">Informasi Kota</p>
+        <div className="grid grid-cols-3 gap-2.5">
+          <StatCard value={stats.pesertaVolunteer} label="Total Peserta Volunteer" />
+          <StatCard value={stats.pesertaCore} label="Total Peserta Core" />
+          <StatCard value={stats.pesertaSquad} label="Total Peserta Squad" />
+        </div>
+        <div className="grid grid-cols-2 gap-2.5">
+          <StatCard value={stats.eventOffline} label="Total Event Offline" />
+          <StatCard value={stats.eventOnline} label="Total Event Online" />
+        </div>
+        <StatCard value={fmtRp(stats.danaEvent)} label="Total Dana Yang Direncanakan" />
+        <StatCard value={fmtRp(stats.danaRiil)} label="Total Dana Yang Dikeluarkan" />
+        <StatCard value={fmtRp(stats.danaUsul)} label="Total Dana Yang Disubsidi" />
       </div>
 
       {showQR && (
@@ -442,11 +462,11 @@ const TABS: KotaTab[] = [
   { id: 'akun',    label: 'Akun',    icon: <UserIcon /> },
 ]
 
-export function AlkClient({ pengurus, events, namaCabang, kasKota }: AlkClientProps) {
+export function AlkClient({ pengurus, events, namaCabang, kasKota, stats, pendingApprovals }: AlkClientProps) {
   const [activeTab, setActiveTab] = useState('beranda')
 
   const tabContent = {
-    beranda: <BerandaTab pengurus={pengurus} events={events} namaCabang={namaCabang} saldo={kasKota.saldo} />,
+    beranda: <BerandaTab pengurus={pengurus} events={events} namaCabang={namaCabang} stats={stats} saldo={kasKota.saldo} pendingApprovals={pendingApprovals} />,
     event:   <EventTab events={events} />,
     kas:     <KasTab kasKota={kasKota} events={events} cabangName={namaCabang} />,
     surat:   <SuratTab pengurus={pengurus} />,

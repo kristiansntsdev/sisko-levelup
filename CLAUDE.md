@@ -31,10 +31,16 @@
 
 ```
 app/
-  layout.tsx        # Root layout: fonts, metadata, body shell
-  page.tsx          # Home page (replace with actual content)
-next.config.ts      # Next.js config (empty scaffold — add options here)
+  dashboard/page.tsx                  # Dashboard user: join volunteer/squad
+  dashboard/kota/alk/page.tsx         # Beranda ALK (saldo + approval member)
+  dashboard/kota/alk/approval/page.tsx # List approval squad dari table upgrade
+lib/actions/upgrade.ts                # joinVolunteer, joinSquad, approveSquad
+task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-08-18]
+- Membership: join volunteer langsung (userlevel 1); join squad insert `upgrade`; admin ALK approve → userlevel 2 lalu hapus row
+- Beranda ALK Kota: kartu ringkasan peserta (volunteer/core/squad), event offline/online, dan total dana usul/riil/event per cabang
 
 ## Recent Updates [2026-08-15]
 - Event absensi: tampilkan userlevel (volunteer/squad/core/pic) di sebelah nama pada Presensi Scan QR

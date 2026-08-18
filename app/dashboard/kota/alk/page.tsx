@@ -1,8 +1,9 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
-import { getAllEventsByKotalevelup } from '@/lib/actions/event'
+import { getAllEventsByKotalevelup, getAlkBerandaStats } from '@/lib/actions/event'
 import { getKasKota } from '@/lib/actions/kas-kota'
+import { countPendingSquadApprovals } from '@/lib/actions/upgrade'
 import { AlkClient } from './alk-client'
 
 export default async function AlkDashboardPage() {
@@ -18,13 +19,15 @@ export default async function AlkDashboardPage() {
 
   const idCabang = Number(pengurus.kotalevelup)
 
-  const [events, cabang, kasKota] = await Promise.all([
+  const [events, cabang, kasKota, stats, pendingApprovals] = await Promise.all([
     getAllEventsByKotalevelup(pengurus.kotalevelup),
     db.cabang.findUnique({
       where: { id_cabang: idCabang },
       select: { namacabang: true },
     }),
     getKasKota(idCabang),
+    getAlkBerandaStats(pengurus.kotalevelup),
+    countPendingSquadApprovals(),
   ])
 
   return (
@@ -33,6 +36,8 @@ export default async function AlkDashboardPage() {
       events={events}
       namaCabang={cabang?.namacabang ?? pengurus.kotalevelup}
       kasKota={kasKota}
+      stats={stats}
+      pendingApprovals={pendingApprovals}
     />
   )
 }

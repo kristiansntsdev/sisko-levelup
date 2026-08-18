@@ -377,3 +377,58 @@ export async function updateEvent(
   revalidatePath('/dashboard/kota/alk')
   revalidatePath(`/dashboard/kota/alk/event/${id}`)
 }
+
+export type AlkBerandaStats = {
+  pesertaVolunteer: number
+  pesertaCore: number
+  pesertaSquad: number
+  eventOffline: number
+  eventOnline: number
+  danaUsul: number
+  danaRiil: number
+  danaEvent: number
+}
+
+function toNum(v: unknown): number {
+  if (v == null) return 0
+  const n = typeof v === 'bigint' ? Number(v) : Number(v)
+  return Number.isFinite(n) ? n : 0
+}
+
+export async function getAlkBerandaStats(idCabang: string): Promise<AlkBerandaStats> {
+  const [volunteer, core, squad, offline, online, usulRows, riilRows, eventRows] = await Promise.all([
+    db.peserta.count({ where: { kotalevelup: idCabang, userlevel: '1' } }),
+    db.peserta.count({ where: { kotalevelup: idCabang, userlevel: '3' } }),
+    db.peserta.count({ where: { kotalevelup: idCabang, userlevel: '2' } }),
+    db.event.count({ where: { id_cabang: idCabang, jenisevent: 'Offline' } }),
+    db.event.count({ where: { id_cabang: idCabang, jenisevent: 'Online' } }),
+    db.$queryRaw<[{ total_dana_usul: unknown }]>`
+      SELECT SUM(r.danausul) AS total_dana_usul
+      FROM reimburse r
+      INNER JOIN event e ON r.id_event = e.id_event
+      WHERE e.id_cabang = ${idCabang}
+    `,
+    db.$queryRaw<[{ total_dana_riil: unknown }]>`
+      SELECT SUM(r.danariil) AS total_dana_riil
+      FROM reimburse r
+      INNER JOIN event e ON r.id_event = e.id_event
+      WHERE e.id_cabang = ${idCabang}
+    `,
+    db.$queryRaw<[{ total_dana_event: unknown }]>`
+      SELECT SUM(e.danaevent) AS total_dana_event
+      FROM event e
+      WHERE e.id_cabang = ${idCabang}
+    `,
+  ])
+
+  return {
+    pesertaVolunteer: volunteer,
+    pesertaCore: core,
+    pesertaSquad: squad,
+    eventOffline: offline,
+    eventOnline: online,
+    danaUsul: toNum(usulRows[0]?.total_dana_usul),
+    danaRiil: toNum(riilRows[0]?.total_dana_riil),
+    danaEvent: toNum(eventRows[0]?.total_dana_event),
+  }
+}

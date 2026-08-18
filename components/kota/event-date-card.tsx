@@ -45,7 +45,7 @@ export function EventDateCard({ event, onClick }: EventDateCardProps) {
     <div
       onClick={onClick}
       className={`bg-surface border border-border rounded-[16px] p-[14px] flex gap-[14px] transition-all duration-150 ${
-        onClick ? 'cursor-pointer hover:border-accent active:scale-[0.99]' : ''
+        onClick ? 'cursor-pointer shadow-sm hover:border-accent hover:shadow-md active:scale-[0.99]' : ''
       }`}
     >
       {/* Date block */}
