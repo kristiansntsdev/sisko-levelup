@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
 
   const [jumlahPertemuanBulanan, absenRows] = await Promise.all([
     db.event.count({ where: { id_cabang: idCabang, wwtype: 'bulanan' } }),
-    // ponytail: pengurus = Squad(2)+Core(3); peserta = Umum/guest(0)+Volunteer(1). Bukan tabel pengurus.
+    // ponytail: pengurus = userlevel>=2 (Squad/Core/Leader/Nasional); peserta = <2 (Umum/Volunteer/null)
     db.$queryRaw<AbsenRow[]>`
       SELECT
         t.id_event,
@@ -177,8 +177,8 @@ export async function POST(req: NextRequest) {
           e.id_event,
           e.nama_event,
           e.tglevent,
-          SUM(CASE WHEN p.userlevel IN ('2', '3') THEN 1 ELSE 0 END) AS hadir_pengurus,
-          SUM(CASE WHEN p.userlevel IN ('0', '1') OR p.userlevel IS NULL OR p.userlevel = '' THEN 1 ELSE 0 END) AS hadir_peserta
+          SUM(CASE WHEN CAST(NULLIF(p.userlevel, '') AS UNSIGNED) >= 2 THEN 1 ELSE 0 END) AS hadir_pengurus,
+          SUM(CASE WHEN p.userlevel IS NULL OR p.userlevel = '' OR CAST(p.userlevel AS UNSIGNED) < 2 THEN 1 ELSE 0 END) AS hadir_peserta
         FROM event e
         LEFT JOIN absen a
           ON a.id_event_int = e.id_event

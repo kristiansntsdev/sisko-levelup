@@ -39,10 +39,11 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-08-20]
+- WW dashboard: pengurus = userlevel ≥ 2 (Squad/Core/Leader/Nasional); peserta = < 2
 - Event form Maps: `loading=async` on script URL (silences Google bootstrap warning)
 - Admin `/admin` + `verify-member`: hanya pengurus ALK + password; email-as-username (adminlk*@gmail.com) via pengurus.username
 - Event form: field `wwtype` (enum `bulanan` | `jfe`) di buat/edit event ALK; kolom ditambah manual di DB lalu `prisma db pull`
-- Internal API: `POST /api/internal/ww-dashboard` — jumlah WW bulanan + grafik kehadiran pengurus (Squad/Core userlevel 2/3) vs peserta (Volunteer/guest 0/1) per cabang ALK
+- Internal API: `POST /api/internal/ww-dashboard` — jumlah WW bulanan + grafik kehadiran pengurus vs peserta per cabang ALK
 
 ## Recent Updates [2026-08-18]
 - Membership: join volunteer langsung (userlevel 1); join squad insert `upgrade`; admin ALK approve → userlevel 2 lalu hapus row
