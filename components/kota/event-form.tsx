@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createEvent, updateEvent } from '@/lib/actions/event'
 import type { EventDetailFull } from '@/lib/actions/event'
+import type { event_wwtype } from '@/lib/generated/enums'
 
 const TARGET_OPTIONS = ['Umum', 'Volunteer', 'Squad', 'Core', 'Leader', 'Tim Nasional']
 const TARGET_VALUES: Record<string, string> = {
@@ -20,6 +21,10 @@ const TARGET_PENGURUS_LABELS: Record<string, string> = Object.fromEntries(
 )
 
 const JENIS_OPTIONS = ['Offline', 'Online']
+const WWTYPE_OPTIONS: { value: event_wwtype; label: string }[] = [
+  { value: 'bulanan', label: 'Bulanan' },
+  { value: 'jfe', label: 'JFE' },
+]
 
 function parseTargetToLabels(stored: string, labelsMap: Record<string, string>): string[] {
   return stored.split(',').filter(Boolean).map((v) => labelsMap[v.trim()]).filter(Boolean)
@@ -42,6 +47,7 @@ function parseLocalDate(s: string): Date {
 type FormState = {
   nama_event: string
   jenisevent: string
+  wwtype: event_wwtype
   target: string[]
   targetpengurus: string[]
   targetjumlah: string
@@ -81,6 +87,7 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl }: EventF
   const [form, setForm] = useState<FormState>({
     nama_event: event?.nama_event ?? '',
     jenisevent: event?.jenisevent ?? 'Offline',
+    wwtype: event?.wwtype ?? 'bulanan',
     target: event?.target ? parseTargetToLabels(event.target, TARGET_LABELS) : [],
     targetpengurus: event?.targetpengurus ? parseTargetToLabels(event.targetpengurus, TARGET_PENGURUS_LABELS) : [],
     targetjumlah: event ? String(event.targetjumlah) : '',
@@ -180,7 +187,8 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl }: EventF
     }
     const script = document.createElement('script')
     script.id = scriptId
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places`
+    // loading=async = Google's recommended bootstrap (silences the console warning)
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places&loading=async`
     script.async = true
     script.onload = initMap
     document.head.appendChild(script)
@@ -197,6 +205,7 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl }: EventF
         const payload = {
           nama_event: form.nama_event.trim(),
           jenisevent: form.jenisevent,
+          wwtype: form.wwtype,
           target: labelsToValues(form.target, TARGET_VALUES),
           targetpengurus: labelsToValues(form.targetpengurus, TARGET_PENGURUS_VALUES),
           targetjumlah: parseInt(form.targetjumlah, 10) || 0,
@@ -262,6 +271,18 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl }: EventF
               className={`${inputCls} appearance-none`}
             >
               {JENIS_OPTIONS.map((j) => <option key={j} value={j}>{j}</option>)}
+            </select>
+          </FormField>
+
+          <FormField label="Tipe WW">
+            <select
+              value={form.wwtype}
+              onChange={(e) => setField('wwtype', e.target.value as event_wwtype)}
+              className={`${inputCls} appearance-none`}
+            >
+              {WWTYPE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
             </select>
           </FormField>
 

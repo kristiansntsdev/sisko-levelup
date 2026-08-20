@@ -131,6 +131,23 @@ export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeFilter<$PrismaModel>
 }
 
+export type Enumevent_wwtypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.event_wwtype | Prisma.Enumevent_wwtypeFieldRefInput<$PrismaModel>
+  in?: $Enums.event_wwtype[]
+  notIn?: $Enums.event_wwtype[]
+  not?: Prisma.NestedEnumevent_wwtypeFilter<$PrismaModel> | $Enums.event_wwtype
+}
+
+export type Enumevent_wwtypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.event_wwtype | Prisma.Enumevent_wwtypeFieldRefInput<$PrismaModel>
+  in?: $Enums.event_wwtype[]
+  notIn?: $Enums.event_wwtype[]
+  not?: Prisma.NestedEnumevent_wwtypeWithAggregatesFilter<$PrismaModel> | $Enums.event_wwtype
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumevent_wwtypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumevent_wwtypeFilter<$PrismaModel>
+}
+
 export type StringNullableFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
   in?: string[] | null
@@ -463,6 +480,23 @@ export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedDateTimeFilter<$PrismaModel>
   _max?: Prisma.NestedDateTimeFilter<$PrismaModel>
+}
+
+export type NestedEnumevent_wwtypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.event_wwtype | Prisma.Enumevent_wwtypeFieldRefInput<$PrismaModel>
+  in?: $Enums.event_wwtype[]
+  notIn?: $Enums.event_wwtype[]
+  not?: Prisma.NestedEnumevent_wwtypeFilter<$PrismaModel> | $Enums.event_wwtype
+}
+
+export type NestedEnumevent_wwtypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.event_wwtype | Prisma.Enumevent_wwtypeFieldRefInput<$PrismaModel>
+  in?: $Enums.event_wwtype[]
+  notIn?: $Enums.event_wwtype[]
+  not?: Prisma.NestedEnumevent_wwtypeWithAggregatesFilter<$PrismaModel> | $Enums.event_wwtype
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumevent_wwtypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumevent_wwtypeFilter<$PrismaModel>
 }
 
 export type NestedStringNullableFilter<$PrismaModel = never> = {

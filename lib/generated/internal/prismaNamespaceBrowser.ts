@@ -211,6 +211,7 @@ export const EventScalarFieldEnum = {
   targetpengurus: 'targetpengurus',
   targetjumlah: 'targetjumlah',
   jenisevent: 'jenisevent',
+  wwtype: 'wwtype',
   jamselesaievent: 'jamselesaievent',
   longlatevent: 'longlatevent',
   radius: 'radius',

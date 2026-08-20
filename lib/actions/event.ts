@@ -1,6 +1,7 @@
 'use server'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
+import type { event_wwtype } from '@/lib/generated/enums'
 
 const POSTER_BASE = 'https://sisko.levelupgen.com/uploads/poster/'
 
@@ -167,6 +168,7 @@ export type EventDetailFull = {
   danaevent: string
   posterUrl: string
   jenisevent: string
+  wwtype: event_wwtype
   linkevent: string
   longlatevent: string
   radius: number
@@ -187,7 +189,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       tglevent: true, tgleventselesai: true,
       jamevent: true, jamselesaievent: true,
       alamatevent: true, danaevent: true, posterevent: true,
-      jenisevent: true, linkevent: true, longlatevent: true,
+      jenisevent: true, wwtype: true, linkevent: true, longlatevent: true,
       radius: true, approvenasional: true, targetjumlah: true,
       target: true, targetpengurus: true, suratpemberitahuan: true,
       registrasi: {
@@ -234,6 +236,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
     danaevent: event.danaevent,
     posterUrl: event.posterevent ? `${POSTER_BASE}${event.posterevent}` : '',
     jenisevent: event.jenisevent,
+    wwtype: event.wwtype,
     linkevent: event.linkevent,
     longlatevent: event.longlatevent,
     radius: event.radius,
@@ -295,6 +298,7 @@ export type EventFormPayload = {
   idCabang: string
   nama_event: string
   jenisevent: string
+  wwtype: event_wwtype
   target: string
   targetpengurus: string
   targetjumlah: number
@@ -326,6 +330,7 @@ export async function createEvent(payload: EventFormPayload): Promise<number> {
       targetpengurus: payload.targetpengurus,
       targetjumlah: payload.targetjumlah,
       jenisevent: payload.jenisevent,
+      wwtype: payload.wwtype,
       longlatevent: payload.longlatevent,
       radius: payload.radius,
       linkevent: '',
@@ -360,6 +365,7 @@ export async function updateEvent(
     data: {
       nama_event: payload.nama_event,
       jenisevent: payload.jenisevent,
+      wwtype: payload.wwtype,
       target: payload.target,
       targetpengurus: payload.targetpengurus,
       targetjumlah: payload.targetjumlah,

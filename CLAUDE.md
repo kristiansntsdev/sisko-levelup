@@ -38,6 +38,12 @@ lib/actions/upgrade.ts                # joinVolunteer, joinSquad, approveSquad
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-08-20]
+- Admin `/admin` + `verify-member`: hanya `pengurus.divisi = alk` + password pengurus (path peserta dihapus)
+- Internal API: `POST /api/internal/verify-member` — ALK pengurus only (username/email + optional password)
+- Event form Maps: `loading=async` on script URL (silences Google bootstrap warning)
+- Event form: field `wwtype` (enum `bulanan` | `jfe`) di buat/edit event ALK; kolom ditambah manual di DB lalu `prisma db pull`
+
 ## Recent Updates [2026-08-18]
 - Membership: join volunteer langsung (userlevel 1); join squad insert `upgrade`; admin ALK approve → userlevel 2 lalu hapus row
 - Beranda ALK Kota: kartu ringkasan peserta (volunteer/core/squad), event offline/online, dan total dana usul/riil/event per cabang
@@ -45,8 +51,7 @@ task.md                               # Blocked: approval sampai core
 ## Recent Updates [2026-08-15]
 - Event absensi: tampilkan userlevel (volunteer/squad/core/pic) di sebelah nama pada Presensi Scan QR
 
-- Internal API: `POST /api/internal/verify-member` (Bearer `INTERNAL_API_SECRET`) looks up `auth_users`/`peserta` by email or usercode for winner-principle LevelUp login
-
+- Internal API: `POST /api/internal/verify-member` (Bearer `INTERNAL_API_SECRET`) — hanya pengurus `divisi=alk` (+ password bila dikirim)
 ## Recent Updates [2026-07-25]
 
 - Fix createAbsen: transaction (absen then attend), try/catch, revalidatePath isolated; decodeQR allows empty email; Presensi query uses id_event_int OR id_event

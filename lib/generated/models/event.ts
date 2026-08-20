@@ -53,6 +53,7 @@ export type EventMinAggregateOutputType = {
   targetpengurus: string | null
   targetjumlah: number | null
   jenisevent: string | null
+  wwtype: $Enums.event_wwtype | null
   jamselesaievent: string | null
   longlatevent: string | null
   radius: number | null
@@ -81,6 +82,7 @@ export type EventMaxAggregateOutputType = {
   targetpengurus: string | null
   targetjumlah: number | null
   jenisevent: string | null
+  wwtype: $Enums.event_wwtype | null
   jamselesaievent: string | null
   longlatevent: string | null
   radius: number | null
@@ -109,6 +111,7 @@ export type EventCountAggregateOutputType = {
   targetpengurus: number
   targetjumlah: number
   jenisevent: number
+  wwtype: number
   jamselesaievent: number
   longlatevent: number
   radius: number
@@ -151,6 +154,7 @@ export type EventMinAggregateInputType = {
   targetpengurus?: true
   targetjumlah?: true
   jenisevent?: true
+  wwtype?: true
   jamselesaievent?: true
   longlatevent?: true
   radius?: true
@@ -179,6 +183,7 @@ export type EventMaxAggregateInputType = {
   targetpengurus?: true
   targetjumlah?: true
   jenisevent?: true
+  wwtype?: true
   jamselesaievent?: true
   longlatevent?: true
   radius?: true
@@ -207,6 +212,7 @@ export type EventCountAggregateInputType = {
   targetpengurus?: true
   targetjumlah?: true
   jenisevent?: true
+  wwtype?: true
   jamselesaievent?: true
   longlatevent?: true
   radius?: true
@@ -322,6 +328,7 @@ export type EventGroupByOutputType = {
   targetpengurus: string
   targetjumlah: number
   jenisevent: string
+  wwtype: $Enums.event_wwtype
   jamselesaievent: string
   longlatevent: string
   radius: number
@@ -373,6 +380,7 @@ export type eventWhereInput = {
   targetpengurus?: Prisma.StringFilter<"event"> | string
   targetjumlah?: Prisma.IntFilter<"event"> | number
   jenisevent?: Prisma.StringFilter<"event"> | string
+  wwtype?: Prisma.Enumevent_wwtypeFilter<"event"> | $Enums.event_wwtype
   jamselesaievent?: Prisma.StringFilter<"event"> | string
   longlatevent?: Prisma.StringFilter<"event"> | string
   radius?: Prisma.IntFilter<"event"> | number
@@ -402,6 +410,7 @@ export type eventOrderByWithRelationInput = {
   targetpengurus?: Prisma.SortOrder
   targetjumlah?: Prisma.SortOrder
   jenisevent?: Prisma.SortOrder
+  wwtype?: Prisma.SortOrder
   jamselesaievent?: Prisma.SortOrder
   longlatevent?: Prisma.SortOrder
   radius?: Prisma.SortOrder
@@ -435,6 +444,7 @@ export type eventWhereUniqueInput = Prisma.AtLeast<{
   targetpengurus?: Prisma.StringFilter<"event"> | string
   targetjumlah?: Prisma.IntFilter<"event"> | number
   jenisevent?: Prisma.StringFilter<"event"> | string
+  wwtype?: Prisma.Enumevent_wwtypeFilter<"event"> | $Enums.event_wwtype
   jamselesaievent?: Prisma.StringFilter<"event"> | string
   longlatevent?: Prisma.StringFilter<"event"> | string
   radius?: Prisma.IntFilter<"event"> | number
@@ -464,6 +474,7 @@ export type eventOrderByWithAggregationInput = {
   targetpengurus?: Prisma.SortOrder
   targetjumlah?: Prisma.SortOrder
   jenisevent?: Prisma.SortOrder
+  wwtype?: Prisma.SortOrder
   jamselesaievent?: Prisma.SortOrder
   longlatevent?: Prisma.SortOrder
   radius?: Prisma.SortOrder
@@ -500,6 +511,7 @@ export type eventScalarWhereWithAggregatesInput = {
   targetpengurus?: Prisma.StringWithAggregatesFilter<"event"> | string
   targetjumlah?: Prisma.IntWithAggregatesFilter<"event"> | number
   jenisevent?: Prisma.StringWithAggregatesFilter<"event"> | string
+  wwtype?: Prisma.Enumevent_wwtypeWithAggregatesFilter<"event"> | $Enums.event_wwtype
   jamselesaievent?: Prisma.StringWithAggregatesFilter<"event"> | string
   longlatevent?: Prisma.StringWithAggregatesFilter<"event"> | string
   radius?: Prisma.IntWithAggregatesFilter<"event"> | number
@@ -527,6 +539,7 @@ export type eventCreateInput = {
   targetpengurus: string
   targetjumlah: number
   jenisevent: string
+  wwtype?: $Enums.event_wwtype
   jamselesaievent: string
   longlatevent: string
   radius: number
@@ -556,6 +569,7 @@ export type eventUncheckedCreateInput = {
   targetpengurus: string
   targetjumlah: number
   jenisevent: string
+  wwtype?: $Enums.event_wwtype
   jamselesaievent: string
   longlatevent: string
   radius: number
@@ -584,6 +598,7 @@ export type eventUpdateInput = {
   targetpengurus?: Prisma.StringFieldUpdateOperationsInput | string
   targetjumlah?: Prisma.IntFieldUpdateOperationsInput | number
   jenisevent?: Prisma.StringFieldUpdateOperationsInput | string
+  wwtype?: Prisma.Enumevent_wwtypeFieldUpdateOperationsInput | $Enums.event_wwtype
   jamselesaievent?: Prisma.StringFieldUpdateOperationsInput | string
   longlatevent?: Prisma.StringFieldUpdateOperationsInput | string
   radius?: Prisma.IntFieldUpdateOperationsInput | number
@@ -613,6 +628,7 @@ export type eventUncheckedUpdateInput = {
   targetpengurus?: Prisma.StringFieldUpdateOperationsInput | string
   targetjumlah?: Prisma.IntFieldUpdateOperationsInput | number
   jenisevent?: Prisma.StringFieldUpdateOperationsInput | string
+  wwtype?: Prisma.Enumevent_wwtypeFieldUpdateOperationsInput | $Enums.event_wwtype
   jamselesaievent?: Prisma.StringFieldUpdateOperationsInput | string
   longlatevent?: Prisma.StringFieldUpdateOperationsInput | string
   radius?: Prisma.IntFieldUpdateOperationsInput | number
@@ -642,6 +658,7 @@ export type eventCreateManyInput = {
   targetpengurus: string
   targetjumlah: number
   jenisevent: string
+  wwtype?: $Enums.event_wwtype
   jamselesaievent: string
   longlatevent: string
   radius: number
@@ -669,6 +686,7 @@ export type eventUpdateManyMutationInput = {
   targetpengurus?: Prisma.StringFieldUpdateOperationsInput | string
   targetjumlah?: Prisma.IntFieldUpdateOperationsInput | number
   jenisevent?: Prisma.StringFieldUpdateOperationsInput | string
+  wwtype?: Prisma.Enumevent_wwtypeFieldUpdateOperationsInput | $Enums.event_wwtype
   jamselesaievent?: Prisma.StringFieldUpdateOperationsInput | string
   longlatevent?: Prisma.StringFieldUpdateOperationsInput | string
   radius?: Prisma.IntFieldUpdateOperationsInput | number
@@ -697,6 +715,7 @@ export type eventUncheckedUpdateManyInput = {
   targetpengurus?: Prisma.StringFieldUpdateOperationsInput | string
   targetjumlah?: Prisma.IntFieldUpdateOperationsInput | number
   jenisevent?: Prisma.StringFieldUpdateOperationsInput | string
+  wwtype?: Prisma.Enumevent_wwtypeFieldUpdateOperationsInput | $Enums.event_wwtype
   jamselesaievent?: Prisma.StringFieldUpdateOperationsInput | string
   longlatevent?: Prisma.StringFieldUpdateOperationsInput | string
   radius?: Prisma.IntFieldUpdateOperationsInput | number
@@ -731,6 +750,7 @@ export type eventCountOrderByAggregateInput = {
   targetpengurus?: Prisma.SortOrder
   targetjumlah?: Prisma.SortOrder
   jenisevent?: Prisma.SortOrder
+  wwtype?: Prisma.SortOrder
   jamselesaievent?: Prisma.SortOrder
   longlatevent?: Prisma.SortOrder
   radius?: Prisma.SortOrder
@@ -765,6 +785,7 @@ export type eventMaxOrderByAggregateInput = {
   targetpengurus?: Prisma.SortOrder
   targetjumlah?: Prisma.SortOrder
   jenisevent?: Prisma.SortOrder
+  wwtype?: Prisma.SortOrder
   jamselesaievent?: Prisma.SortOrder
   longlatevent?: Prisma.SortOrder
   radius?: Prisma.SortOrder
@@ -793,6 +814,7 @@ export type eventMinOrderByAggregateInput = {
   targetpengurus?: Prisma.SortOrder
   targetjumlah?: Prisma.SortOrder
   jenisevent?: Prisma.SortOrder
+  wwtype?: Prisma.SortOrder
   jamselesaievent?: Prisma.SortOrder
   longlatevent?: Prisma.SortOrder
   radius?: Prisma.SortOrder
@@ -815,6 +837,10 @@ export type eventSumOrderByAggregateInput = {
 export type EventScalarRelationFilter = {
   is?: Prisma.eventWhereInput
   isNot?: Prisma.eventWhereInput
+}
+
+export type Enumevent_wwtypeFieldUpdateOperationsInput = {
+  set?: $Enums.event_wwtype
 }
 
 export type eventCreateNestedOneWithoutRegistrasiInput = {
@@ -845,6 +871,7 @@ export type eventCreateWithoutRegistrasiInput = {
   targetpengurus: string
   targetjumlah: number
   jenisevent: string
+  wwtype?: $Enums.event_wwtype
   jamselesaievent: string
   longlatevent: string
   radius: number
@@ -873,6 +900,7 @@ export type eventUncheckedCreateWithoutRegistrasiInput = {
   targetpengurus: string
   targetjumlah: number
   jenisevent: string
+  wwtype?: $Enums.event_wwtype
   jamselesaievent: string
   longlatevent: string
   radius: number
@@ -916,6 +944,7 @@ export type eventUpdateWithoutRegistrasiInput = {
   targetpengurus?: Prisma.StringFieldUpdateOperationsInput | string
   targetjumlah?: Prisma.IntFieldUpdateOperationsInput | number
   jenisevent?: Prisma.StringFieldUpdateOperationsInput | string
+  wwtype?: Prisma.Enumevent_wwtypeFieldUpdateOperationsInput | $Enums.event_wwtype
   jamselesaievent?: Prisma.StringFieldUpdateOperationsInput | string
   longlatevent?: Prisma.StringFieldUpdateOperationsInput | string
   radius?: Prisma.IntFieldUpdateOperationsInput | number
@@ -944,6 +973,7 @@ export type eventUncheckedUpdateWithoutRegistrasiInput = {
   targetpengurus?: Prisma.StringFieldUpdateOperationsInput | string
   targetjumlah?: Prisma.IntFieldUpdateOperationsInput | number
   jenisevent?: Prisma.StringFieldUpdateOperationsInput | string
+  wwtype?: Prisma.Enumevent_wwtypeFieldUpdateOperationsInput | $Enums.event_wwtype
   jamselesaievent?: Prisma.StringFieldUpdateOperationsInput | string
   longlatevent?: Prisma.StringFieldUpdateOperationsInput | string
   radius?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1003,6 +1033,7 @@ export type eventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   targetpengurus?: boolean
   targetjumlah?: boolean
   jenisevent?: boolean
+  wwtype?: boolean
   jamselesaievent?: boolean
   longlatevent?: boolean
   radius?: boolean
@@ -1035,6 +1066,7 @@ export type eventSelectScalar = {
   targetpengurus?: boolean
   targetjumlah?: boolean
   jenisevent?: boolean
+  wwtype?: boolean
   jamselesaievent?: boolean
   longlatevent?: boolean
   radius?: boolean
@@ -1048,7 +1080,7 @@ export type eventSelectScalar = {
   suratpemberitahuan?: boolean
 }
 
-export type eventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_event" | "nama_event" | "tglevent" | "tgleventselesai" | "jamevent" | "alamatevent" | "danaevent" | "posterevent" | "proposalevent" | "id_cabang" | "target" | "targetpengurus" | "targetjumlah" | "jenisevent" | "jamselesaievent" | "longlatevent" | "radius" | "linkevent" | "approvenasional" | "approveadmin" | "notenasional" | "noteadmin" | "qr" | "khusus" | "suratpemberitahuan", ExtArgs["result"]["event"]>
+export type eventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_event" | "nama_event" | "tglevent" | "tgleventselesai" | "jamevent" | "alamatevent" | "danaevent" | "posterevent" | "proposalevent" | "id_cabang" | "target" | "targetpengurus" | "targetjumlah" | "jenisevent" | "wwtype" | "jamselesaievent" | "longlatevent" | "radius" | "linkevent" | "approvenasional" | "approveadmin" | "notenasional" | "noteadmin" | "qr" | "khusus" | "suratpemberitahuan", ExtArgs["result"]["event"]>
 export type eventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   registrasi?: boolean | Prisma.event$registrasiArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
@@ -1074,6 +1106,7 @@ export type $eventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     targetpengurus: string
     targetjumlah: number
     jenisevent: string
+    wwtype: $Enums.event_wwtype
     jamselesaievent: string
     longlatevent: string
     radius: number
@@ -1469,6 +1502,7 @@ export interface eventFieldRefs {
   readonly targetpengurus: Prisma.FieldRef<"event", 'String'>
   readonly targetjumlah: Prisma.FieldRef<"event", 'Int'>
   readonly jenisevent: Prisma.FieldRef<"event", 'String'>
+  readonly wwtype: Prisma.FieldRef<"event", 'event_wwtype'>
   readonly jamselesaievent: Prisma.FieldRef<"event", 'String'>
   readonly longlatevent: Prisma.FieldRef<"event", 'String'>
   readonly radius: Prisma.FieldRef<"event", 'Int'>

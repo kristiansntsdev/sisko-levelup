@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
 
         <div>
           <h1 className="text-2xl font-bold text-fg">Masuk Admin</h1>
-          <p className="text-sm text-muted mt-1">Login menggunakan akun pengurus</p>
+          <p className="text-sm text-muted mt-1">Login pengurus ALK</p>
         </div>
 
         <form action={action} className="flex flex-col gap-4">

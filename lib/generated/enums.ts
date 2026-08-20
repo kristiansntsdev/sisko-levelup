@@ -62,3 +62,11 @@ export const kas_kota_txn_kategori = {
 } as const
 
 export type kas_kota_txn_kategori = (typeof kas_kota_txn_kategori)[keyof typeof kas_kota_txn_kategori]
+
+
+export const event_wwtype = {
+  bulanan: 'bulanan',
+  jfe: 'jfe'
+} as const
+
+export type event_wwtype = (typeof event_wwtype)[keyof typeof event_wwtype]

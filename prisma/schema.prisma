@@ -86,6 +86,7 @@ model event {
   targetpengurus     String       @db.Text
   targetjumlah       Int
   jenisevent         String       @db.Text
+  wwtype             event_wwtype @default(bulanan)
   jamselesaievent    String       @db.Text
   longlatevent       String       @db.Text
   radius             Int
@@ -422,6 +423,22 @@ model kas_kota_txn {
   @@index([id_cabang], map: "idx_id_cabang")
 }
 
+model dokumentasi_kota {
+  id          Int    @id @default(autoincrement())
+  id_event    Int    @unique
+  kotalevelup String @db.VarChar(255)
+  gdrive_link String @db.Text
+}
+
+model event_detail {
+  id          Int      @id @default(autoincrement())
+  id_event    Int      @unique(map: "uq_event_detail_event")
+  pembicara   String?  @default("[]") @db.LongText
+  rundown_pra String?  @db.LongText
+  rundown_on  String?  @db.LongText
+  updated_at  DateTime @default(now()) @db.DateTime(0)
+}
+
 enum peserta_status {
   active
   suspend
@@ -449,13 +466,6 @@ enum jobs_place_type {
   perusahaan
 }
 
-model dokumentasi_kota {
-  id          Int    @id @default(autoincrement())
-  id_event    Int    @unique
-  kotalevelup String @db.VarChar(255)
-  gdrive_link String @db.Text
-}
-
 enum kas_kota_txn_tipe {
   masuk
   keluar
@@ -466,11 +476,7 @@ enum kas_kota_txn_kategori {
   event
 }
 
-model event_detail {
-  id           Int      @id @default(autoincrement())
-  id_event     Int      @unique
-  pembicara    String?  @default("[]") @db.LongText
-  rundown_pra  String?  @db.LongText
-  rundown_on   String?  @db.LongText
-  updated_at   DateTime @default(now()) @db.DateTime(0)
+enum event_wwtype {
+  bulanan
+  jfe
 }

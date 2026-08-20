@@ -17,6 +17,9 @@ export async function loginPengurus(
   })
 
   if (!pengurus) return { error: 'Username atau password salah.' }
+  if (pengurus.divisi !== 'alk') {
+    return { error: 'Akses hanya untuk pengurus ALK.' }
+  }
 
   const cookieStore = await cookies()
   cookieStore.set('pengurus_id', String(pengurus.id_pengurus), {
@@ -25,10 +28,7 @@ export async function loginPengurus(
     maxAge: 60 * 60 * 8,
   })
 
-  if (pengurus.divisi === 'alk') redirect('/dashboard/kota/alk')
-  if (pengurus.divisi === 'brim') redirect('/dashboard/kota/brim')
-  if (pengurus.divisi === 'vol') redirect('/dashboard/kota/vol')
-  redirect('/dashboard/kota')
+  redirect('/dashboard/kota/alk')
 }
 
 export async function logoutPengurus() {
