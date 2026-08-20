@@ -15,6 +15,14 @@ type MemberPayload = {
   usercode: string | null
 }
 
+type AlkPengurus = {
+  id_pengurus: number
+  nama: string
+  username: string
+  password: string
+  email: string
+}
+
 function unauthorized() {
   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 }
@@ -46,38 +54,51 @@ function toMember(pengurus: {
   }
 }
 
+async function findPengurusByUsername(username: string): Promise<AlkPengurus | null> {
+  const pengurus = await db.pengurus.findFirst({
+    where: { username, divisi: 'alk' },
+    select: {
+      id_pengurus: true,
+      nama: true,
+      username: true,
+      password: true,
+      auth_users: {
+        take: 1,
+        select: { email: true, name: true },
+        orderBy: { created_at: 'desc' },
+      },
+    },
+  })
+  if (!pengurus) return null
+
+  // ALK usernames are often the email itself (e.g. adminlkngawi@gmail.com)
+  const email =
+    pengurus.auth_users[0]?.email?.toLowerCase() ||
+    (pengurus.username.includes('@')
+      ? pengurus.username.toLowerCase()
+      : `${pengurus.username}@alk.sisko.internal`)
+
+  return {
+    id_pengurus: pengurus.id_pengurus,
+    nama: pengurus.auth_users[0]?.name || pengurus.nama,
+    username: pengurus.username,
+    password: pengurus.password,
+    email,
+  }
+}
+
 /** Resolve ALK pengurus only — never plain peserta. */
 async function findAlkPengurus(emailQuery: string | null, username: string | null) {
-  if (username && !username.includes('@')) {
-    const pengurus = await db.pengurus.findFirst({
-      where: { username, divisi: 'alk' },
-      select: {
-        id_pengurus: true,
-        nama: true,
-        username: true,
-        password: true,
-        auth_users: {
-          take: 1,
-          select: { email: true, name: true },
-          orderBy: { created_at: 'desc' },
-        },
-      },
-    })
-    if (!pengurus) return null
-    const email =
-      pengurus.auth_users[0]?.email?.toLowerCase() ??
-      `${pengurus.username}@alk.sisko.internal`
-    return {
-      id_pengurus: pengurus.id_pengurus,
-      nama: pengurus.auth_users[0]?.name || pengurus.nama,
-      username: pengurus.username,
-      password: pengurus.password,
-      email,
-    }
+  // 1) pengurus.username — includes email-as-username (common for ALK admins)
+  const loginId = username || emailQuery
+  if (loginId) {
+    const byUsername = await findPengurusByUsername(loginId)
+    if (byUsername) return byUsername
   }
 
   if (!emailQuery) return null
 
+  // 2) auth_users.email → linked pengurus ALK
   const authUser = await db.auth_users.findFirst({
     where: { email: emailQuery },
     select: {
