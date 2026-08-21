@@ -90,15 +90,25 @@ const FILTER_LABELS: Record<string, string> = {
   all: 'Semua', approved: 'Disetujui', pending: 'Belum Approve',
 }
 
-const NASIONAL_FILTER_KEYS = ['all', 'seluruh_kota', 'khusus'] as const
+const NASIONAL_FILTER_KEYS = ['all', 'seluruh_kota', 'khusus', 'pending', 'rejected'] as const
 const NASIONAL_FILTER_LABELS: Record<(typeof NASIONAL_FILTER_KEYS)[number], string> = {
   all: 'Semua',
   seluruh_kota: 'Seluruh Kota',
   khusus: 'Khusus',
+  pending: 'Belum Approve',
+  rejected: 'Ditolak',
 }
 
 function isKhususEvent(e: EventDashboard) {
   return e.khusus === '1'
+}
+
+function isRejectedEvent(e: EventDashboard) {
+  return e.approvenasional !== '1' && e.notenasional.trim() !== ''
+}
+
+function isPendingEvent(e: EventDashboard) {
+  return e.approvenasional !== '1' && e.notenasional.trim() === ''
 }
 
 function eventOptionLabel(e: EventDashboard) {
@@ -350,14 +360,20 @@ function EventTab({ events, isNasional }: { events: EventDashboard[]; isNasional
     if (isNasional) {
       const seluruh = sorted.filter((e) => !isKhususEvent(e))
       const khusus = sorted.filter(isKhususEvent)
+      const pending = sorted.filter(isPendingEvent)
+      const rejected = sorted.filter(isRejectedEvent)
       const counts = {
         all: sorted.length,
         seluruh_kota: seluruh.length,
         khusus: khusus.length,
+        pending: pending.length,
+        rejected: rejected.length,
       }
       const filtered =
         filter === 'seluruh_kota' ? seluruh
         : filter === 'khusus' ? khusus
+        : filter === 'pending' ? pending
+        : filter === 'rejected' ? rejected
         : sorted
       const filterTabs = NASIONAL_FILTER_KEYS.map((k) => ({
         key: k,
@@ -381,13 +397,13 @@ function EventTab({ events, isNasional }: { events: EventDashboard[]; isNasional
   }, [events, filter, isNasional])
 
   const subtitle = isNasional
-    ? `${(counts as { seluruh_kota: number }).seluruh_kota} seluruh kota · ${(counts as { khusus: number }).khusus} khusus`
+    ? `${(counts as { pending: number }).pending} belum approve · ${(counts as { rejected: number }).rejected} ditolak`
     : `${(counts as { approved: number }).approved} disetujui · ${(counts as { pending: number }).pending} belum approve`
 
   const heroMeta = isNasional
     ? [
-        { label: 'Seluruh Kota', value: (counts as { seluruh_kota: number }).seluruh_kota },
-        { label: 'Khusus', value: (counts as { khusus: number }).khusus },
+        { label: 'Belum Approve', value: (counts as { pending: number }).pending },
+        { label: 'Ditolak', value: (counts as { rejected: number }).rejected },
       ]
     : [
         { label: 'Disetujui', value: (counts as { approved: number }).approved },
@@ -423,9 +439,50 @@ function EventTab({ events, isNasional }: { events: EventDashboard[]; isNasional
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
-          {filtered.map((e) => (
-            <EventDateCard key={e.id_event} event={e} onClick={() => router.push(`/dashboard/kota/alk/event/${e.id_event}`)} />
-          ))}
+          {filtered.map((e) => {
+            const rejected = isNasional && isRejectedEvent(e)
+            const needsApprove = isNasional && isPendingEvent(e)
+            if (needsApprove || rejected) {
+              return (
+                <div
+                  key={e.id_event}
+                  className={`bg-surface border rounded-[16px] px-4 py-3.5 flex items-center gap-3 ${
+                    rejected ? 'border-border' : 'border-accent'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/dashboard/kota/alk/event/${e.id_event}`)}
+                    className="flex-1 min-w-0 text-left"
+                  >
+                    <p className="text-[15px] font-bold text-fg truncate">{e.nama_event}</p>
+                    <p className="text-[12px] text-muted mt-0.5">{e.tglDisplay}</p>
+                    {rejected ? (
+                      <p className="text-[11px] text-muted mt-1 line-clamp-2">{e.notenasional}</p>
+                    ) : null}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/dashboard/kota/alk/event/${e.id_event}/approve`)}
+                    className={`shrink-0 px-3.5 py-2 rounded-full text-[13px] font-semibold ${
+                      rejected
+                        ? 'border border-border text-muted'
+                        : 'border border-accent text-accent'
+                    }`}
+                  >
+                    {rejected ? 'ditolak' : 'approve'}
+                  </button>
+                </div>
+              )
+            }
+            return (
+              <EventDateCard
+                key={e.id_event}
+                event={e}
+                onClick={() => router.push(`/dashboard/kota/alk/event/${e.id_event}`)}
+              />
+            )
+          })}
         </div>
       )}
     </div>

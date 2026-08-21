@@ -8,6 +8,7 @@ import {
   isNasionalAdmin,
   NASIONAL_EVENT_CABANG,
 } from '@/lib/event-cabang'
+import { appendNotenasional } from '@/lib/event-approval'
 import { formatTelegramMessage, nasionalScopeLabel, notifyTelegram } from '@/lib/telegram'
 
 const POSTER_BASE = 'https://sisko.levelupgen.com/uploads/poster/'
@@ -108,6 +109,7 @@ export type EventDashboard = {
   alamatevent: string
   posterUrl: string
   approvenasional: string
+  notenasional: string
   khusus: string
 }
 
@@ -120,7 +122,7 @@ export async function getAllEventsByKotalevelup(
     select: {
       id_event: true, nama_event: true,
       tglevent: true, jamevent: true, alamatevent: true, posterevent: true,
-      approvenasional: true, khusus: true,
+      approvenasional: true, notenasional: true, khusus: true,
     },
   })
   return rows.map((e) => ({
@@ -134,6 +136,7 @@ export async function getAllEventsByKotalevelup(
     alamatevent: e.alamatevent,
     posterUrl: `${POSTER_BASE}${e.posterevent}`,
     approvenasional: e.approvenasional,
+    notenasional: e.notenasional ?? '',
     khusus: e.khusus,
   }))
 }
@@ -182,6 +185,7 @@ export type EventDetailFull = {
   longlatevent: string
   radius: number
   approvenasional: string
+  notenasional: string
   targetjumlah: number
   target: string
   targetpengurus: string
@@ -200,7 +204,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       jamevent: true, jamselesaievent: true,
       alamatevent: true, danaevent: true, posterevent: true,
       jenisevent: true, wwtype: true, linkevent: true, longlatevent: true,
-      radius: true, approvenasional: true, targetjumlah: true,
+      radius: true, approvenasional: true, notenasional: true, targetjumlah: true,
       target: true, targetpengurus: true, suratpemberitahuan: true, khusus: true,
       registrasi: {
         select: {
@@ -251,6 +255,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
     longlatevent: event.longlatevent,
     radius: event.radius,
     approvenasional: event.approvenasional,
+    notenasional: event.notenasional,
     targetjumlah: event.targetjumlah,
     target: event.target,
     targetpengurus: event.targetpengurus,
@@ -510,4 +515,88 @@ export async function getAlkBerandaStats(idCabang: string): Promise<AlkBerandaSt
     danaRiil: toNum(riilRows[0]?.total_dana_riil),
     danaEvent: toNum(eventRows[0]?.total_dana_event),
   }
+}
+
+export type EventApprovalResult = { ok: true } | { ok: false; error: string }
+
+async function requireSekretariatNasional(): Promise<
+  { ok: true } | { ok: false; error: string }
+> {
+  const pengurusId = (await cookies()).get('pengurus_id')?.value
+  if (!pengurusId) return { ok: false, error: 'Unauthorized' }
+  const pengurus = await db.pengurus.findUnique({
+    where: { id_pengurus: Number(pengurusId) },
+    select: { username: true, divisi: true },
+  })
+  if (!pengurus || pengurus.divisi !== 'alk' || !isNasionalAdmin(pengurus.username)) {
+    return { ok: false, error: 'Hanya Sekretariat Nasional yang bisa approve' }
+  }
+  return { ok: true }
+}
+
+/** ALK Nasional (Sekretariat) approve → approvenasional = 1 */
+export async function approveEventAlkNasional(
+  idEvent: number,
+): Promise<EventApprovalResult> {
+  const gate = await requireSekretariatNasional()
+  if (!gate.ok) return gate
+
+  const event = await db.event.findUnique({
+    where: { id_event: idEvent },
+    select: { nama_event: true, khusus: true },
+  })
+  if (!event) return { ok: false, error: 'Event tidak ditemukan' }
+
+  await db.event.update({
+    where: { id_event: idEvent },
+    data: { approvenasional: '1' },
+  })
+  revalidatePath('/dashboard/kota/alk')
+  revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
+
+  void notifyTelegram(
+    formatTelegramMessage('[Event Nasional] Approved ALK', {
+      Nama: event.nama_event,
+      Tipe: nasionalScopeLabel(event.khusus),
+      ID: idEvent,
+    }),
+  )
+  return { ok: true }
+}
+
+/** ALK Nasional reject → append "ALK Nasional : …" ke notenasional */
+export async function rejectEventAlkNasional(
+  idEvent: number,
+  alasan: string,
+): Promise<EventApprovalResult> {
+  const gate = await requireSekretariatNasional()
+  if (!gate.ok) return gate
+
+  const reason = alasan.trim()
+  if (!reason) return { ok: false, error: 'Alasan reject wajib diisi' }
+
+  const existing = await db.event.findUnique({
+    where: { id_event: idEvent },
+    select: { notenasional: true, nama_event: true, khusus: true },
+  })
+  if (!existing) return { ok: false, error: 'Event tidak ditemukan' }
+
+  await db.event.update({
+    where: { id_event: idEvent },
+    data: {
+      approvenasional: '0',
+      notenasional: appendNotenasional(existing.notenasional, 'alk', reason),
+    },
+  })
+  revalidatePath('/dashboard/kota/alk')
+  revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
+
+  void notifyTelegram(
+    formatTelegramMessage('[Event Nasional] Rejected ALK', {
+      Nama: existing.nama_event,
+      Alasan: reason,
+      ID: idEvent,
+    }),
+  )
+  return { ok: true }
 }
