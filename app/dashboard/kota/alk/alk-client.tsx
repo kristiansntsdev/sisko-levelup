@@ -26,6 +26,7 @@ interface AlkClientProps {
   kasKota: KasKotaData
   stats: AlkBerandaStats
   pendingApprovals: number
+  isNasional?: boolean
 }
 
 // ── Icons ──────────────────────────────────────────────────────
@@ -87,6 +88,17 @@ function getGreeting() {
 const FILTER_KEYS = ['all', 'approved', 'pending'] as const
 const FILTER_LABELS: Record<string, string> = {
   all: 'Semua', approved: 'Disetujui', pending: 'Belum Approve',
+}
+
+const NASIONAL_FILTER_KEYS = ['all', 'seluruh_kota', 'khusus'] as const
+const NASIONAL_FILTER_LABELS: Record<(typeof NASIONAL_FILTER_KEYS)[number], string> = {
+  all: 'Semua',
+  seluruh_kota: 'Seluruh Kota',
+  khusus: 'Khusus',
+}
+
+function isKhususEvent(e: EventDashboard) {
+  return e.khusus === '1'
 }
 
 function eventOptionLabel(e: EventDashboard) {
@@ -328,36 +340,66 @@ function BerandaTab({ pengurus, events, namaCabang, stats, saldo, pendingApprova
 }
 
 // ── Event tab ──────────────────────────────────────────────────
-function EventTab({ events }: { events: EventDashboard[] }) {
+function EventTab({ events, isNasional }: { events: EventDashboard[]; isNasional: boolean }) {
   const router = useRouter()
   const [filter, setFilter] = useState('all')
 
-  const { filtered, counts } = useMemo(() => {
+  const { filtered, counts, filterTabs } = useMemo(() => {
+    const sorted = [...events].sort((a, b) => b.tglMs - a.tglMs)
+
+    if (isNasional) {
+      const seluruh = sorted.filter((e) => !isKhususEvent(e))
+      const khusus = sorted.filter(isKhususEvent)
+      const counts = {
+        all: sorted.length,
+        seluruh_kota: seluruh.length,
+        khusus: khusus.length,
+      }
+      const filtered =
+        filter === 'seluruh_kota' ? seluruh
+        : filter === 'khusus' ? khusus
+        : sorted
+      const filterTabs = NASIONAL_FILTER_KEYS.map((k) => ({
+        key: k,
+        label: NASIONAL_FILTER_LABELS[k],
+        count: counts[k],
+      }))
+      return { filtered, counts, filterTabs }
+    }
+
     const isApproved = (e: EventDashboard) => e.approvenasional === '1'
     const counts = { all: events.length, approved: 0, pending: 0 }
     for (const e of events) {
       if (isApproved(e)) counts.approved++
       else counts.pending++
     }
-    const sorted = [...events].sort((a, b) => b.tglMs - a.tglMs)
-    return {
-      filtered: filter === 'all' ? sorted
-        : filter === 'approved' ? sorted.filter(isApproved)
-        : sorted.filter((e) => !isApproved(e)),
-      counts,
-    }
-  }, [events, filter])
+    const filtered = filter === 'all' ? sorted
+      : filter === 'approved' ? sorted.filter(isApproved)
+      : sorted.filter((e) => !isApproved(e))
+    const filterTabs = FILTER_KEYS.map((k) => ({ key: k, label: FILTER_LABELS[k], count: counts[k] }))
+    return { filtered, counts, filterTabs }
+  }, [events, filter, isNasional])
 
-  const filterTabs = FILTER_KEYS.map((k) => ({ key: k, label: FILTER_LABELS[k], count: counts[k] }))
+  const subtitle = isNasional
+    ? `${(counts as { seluruh_kota: number }).seluruh_kota} seluruh kota · ${(counts as { khusus: number }).khusus} khusus`
+    : `${(counts as { approved: number }).approved} disetujui · ${(counts as { pending: number }).pending} belum approve`
+
+  const heroMeta = isNasional
+    ? [
+        { label: 'Seluruh Kota', value: (counts as { seluruh_kota: number }).seluruh_kota },
+        { label: 'Khusus', value: (counts as { khusus: number }).khusus },
+      ]
+    : [
+        { label: 'Disetujui', value: (counts as { approved: number }).approved },
+        { label: 'Belum Approve', value: (counts as { pending: number }).pending },
+      ]
 
   return (
     <div className="max-w-[480px] mx-auto px-4 flex flex-col gap-4 pb-6">
       <div className="pt-5 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-[22px] font-bold text-fg">Event</h1>
-          <p className="text-[12px] text-muted mt-0.5">
-            {counts.approved} disetujui · {counts.pending} belum approve
-          </p>
+          <p className="text-[12px] text-muted mt-0.5">{subtitle}</p>
         </div>
         <button
           onClick={() => router.push('/dashboard/kota/alk/event/new')}
@@ -368,12 +410,9 @@ function EventTab({ events }: { events: EventDashboard[] }) {
       </div>
 
       <HeroCard
-        label="Total Event Wilayah"
+        label={isNasional ? 'Total Event Nasional' : 'Total Event Wilayah'}
         amount={`${events.length} event`}
-        meta={[
-          { label: 'Disetujui', value: counts.approved },
-          { label: 'Belum Approve', value: counts.pending },
-        ]}
+        meta={heroMeta}
       />
 
       <FilterTabs tabs={filterTabs} active={filter} onChange={setFilter} />
@@ -462,12 +501,12 @@ const TABS: KotaTab[] = [
   { id: 'akun',    label: 'Akun',    icon: <UserIcon /> },
 ]
 
-export function AlkClient({ pengurus, events, namaCabang, kasKota, stats, pendingApprovals }: AlkClientProps) {
+export function AlkClient({ pengurus, events, namaCabang, kasKota, stats, pendingApprovals, isNasional = false }: AlkClientProps) {
   const [activeTab, setActiveTab] = useState('beranda')
 
   const tabContent = {
     beranda: <BerandaTab pengurus={pengurus} events={events} namaCabang={namaCabang} stats={stats} saldo={kasKota.saldo} pendingApprovals={pendingApprovals} />,
-    event:   <EventTab events={events} />,
+    event:   <EventTab events={events} isNasional={isNasional} />,
     kas:     <KasTab kasKota={kasKota} events={events} cabangName={namaCabang} />,
     surat:   <SuratTab pengurus={pengurus} />,
     akun:    <AkunTab pengurus={pengurus} namaCabang={namaCabang} />,

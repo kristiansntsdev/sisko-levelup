@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { getEventDetail } from '@/lib/actions/event'
+import { isNasionalAdmin, resolveEventCabang } from '@/lib/event-cabang'
 import { EventForm } from '@/components/kota/event-form'
 
 export default async function EditEventPage({
@@ -17,7 +18,7 @@ export default async function EditEventPage({
 
   const pengurus = await db.pengurus.findUnique({
     where: { id_pengurus: Number(pengurusId) },
-    select: { divisi: true, kotalevelup: true },
+    select: { divisi: true, kotalevelup: true, username: true },
   })
   if (!pengurus || pengurus.divisi !== 'alk') redirect('/admin')
 
@@ -27,10 +28,11 @@ export default async function EditEventPage({
   return (
     <EventForm
       mode="edit"
-      idCabang={pengurus.kotalevelup}
+      idCabang={resolveEventCabang(pengurus)}
       mapsApiKey={process.env.GMAPS_API_KEY ?? ''}
       event={event}
       backUrl={`/dashboard/kota/alk/event/${id}`}
+      isNasional={isNasionalAdmin(pengurus.username)}
     />
   )
 }

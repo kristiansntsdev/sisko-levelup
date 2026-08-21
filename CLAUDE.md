@@ -38,6 +38,12 @@ lib/actions/upgrade.ts                # joinVolunteer, joinSquad, approveSquad
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-08-21]
+- Tiket online: halaman `/dashboard/tiket/[id]` — brand "event online", QR, tombol Absen Event (dibuka 15 menit sebelum `jamselesaievent`, tutup di jam selesai; tiket tetap tampil selama status confirmed)
+- Sekretariat nasional event tab: filter Semua / Seluruh Kota / Khusus (`khusus` '' vs '1'); form buat/edit pilih tipe → `id_cabang=0` + `khusus`
+- Event create: `sekretariatnasional@gmail.com` → `id_cabang` / cabang efektif `0` (`resolveEventCabang`); pengurus 17 `kotalevelup` ""→`0`
+- Admin login: `sekretariatnasional@gmail.com` (`pengurus` id 17) — `divisi` null → `alk` (password lama tetap); Hostinger MySQL remote timeout dari IP lokal
+
 ## Recent Updates [2026-08-20]
 - WW dashboard: pengurus = userlevel ≥ 2 (Squad/Core/Leader/Nasional); peserta = < 2
 - Event form Maps: `loading=async` on script URL (silences Google bootstrap warning)

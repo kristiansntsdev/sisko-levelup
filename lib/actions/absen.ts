@@ -1,6 +1,8 @@
 'use server'
+import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
+import { eventDateTime, isOnlineAbsenOpen } from '@/lib/event-absen-window'
 import type { QRPayload } from '@/lib/qr'
 
 export async function getPesertaPreview(idPeserta: number) {
@@ -8,6 +10,71 @@ export async function getPesertaPreview(idPeserta: number) {
     where: { id_peserta: idPeserta },
     select: { nama: true, gereja: true },
   })
+}
+
+/** Peserta self-absen for Online events — only in the 15-min-before-end window. */
+export async function absenOnlineSelf(idRegistrasi: number): Promise<
+  | { success: true }
+  | {
+      success: false
+      reason:
+        | 'unauthenticated'
+        | 'not_found'
+        | 'forbidden'
+        | 'not_online'
+        | 'window_closed'
+        | 'already_scanned'
+        | 'error'
+    }
+> {
+  const session = await auth()
+  const idPeserta = session?.user?.idPeserta
+  if (!idPeserta) return { success: false, reason: 'unauthenticated' }
+
+  const row = await db.registrasi.findUnique({
+    where: { id_registrasi: idRegistrasi },
+    select: {
+      id_peserta: true,
+      id_event: true,
+      status: true,
+      event: {
+        select: {
+          jenisevent: true,
+          tgleventselesai: true,
+          jamselesaievent: true,
+        },
+      },
+    },
+  })
+  if (!row) return { success: false, reason: 'not_found' }
+  if (row.id_peserta !== idPeserta) return { success: false, reason: 'forbidden' }
+  if (row.event?.jenisevent !== 'Online') return { success: false, reason: 'not_online' }
+
+  const endAt =
+    row.event.tgleventselesai && row.event.jamselesaievent
+      ? eventDateTime(row.event.tgleventselesai, row.event.jamselesaievent)
+      : null
+  if (!endAt || !isOnlineAbsenOpen(new Date(), endAt)) {
+    return { success: false, reason: 'window_closed' }
+  }
+
+  const email = session.user?.email ?? ''
+  const result = await createAbsen({
+    p: String(row.id_peserta),
+    e: email,
+    ev: String(row.id_event),
+  })
+  if (result.success) {
+    try {
+      revalidatePath('/dashboard')
+      revalidatePath(`/dashboard/tiket/${idRegistrasi}`)
+    } catch {
+      /* ok */
+    }
+    return { success: true }
+  }
+  if (result.reason === 'already_scanned') return { success: false, reason: 'already_scanned' }
+  return { success: false, reason: 'error' }
 }
 
 export async function createAbsen(payload: QRPayload): Promise<

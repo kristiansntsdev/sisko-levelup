@@ -5,6 +5,11 @@ import Link from 'next/link'
 import { createEvent, updateEvent } from '@/lib/actions/event'
 import type { EventDetailFull } from '@/lib/actions/event'
 import type { event_wwtype } from '@/lib/generated/enums'
+import {
+  khususFromScope,
+  scopeFromKhusus,
+  type NasionalEventScope,
+} from '@/lib/event-cabang'
 
 const TARGET_OPTIONS = ['Umum', 'Volunteer', 'Squad', 'Core', 'Leader', 'Tim Nasional']
 const TARGET_VALUES: Record<string, string> = {
@@ -66,12 +71,17 @@ interface EventFormProps {
   mapsApiKey: string
   event?: EventDetailFull
   backUrl: string
+  /** Sekretariat nasional: show seluruh kota / khusus scope inputs */
+  isNasional?: boolean
 }
 
-export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl }: EventFormProps) {
+export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasional = false }: EventFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
+  const [nasionalScope, setNasionalScope] = useState<NasionalEventScope>(
+    event ? scopeFromKhusus(event.khusus) : 'seluruh_kota',
+  )
 
   const initialLatLng = (() => {
     if (!event?.longlatevent) return null
@@ -218,6 +228,7 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl }: EventF
           radius: parseInt(form.radius, 10) || 0,
           danaevent: danaRaw,
           suratpemberitahuan: form.suratpemberitahuan,
+          khusus: isNasional ? khususFromScope(nasionalScope) : '',
         }
 
         if (mode === 'create') {
@@ -254,6 +265,38 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl }: EventF
 
         {/* Info Dasar */}
         <FormSection title="Info Dasar">
+          {isNasional && (
+            <FormField label="Tipe Event Nasional">
+              <div className="flex flex-col gap-2 pt-0.5">
+                {(
+                  [
+                    { value: 'seluruh_kota', label: 'Event Seluruh Kota', hint: 'Event nasional untuk semua kota' },
+                    { value: 'khusus', label: 'Event Khusus', hint: 'Event khusus nasional (mis. WW Online)' },
+                  ] as const
+                ).map((opt) => {
+                  const active = nasionalScope === opt.value
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setNasionalScope(opt.value)}
+                      className={`text-left px-3.5 py-3 rounded-[12px] border-[1.5px] transition-colors ${
+                        active
+                          ? 'border-accent bg-accent-light'
+                          : 'border-border bg-surface'
+                      }`}
+                    >
+                      <p className={`text-[14px] font-semibold ${active ? 'text-accent-dark' : 'text-fg'}`}>
+                        {opt.label}
+                      </p>
+                      <p className="text-[12px] text-muted mt-0.5">{opt.hint}</p>
+                    </button>
+                  )
+                })}
+              </div>
+            </FormField>
+          )}
+
           <FormField label="Nama Event">
             <input
               type="text"

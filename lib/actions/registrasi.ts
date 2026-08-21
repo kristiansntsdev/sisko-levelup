@@ -34,17 +34,32 @@ export async function getRegistrasiDetail(idRegistrasi: number) {
   const row = await db.registrasi.findUnique({
     where: { id_registrasi: idRegistrasi },
     select: {
+      id_registrasi: true,
       id_peserta: true,
       id_event: true,
-      event: { select: { nama_event: true, posterevent: true } },
+      status: true,
+      event: {
+        select: {
+          nama_event: true,
+          posterevent: true,
+          jenisevent: true,
+          tgleventselesai: true,
+          jamselesaievent: true,
+        },
+      },
     },
   })
   if (!row) return null
   return {
+    id_registrasi: row.id_registrasi,
     id_peserta: row.id_peserta,
     id_event: row.id_event,
+    status: row.status,
     nama_event: row.event?.nama_event ?? '',
     posterUrl: row.event?.posterevent ?? null,
+    jenisevent: row.event?.jenisevent ?? '',
+    tglSelesaiMs: row.event?.tgleventselesai?.getTime() ?? 0,
+    jamselesaievent: row.event?.jamselesaievent ?? '',
   }
 }
 

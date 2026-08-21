@@ -79,6 +79,11 @@ export function EventDateCard({ event, onClick }: EventDateCardProps) {
                 Belum Approve
               </span>
             )}
+            {event.khusus === '1' && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-accent-light text-accent-dark">
+                Khusus
+              </span>
+            )}
           </div>
         </div>
         <p className="text-[12px] text-muted flex items-center gap-1.5 flex-wrap">

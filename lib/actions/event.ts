@@ -1,7 +1,9 @@
 'use server'
+import { cookies } from 'next/headers'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import type { event_wwtype } from '@/lib/generated/enums'
+import { resolveEventCabang, isNasionalAdmin } from '@/lib/event-cabang'
 
 const POSTER_BASE = 'https://sisko.levelupgen.com/uploads/poster/'
 
@@ -101,6 +103,7 @@ export type EventDashboard = {
   alamatevent: string
   posterUrl: string
   approvenasional: string
+  khusus: string
 }
 
 export async function getAllEventsByKotalevelup(
@@ -112,7 +115,7 @@ export async function getAllEventsByKotalevelup(
     select: {
       id_event: true, nama_event: true,
       tglevent: true, jamevent: true, alamatevent: true, posterevent: true,
-      approvenasional: true,
+      approvenasional: true, khusus: true,
     },
   })
   return rows.map((e) => ({
@@ -126,6 +129,7 @@ export async function getAllEventsByKotalevelup(
     alamatevent: e.alamatevent,
     posterUrl: `${POSTER_BASE}${e.posterevent}`,
     approvenasional: e.approvenasional,
+    khusus: e.khusus,
   }))
 }
 
@@ -177,6 +181,7 @@ export type EventDetailFull = {
   target: string
   targetpengurus: string
   suratpemberitahuan: string
+  khusus: string
   registrasi: RegistrasiRow[]
   absen: AbsenRow[]
 }
@@ -191,7 +196,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       alamatevent: true, danaevent: true, posterevent: true,
       jenisevent: true, wwtype: true, linkevent: true, longlatevent: true,
       radius: true, approvenasional: true, targetjumlah: true,
-      target: true, targetpengurus: true, suratpemberitahuan: true,
+      target: true, targetpengurus: true, suratpemberitahuan: true, khusus: true,
       registrasi: {
         select: {
           id_registrasi: true,
@@ -245,6 +250,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
     target: event.target,
     targetpengurus: event.targetpengurus,
     suratpemberitahuan: event.suratpemberitahuan,
+    khusus: event.khusus,
     registrasi: event.registrasi.map((r) => ({
       id_registrasi: r.id_registrasi,
       nama: r.peserta.nama,
@@ -311,9 +317,25 @@ export type EventFormPayload = {
   radius: number
   danaevent: string
   suratpemberitahuan: string
+  khusus: string
 }
 
 export async function createEvent(payload: EventFormPayload): Promise<number> {
+  const pengurusId = (await cookies()).get('pengurus_id')?.value
+  let idCabang = payload.idCabang
+  let khusus = payload.khusus || ''
+  if (pengurusId) {
+    const pengurus = await db.pengurus.findUnique({
+      where: { id_pengurus: Number(pengurusId) },
+      select: { username: true, kotalevelup: true, divisi: true },
+    })
+    if (pengurus?.divisi === 'alk') {
+      idCabang = resolveEventCabang(pengurus)
+      // only nasional may set khusus; kota admins always empty
+      if (!isNasionalAdmin(pengurus.username)) khusus = ''
+    }
+  }
+
   const created = await db.event.create({
     data: {
       nama_event: payload.nama_event,
@@ -325,7 +347,7 @@ export async function createEvent(payload: EventFormPayload): Promise<number> {
       danaevent: payload.danaevent,
       posterevent: '',
       proposalevent: '',
-      id_cabang: payload.idCabang,
+      id_cabang: idCabang,
       target: payload.target,
       targetpengurus: payload.targetpengurus,
       targetjumlah: payload.targetjumlah,
@@ -339,7 +361,7 @@ export async function createEvent(payload: EventFormPayload): Promise<number> {
       notenasional: '',
       noteadmin: '',
       qr: '',
-      khusus: '',
+      khusus,
       suratpemberitahuan: payload.suratpemberitahuan,
     },
     select: { id_event: true },
@@ -360,6 +382,18 @@ export async function updateEvent(
   id: number,
   payload: Omit<EventFormPayload, 'idCabang'>,
 ): Promise<void> {
+  const pengurusId = (await cookies()).get('pengurus_id')?.value
+  let khusus: string | undefined
+  if (pengurusId) {
+    const pengurus = await db.pengurus.findUnique({
+      where: { id_pengurus: Number(pengurusId) },
+      select: { username: true },
+    })
+    if (pengurus && isNasionalAdmin(pengurus.username)) {
+      khusus = payload.khusus || ''
+    }
+  }
+
   await db.event.update({
     where: { id_event: id },
     data: {
@@ -378,6 +412,7 @@ export async function updateEvent(
       radius: payload.radius,
       danaevent: payload.danaevent,
       suratpemberitahuan: payload.suratpemberitahuan,
+      ...(khusus !== undefined ? { khusus } : {}),
     },
   })
   revalidatePath('/dashboard/kota/alk')

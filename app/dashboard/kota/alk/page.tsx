@@ -1,7 +1,11 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
-import { getAllEventsByKotalevelup, getAlkBerandaStats } from '@/lib/actions/event'
+import {
+  getAllEventsByKotalevelup,
+  getAlkBerandaStats,
+} from '@/lib/actions/event'
+import { isNasionalAdmin, resolveEventCabang } from '@/lib/event-cabang'
 import { getKasKota } from '@/lib/actions/kas-kota'
 import { countPendingSquadApprovals } from '@/lib/actions/upgrade'
 import { AlkClient } from './alk-client'
@@ -13,31 +17,45 @@ export default async function AlkDashboardPage() {
 
   const pengurus = await db.pengurus.findUnique({
     where: { id_pengurus: Number(pengurusId) },
-    select: { id_pengurus: true, nama: true, kotalevelup: true, divisi: true },
+    select: {
+      id_pengurus: true,
+      nama: true,
+      username: true,
+      kotalevelup: true,
+      divisi: true,
+    },
   })
   if (!pengurus || pengurus.divisi !== 'alk') redirect('/admin')
 
-  const idCabang = Number(pengurus.kotalevelup)
+  const kotalevelup = resolveEventCabang(pengurus)
+  const idCabang = Number(kotalevelup)
+  const isNasional = isNasionalAdmin(pengurus.username)
 
   const [events, cabang, kasKota, stats, pendingApprovals] = await Promise.all([
-    getAllEventsByKotalevelup(pengurus.kotalevelup),
+    getAllEventsByKotalevelup(kotalevelup),
     db.cabang.findUnique({
       where: { id_cabang: idCabang },
       select: { namacabang: true },
     }),
     getKasKota(idCabang),
-    getAlkBerandaStats(pengurus.kotalevelup),
+    getAlkBerandaStats(kotalevelup),
     countPendingSquadApprovals(),
   ])
 
   return (
     <AlkClient
-      pengurus={pengurus}
+      pengurus={{
+        id_pengurus: pengurus.id_pengurus,
+        nama: pengurus.nama,
+        kotalevelup,
+        divisi: pengurus.divisi,
+      }}
       events={events}
-      namaCabang={cabang?.namacabang ?? pengurus.kotalevelup}
+      namaCabang={cabang?.namacabang ?? (isNasional ? 'Nasional' : kotalevelup)}
       kasKota={kasKota}
       stats={stats}
       pendingApprovals={pendingApprovals}
+      isNasional={isNasional}
     />
   )
 }
