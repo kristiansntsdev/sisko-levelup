@@ -1,5 +1,7 @@
 'use server'
 import { db } from '@/lib/db'
+import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
+import { formatTelegramMessage, notifyTelegram } from '@/lib/telegram'
 
 export async function updatePesertaProfile(idPeserta: number, data: { nama: string; nowa: string; gereja: string; sekolah: string; idTempatKerja: number | null }) {
   await db.peserta.update({
@@ -20,6 +22,24 @@ export async function createRegistrasi(idPeserta: number, idEvent: number) {
     create: { id_peserta: idPeserta, id_event: idEvent, status: 'confirmed' },
     update: { status: 'confirmed' },
   })
+
+  const event = await db.event.findUnique({
+    where: { id_event: idEvent },
+    select: { id_cabang: true, nama_event: true },
+  })
+  if (event?.id_cabang === NASIONAL_EVENT_CABANG) {
+    const peserta = await db.peserta.findUnique({
+      where: { id_peserta: idPeserta },
+      select: { nama: true },
+    })
+    void notifyTelegram(
+      formatTelegramMessage('[Event Nasional] Registrasi', {
+        Peserta: peserta?.nama ?? idPeserta,
+        Event: event.nama_event,
+        ID: idEvent,
+      }),
+    )
+  }
 }
 
 export async function checkRegistrasi(idPeserta: number, idEvent: number): Promise<boolean> {

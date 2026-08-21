@@ -3,7 +3,9 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { eventDateTime, isOnlineAbsenOpen } from '@/lib/event-absen-window'
+import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
 import type { QRPayload } from '@/lib/qr'
+import { formatTelegramMessage, notifyTelegram } from '@/lib/telegram'
 
 export async function getPesertaPreview(idPeserta: number) {
   return db.peserta.findUnique({
@@ -137,6 +139,20 @@ export async function createAbsen(payload: QRPayload): Promise<
       revalidatePath('/dashboard/kota/alk')
     } catch {
       /* ok outside request scope (scripts/tests) */
+    }
+
+    const event = await db.event.findUnique({
+      where: { id_event: idEvent },
+      select: { id_cabang: true, nama_event: true },
+    })
+    if (event?.id_cabang === NASIONAL_EVENT_CABANG) {
+      void notifyTelegram(
+        formatTelegramMessage('[Event Nasional] Absen', {
+          Peserta: peserta?.nama ?? idPeserta,
+          Event: event.nama_event,
+          ID: idEvent,
+        }),
+      )
     }
 
     return { success: true, nama: peserta?.nama ?? '', gereja: peserta?.gereja ?? '' }

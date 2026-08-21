@@ -3,7 +3,12 @@ import { cookies } from 'next/headers'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import type { event_wwtype } from '@/lib/generated/enums'
-import { resolveEventCabang, isNasionalAdmin } from '@/lib/event-cabang'
+import {
+  resolveEventCabang,
+  isNasionalAdmin,
+  NASIONAL_EVENT_CABANG,
+} from '@/lib/event-cabang'
+import { formatTelegramMessage, nasionalScopeLabel, notifyTelegram } from '@/lib/telegram'
 
 const POSTER_BASE = 'https://sisko.levelupgen.com/uploads/poster/'
 
@@ -375,6 +380,22 @@ export async function createEvent(payload: EventFormPayload): Promise<number> {
   })
 
   revalidatePath('/dashboard/kota/alk')
+
+  if (idCabang === NASIONAL_EVENT_CABANG) {
+    void notifyTelegram(
+      formatTelegramMessage('[Event Nasional] Dibuat', {
+        Nama: payload.nama_event,
+        Tipe: `${payload.jenisevent} / ${nasionalScopeLabel(khusus)}`,
+        Tanggal: payload.tglevent.toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        }),
+        ID: id,
+      }),
+    )
+  }
+
   return id
 }
 
@@ -384,12 +405,14 @@ export async function updateEvent(
 ): Promise<void> {
   const pengurusId = (await cookies()).get('pengurus_id')?.value
   let khusus: string | undefined
+  let isNasional = false
   if (pengurusId) {
     const pengurus = await db.pengurus.findUnique({
       where: { id_pengurus: Number(pengurusId) },
       select: { username: true },
     })
     if (pengurus && isNasionalAdmin(pengurus.username)) {
+      isNasional = true
       khusus = payload.khusus || ''
     }
   }
@@ -417,6 +440,21 @@ export async function updateEvent(
   })
   revalidatePath('/dashboard/kota/alk')
   revalidatePath(`/dashboard/kota/alk/event/${id}`)
+
+  if (isNasional) {
+    void notifyTelegram(
+      formatTelegramMessage('[Event Nasional] Diedit', {
+        Nama: payload.nama_event,
+        Tipe: `${payload.jenisevent} / ${nasionalScopeLabel(khusus ?? '')}`,
+        Tanggal: payload.tglevent.toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        }),
+        ID: id,
+      }),
+    )
+  }
 }
 
 export type AlkBerandaStats = {

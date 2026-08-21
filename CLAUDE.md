@@ -35,10 +35,12 @@ app/
   dashboard/kota/alk/page.tsx         # Beranda ALK (saldo + approval member)
   dashboard/kota/alk/approval/page.tsx # List approval squad dari table upgrade
 lib/actions/upgrade.ts                # joinVolunteer, joinSquad, approveSquad
+lib/telegram.ts                       # notifyTelegram → group (nasional ops)
 task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-08-21]
+- Telegram group notif (sekretariat nasional): create/update event `id_cabang=0`, registrasi + absen di event nasional via `lib/telegram.ts` (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`)
 - Tiket Aktif: semua join bulan ini (`confirmed` + `absence`), termasuk tanggal yang sudah lewat; absen online tetap bisa sampai akhir bulan event
 - Tiket online: halaman `/dashboard/tiket/[id]` — brand "event online", QR, tombol Absen Event (dibuka 15 menit sebelum `jamselesaievent`, berlaku sampai akhir bulan)
 - Sekretariat nasional event tab: filter Semua / Seluruh Kota / Khusus (`khusus` '' vs '1'); form buat/edit pilih tipe → `id_cabang=0` + `khusus`
