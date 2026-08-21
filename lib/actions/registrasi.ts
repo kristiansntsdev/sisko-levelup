@@ -77,14 +77,27 @@ export async function getRegistrasiByPeserta(idPeserta: number) {
     data: { status: 'absence' },
   })
 
+  // Tiket Aktif = joined this month, including past dates (absence) so
+  // online absen masih bisa diakses kalau lupa. Exclude attend.
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+
   const rows = await db.registrasi.findMany({
-    where: { id_peserta: idPeserta, status: 'confirmed' },
+    where: {
+      id_peserta: idPeserta,
+      status: { in: ['confirmed', 'absence'] },
+      event: {
+        tglevent: { gte: startOfMonth, lt: startOfNextMonth },
+      },
+    },
     select: {
       id_registrasi: true,
       id_event: true,
+      status: true,
       event: { select: { nama_event: true, tglevent: true, jamevent: true, posterevent: true } },
     },
-    orderBy: { created_at: 'desc' },
+    orderBy: { event: { tglevent: 'asc' } },
   })
 
   return rows.map((r) => {
@@ -92,6 +105,7 @@ export async function getRegistrasiByPeserta(idPeserta: number) {
     return {
       id_registrasi: r.id_registrasi,
       id_event: r.id_event,
+      status: r.status,
       nama_event: r.event?.nama_event ?? '',
       tglDisplay: tglevent
         ? tglevent.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })

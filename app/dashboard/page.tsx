@@ -65,14 +65,13 @@ export default function DashboardPage() {
 
   const isLoading = status === 'loading' || dataLoading
 
-  const tiketAktif = registrasi.slice(0, 3)
+  // Server already scopes to this month (confirmed + absence). Show all.
+  const tiketAktif = registrasi
 
-  const now = new Date()
-  const eventTerdekat = registrasi.find((r) => {
-    if (!r.tglMs) return false
-    const d = new Date(r.tglMs)
-    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
-  }) ?? null
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+  const eventTerdekat =
+    registrasi.find((r) => r.tglMs >= startOfToday.getTime()) ?? null
 
   return (
     <main className="min-h-screen bg-bg pb-safe flex flex-col">

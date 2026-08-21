@@ -34,7 +34,7 @@ export default async function TiketDetailPage({ params }: { params: Promise<{ id
 
   return (
     <main className="min-h-screen bg-bg pb-safe flex flex-col">
-      <TiketNav brand={isOnline ? 'event online' : undefined} />
+      <TiketNav />
 
       <div className="flex-1 max-w-sm mx-auto w-full px-5 py-6 flex flex-col">
         <div className="w-full bg-bg border border-border rounded-card p-5 flex flex-col gap-5">
@@ -73,15 +73,10 @@ export default async function TiketDetailPage({ params }: { params: Promise<{ id
   )
 }
 
-function TiketNav({ brand }: { brand?: string }) {
+function TiketNav() {
   return (
     <nav className="w-full sticky top-0 z-10 bg-bg">
-      <div className="max-w-sm mx-auto px-5 pt-5 pb-2 flex flex-col gap-2">
-        {brand && (
-          <p className="font-[family-name:var(--font-instrument-serif)] italic text-xl text-amber">
-            {brand}
-          </p>
-        )}
+      <div className="max-w-sm mx-auto px-5 pt-5 pb-2">
         <Link
           href="/dashboard"
           className="text-sm text-muted hover:text-fg transition-colors inline-flex items-center gap-1 w-fit"

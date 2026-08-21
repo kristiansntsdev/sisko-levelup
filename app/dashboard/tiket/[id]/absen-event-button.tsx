@@ -49,7 +49,7 @@ export function AbsenEventButton({
     phase === 'too_early'
       ? 'Absen dibuka 15 menit sebelum acara selesai.'
       : phase === 'closed'
-        ? 'Waktu absen sudah berakhir.'
+        ? 'Waktu absen sudah berakhir (lewat bulan event).'
         : phase === 'unknown'
           ? 'Jadwal selesai event belum lengkap.'
           : null
@@ -68,7 +68,7 @@ export function AbsenEventButton({
         not_found: 'Tiket tidak ditemukan.',
         forbidden: 'Tiket ini bukan milikmu.',
         not_online: 'Absen mandiri hanya untuk event online.',
-        window_closed: 'Di luar jendela absen (15 menit sebelum selesai).',
+        window_closed: 'Di luar jendela absen (dibuka 15 menit sebelum selesai, berlaku sampai akhir bulan).',
         already_scanned: 'Kamu sudah absen.',
         error: 'Gagal menyimpan absen. Coba lagi.',
       } as const
@@ -87,7 +87,7 @@ export function AbsenEventButton({
         type="button"
         onClick={handleAbsen}
         disabled={!open || pending}
-        className="w-full py-3.5 rounded-full border border-fg bg-[#c8e7f5] text-fg font-[family-name:var(--font-instrument-serif)] italic text-xl disabled:opacity-45 disabled:cursor-not-allowed hover:brightness-95 transition"
+        className="w-full py-3.5 rounded-full border border-fg bg-[#c8e7f5] text-fg text-[15px] font-semibold cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed hover:brightness-95 transition"
       >
         {pending ? 'Menyimpan…' : 'Absen Event'}
       </button>
