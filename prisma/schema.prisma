@@ -80,6 +80,7 @@ model event {
   alamatevent        String       @db.Text
   danaevent          String       @db.Text
   posterevent        String       @db.Text
+  image_url          String       @default("") @db.Text
   proposalevent      String       @db.Text
   id_cabang          String       @db.Text
   target             String       @db.Text

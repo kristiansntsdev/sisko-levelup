@@ -1,6 +1,5 @@
 import { NASIONAL_EVENT_CABANG, NASIONAL_KHUSUS_VALUE } from '@/lib/event-cabang'
-
-const POSTER_BASE = 'https://sisko.levelupgen.com/uploads/poster/'
+import { resolveEventPosterUrl } from '@/lib/event-poster'
 
 function escapeHtml(s: string): string {
   return s
@@ -43,11 +42,8 @@ export function eventDetailLink(idEvent: number): string {
   return `${publicAppBase()}/dashboard/kota/alk/event/${idEvent}`
 }
 
-export function eventFlyerLink(posterevent: string): string {
-  const name = posterevent.trim()
-  if (!name) return ''
-  if (/^https?:\/\//i.test(name)) return name
-  return `${POSTER_BASE}${name}`
+export function eventFlyerLink(posterevent: string, imageUrl?: string): string {
+  return resolveEventPosterUrl(posterevent, imageUrl)
 }
 
 /** `longlatevent` stored as "lat,lng" → Google Maps open pin. */

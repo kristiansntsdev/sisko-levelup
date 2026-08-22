@@ -47,6 +47,7 @@ export type EventMinAggregateOutputType = {
   alamatevent: string | null
   danaevent: string | null
   posterevent: string | null
+  image_url: string | null
   proposalevent: string | null
   id_cabang: string | null
   target: string | null
@@ -77,6 +78,7 @@ export type EventMaxAggregateOutputType = {
   alamatevent: string | null
   danaevent: string | null
   posterevent: string | null
+  image_url: string | null
   proposalevent: string | null
   id_cabang: string | null
   target: string | null
@@ -107,6 +109,7 @@ export type EventCountAggregateOutputType = {
   alamatevent: number
   danaevent: number
   posterevent: number
+  image_url: number
   proposalevent: number
   id_cabang: number
   target: number
@@ -151,6 +154,7 @@ export type EventMinAggregateInputType = {
   alamatevent?: true
   danaevent?: true
   posterevent?: true
+  image_url?: true
   proposalevent?: true
   id_cabang?: true
   target?: true
@@ -181,6 +185,7 @@ export type EventMaxAggregateInputType = {
   alamatevent?: true
   danaevent?: true
   posterevent?: true
+  image_url?: true
   proposalevent?: true
   id_cabang?: true
   target?: true
@@ -211,6 +216,7 @@ export type EventCountAggregateInputType = {
   alamatevent?: true
   danaevent?: true
   posterevent?: true
+  image_url?: true
   proposalevent?: true
   id_cabang?: true
   target?: true
@@ -328,6 +334,7 @@ export type EventGroupByOutputType = {
   alamatevent: string
   danaevent: string
   posterevent: string
+  image_url: string
   proposalevent: string
   id_cabang: string
   target: string
@@ -381,6 +388,7 @@ export type eventWhereInput = {
   alamatevent?: Prisma.StringFilter<"event"> | string
   danaevent?: Prisma.StringFilter<"event"> | string
   posterevent?: Prisma.StringFilter<"event"> | string
+  image_url?: Prisma.StringFilter<"event"> | string
   proposalevent?: Prisma.StringFilter<"event"> | string
   id_cabang?: Prisma.StringFilter<"event"> | string
   target?: Prisma.StringFilter<"event"> | string
@@ -412,6 +420,7 @@ export type eventOrderByWithRelationInput = {
   alamatevent?: Prisma.SortOrder
   danaevent?: Prisma.SortOrder
   posterevent?: Prisma.SortOrder
+  image_url?: Prisma.SortOrder
   proposalevent?: Prisma.SortOrder
   id_cabang?: Prisma.SortOrder
   target?: Prisma.SortOrder
@@ -447,6 +456,7 @@ export type eventWhereUniqueInput = Prisma.AtLeast<{
   alamatevent?: Prisma.StringFilter<"event"> | string
   danaevent?: Prisma.StringFilter<"event"> | string
   posterevent?: Prisma.StringFilter<"event"> | string
+  image_url?: Prisma.StringFilter<"event"> | string
   proposalevent?: Prisma.StringFilter<"event"> | string
   id_cabang?: Prisma.StringFilter<"event"> | string
   target?: Prisma.StringFilter<"event"> | string
@@ -478,6 +488,7 @@ export type eventOrderByWithAggregationInput = {
   alamatevent?: Prisma.SortOrder
   danaevent?: Prisma.SortOrder
   posterevent?: Prisma.SortOrder
+  image_url?: Prisma.SortOrder
   proposalevent?: Prisma.SortOrder
   id_cabang?: Prisma.SortOrder
   target?: Prisma.SortOrder
@@ -516,6 +527,7 @@ export type eventScalarWhereWithAggregatesInput = {
   alamatevent?: Prisma.StringWithAggregatesFilter<"event"> | string
   danaevent?: Prisma.StringWithAggregatesFilter<"event"> | string
   posterevent?: Prisma.StringWithAggregatesFilter<"event"> | string
+  image_url?: Prisma.StringWithAggregatesFilter<"event"> | string
   proposalevent?: Prisma.StringWithAggregatesFilter<"event"> | string
   id_cabang?: Prisma.StringWithAggregatesFilter<"event"> | string
   target?: Prisma.StringWithAggregatesFilter<"event"> | string
@@ -545,6 +557,7 @@ export type eventCreateInput = {
   alamatevent: string
   danaevent: string
   posterevent: string
+  image_url?: string
   proposalevent: string
   id_cabang: string
   target: string
@@ -576,6 +589,7 @@ export type eventUncheckedCreateInput = {
   alamatevent: string
   danaevent: string
   posterevent: string
+  image_url?: string
   proposalevent: string
   id_cabang: string
   target: string
@@ -606,6 +620,7 @@ export type eventUpdateInput = {
   alamatevent?: Prisma.StringFieldUpdateOperationsInput | string
   danaevent?: Prisma.StringFieldUpdateOperationsInput | string
   posterevent?: Prisma.StringFieldUpdateOperationsInput | string
+  image_url?: Prisma.StringFieldUpdateOperationsInput | string
   proposalevent?: Prisma.StringFieldUpdateOperationsInput | string
   id_cabang?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.StringFieldUpdateOperationsInput | string
@@ -637,6 +652,7 @@ export type eventUncheckedUpdateInput = {
   alamatevent?: Prisma.StringFieldUpdateOperationsInput | string
   danaevent?: Prisma.StringFieldUpdateOperationsInput | string
   posterevent?: Prisma.StringFieldUpdateOperationsInput | string
+  image_url?: Prisma.StringFieldUpdateOperationsInput | string
   proposalevent?: Prisma.StringFieldUpdateOperationsInput | string
   id_cabang?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.StringFieldUpdateOperationsInput | string
@@ -668,6 +684,7 @@ export type eventCreateManyInput = {
   alamatevent: string
   danaevent: string
   posterevent: string
+  image_url?: string
   proposalevent: string
   id_cabang: string
   target: string
@@ -697,6 +714,7 @@ export type eventUpdateManyMutationInput = {
   alamatevent?: Prisma.StringFieldUpdateOperationsInput | string
   danaevent?: Prisma.StringFieldUpdateOperationsInput | string
   posterevent?: Prisma.StringFieldUpdateOperationsInput | string
+  image_url?: Prisma.StringFieldUpdateOperationsInput | string
   proposalevent?: Prisma.StringFieldUpdateOperationsInput | string
   id_cabang?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.StringFieldUpdateOperationsInput | string
@@ -727,6 +745,7 @@ export type eventUncheckedUpdateManyInput = {
   alamatevent?: Prisma.StringFieldUpdateOperationsInput | string
   danaevent?: Prisma.StringFieldUpdateOperationsInput | string
   posterevent?: Prisma.StringFieldUpdateOperationsInput | string
+  image_url?: Prisma.StringFieldUpdateOperationsInput | string
   proposalevent?: Prisma.StringFieldUpdateOperationsInput | string
   id_cabang?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.StringFieldUpdateOperationsInput | string
@@ -763,6 +782,7 @@ export type eventCountOrderByAggregateInput = {
   alamatevent?: Prisma.SortOrder
   danaevent?: Prisma.SortOrder
   posterevent?: Prisma.SortOrder
+  image_url?: Prisma.SortOrder
   proposalevent?: Prisma.SortOrder
   id_cabang?: Prisma.SortOrder
   target?: Prisma.SortOrder
@@ -799,6 +819,7 @@ export type eventMaxOrderByAggregateInput = {
   alamatevent?: Prisma.SortOrder
   danaevent?: Prisma.SortOrder
   posterevent?: Prisma.SortOrder
+  image_url?: Prisma.SortOrder
   proposalevent?: Prisma.SortOrder
   id_cabang?: Prisma.SortOrder
   target?: Prisma.SortOrder
@@ -829,6 +850,7 @@ export type eventMinOrderByAggregateInput = {
   alamatevent?: Prisma.SortOrder
   danaevent?: Prisma.SortOrder
   posterevent?: Prisma.SortOrder
+  image_url?: Prisma.SortOrder
   proposalevent?: Prisma.SortOrder
   id_cabang?: Prisma.SortOrder
   target?: Prisma.SortOrder
@@ -887,6 +909,7 @@ export type eventCreateWithoutRegistrasiInput = {
   alamatevent: string
   danaevent: string
   posterevent: string
+  image_url?: string
   proposalevent: string
   id_cabang: string
   target: string
@@ -917,6 +940,7 @@ export type eventUncheckedCreateWithoutRegistrasiInput = {
   alamatevent: string
   danaevent: string
   posterevent: string
+  image_url?: string
   proposalevent: string
   id_cabang: string
   target: string
@@ -962,6 +986,7 @@ export type eventUpdateWithoutRegistrasiInput = {
   alamatevent?: Prisma.StringFieldUpdateOperationsInput | string
   danaevent?: Prisma.StringFieldUpdateOperationsInput | string
   posterevent?: Prisma.StringFieldUpdateOperationsInput | string
+  image_url?: Prisma.StringFieldUpdateOperationsInput | string
   proposalevent?: Prisma.StringFieldUpdateOperationsInput | string
   id_cabang?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.StringFieldUpdateOperationsInput | string
@@ -992,6 +1017,7 @@ export type eventUncheckedUpdateWithoutRegistrasiInput = {
   alamatevent?: Prisma.StringFieldUpdateOperationsInput | string
   danaevent?: Prisma.StringFieldUpdateOperationsInput | string
   posterevent?: Prisma.StringFieldUpdateOperationsInput | string
+  image_url?: Prisma.StringFieldUpdateOperationsInput | string
   proposalevent?: Prisma.StringFieldUpdateOperationsInput | string
   id_cabang?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1053,6 +1079,7 @@ export type eventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   alamatevent?: boolean
   danaevent?: boolean
   posterevent?: boolean
+  image_url?: boolean
   proposalevent?: boolean
   id_cabang?: boolean
   target?: boolean
@@ -1087,6 +1114,7 @@ export type eventSelectScalar = {
   alamatevent?: boolean
   danaevent?: boolean
   posterevent?: boolean
+  image_url?: boolean
   proposalevent?: boolean
   id_cabang?: boolean
   target?: boolean
@@ -1108,7 +1136,7 @@ export type eventSelectScalar = {
   suratpemberitahuan?: boolean
 }
 
-export type eventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_event" | "nama_event" | "tglevent" | "tgleventselesai" | "jamevent" | "alamatevent" | "danaevent" | "posterevent" | "proposalevent" | "id_cabang" | "target" | "targetpengurus" | "targetjumlah" | "jenisevent" | "wwtype" | "jamselesaievent" | "longlatevent" | "radius" | "linkevent" | "approvenasional" | "approvebrimnas" | "approveadmin" | "notenasional" | "noteadmin" | "qr" | "khusus" | "suratpemberitahuan", ExtArgs["result"]["event"]>
+export type eventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_event" | "nama_event" | "tglevent" | "tgleventselesai" | "jamevent" | "alamatevent" | "danaevent" | "posterevent" | "image_url" | "proposalevent" | "id_cabang" | "target" | "targetpengurus" | "targetjumlah" | "jenisevent" | "wwtype" | "jamselesaievent" | "longlatevent" | "radius" | "linkevent" | "approvenasional" | "approvebrimnas" | "approveadmin" | "notenasional" | "noteadmin" | "qr" | "khusus" | "suratpemberitahuan", ExtArgs["result"]["event"]>
 export type eventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   registrasi?: boolean | Prisma.event$registrasiArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
@@ -1128,6 +1156,7 @@ export type $eventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     alamatevent: string
     danaevent: string
     posterevent: string
+    image_url: string
     proposalevent: string
     id_cabang: string
     target: string
@@ -1525,6 +1554,7 @@ export interface eventFieldRefs {
   readonly alamatevent: Prisma.FieldRef<"event", 'String'>
   readonly danaevent: Prisma.FieldRef<"event", 'String'>
   readonly posterevent: Prisma.FieldRef<"event", 'String'>
+  readonly image_url: Prisma.FieldRef<"event", 'String'>
   readonly proposalevent: Prisma.FieldRef<"event", 'String'>
   readonly id_cabang: Prisma.FieldRef<"event", 'String'>
   readonly target: Prisma.FieldRef<"event", 'String'>

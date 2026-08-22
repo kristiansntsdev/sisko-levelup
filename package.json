@@ -13,6 +13,7 @@
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@vercel/blob": "^2.8.0",
     "exceljs": "^4.4.0",
     "html-to-image": "^1.11.13",
     "konva": "^10.3.0",

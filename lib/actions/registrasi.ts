@@ -1,6 +1,7 @@
 'use server'
 import { db } from '@/lib/db'
 import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
+import { resolveEventPosterUrl } from '@/lib/event-poster'
 import { formatTelegramMessage, notifyTelegram, eventDetailLink } from '@/lib/telegram'
 
 export async function updatePesertaProfile(idPeserta: number, data: { nama: string; nowa: string; gereja: string; sekolah: string; idTempatKerja: number | null }) {
@@ -67,6 +68,7 @@ export async function getRegistrasiDetail(idRegistrasi: number) {
         select: {
           nama_event: true,
           posterevent: true,
+          image_url: true,
           jenisevent: true,
           tgleventselesai: true,
           jamselesaievent: true,
@@ -81,7 +83,7 @@ export async function getRegistrasiDetail(idRegistrasi: number) {
     id_event: row.id_event,
     status: row.status,
     nama_event: row.event?.nama_event ?? '',
-    posterUrl: row.event?.posterevent ?? null,
+    posterUrl: resolveEventPosterUrl(row.event?.posterevent, row.event?.image_url) || null,
     jenisevent: row.event?.jenisevent ?? '',
     tglSelesaiMs: row.event?.tgleventselesai?.getTime() ?? 0,
     jamselesaievent: row.event?.jamselesaievent ?? '',

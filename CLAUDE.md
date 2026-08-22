@@ -38,11 +38,14 @@ app/
   dashboard/kota/brim/event/[id]/approve/ # Brim Nasional: approvebrimnas
 lib/actions/upgrade.ts                # joinVolunteer, joinSquad, approveSquad
 lib/event-approval.ts                 # append notenasional (ALK/Brim prefixes)
+lib/event-poster.ts                    # resolveEventPosterUrl: posterevent then image_url
 lib/telegram.ts                       # notifyTelegram → group (nasional ops)
 task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-08-22]
+- Blob upload pakai `BLOB_READ_WRITE_TOKEN` eksplisit (OIDC development tidak terhubung ke store)
+- Event flyer v2: kolom `image_url` (Vercel Blob); display `posterevent` dulu, kosong baru Blob; upload flyer di form buat event
 - Telegram approve/reject: `Tanggal Event` 1 hari vs rentang `(beberapa hari)`; kota `[Event Kota]` + Cabang
 - Telegram approve/reject: event kota → `[Event Kota]` + Cabang (namacabang); nasional tetap Tipe seluruh_kota/khusus
 - Sekretariat + Brim Nasional tab Event: list semua event (tanpa filter `id_cabang`); kota tetap per cabang

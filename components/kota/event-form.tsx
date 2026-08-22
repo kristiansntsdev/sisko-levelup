@@ -107,6 +107,8 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
   const [latLng, setLatLng] = useState<{ lat: number; lng: number } | null>(initialLatLng)
   const [danaRaw, setDanaRaw] = useState(event?.danaevent.replace(/\D/g, '') ?? '')
   const [danaDisplay, setDanaDisplay] = useState(() => fmtRp(event?.danaevent.replace(/\D/g, '') ?? ''))
+  const [flyer, setFlyer] = useState<File | null>(null)
+  const [flyerPreview, setFlyerPreview] = useState('')
 
   const [form, setForm] = useState<FormState>({
     nama_event: event?.nama_event ?? '',
@@ -218,6 +220,12 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
     document.head.appendChild(script)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    return () => {
+      if (flyerPreview) URL.revokeObjectURL(flyerPreview)
+    }
+  }, [flyerPreview])
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -246,14 +254,14 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
         }
 
         if (mode === 'create') {
-          const id = await createEvent({ ...payload, idCabang })
+          const id = await createEvent({ ...payload, idCabang }, flyer)
           router.push(`/dashboard/kota/alk/event/${id}`)
         } else {
           await updateEvent(event!.id_event, payload)
           router.push(`/dashboard/kota/alk/event/${event!.id_event}`)
         }
-      } catch {
-        setError('Gagal menyimpan. Coba lagi.')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Gagal menyimpan. Coba lagi.')
       }
     })
   }
@@ -513,6 +521,29 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
               placeholder="https://..."
             />
           </FormField>
+
+          {mode === 'create' && (
+            <FormField label="Flyer Event">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null
+                  setFlyer(file)
+                  setFlyerPreview(file ? URL.createObjectURL(file) : '')
+                }}
+                className="text-[13px] text-fg file:mr-3 file:px-3 file:py-1.5 file:rounded-full file:border-0 file:bg-accent file:text-white file:text-[13px] file:font-medium"
+              />
+              {flyerPreview && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={flyerPreview}
+                  alt="Preview flyer"
+                  className="mt-2 w-full rounded-[12px] border border-border object-cover"
+                />
+              )}
+            </FormField>
+          )}
         </FormSection>
 
         {/* Error */}

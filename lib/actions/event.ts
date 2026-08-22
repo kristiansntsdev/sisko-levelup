@@ -1,5 +1,6 @@
 'use server'
 import { cookies } from 'next/headers'
+import { put } from '@vercel/blob'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import type { event_wwtype } from '@/lib/generated/enums'
@@ -10,9 +11,8 @@ import {
   NASIONAL_EVENT_CABANG,
 } from '@/lib/event-cabang'
 import { appendNotenasional } from '@/lib/event-approval'
+import { resolveEventPosterUrl } from '@/lib/event-poster'
 import { formatTelegramMessage, nasionalScopeLabel, notifyTelegram, eventActionButtons, eventFormTelegramFields, eventTelegramScope } from '@/lib/telegram'
-
-const POSTER_BASE = 'https://sisko.levelupgen.com/uploads/poster/'
 
 export type EventSummary = {
   id_event: number
@@ -51,7 +51,7 @@ export async function getEventsByKotalevelup(
       orderBy: { id_event: 'desc' },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
-      select: { id_event: true, tglevent: true, jamevent: true, posterevent: true },
+      select: { id_event: true, tglevent: true, jamevent: true, posterevent: true, image_url: true },
     }),
     db.event.count({ where: { id_cabang: kotalevelup } }),
   ])
@@ -62,7 +62,7 @@ export async function getEventsByKotalevelup(
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
       }),
       jamevent: e.jamevent,
-      posterUrl: `${POSTER_BASE}${e.posterevent}`,
+      posterUrl: resolveEventPosterUrl(e.posterevent, e.image_url),
       tglMs: e.tglevent.getTime(),
     })),
     total,
@@ -82,7 +82,7 @@ export async function getEventsByKotalevelupFull(
       orderBy: { id_event: 'desc' },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
-      select: { id_event: true, nama_event: true, tglevent: true, jamevent: true, posterevent: true },
+      select: { id_event: true, nama_event: true, tglevent: true, jamevent: true, posterevent: true, image_url: true },
     }),
     db.event.count({ where: { id_cabang: kotalevelup } }),
   ])
@@ -94,7 +94,7 @@ export async function getEventsByKotalevelupFull(
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
       }),
       jamevent: e.jamevent,
-      posterUrl: `${POSTER_BASE}${e.posterevent}`,
+      posterUrl: resolveEventPosterUrl(e.posterevent, e.image_url),
       tglMs: e.tglevent.getTime(),
     })),
     total,
@@ -124,7 +124,7 @@ export async function getAllEventsByKotalevelup(
     orderBy: { tglevent: 'desc' },
     select: {
       id_event: true, nama_event: true,
-      tglevent: true, jamevent: true, alamatevent: true, posterevent: true,
+      tglevent: true, jamevent: true, alamatevent: true, posterevent: true, image_url: true,
       approvenasional: true, approvebrimnas: true, notenasional: true, khusus: true,
     },
   })
@@ -142,7 +142,7 @@ export async function getAllEventsByKotalevelup(
         : 'Tanggal tidak valid',
       jamevent: e.jamevent,
       alamatevent: e.alamatevent,
-      posterUrl: `${POSTER_BASE}${e.posterevent}`,
+      posterUrl: resolveEventPosterUrl(e.posterevent, e.image_url),
       approvenasional: e.approvenasional,
       approvebrimnas: e.approvebrimnas ?? '0',
       notenasional: e.notenasional ?? '',
@@ -213,7 +213,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       id_event: true, nama_event: true,
       tglevent: true, tgleventselesai: true,
       jamevent: true, jamselesaievent: true,
-      alamatevent: true, danaevent: true, posterevent: true,
+      alamatevent: true, danaevent: true, posterevent: true, image_url: true,
       jenisevent: true, wwtype: true, linkevent: true, longlatevent: true,
       radius: true, approvenasional: true, approvebrimnas: true, notenasional: true, targetjumlah: true,
       target: true, targetpengurus: true, suratpemberitahuan: true, khusus: true,
@@ -259,7 +259,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
     jamselesaievent: event.jamselesaievent,
     alamatevent: event.alamatevent,
     danaevent: event.danaevent,
-    posterUrl: event.posterevent ? `${POSTER_BASE}${event.posterevent}` : '',
+    posterUrl: resolveEventPosterUrl(event.posterevent, event.image_url),
     jenisevent: event.jenisevent,
     wwtype: event.wwtype,
     linkevent: event.linkevent,
@@ -301,6 +301,7 @@ export async function getEventById(id: number): Promise<EventSummary | null> {
       tglevent: true,
       jamevent: true,
       posterevent: true,
+      image_url: true,
     },
   })
 
@@ -316,7 +317,7 @@ export async function getEventById(id: number): Promise<EventSummary | null> {
       day: 'numeric',
     }),
     jamevent: event.jamevent,
-    posterUrl: `${POSTER_BASE}${event.posterevent}`,
+    posterUrl: resolveEventPosterUrl(event.posterevent, event.image_url),
   }
 }
 
@@ -342,7 +343,28 @@ export type EventFormPayload = {
   khusus: string
 }
 
-export async function createEvent(payload: EventFormPayload): Promise<number> {
+const FLYER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+const FLYER_MAX_BYTES = 4 * 1024 * 1024
+
+async function uploadEventFlyer(file: File): Promise<string> {
+  if (!FLYER_TYPES.has(file.type)) {
+    throw new Error('Flyer harus JPEG, PNG, WebP, atau GIF.')
+  }
+  if (file.size > FLYER_MAX_BYTES) {
+    throw new Error('Flyer maksimal 4 MB.')
+  }
+  const token = process.env.BLOB_READ_WRITE_TOKEN
+  if (!token) throw new Error('BLOB_READ_WRITE_TOKEN belum di-set.')
+  // explicit token beats OIDC; store is not connected to the development environment
+  const blob = await put(`events/flyers/${file.name}`, file, {
+    access: 'public',
+    addRandomSuffix: true,
+    token,
+  })
+  return blob.url
+}
+
+export async function createEvent(payload: EventFormPayload, flyer?: File | null): Promise<number> {
   const pengurusId = (await cookies()).get('pengurus_id')?.value
   let idCabang = payload.idCabang
   let khusus = payload.khusus || ''
@@ -358,6 +380,8 @@ export async function createEvent(payload: EventFormPayload): Promise<number> {
     }
   }
 
+  const imageUrl = flyer && flyer.size > 0 ? await uploadEventFlyer(flyer) : ''
+
   const created = await db.event.create({
     data: {
       nama_event: payload.nama_event,
@@ -368,6 +392,7 @@ export async function createEvent(payload: EventFormPayload): Promise<number> {
       alamatevent: payload.alamatevent,
       danaevent: payload.danaevent,
       posterevent: '',
+      image_url: imageUrl,
       proposalevent: '',
       id_cabang: idCabang,
       target: payload.target,
@@ -438,7 +463,7 @@ export async function createEvent(payload: EventFormPayload): Promise<number> {
         id,
       }),
     }),
-    { buttons: eventActionButtons(id, { longlatevent: payload.longlatevent }) },
+    { buttons: eventActionButtons(id, { poster: imageUrl || undefined, longlatevent: payload.longlatevent }) },
   )
 
   return id
