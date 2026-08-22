@@ -257,7 +257,7 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
           const id = await createEvent({ ...payload, idCabang }, flyer)
           router.push(`/dashboard/kota/alk/event/${id}`)
         } else {
-          await updateEvent(event!.id_event, payload)
+          await updateEvent(event!.id_event, payload, flyer)
           router.push(`/dashboard/kota/alk/event/${event!.id_event}`)
         }
       } catch (err) {
@@ -522,8 +522,7 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
             />
           </FormField>
 
-          {mode === 'create' && (
-            <FormField label="Flyer Event">
+          <FormField label={mode === 'edit' ? 'Upload ulang poster' : 'Flyer Event'}>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/gif"
@@ -534,16 +533,15 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
                 }}
                 className="text-[13px] text-fg file:mr-3 file:px-3 file:py-1.5 file:rounded-full file:border-0 file:bg-accent file:text-white file:text-[13px] file:font-medium"
               />
-              {flyerPreview && (
+              {(flyerPreview || event?.posterUrl) && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={flyerPreview}
+                  src={flyerPreview || event!.posterUrl}
                   alt="Preview flyer"
                   className="mt-2 w-full rounded-[12px] border border-border object-cover"
                 />
               )}
             </FormField>
-          )}
         </FormSection>
 
         {/* Error */}
@@ -559,7 +557,11 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
           disabled={isPending}
           className="w-full py-4 bg-accent text-white rounded-btn text-[16px] font-semibold disabled:opacity-60 transition-opacity"
         >
-          {isPending ? 'Menyimpan...' : mode === 'create' ? 'Buat Event' : 'Simpan Perubahan'}
+          {isPending
+            ? (flyer ? 'Mengunggah flyer...' : 'Menyimpan...')
+            : form.wwtype === 'bulanan' && flyer
+              ? 'Simpan & Review Flyer'
+              : mode === 'create' ? 'Buat Event' : 'Simpan Perubahan'}
         </button>
 
       </form>

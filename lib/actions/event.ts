@@ -12,6 +12,19 @@ import {
 } from '@/lib/event-cabang'
 import { appendNotenasional } from '@/lib/event-approval'
 import { resolveEventPosterUrl } from '@/lib/event-poster'
+import {
+  emptyFlyerQa,
+  extractJsonObject,
+  flyerQaTelegramFields,
+  formatFlyerExpectedTanggal,
+  needsFlyerReview,
+  parseFlyerQa,
+  parseFlyerQaReview,
+  pollFlyerQaRun,
+  startFlyerQaWebhook,
+  stringifyFlyerQa,
+  type FlyerQaRecord,
+} from '@/lib/flyer-qa'
 import { formatTelegramMessage, nasionalScopeLabel, notifyTelegram, eventActionButtons, eventFormTelegramFields, eventTelegramScope } from '@/lib/telegram'
 
 export type EventSummary = {
@@ -202,6 +215,7 @@ export type EventDetailFull = {
   targetpengurus: string
   suratpemberitahuan: string
   khusus: string
+  flyerQa: FlyerQaRecord | null
   registrasi: RegistrasiRow[]
   absen: AbsenRow[]
 }
@@ -216,7 +230,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       alamatevent: true, danaevent: true, posterevent: true, image_url: true,
       jenisevent: true, wwtype: true, linkevent: true, longlatevent: true,
       radius: true, approvenasional: true, approvebrimnas: true, notenasional: true, targetjumlah: true,
-      target: true, targetpengurus: true, suratpemberitahuan: true, khusus: true,
+      target: true, targetpengurus: true, suratpemberitahuan: true, khusus: true, flyer_qa: true,
       registrasi: {
         select: {
           id_registrasi: true,
@@ -273,6 +287,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
     targetpengurus: event.targetpengurus,
     suratpemberitahuan: event.suratpemberitahuan,
     khusus: event.khusus,
+    flyerQa: parseFlyerQa(event.flyer_qa),
     registrasi: event.registrasi.map((r) => ({
       id_registrasi: r.id_registrasi,
       nama: r.peserta.nama,
@@ -411,6 +426,7 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
       qr: '',
       khusus,
       suratpemberitahuan: payload.suratpemberitahuan,
+      flyer_qa: '',
     },
     select: { id_event: true },
   })
@@ -437,34 +453,38 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
     }
   }
 
-  void notifyTelegram(
-    formatTelegramMessage({
-      tag: isNasionalEvent ? 'Event Nasional' : 'Event Kota',
-      action: 'Dibuat',
-      eventName: payload.nama_event,
-      fields: eventFormTelegramFields({
-        cabangLabel,
-        isNasional: isNasionalEvent,
-        khusus,
-        jenisevent: payload.jenisevent,
-        wwtype: payload.wwtype,
-        target: payload.target,
-        targetpengurus: payload.targetpengurus,
-        targetjumlah: payload.targetjumlah,
-        tglevent: payload.tglevent,
-        tgleventselesai: payload.tgleventselesai,
-        jamevent: payload.jamevent,
-        jamselesaievent: payload.jamselesaievent,
-        alamatevent: payload.alamatevent,
-        longlatevent: payload.longlatevent,
-        radius: payload.radius,
-        danaevent: payload.danaevent,
-        suratpemberitahuan: payload.suratpemberitahuan,
-        id,
+  if (needsFlyerReview(payload.wwtype, imageUrl)) {
+    await kickoffFlyerReview(id)
+  } else {
+    void notifyTelegram(
+      formatTelegramMessage({
+        tag: isNasionalEvent ? 'Event Nasional' : 'Event Kota',
+        action: 'Dibuat',
+        eventName: payload.nama_event,
+        fields: eventFormTelegramFields({
+          cabangLabel,
+          isNasional: isNasionalEvent,
+          khusus,
+          jenisevent: payload.jenisevent,
+          wwtype: payload.wwtype,
+          target: payload.target,
+          targetpengurus: payload.targetpengurus,
+          targetjumlah: payload.targetjumlah,
+          tglevent: payload.tglevent,
+          tgleventselesai: payload.tgleventselesai,
+          jamevent: payload.jamevent,
+          jamselesaievent: payload.jamselesaievent,
+          alamatevent: payload.alamatevent,
+          longlatevent: payload.longlatevent,
+          radius: payload.radius,
+          danaevent: payload.danaevent,
+          suratpemberitahuan: payload.suratpemberitahuan,
+          id,
+        }),
       }),
-    }),
-    { buttons: eventActionButtons(id, { poster: imageUrl || undefined, longlatevent: payload.longlatevent }) },
-  )
+      { buttons: eventActionButtons(id, { poster: imageUrl || undefined, longlatevent: payload.longlatevent }) },
+    )
+  }
 
   return id
 }
@@ -472,6 +492,7 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
 export async function updateEvent(
   id: number,
   payload: Omit<EventFormPayload, 'idCabang'>,
+  flyer?: File | null,
 ): Promise<void> {
   const pengurusId = (await cookies()).get('pengurus_id')?.value
   let khusus: string | undefined
@@ -486,6 +507,18 @@ export async function updateEvent(
       khusus = payload.khusus || ''
     }
   }
+
+  const current = await db.event.findUnique({
+    where: { id_event: id },
+    select: { image_url: true, posterevent: true },
+  })
+  if (!current) throw new Error('Event tidak ditemukan')
+
+  const newFlyer = flyer && flyer.size > 0
+  const imageUrl = newFlyer
+    ? await uploadEventFlyer(flyer)
+    : resolveEventPosterUrl(current.posterevent, current.image_url)
+  const reviewed = needsFlyerReview(payload.wwtype, imageUrl)
 
   await db.event.update({
     where: { id_event: id },
@@ -506,12 +539,18 @@ export async function updateEvent(
       danaevent: payload.danaevent,
       suratpemberitahuan: payload.suratpemberitahuan,
       ...(khusus !== undefined ? { khusus } : {}),
+      ...(newFlyer ? { image_url: imageUrl, posterevent: '' } : {}),
     },
   })
   revalidatePath('/dashboard/kota/alk')
   revalidatePath(`/dashboard/kota/alk/event/${id}`)
 
-  if (isNasional) {
+  if (reviewed && newFlyer) {
+    await kickoffFlyerReview(id)
+    return
+  }
+
+  if (!reviewed && isNasional) {
     void notifyTelegram(
       formatTelegramMessage({
         tag: 'Event Nasional',
@@ -541,6 +580,193 @@ export async function updateEvent(
       { buttons: eventActionButtons(id, { longlatevent: payload.longlatevent }) },
     )
   }
+}
+
+async function requireAlkPengurus(): Promise<void> {
+  const pengurusId = (await cookies()).get('pengurus_id')?.value
+  if (!pengurusId) throw new Error('Unauthorized')
+  const pengurus = await db.pengurus.findUnique({
+    where: { id_pengurus: Number(pengurusId) },
+    select: { divisi: true },
+  })
+  if (!pengurus || pengurus.divisi !== 'alk') throw new Error('Unauthorized')
+}
+
+async function flyerQaPayloadForEvent(id: number) {
+  const event = await db.event.findUnique({
+    where: { id_event: id },
+    select: {
+      nama_event: true, tglevent: true, jamevent: true, alamatevent: true,
+      id_cabang: true, image_url: true, posterevent: true, wwtype: true,
+    },
+  })
+  if (!event) throw new Error('Event tidak ditemukan')
+  const file_url = resolveEventPosterUrl(event.posterevent, event.image_url)
+  if (!needsFlyerReview(event.wwtype, file_url)) {
+    throw new Error('Event ini tidak perlu review flyer')
+  }
+  let kota = 'Nasional'
+  if (event.id_cabang !== NASIONAL_EVENT_CABANG) {
+    const cabangId = Number(event.id_cabang)
+    if (Number.isFinite(cabangId)) {
+      const cabang = await db.cabang.findUnique({
+        where: { id_cabang: cabangId },
+        select: { namacabang: true },
+      })
+      if (cabang?.namacabang) kota = cabang.namacabang
+    }
+  }
+  return {
+    file_url,
+    kota,
+    expected: {
+      acara: event.nama_event,
+      tanggal: formatFlyerExpectedTanggal(event.tglevent),
+      waktu: event.jamevent,
+      tempat: event.alamatevent,
+    },
+  }
+}
+
+async function saveFlyerQa(id: number, rec: FlyerQaRecord): Promise<void> {
+  await db.event.update({
+    where: { id_event: id },
+    data: { flyer_qa: stringifyFlyerQa(rec) },
+  })
+  revalidatePath(`/dashboard/kota/alk/event/${id}`)
+}
+
+async function kickoffFlyerReview(id: number): Promise<FlyerQaRecord> {
+  try {
+    const payload = await flyerQaPayloadForEvent(id)
+    const { agentId } = await startFlyerQaWebhook(payload)
+    const rec = emptyFlyerQa({ state: 'reviewing', agentId })
+    await saveFlyerQa(id, rec)
+    return rec
+  } catch (err) {
+    const rec = emptyFlyerQa({
+      state: 'error',
+      error: err instanceof Error ? err.message : 'Gagal mulai review flyer',
+    })
+    await saveFlyerQa(id, rec)
+    return rec
+  }
+}
+
+export async function pollFlyerReview(id: number): Promise<FlyerQaRecord | null> {
+  await requireAlkPengurus()
+  const event = await db.event.findUnique({
+    where: { id_event: id },
+    select: { flyer_qa: true },
+  })
+  if (!event) throw new Error('Event tidak ditemukan')
+  const rec = parseFlyerQa(event.flyer_qa)
+  if (!rec || rec.state !== 'reviewing') return rec
+  try {
+    const run = await pollFlyerQaRun(rec.agentId, rec.runId)
+    rec.runId = run.runId
+    if (run.status === 'FINISHED') {
+      rec.error = null
+      try {
+        rec.review = run.result ? parseFlyerQaReview(extractJsonObject(run.result)) : null
+      } catch {
+        rec.review = null
+      }
+      if (rec.review) {
+        rec.state = 'done'
+      } else {
+        rec.state = 'error'
+        rec.error = 'Hasil review tidak valid'
+      }
+      await saveFlyerQa(id, rec)
+    } else if (run.status === 'ERROR' || run.status === 'CANCELLED' || run.status === 'EXPIRED') {
+      rec.state = 'error'
+      rec.error = `Review ${run.status}`
+      await saveFlyerQa(id, rec)
+    }
+  } catch (err) {
+    rec.error = err instanceof Error ? err.message : 'Gagal cek status review'
+  }
+  return rec
+}
+
+export async function retryFlyerReview(id: number): Promise<FlyerQaRecord> {
+  await requireAlkPengurus()
+  return kickoffFlyerReview(id)
+}
+
+export async function ajukanEventFlyer(
+  id: number,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await requireAlkPengurus()
+  } catch {
+    return { ok: false, error: 'Unauthorized' }
+  }
+  const event = await db.event.findUnique({
+    where: { id_event: id },
+    select: {
+      nama_event: true, jenisevent: true, wwtype: true, target: true, targetpengurus: true,
+      targetjumlah: true, tglevent: true, tgleventselesai: true, jamevent: true,
+      jamselesaievent: true, alamatevent: true, longlatevent: true, radius: true,
+      danaevent: true, suratpemberitahuan: true, khusus: true, id_cabang: true,
+      posterevent: true, image_url: true, flyer_qa: true,
+    },
+  })
+  if (!event) return { ok: false, error: 'Event tidak ditemukan' }
+  const rec = parseFlyerQa(event.flyer_qa)
+  if (!rec || rec.state !== 'done') return { ok: false, error: 'Review flyer belum selesai' }
+  if (rec.diajukan) return { ok: false, error: 'Event sudah diajukan' }
+
+  rec.diajukan = true
+  rec.diajukanAt = new Date().toISOString()
+  await saveFlyerQa(id, rec)
+
+  const isNasionalEvent = event.id_cabang === NASIONAL_EVENT_CABANG
+  let cabangLabel = isNasionalEvent ? nasionalScopeLabel(event.khusus) : event.id_cabang
+  if (!isNasionalEvent) {
+    const cabangId = Number(event.id_cabang)
+    if (Number.isFinite(cabangId)) {
+      const cabang = await db.cabang.findUnique({
+        where: { id_cabang: cabangId },
+        select: { namacabang: true },
+      })
+      if (cabang?.namacabang) cabangLabel = cabang.namacabang
+    }
+  }
+  const poster = resolveEventPosterUrl(event.posterevent, event.image_url)
+  void notifyTelegram(
+    formatTelegramMessage({
+      tag: isNasionalEvent ? 'Event Nasional' : 'Event Kota',
+      action: 'Diajukan',
+      eventName: event.nama_event,
+      fields: {
+        ...eventFormTelegramFields({
+          cabangLabel,
+          isNasional: isNasionalEvent,
+          khusus: event.khusus,
+          jenisevent: event.jenisevent,
+          wwtype: event.wwtype,
+          target: event.target,
+          targetpengurus: event.targetpengurus,
+          targetjumlah: event.targetjumlah,
+          tglevent: event.tglevent,
+          tgleventselesai: event.tgleventselesai,
+          jamevent: event.jamevent,
+          jamselesaievent: event.jamselesaievent,
+          alamatevent: event.alamatevent,
+          longlatevent: event.longlatevent,
+          radius: event.radius,
+          danaevent: event.danaevent,
+          suratpemberitahuan: event.suratpemberitahuan,
+          id,
+        }),
+        ...flyerQaTelegramFields(rec.review),
+      },
+    }),
+    { buttons: eventActionButtons(id, { poster: poster || undefined, longlatevent: event.longlatevent }) },
+  )
+  return { ok: true }
 }
 
 export type AlkBerandaStats = {

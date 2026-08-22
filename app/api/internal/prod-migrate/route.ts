@@ -28,7 +28,7 @@ async function ensureEventColumn(name: string, ddl: string): Promise<boolean> {
   return missing
 }
 
-/** Idempotent prod: event.approvebrimnas, event.image_url, brimnasional divisi=brim. */
+/** Idempotent prod: event.approvebrimnas, event.image_url, event.flyer_qa, brimnasional divisi=brim. */
 export async function POST(req: NextRequest) {
   if (!checkSecret(req)) return unauthorized()
 
@@ -48,6 +48,14 @@ export async function POST(req: NextRequest) {
     Prisma.sql`UPDATE event SET image_url = '' WHERE image_url IS NULL`,
   )
 
+  const addedFlyerQa = await ensureEventColumn(
+    'flyer_qa',
+    'ALTER TABLE event ADD COLUMN flyer_qa LONGTEXT NULL',
+  )
+  const flyerQaBackfill = await db.$executeRaw(
+    Prisma.sql`UPDATE event SET flyer_qa = '' WHERE flyer_qa IS NULL`,
+  )
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -63,6 +71,8 @@ export async function POST(req: NextRequest) {
     backfill,
     addedImageUrl,
     imageBackfill,
+    addedFlyerQa,
+    flyerQaBackfill,
     brimUpdated: brim.count,
     brim: row,
   })

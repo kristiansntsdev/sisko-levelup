@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import type { EventDetailFull } from '@/lib/actions/event'
 import { isEventFullyApproved } from '@/lib/event-approval'
+import { FlyerQaSummary } from '@/components/kota/flyer-qa-summary'
 
 const PAGE_SIZE = 10
 
@@ -154,6 +155,12 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
             />
           </div>
         )}
+
+        <FlyerQaSummary
+          eventId={event.id_event}
+          initial={event.flyerQa}
+          editHref={`/dashboard/kota/alk/event/${event.id_event}/edit`}
+        />
 
         {/* Info table */}
         <div className="bg-surface border border-border rounded-card overflow-hidden">

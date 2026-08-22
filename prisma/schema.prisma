@@ -81,6 +81,7 @@ model event {
   danaevent          String       @db.Text
   posterevent        String       @db.Text
   image_url          String       @default("") @db.Text
+  flyer_qa           String       @default("") @db.LongText
   proposalevent      String       @db.Text
   id_cabang          String       @db.Text
   target             String       @db.Text
