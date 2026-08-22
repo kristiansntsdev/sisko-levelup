@@ -43,6 +43,9 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-08-22]
+- Telegram approve/reject: `Tanggal Event` 1 hari vs rentang `(beberapa hari)`; kota `[Event Kota]` + Cabang
+- Telegram approve/reject: event kota → `[Event Kota]` + Cabang (namacabang); nasional tetap Tipe seluruh_kota/khusus
+- Sekretariat + Brim Nasional tab Event: list semua event (tanpa filter `id_cabang`); kota tetap per cabang
 - Tab Event (ALK + Brim) search nama/alamat/tanggal/ID; saat cari tampil semua match tanpa pagination
 - Prod migrate via Vercel `/api/internal/prod-migrate`: `event.approvebrimnas` + `brimnasional` `divisi=brim`
 - Brim Nasional (`brimnasional@gmail.com`) tab Event seperti Sekretariat; approve di `/dashboard/kota/brim/event/[id]/approve`

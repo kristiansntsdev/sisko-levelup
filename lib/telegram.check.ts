@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import {
   eventActionButtons,
   eventFormTelegramFields,
+  eventTelegramDateLabel,
+  eventTelegramScope,
   isTelegramButtonUrl,
   nasionalScopeLabel,
 } from './telegram'
@@ -69,5 +71,26 @@ assert.ok(buttons[4].url.endsWith('/brim/event/205/approve'))
 assert.equal(nasionalScopeLabel(''), 'seluruh_kota')
 assert.equal(isTelegramButtonUrl('http://localhost:3000/x'), false)
 assert.equal(isTelegramButtonUrl('https://sisko-v2.vercel.app/x'), true)
+
+const kotaScope = eventTelegramScope({
+  idCabang: '12',
+  khusus: '',
+  cabangName: 'LevelUP Ngawi',
+  tglevent: new Date(2026, 7, 22),
+  tgleventselesai: new Date(2026, 7, 22),
+})
+assert.equal(kotaScope.tag, 'Event Kota')
+assert.equal(kotaScope.fields['Cabang'], 'LevelUP Ngawi')
+assert.equal(kotaScope.fields['Tipe'], undefined)
+assert.equal(kotaScope.fields['Tanggal Event'], '22 Agustus 2026 (1 hari)')
+
+assert.equal(
+  eventTelegramDateLabel(new Date(2026, 7, 22), new Date(2026, 7, 24)),
+  '22 Agustus 2026 - 24 Agustus 2026 (beberapa hari)',
+)
+
+const nasionalScope = eventTelegramScope({ idCabang: '0', khusus: '' })
+assert.equal(nasionalScope.tag, 'Event Nasional')
+assert.equal(nasionalScope.fields['Tipe'], 'seluruh_kota')
 
 console.log('telegram.check: ok')

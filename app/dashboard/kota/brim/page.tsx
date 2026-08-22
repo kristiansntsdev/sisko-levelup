@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { getPengaturanKota } from '@/lib/actions/brim'
 import { getAllEventsByKotalevelup } from '@/lib/actions/event'
-import { isNasionalBrim, NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
+import { isNasionalBrim } from '@/lib/event-cabang'
 import { BrimClient } from './brim-client'
 
 export default async function BrimDashboardPage() {
@@ -31,7 +31,7 @@ export default async function BrimDashboardPage() {
       where: { id_cabang: Number(pengurus.kotalevelup) },
       select: { namacabang: true },
     }),
-    nasional ? getAllEventsByKotalevelup(NASIONAL_EVENT_CABANG) : Promise.resolve([]),
+    nasional ? getAllEventsByKotalevelup(null) : Promise.resolve([]),
   ])
 
   return (

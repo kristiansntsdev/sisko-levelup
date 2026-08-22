@@ -32,7 +32,7 @@ export default async function AlkDashboardPage() {
   const isNasional = isNasionalAdmin(pengurus.username)
 
   const [events, cabang, kasKota, stats, pendingApprovals] = await Promise.all([
-    getAllEventsByKotalevelup(kotalevelup),
+    getAllEventsByKotalevelup(isNasional ? null : kotalevelup),
     db.cabang.findUnique({
       where: { id_cabang: idCabang },
       select: { namacabang: true },

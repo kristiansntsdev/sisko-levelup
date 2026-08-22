@@ -10,7 +10,7 @@ import {
   NASIONAL_EVENT_CABANG,
 } from '@/lib/event-cabang'
 import { appendNotenasional } from '@/lib/event-approval'
-import { formatTelegramMessage, nasionalScopeLabel, notifyTelegram, eventActionButtons, eventFormTelegramFields } from '@/lib/telegram'
+import { formatTelegramMessage, nasionalScopeLabel, notifyTelegram, eventActionButtons, eventFormTelegramFields, eventTelegramScope } from '@/lib/telegram'
 
 const POSTER_BASE = 'https://sisko.levelupgen.com/uploads/poster/'
 
@@ -115,11 +115,12 @@ export type EventDashboard = {
   khusus: string
 }
 
+/** `null` = all cabang (Sekretariat / Brim Nasional). */
 export async function getAllEventsByKotalevelup(
-  kotalevelup: string,
+  kotalevelup: string | null,
 ): Promise<EventDashboard[]> {
   const rows = await db.event.findMany({
-    where: { id_cabang: kotalevelup },
+    where: kotalevelup == null ? undefined : { id_cabang: kotalevelup },
     orderBy: { tglevent: 'desc' },
     select: {
       id_event: true, nama_event: true,
@@ -574,6 +575,32 @@ export async function getAlkBerandaStats(idCabang: string): Promise<AlkBerandaSt
 
 export type EventApprovalResult = { ok: true } | { ok: false; error: string }
 
+async function telegramScopeForEvent(event: {
+  id_cabang: string
+  khusus: string | null
+  tglevent: Date
+  tgleventselesai: Date
+}) {
+  let cabangName: string | null = null
+  if (event.id_cabang !== NASIONAL_EVENT_CABANG) {
+    const cabangId = Number(event.id_cabang)
+    if (Number.isFinite(cabangId)) {
+      const row = await db.cabang.findUnique({
+        where: { id_cabang: cabangId },
+        select: { namacabang: true },
+      })
+      cabangName = row?.namacabang ?? null
+    }
+  }
+  return eventTelegramScope({
+    idCabang: event.id_cabang,
+    khusus: event.khusus ?? '',
+    cabangName,
+    tglevent: event.tglevent,
+    tgleventselesai: event.tgleventselesai,
+  })
+}
+
 async function requireSekretariatNasional(): Promise<
   { ok: true } | { ok: false; error: string }
 > {
@@ -598,7 +625,7 @@ export async function approveEventAlkNasional(
 
   const event = await db.event.findUnique({
     where: { id_event: idEvent },
-    select: { nama_event: true, khusus: true },
+    select: { nama_event: true, khusus: true, id_cabang: true, tglevent: true, tgleventselesai: true },
   })
   if (!event) return { ok: false, error: 'Event tidak ditemukan' }
 
@@ -609,15 +636,13 @@ export async function approveEventAlkNasional(
   revalidatePath('/dashboard/kota/alk')
   revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
 
+  const scope = await telegramScopeForEvent(event)
   void notifyTelegram(
     formatTelegramMessage({
-      tag: 'Event Nasional',
+      tag: scope.tag,
       action: 'Approved ALK',
       eventName: event.nama_event,
-      fields: {
-        Tipe: nasionalScopeLabel(event.khusus),
-        ID: idEvent,
-      },
+      fields: { ...scope.fields, ID: idEvent },
     }),
     { buttons: eventActionButtons(idEvent) },
   )
@@ -648,7 +673,7 @@ export async function approveEventBrimNasional(
 
   const event = await db.event.findUnique({
     where: { id_event: idEvent },
-    select: { nama_event: true, khusus: true },
+    select: { nama_event: true, khusus: true, id_cabang: true, tglevent: true, tgleventselesai: true },
   })
   if (!event) return { ok: false, error: 'Event tidak ditemukan' }
 
@@ -659,15 +684,13 @@ export async function approveEventBrimNasional(
   revalidatePath('/dashboard/kota/brim')
   revalidatePath(`/dashboard/kota/brim/event/${idEvent}/approve`)
 
+  const scope = await telegramScopeForEvent(event)
   void notifyTelegram(
     formatTelegramMessage({
-      tag: 'Event Nasional',
+      tag: scope.tag,
       action: 'Approved Brim',
       eventName: event.nama_event,
-      fields: {
-        Tipe: nasionalScopeLabel(event.khusus),
-        ID: idEvent,
-      },
+      fields: { ...scope.fields, ID: idEvent },
     }),
     { buttons: eventActionButtons(idEvent) },
   )
@@ -687,7 +710,7 @@ export async function rejectEventBrimNasional(
 
   const existing = await db.event.findUnique({
     where: { id_event: idEvent },
-    select: { notenasional: true, nama_event: true, khusus: true },
+    select: { notenasional: true, nama_event: true, khusus: true, id_cabang: true, tglevent: true, tgleventselesai: true },
   })
   if (!existing) return { ok: false, error: 'Event tidak ditemukan' }
 
@@ -701,15 +724,13 @@ export async function rejectEventBrimNasional(
   revalidatePath('/dashboard/kota/brim')
   revalidatePath(`/dashboard/kota/brim/event/${idEvent}/approve`)
 
+  const scope = await telegramScopeForEvent(existing)
   void notifyTelegram(
     formatTelegramMessage({
-      tag: 'Event Nasional',
+      tag: scope.tag,
       action: 'Rejected Brim',
       eventName: existing.nama_event,
-      fields: {
-        Alasan: reason,
-        ID: idEvent,
-      },
+      fields: { ...scope.fields, Alasan: reason, ID: idEvent },
     }),
     { buttons: eventActionButtons(idEvent) },
   )
@@ -729,7 +750,7 @@ export async function rejectEventAlkNasional(
 
   const existing = await db.event.findUnique({
     where: { id_event: idEvent },
-    select: { notenasional: true, nama_event: true, khusus: true },
+    select: { notenasional: true, nama_event: true, khusus: true, id_cabang: true, tglevent: true, tgleventselesai: true },
   })
   if (!existing) return { ok: false, error: 'Event tidak ditemukan' }
 
@@ -743,15 +764,13 @@ export async function rejectEventAlkNasional(
   revalidatePath('/dashboard/kota/alk')
   revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
 
+  const scope = await telegramScopeForEvent(existing)
   void notifyTelegram(
     formatTelegramMessage({
-      tag: 'Event Nasional',
+      tag: scope.tag,
       action: 'Rejected ALK',
       eventName: existing.nama_event,
-      fields: {
-        Alasan: reason,
-        ID: idEvent,
-      },
+      fields: { ...scope.fields, Alasan: reason, ID: idEvent },
     }),
     { buttons: eventActionButtons(idEvent) },
   )

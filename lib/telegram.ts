@@ -1,4 +1,4 @@
-import { NASIONAL_KHUSUS_VALUE } from '@/lib/event-cabang'
+import { NASIONAL_EVENT_CABANG, NASIONAL_KHUSUS_VALUE } from '@/lib/event-cabang'
 
 const POSTER_BASE = 'https://sisko.levelupgen.com/uploads/poster/'
 
@@ -114,6 +114,40 @@ export function formatTelegramMessage(opts: {
 
 export function nasionalScopeLabel(khusus: string): string {
   return khusus === NASIONAL_KHUSUS_VALUE ? 'khusus' : 'seluruh_kota'
+}
+
+export function eventTelegramDateLabel(mulai: Date, selesai: Date): string {
+  const fmt = (d: Date) =>
+    d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+  const a = fmt(mulai)
+  const b = fmt(selesai)
+  return a === b ? `${a} (1 hari)` : `${a} - ${b} (beberapa hari)`
+}
+
+/** Kota vs nasional for Telegram: cabang name, never nasional scope on a city event. */
+export function eventTelegramScope(input: {
+  idCabang: string
+  khusus: string
+  cabangName?: string | null
+  tglevent?: Date | null
+  tgleventselesai?: Date | null
+}): { tag: 'Event Nasional' | 'Event Kota'; fields: Record<string, string> } {
+  const fields: Record<string, string> = {}
+  const tag = input.idCabang === NASIONAL_EVENT_CABANG ? 'Event Nasional' : 'Event Kota'
+  if (tag === 'Event Nasional') {
+    fields['Tipe'] = nasionalScopeLabel(input.khusus)
+  } else {
+    const cabang = input.cabangName?.trim()
+    fields['Cabang'] = cabang || input.idCabang
+  }
+  if (input.tglevent instanceof Date && Number.isFinite(input.tglevent.getTime())) {
+    const selesai =
+      input.tgleventselesai instanceof Date && Number.isFinite(input.tgleventselesai.getTime())
+        ? input.tgleventselesai
+        : input.tglevent
+    fields['Tanggal Event'] = eventTelegramDateLabel(input.tglevent, selesai)
+  }
+  return { tag, fields }
 }
 
 const TARGET_PESERTA_LABEL: Record<string, string> = {
