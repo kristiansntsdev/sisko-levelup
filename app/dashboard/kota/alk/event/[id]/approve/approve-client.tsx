@@ -9,6 +9,7 @@ import {
   rejectEventAlkNasional,
   rejectEventBrimNasional,
 } from '@/lib/actions/event'
+import { FlyerQaSummary } from '@/components/kota/flyer-qa-summary'
 
 export function EventApproveClient({
   event,
@@ -130,6 +131,8 @@ export function EventApproveClient({
             </div>
           )}
         </div>
+
+        <FlyerQaSummary eventId={event.id_event} initial={event.flyerQa} live={false} />
 
         {notes ? (
           <div className="bg-amber-light border border-border rounded-[14px] px-4 py-3">

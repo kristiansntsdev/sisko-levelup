@@ -4,6 +4,7 @@ import {
   eventFormTelegramFields,
   eventTelegramDateLabel,
   eventTelegramScope,
+  formatTelegramMessage,
   isTelegramButtonUrl,
   nasionalScopeLabel,
 } from './telegram'
@@ -92,5 +93,18 @@ assert.equal(
 const nasionalScope = eventTelegramScope({ idCabang: '0', khusus: '' })
 assert.equal(nasionalScope.tag, 'Event Nasional')
 assert.equal(nasionalScope.fields['Tipe'], 'seluruh_kota')
+
+const revisiCard = formatTelegramMessage({
+  tag: 'Event Kota',
+  action: 'Diajukan',
+  eventName: 'test flyer review',
+  banner: '🚨🚨🚨 Butuh Revisi 🚨🚨🚨',
+  boldFields: ['QA flyer'],
+  fields: { 'QA flyer': 'REVISI', Cabang: 'LevelUP Ngawi' },
+})
+assert.ok(revisiCard.startsWith('🚨🚨🚨 Butuh Revisi 🚨🚨🚨\n'))
+assert.ok(revisiCard.includes('<b>[Event Kota]</b> Diajukan'))
+assert.ok(revisiCard.includes('<b>QA flyer: REVISI</b>'))
+assert.ok(!revisiCard.includes('Temuan:'))
 
 console.log('telegram.check: ok')

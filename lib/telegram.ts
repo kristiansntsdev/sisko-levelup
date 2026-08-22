@@ -88,12 +88,17 @@ export function formatTelegramMessage(opts: {
   eventName: string
   fields?: Record<string, string | number>
   layout?: TelegramCardLayout
+  /** Plain line above `[tag] action` (emoji OK). */
+  banner?: string
+  /** Field keys whose whole `Key: value` line is wrapped in <b>. */
+  boldFields?: string[]
 }): string {
   const tag = opts.tag ?? 'Event Nasional'
   const layout = opts.layout ?? 'default'
-  const lines: string[] = [
-    `<b>[${escapeHtml(tag)}]</b> ${escapeHtml(opts.action)}`,
-  ]
+  const bold = new Set(opts.boldFields ?? [])
+  const lines: string[] = []
+  if (opts.banner?.trim()) lines.push(escapeHtml(opts.banner.trim()))
+  lines.push(`<b>[${escapeHtml(tag)}]</b> ${escapeHtml(opts.action)}`)
 
   if (layout === 'peserta') {
     lines.push(`<b>${escapeHtml(opts.eventName)}</b>`)
@@ -102,7 +107,8 @@ export function formatTelegramMessage(opts: {
   }
 
   for (const [key, value] of Object.entries(opts.fields ?? {})) {
-    lines.push(`${escapeHtml(key)}: ${escapeHtml(String(value))}`)
+    const line = `${escapeHtml(key)}: ${escapeHtml(String(value))}`
+    lines.push(bold.has(key) ? `<b>${line}</b>` : line)
   }
 
   return lines.join('\n')

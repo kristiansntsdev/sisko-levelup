@@ -228,16 +228,11 @@ export function parseFlyerQa(raw: string | null | undefined): FlyerQaRecord | nu
 }
 
 export function flyerQaTelegramFields(review: FlyerQaReview | null): Record<string, string> {
-  if (!review) return { 'QA flyer': 'tidak ada' }
-  const fields: Record<string, string> = { 'QA flyer': review.status }
-  if (review.temuan.length) fields['Temuan'] = review.temuan.join('; ')
-  if (review.rekomendasi.length) fields['Rekomendasi'] = review.rekomendasi.join('; ')
-  if (review.typo_list.length) {
-    fields['Typo'] = review.typo_list
-      .map((t) => `${t.tertulis} → ${t.usulan}`)
-      .join('; ')
-  }
-  return fields
+  return { 'QA flyer': review?.status ?? 'tidak ada' }
+}
+
+export function flyerQaTelegramBanner(status: FlyerQaOverall | null | undefined): string | undefined {
+  return status === 'REVISI' ? '🚨🚨🚨 Butuh Revisi 🚨🚨🚨' : undefined
 }
 
 function qaAuth(): { url: string; token: string } {

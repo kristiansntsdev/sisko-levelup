@@ -15,6 +15,7 @@ import { resolveEventPosterUrl } from '@/lib/event-poster'
 import {
   emptyFlyerQa,
   extractJsonObject,
+  flyerQaTelegramBanner,
   flyerQaTelegramFields,
   formatFlyerExpectedTanggal,
   needsFlyerReview,
@@ -740,7 +741,10 @@ export async function ajukanEventFlyer(
       tag: isNasionalEvent ? 'Event Nasional' : 'Event Kota',
       action: 'Diajukan',
       eventName: event.nama_event,
+      banner: flyerQaTelegramBanner(rec.review?.status),
+      boldFields: ['QA flyer'],
       fields: {
+        ...flyerQaTelegramFields(rec.review),
         ...eventFormTelegramFields({
           cabangLabel,
           isNasional: isNasionalEvent,
@@ -761,7 +765,6 @@ export async function ajukanEventFlyer(
           suratpemberitahuan: event.suratpemberitahuan,
           id,
         }),
-        ...flyerQaTelegramFields(rec.review),
       },
     }),
     { buttons: eventActionButtons(id, { poster: poster || undefined, longlatevent: event.longlatevent }) },

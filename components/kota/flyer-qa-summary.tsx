@@ -45,10 +45,13 @@ export function FlyerQaSummary({
   eventId,
   initial,
   editHref,
+  live = true,
 }: {
   eventId: number
   initial: FlyerQaRecord | null
-  editHref: string
+  editHref?: string
+  /** false = snapshot dari DB (halaman approve), tanpa poll / Ajukan. */
+  live?: boolean
 }) {
   const [qa, setQa] = useState(initial)
   const [timedOut, setTimedOut] = useState(false)
@@ -58,7 +61,7 @@ export function FlyerQaSummary({
   const [reviewStartedAt, setReviewStartedAt] = useState(Date.now())
 
   useEffect(() => {
-    if (qa?.state !== 'reviewing') return
+    if (!live || qa?.state !== 'reviewing') return
     started.current = Date.now()
     setReviewStartedAt(Date.now())
     setTimedOut(false)
@@ -82,9 +85,10 @@ export function FlyerQaSummary({
       stop = true
       clearTimeout(t)
     }
-  }, [eventId, qa?.state, qa?.agentId])
+  }, [live, eventId, qa?.state, qa?.agentId])
 
   if (!qa) return null
+  if (!live && !(qa.state === 'done' && qa.review)) return null
 
   function retry() {
     setMsg('')
@@ -123,11 +127,11 @@ export function FlyerQaSummary({
       </div>
 
       <div className="px-4 py-4 flex flex-col gap-3">
-        {qa.state === 'reviewing' && !timedOut && (
+        {live && qa.state === 'reviewing' && !timedOut && (
           <ReviewingStatus startedAt={reviewStartedAt} />
         )}
 
-        {(qa.state === 'error' || timedOut) && (
+        {live && (qa.state === 'error' || timedOut) && (
           <>
             <p className="text-[13px] text-red">
               {timedOut ? 'Review terlalu lama. Coba lagi.' : (qa.error || 'Review gagal')}
@@ -184,26 +188,30 @@ export function FlyerQaSummary({
               </p>
             )}
 
-            {qa.diajukan ? (
-              <p className="text-[13px] font-semibold text-green-dark">Sudah diajukan</p>
-            ) : (
-              <button
-                type="button"
-                onClick={ajukan}
-                disabled={isPending}
-                className="w-full py-3 bg-accent text-white rounded-btn text-[14px] font-semibold disabled:opacity-60"
-              >
-                {isPending ? 'Mengajukan...' : 'Ajukan'}
-              </button>
+            {live && (
+              qa.diajukan ? (
+                <p className="text-[13px] font-semibold text-green-dark">Sudah diajukan</p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={ajukan}
+                  disabled={isPending}
+                  className="w-full py-3 bg-accent text-white rounded-btn text-[14px] font-semibold disabled:opacity-60"
+                >
+                  {isPending ? 'Mengajukan...' : 'Ajukan'}
+                </button>
+              )
             )}
           </>
         )}
 
         {msg && <p className="text-[12px] text-red">{msg}</p>}
 
-        <Link href={editHref} className="text-[12px] text-accent font-medium">
-          Upload ulang poster
-        </Link>
+        {live && editHref && (
+          <Link href={editHref} className="text-[12px] text-accent font-medium">
+            Upload ulang poster
+          </Link>
+        )}
       </div>
     </div>
   )

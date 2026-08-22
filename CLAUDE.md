@@ -45,7 +45,7 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-08-22]
-- WW bulanan + flyer: simpan event → Cursor QA review (status berganti: unduh/baca/cek logo…) → Ajukan ke Telegram (AI helper, bukan gate)
+- WW bulanan + flyer: Ajukan ke Telegram; halaman approve ALK/Brim tampilkan snapshot QA dari DB (tanpa poll)
 - Event flyer v2: kolom `image_url` (Vercel Blob); display `posterevent` dulu, kosong baru Blob; upload flyer di form buat/edit
 - Blob upload pakai `BLOB_READ_WRITE_TOKEN` eksplisit (OIDC development tidak terhubung ke store)
 - Telegram approve/reject: `Tanggal Event` 1 hari vs rentang `(beberapa hari)`; kota `[Event Kota]` + Cabang

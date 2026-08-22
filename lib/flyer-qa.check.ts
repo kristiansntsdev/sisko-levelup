@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import {
   extractJsonObject,
   flyerQaReviewingStep,
+  flyerQaTelegramBanner,
   flyerQaTelegramFields,
   formatFlyerExpectedTanggal,
   FLYER_QA_REVIEWING_STEPS,
@@ -34,8 +35,10 @@ assert.equal(review.expected_match.pembicara, false)
 
 const fields = flyerQaTelegramFields(review)
 assert.equal(fields['QA flyer'], 'REVISI')
-assert.ok(fields['Temuan']?.includes('Logo kiri atas'))
-assert.ok(fields['Typo']?.includes('Connect With US'))
+assert.equal(fields['Temuan'], undefined)
+assert.equal(flyerQaTelegramBanner('REVISI'), '🚨🚨🚨 Butuh Revisi 🚨🚨🚨')
+assert.equal(flyerQaTelegramBanner('PASS'), undefined)
+assert.equal(flyerQaTelegramBanner('BLOKIR'), undefined)
 
 assert.equal(parseFlyerQa(''), null)
 assert.equal(parseFlyerQa('not-json'), null)
