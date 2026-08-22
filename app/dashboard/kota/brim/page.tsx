@@ -2,6 +2,8 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { getPengaturanKota } from '@/lib/actions/brim'
+import { getAllEventsByKotalevelup } from '@/lib/actions/event'
+import { isNasionalBrim, NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
 import { BrimClient } from './brim-client'
 
 export default async function BrimDashboardPage() {
@@ -11,23 +13,34 @@ export default async function BrimDashboardPage() {
 
   const pengurus = await db.pengurus.findUnique({
     where: { id_pengurus: Number(pengurusId) },
-    select: { id_pengurus: true, nama: true, kotalevelup: true, divisi: true },
+    select: {
+      id_pengurus: true,
+      nama: true,
+      username: true,
+      kotalevelup: true,
+      divisi: true,
+    },
   })
   if (!pengurus || pengurus.divisi !== 'brim') redirect('/admin')
 
-  const [pengaturan, cabang] = await Promise.all([
+  const nasional = isNasionalBrim(pengurus.username)
+
+  const [pengaturan, cabang, events] = await Promise.all([
     getPengaturanKota(pengurus.kotalevelup),
     db.cabang.findUnique({
       where: { id_cabang: Number(pengurus.kotalevelup) },
       select: { namacabang: true },
     }),
+    nasional ? getAllEventsByKotalevelup(NASIONAL_EVENT_CABANG) : Promise.resolve([]),
   ])
 
   return (
     <BrimClient
       nama={pengurus.nama}
-      kotalevelup={cabang?.namacabang ?? pengurus.kotalevelup}
+      kotalevelup={cabang?.namacabang ?? (nasional ? 'Nasional' : pengurus.kotalevelup)}
       pengaturan={pengaturan ?? null}
+      events={events}
+      isNasional={nasional}
     />
   )
 }

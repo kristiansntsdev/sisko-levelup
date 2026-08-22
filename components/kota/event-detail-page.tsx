@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { EventDetailFull } from '@/lib/actions/event'
+import { isEventFullyApproved } from '@/lib/event-approval'
 
 const PAGE_SIZE = 10
 
@@ -78,7 +79,7 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
     return `https://maps.google.com/maps?q=${parts[0]},${parts[1]}&z=15&output=embed`
   })()
 
-  const isApproved = event.approvenasional === '1'
+  const isApproved = isEventFullyApproved(event)
   const sameDates = event.tglDisplay === event.tglSelesaiDisplay
 
   const totalRegistrasi = event.registrasi.length

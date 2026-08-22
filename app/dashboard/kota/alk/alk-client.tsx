@@ -7,9 +7,11 @@ import {
   EventDateCard,
   HeroCard, FilterTabs,
   KasTab, SuratTab,
+  eventMatchesQuery,
 } from '@/components/kota'
 import type { KasKotaData } from '@/components/kota'
 import type { AlkBerandaStats, EventDashboard } from '@/lib/actions/event'
+import { isEventFullyApproved } from '@/lib/event-approval'
 import { logoutPengurus } from '@/app/admin/actions'
 
 interface Pengurus {
@@ -350,9 +352,13 @@ function BerandaTab({ pengurus, events, namaCabang, stats, saldo, pendingApprova
 }
 
 // ── Event tab ──────────────────────────────────────────────────
+const EVENT_PAGE_SIZE = 10
+
 function EventTab({ events, isNasional }: { events: EventDashboard[]; isNasional: boolean }) {
   const router = useRouter()
   const [filter, setFilter] = useState('all')
+  const [page, setPage] = useState(0)
+  const [q, setQ] = useState('')
 
   const { filtered, counts, filterTabs } = useMemo(() => {
     const sorted = [...events].sort((a, b) => b.tglMs - a.tglMs)
@@ -383,7 +389,7 @@ function EventTab({ events, isNasional }: { events: EventDashboard[]; isNasional
       return { filtered, counts, filterTabs }
     }
 
-    const isApproved = (e: EventDashboard) => e.approvenasional === '1'
+    const isApproved = (e: EventDashboard) => isEventFullyApproved(e)
     const counts = { all: events.length, approved: 0, pending: 0 }
     for (const e of events) {
       if (isApproved(e)) counts.approved++
@@ -395,6 +401,24 @@ function EventTab({ events, isNasional }: { events: EventDashboard[]; isNasional
     const filterTabs = FILTER_KEYS.map((k) => ({ key: k, label: FILTER_LABELS[k], count: counts[k] }))
     return { filtered, counts, filterTabs }
   }, [events, filter, isNasional])
+
+  const searched = useMemo(() => {
+    if (!q.trim()) return filtered
+    return [...events]
+      .sort((a, b) => b.tglMs - a.tglMs)
+      .filter((e) => eventMatchesQuery(e, q))
+  }, [events, filtered, q])
+  const searching = q.trim() !== ''
+  const totalPages = Math.max(1, Math.ceil(searched.length / EVENT_PAGE_SIZE))
+  const safePage = Math.min(page, totalPages - 1)
+  const paged = searching
+    ? searched
+    : searched.slice(safePage * EVENT_PAGE_SIZE, (safePage + 1) * EVENT_PAGE_SIZE)
+
+  function changeFilter(next: string) {
+    setFilter(next)
+    setPage(0)
+  }
 
   const subtitle = isNasional
     ? `${(counts as { pending: number }).pending} belum approve · ${(counts as { rejected: number }).rejected} ditolak`
@@ -419,7 +443,7 @@ function EventTab({ events, isNasional }: { events: EventDashboard[]; isNasional
         </div>
         <button
           onClick={() => router.push('/dashboard/kota/alk/event/new')}
-          className="mt-1 shrink-0 px-3.5 py-2 bg-accent text-white rounded-full text-[13px] font-semibold flex items-center gap-1.5"
+          className="mt-1 shrink-0 px-3.5 py-2 bg-accent text-white rounded-full text-[13px] font-semibold flex items-center gap-1.5 cursor-pointer"
         >
           <span>+</span> Buat Event
         </button>
@@ -431,59 +455,74 @@ function EventTab({ events, isNasional }: { events: EventDashboard[]; isNasional
         meta={heroMeta}
       />
 
-      <FilterTabs tabs={filterTabs} active={filter} onChange={setFilter} />
+      <FilterTabs tabs={filterTabs} active={filter} onChange={changeFilter} />
 
-      {filtered.length === 0 ? (
+      <input
+        type="search"
+        value={q}
+        onChange={(e) => {
+          setQ(e.target.value)
+          setPage(0)
+        }}
+        placeholder="Cari nama, alamat, tanggal, atau ID…"
+        className="w-full rounded-[14px] border border-border bg-surface px-3.5 py-3 text-[14px] text-fg placeholder:text-subtle focus:outline-none focus:border-accent"
+      />
+
+      {searched.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16">
-          <p className="text-sm text-muted">Tidak ada event.</p>
+          <p className="text-sm text-muted">{searching ? 'Event tidak ditemukan.' : 'Tidak ada event.'}</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2.5">
-          {filtered.map((e) => {
-            const rejected = isNasional && isRejectedEvent(e)
-            const needsApprove = isNasional && isPendingEvent(e)
-            if (needsApprove || rejected) {
+        <>
+          <div className="flex flex-col gap-2.5">
+            {paged.map((e) => {
+              const showApprove = isNasional && e.approvenasional !== '1'
               return (
-                <div
+                <EventDateCard
                   key={e.id_event}
-                  className={`bg-surface border rounded-[16px] px-4 py-3.5 flex items-center gap-3 ${
-                    rejected ? 'border-border' : 'border-accent'
-                  }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/dashboard/kota/alk/event/${e.id_event}`)}
-                    className="flex-1 min-w-0 text-left"
-                  >
-                    <p className="text-[15px] font-bold text-fg truncate">{e.nama_event}</p>
-                    <p className="text-[12px] text-muted mt-0.5">{e.tglDisplay}</p>
-                    {rejected ? (
-                      <p className="text-[11px] text-muted mt-1 line-clamp-2">{e.notenasional}</p>
-                    ) : null}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/dashboard/kota/alk/event/${e.id_event}/approve`)}
-                    className={`shrink-0 px-3.5 py-2 rounded-full text-[13px] font-semibold ${
-                      rejected
-                        ? 'border border-border text-muted'
-                        : 'border border-accent text-accent'
-                    }`}
-                  >
-                    {rejected ? 'ditolak' : 'approve'}
-                  </button>
-                </div>
+                  event={e}
+                  onClick={() => router.push(`/dashboard/kota/alk/event/${e.id_event}`)}
+                  action={
+                    showApprove ? (
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/dashboard/kota/alk/event/${e.id_event}/approve`)}
+                        className="w-full py-2.5 bg-accent text-white rounded-[12px] text-[13px] font-semibold cursor-pointer hover:opacity-90"
+                      >
+                        Lihat Event
+                      </button>
+                    ) : undefined
+                  }
+                />
               )
-            }
-            return (
-              <EventDateCard
-                key={e.id_event}
-                event={e}
-                onClick={() => router.push(`/dashboard/kota/alk/event/${e.id_event}`)}
-              />
-            )
-          })}
-        </div>
+            })}
+          </div>
+
+          {!searching && totalPages > 1 ? (
+            <div className="flex items-center justify-between gap-2 pt-1 pb-2">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={safePage === 0}
+                className="text-[13px] px-3 py-1.5 rounded-[10px] border border-border bg-surface cursor-pointer disabled:opacity-40"
+              >
+                ← Prev
+              </button>
+              <span className="text-[12px] text-muted">
+                {safePage + 1} / {totalPages}
+                <span className="text-subtle"> · {searched.length} event</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={safePage >= totalPages - 1}
+                className="text-[13px] px-3 py-1.5 rounded-[10px] border border-border bg-surface cursor-pointer disabled:opacity-40"
+              >
+                Next →
+              </button>
+            </div>
+          ) : null}
+        </>
       )}
     </div>
   )

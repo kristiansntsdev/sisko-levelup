@@ -17,9 +17,14 @@ export async function loginPengurus(
   })
 
   if (!pengurus) return { error: 'Username atau password salah.' }
-  if (pengurus.divisi !== 'alk') {
-    return { error: 'Akses hanya untuk pengurus ALK.' }
-  }
+
+  const divisi = pengurus.divisi
+  const dest =
+    divisi === 'alk' ? '/dashboard/kota/alk'
+    : divisi === 'brim' ? '/dashboard/kota/brim'
+    : divisi === 'vol' ? '/dashboard/kota/vol'
+    : null
+  if (!dest) return { error: 'Divisi tidak dikenali.' }
 
   const cookieStore = await cookies()
   cookieStore.set('pengurus_id', String(pengurus.id_pengurus), {
@@ -28,7 +33,7 @@ export async function loginPengurus(
     maxAge: 60 * 60 * 8,
   })
 
-  redirect('/dashboard/kota/alk')
+  redirect(dest)
 }
 
 export async function logoutPengurus() {

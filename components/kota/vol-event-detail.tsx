@@ -2,6 +2,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import type { EventDetailFull } from '@/lib/actions/event'
+import { isEventFullyApproved } from '@/lib/event-approval'
 import type { EventDetailVol, PembicaraItem, RundownRow } from '@/lib/actions/event-detail'
 import { upsertPembicara, upsertRundownPra, upsertRundownOn } from '@/lib/actions/event-detail'
 
@@ -326,7 +327,7 @@ export function VolEventDetailClient({ event, volDetail, backUrl }: VolEventDeta
     return `https://maps.google.com/maps?q=${parts[0]},${parts[1]}&z=15&output=embed`
   })()
 
-  const isApproved = event.approvenasional === '1'
+  const isApproved = isEventFullyApproved(event)
   const sameDates = event.tglDisplay === event.tglSelesaiDisplay
 
   const infoRows = [

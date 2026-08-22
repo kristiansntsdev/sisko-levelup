@@ -59,6 +59,7 @@ export type EventMinAggregateOutputType = {
   radius: number | null
   linkevent: string | null
   approvenasional: string | null
+  approvebrimnas: string | null
   approveadmin: string | null
   notenasional: string | null
   noteadmin: string | null
@@ -88,6 +89,7 @@ export type EventMaxAggregateOutputType = {
   radius: number | null
   linkevent: string | null
   approvenasional: string | null
+  approvebrimnas: string | null
   approveadmin: string | null
   notenasional: string | null
   noteadmin: string | null
@@ -117,6 +119,7 @@ export type EventCountAggregateOutputType = {
   radius: number
   linkevent: number
   approvenasional: number
+  approvebrimnas: number
   approveadmin: number
   notenasional: number
   noteadmin: number
@@ -160,6 +163,7 @@ export type EventMinAggregateInputType = {
   radius?: true
   linkevent?: true
   approvenasional?: true
+  approvebrimnas?: true
   approveadmin?: true
   notenasional?: true
   noteadmin?: true
@@ -189,6 +193,7 @@ export type EventMaxAggregateInputType = {
   radius?: true
   linkevent?: true
   approvenasional?: true
+  approvebrimnas?: true
   approveadmin?: true
   notenasional?: true
   noteadmin?: true
@@ -218,6 +223,7 @@ export type EventCountAggregateInputType = {
   radius?: true
   linkevent?: true
   approvenasional?: true
+  approvebrimnas?: true
   approveadmin?: true
   notenasional?: true
   noteadmin?: true
@@ -334,6 +340,7 @@ export type EventGroupByOutputType = {
   radius: number
   linkevent: string
   approvenasional: string
+  approvebrimnas: string
   approveadmin: string
   notenasional: string
   noteadmin: string
@@ -386,6 +393,7 @@ export type eventWhereInput = {
   radius?: Prisma.IntFilter<"event"> | number
   linkevent?: Prisma.StringFilter<"event"> | string
   approvenasional?: Prisma.StringFilter<"event"> | string
+  approvebrimnas?: Prisma.StringFilter<"event"> | string
   approveadmin?: Prisma.StringFilter<"event"> | string
   notenasional?: Prisma.StringFilter<"event"> | string
   noteadmin?: Prisma.StringFilter<"event"> | string
@@ -416,6 +424,7 @@ export type eventOrderByWithRelationInput = {
   radius?: Prisma.SortOrder
   linkevent?: Prisma.SortOrder
   approvenasional?: Prisma.SortOrder
+  approvebrimnas?: Prisma.SortOrder
   approveadmin?: Prisma.SortOrder
   notenasional?: Prisma.SortOrder
   noteadmin?: Prisma.SortOrder
@@ -450,6 +459,7 @@ export type eventWhereUniqueInput = Prisma.AtLeast<{
   radius?: Prisma.IntFilter<"event"> | number
   linkevent?: Prisma.StringFilter<"event"> | string
   approvenasional?: Prisma.StringFilter<"event"> | string
+  approvebrimnas?: Prisma.StringFilter<"event"> | string
   approveadmin?: Prisma.StringFilter<"event"> | string
   notenasional?: Prisma.StringFilter<"event"> | string
   noteadmin?: Prisma.StringFilter<"event"> | string
@@ -480,6 +490,7 @@ export type eventOrderByWithAggregationInput = {
   radius?: Prisma.SortOrder
   linkevent?: Prisma.SortOrder
   approvenasional?: Prisma.SortOrder
+  approvebrimnas?: Prisma.SortOrder
   approveadmin?: Prisma.SortOrder
   notenasional?: Prisma.SortOrder
   noteadmin?: Prisma.SortOrder
@@ -517,6 +528,7 @@ export type eventScalarWhereWithAggregatesInput = {
   radius?: Prisma.IntWithAggregatesFilter<"event"> | number
   linkevent?: Prisma.StringWithAggregatesFilter<"event"> | string
   approvenasional?: Prisma.StringWithAggregatesFilter<"event"> | string
+  approvebrimnas?: Prisma.StringWithAggregatesFilter<"event"> | string
   approveadmin?: Prisma.StringWithAggregatesFilter<"event"> | string
   notenasional?: Prisma.StringWithAggregatesFilter<"event"> | string
   noteadmin?: Prisma.StringWithAggregatesFilter<"event"> | string
@@ -545,6 +557,7 @@ export type eventCreateInput = {
   radius: number
   linkevent: string
   approvenasional: string
+  approvebrimnas?: string
   approveadmin: string
   notenasional: string
   noteadmin: string
@@ -575,6 +588,7 @@ export type eventUncheckedCreateInput = {
   radius: number
   linkevent: string
   approvenasional: string
+  approvebrimnas?: string
   approveadmin: string
   notenasional: string
   noteadmin: string
@@ -604,6 +618,7 @@ export type eventUpdateInput = {
   radius?: Prisma.IntFieldUpdateOperationsInput | number
   linkevent?: Prisma.StringFieldUpdateOperationsInput | string
   approvenasional?: Prisma.StringFieldUpdateOperationsInput | string
+  approvebrimnas?: Prisma.StringFieldUpdateOperationsInput | string
   approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
   notenasional?: Prisma.StringFieldUpdateOperationsInput | string
   noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
@@ -634,6 +649,7 @@ export type eventUncheckedUpdateInput = {
   radius?: Prisma.IntFieldUpdateOperationsInput | number
   linkevent?: Prisma.StringFieldUpdateOperationsInput | string
   approvenasional?: Prisma.StringFieldUpdateOperationsInput | string
+  approvebrimnas?: Prisma.StringFieldUpdateOperationsInput | string
   approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
   notenasional?: Prisma.StringFieldUpdateOperationsInput | string
   noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
@@ -664,6 +680,7 @@ export type eventCreateManyInput = {
   radius: number
   linkevent: string
   approvenasional: string
+  approvebrimnas?: string
   approveadmin: string
   notenasional: string
   noteadmin: string
@@ -692,6 +709,7 @@ export type eventUpdateManyMutationInput = {
   radius?: Prisma.IntFieldUpdateOperationsInput | number
   linkevent?: Prisma.StringFieldUpdateOperationsInput | string
   approvenasional?: Prisma.StringFieldUpdateOperationsInput | string
+  approvebrimnas?: Prisma.StringFieldUpdateOperationsInput | string
   approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
   notenasional?: Prisma.StringFieldUpdateOperationsInput | string
   noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
@@ -721,6 +739,7 @@ export type eventUncheckedUpdateManyInput = {
   radius?: Prisma.IntFieldUpdateOperationsInput | number
   linkevent?: Prisma.StringFieldUpdateOperationsInput | string
   approvenasional?: Prisma.StringFieldUpdateOperationsInput | string
+  approvebrimnas?: Prisma.StringFieldUpdateOperationsInput | string
   approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
   notenasional?: Prisma.StringFieldUpdateOperationsInput | string
   noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
@@ -756,6 +775,7 @@ export type eventCountOrderByAggregateInput = {
   radius?: Prisma.SortOrder
   linkevent?: Prisma.SortOrder
   approvenasional?: Prisma.SortOrder
+  approvebrimnas?: Prisma.SortOrder
   approveadmin?: Prisma.SortOrder
   notenasional?: Prisma.SortOrder
   noteadmin?: Prisma.SortOrder
@@ -791,6 +811,7 @@ export type eventMaxOrderByAggregateInput = {
   radius?: Prisma.SortOrder
   linkevent?: Prisma.SortOrder
   approvenasional?: Prisma.SortOrder
+  approvebrimnas?: Prisma.SortOrder
   approveadmin?: Prisma.SortOrder
   notenasional?: Prisma.SortOrder
   noteadmin?: Prisma.SortOrder
@@ -820,6 +841,7 @@ export type eventMinOrderByAggregateInput = {
   radius?: Prisma.SortOrder
   linkevent?: Prisma.SortOrder
   approvenasional?: Prisma.SortOrder
+  approvebrimnas?: Prisma.SortOrder
   approveadmin?: Prisma.SortOrder
   notenasional?: Prisma.SortOrder
   noteadmin?: Prisma.SortOrder
@@ -877,6 +899,7 @@ export type eventCreateWithoutRegistrasiInput = {
   radius: number
   linkevent: string
   approvenasional: string
+  approvebrimnas?: string
   approveadmin: string
   notenasional: string
   noteadmin: string
@@ -906,6 +929,7 @@ export type eventUncheckedCreateWithoutRegistrasiInput = {
   radius: number
   linkevent: string
   approvenasional: string
+  approvebrimnas?: string
   approveadmin: string
   notenasional: string
   noteadmin: string
@@ -950,6 +974,7 @@ export type eventUpdateWithoutRegistrasiInput = {
   radius?: Prisma.IntFieldUpdateOperationsInput | number
   linkevent?: Prisma.StringFieldUpdateOperationsInput | string
   approvenasional?: Prisma.StringFieldUpdateOperationsInput | string
+  approvebrimnas?: Prisma.StringFieldUpdateOperationsInput | string
   approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
   notenasional?: Prisma.StringFieldUpdateOperationsInput | string
   noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
@@ -979,6 +1004,7 @@ export type eventUncheckedUpdateWithoutRegistrasiInput = {
   radius?: Prisma.IntFieldUpdateOperationsInput | number
   linkevent?: Prisma.StringFieldUpdateOperationsInput | string
   approvenasional?: Prisma.StringFieldUpdateOperationsInput | string
+  approvebrimnas?: Prisma.StringFieldUpdateOperationsInput | string
   approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
   notenasional?: Prisma.StringFieldUpdateOperationsInput | string
   noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1039,6 +1065,7 @@ export type eventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   radius?: boolean
   linkevent?: boolean
   approvenasional?: boolean
+  approvebrimnas?: boolean
   approveadmin?: boolean
   notenasional?: boolean
   noteadmin?: boolean
@@ -1072,6 +1099,7 @@ export type eventSelectScalar = {
   radius?: boolean
   linkevent?: boolean
   approvenasional?: boolean
+  approvebrimnas?: boolean
   approveadmin?: boolean
   notenasional?: boolean
   noteadmin?: boolean
@@ -1080,7 +1108,7 @@ export type eventSelectScalar = {
   suratpemberitahuan?: boolean
 }
 
-export type eventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_event" | "nama_event" | "tglevent" | "tgleventselesai" | "jamevent" | "alamatevent" | "danaevent" | "posterevent" | "proposalevent" | "id_cabang" | "target" | "targetpengurus" | "targetjumlah" | "jenisevent" | "wwtype" | "jamselesaievent" | "longlatevent" | "radius" | "linkevent" | "approvenasional" | "approveadmin" | "notenasional" | "noteadmin" | "qr" | "khusus" | "suratpemberitahuan", ExtArgs["result"]["event"]>
+export type eventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_event" | "nama_event" | "tglevent" | "tgleventselesai" | "jamevent" | "alamatevent" | "danaevent" | "posterevent" | "proposalevent" | "id_cabang" | "target" | "targetpengurus" | "targetjumlah" | "jenisevent" | "wwtype" | "jamselesaievent" | "longlatevent" | "radius" | "linkevent" | "approvenasional" | "approvebrimnas" | "approveadmin" | "notenasional" | "noteadmin" | "qr" | "khusus" | "suratpemberitahuan", ExtArgs["result"]["event"]>
 export type eventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   registrasi?: boolean | Prisma.event$registrasiArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
@@ -1112,6 +1140,7 @@ export type $eventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     radius: number
     linkevent: string
     approvenasional: string
+    approvebrimnas: string
     approveadmin: string
     notenasional: string
     noteadmin: string
@@ -1508,6 +1537,7 @@ export interface eventFieldRefs {
   readonly radius: Prisma.FieldRef<"event", 'Int'>
   readonly linkevent: Prisma.FieldRef<"event", 'String'>
   readonly approvenasional: Prisma.FieldRef<"event", 'String'>
+  readonly approvebrimnas: Prisma.FieldRef<"event", 'String'>
   readonly approveadmin: Prisma.FieldRef<"event", 'String'>
   readonly notenasional: Prisma.FieldRef<"event", 'String'>
   readonly noteadmin: Prisma.FieldRef<"event", 'String'>

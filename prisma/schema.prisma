@@ -92,6 +92,7 @@ model event {
   radius             Int
   linkevent          String       @db.Text
   approvenasional    String       @db.Text
+  approvebrimnas     String       @default("0") @db.Text
   approveadmin       String       @db.Text
   notenasional       String       @db.Text
   noteadmin          String       @db.Text

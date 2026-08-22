@@ -2,10 +2,10 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { getEventDetail } from '@/lib/actions/event'
-import { isNasionalAdmin } from '@/lib/event-cabang'
-import { EventApproveClient } from './approve-client'
+import { isNasionalBrim } from '@/lib/event-cabang'
+import { EventApproveClient } from '@/app/dashboard/kota/alk/event/[id]/approve/approve-client'
 
-export default async function AlkEventApprovePage({
+export default async function BrimEventApprovePage({
   params,
 }: {
   params: Promise<{ id: string }>
@@ -20,12 +20,12 @@ export default async function AlkEventApprovePage({
     where: { id_pengurus: Number(pengurusId) },
     select: { divisi: true, username: true },
   })
-  if (!pengurus || pengurus.divisi !== 'alk' || !isNasionalAdmin(pengurus.username)) {
-    redirect('/dashboard/kota/alk')
+  if (!pengurus || pengurus.divisi !== 'brim' || !isNasionalBrim(pengurus.username)) {
+    redirect('/dashboard/kota/brim')
   }
 
   const event = await getEventDetail(Number(id))
-  if (!event) redirect('/dashboard/kota/alk')
+  if (!event) redirect('/dashboard/kota/brim')
 
-  return <EventApproveClient event={event} role="alk" />
+  return <EventApproveClient event={event} role="brim" />
 }

@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { eventDateTime, isOnlineAbsenOpen } from '@/lib/event-absen-window'
 import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
 import type { QRPayload } from '@/lib/qr'
-import { formatTelegramMessage, notifyTelegram } from '@/lib/telegram'
+import { formatTelegramMessage, notifyTelegram, eventDetailLink } from '@/lib/telegram'
 
 export async function getPesertaPreview(idPeserta: number) {
   return db.peserta.findUnique({
@@ -147,11 +147,16 @@ export async function createAbsen(payload: QRPayload): Promise<
     })
     if (event?.id_cabang === NASIONAL_EVENT_CABANG) {
       void notifyTelegram(
-        formatTelegramMessage('[Event Nasional] Absen', {
-          Peserta: peserta?.nama ?? idPeserta,
-          Event: event.nama_event,
-          ID: idEvent,
+        formatTelegramMessage({
+          action: 'Absen',
+          eventName: event.nama_event,
+          fields: {
+            Peserta: peserta?.nama ?? idPeserta,
+            ID: idEvent,
+          },
+          layout: 'peserta',
         }),
+        { buttons: [{ text: '📋 Detail Event', url: eventDetailLink(idEvent) }] },
       )
     }
 

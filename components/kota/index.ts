@@ -1,6 +1,6 @@
 export { KotaShell } from './kota-shell'
 export type { KotaTab } from './kota-shell'
-export { EventDateCard, getEventStatus } from './event-date-card'
+export { EventDateCard, getEventStatus, eventMatchesQuery } from './event-date-card'
 export type { EventStatus } from './event-date-card'
 export { SummaryTile } from './summary-tile'
 export { HeroCard } from './hero-card'

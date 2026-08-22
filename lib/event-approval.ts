@@ -22,3 +22,15 @@ export function appendNotenasional(
   const prev = (existing ?? '').trim()
   return prev ? `${prev}\n${line}` : line
 }
+
+/** Event tampil Disetujui hanya jika ALK + Brim nasional keduanya 1. */
+export function isEventFullyApproved(e: {
+  approvenasional?: string | null
+  approvebrimnas?: string | null
+}): boolean {
+  return e.approvenasional === '1' && e.approvebrimnas === '1'
+}
+
+export function hasBrimRejectNote(notenasional: string): boolean {
+  return notenasional.includes(PREFIX.brim)
+}

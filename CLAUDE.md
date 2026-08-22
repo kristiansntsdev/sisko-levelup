@@ -35,16 +35,23 @@ app/
   dashboard/kota/alk/page.tsx         # Beranda ALK (saldo + approval member)
   dashboard/kota/alk/approval/page.tsx # List approval squad dari table upgrade
   dashboard/kota/alk/event/[id]/approve/ # Sekretariat: approve/reject event
+  dashboard/kota/brim/event/[id]/approve/ # Brim Nasional: approvebrimnas
 lib/actions/upgrade.ts                # joinVolunteer, joinSquad, approveSquad
 lib/event-approval.ts                 # append notenasional (ALK/Brim prefixes)
 lib/telegram.ts                       # notifyTelegram → group (nasional ops)
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-08-22]
+- Tab Event (ALK + Brim) search nama/alamat/tanggal/ID; saat cari tampil semua match tanpa pagination
+- Prod migrate via Vercel `/api/internal/prod-migrate`: `event.approvebrimnas` + `brimnasional` `divisi=brim`
+- Brim Nasional (`brimnasional@gmail.com`) tab Event seperti Sekretariat; approve di `/dashboard/kota/brim/event/[id]/approve`
+- `brimnasional@gmail.com` `divisi` → `brim` (prod); admin login route alk/brim/vol ke dashboard masing-masing
+
 ## Recent Updates [2026-08-21]
 - Sekretariat event tab: filter Belum Approve / Ditolak (`approvenasional`≠1 + kosong/`notenasional`); ditolak tampil alasan + tombol ke approve page
 - Sekretariat event approve: tombol approve di list → `/event/[id]/approve`; Approve set `approvenasional=1`; Reject append `ALK Nasional : …` ke `notenasional`; keduanya `notifyTelegram`
-- Telegram group notif (sekretariat nasional): create/update event `id_cabang=0`, registrasi + absen di event nasional via `lib/telegram.ts` (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`)
+- Telegram: create event (kota + nasional) notif `[Event Kota|Nasional]`; buttons 🔗 Link Event · 🖼 Flyer (jika ada) · ✅ Approval; absen/registrasi → Detail Event
 - Tiket Aktif: semua join bulan ini (`confirmed` + `absence`), termasuk tanggal yang sudah lewat; absen online tetap bisa sampai akhir bulan event
 - Tiket online: halaman `/dashboard/tiket/[id]` — brand "event online", QR, tombol Absen Event (dibuka 15 menit sebelum `jamselesaievent`, berlaku sampai akhir bulan)
 - Sekretariat nasional event tab: filter Semua / Seluruh Kota / Khusus / Belum Approve / Ditolak; form buat/edit pilih tipe → `id_cabang=0` + `khusus`

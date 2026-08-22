@@ -5,21 +5,31 @@ import { useRouter } from 'next/navigation'
 import type { EventDetailFull } from '@/lib/actions/event'
 import {
   approveEventAlkNasional,
+  approveEventBrimNasional,
   rejectEventAlkNasional,
+  rejectEventBrimNasional,
 } from '@/lib/actions/event'
 
-export function EventApproveClient({ event }: { event: EventDetailFull }) {
+export function EventApproveClient({
+  event,
+  role,
+}: {
+  event: EventDetailFull
+  role: 'alk' | 'brim'
+}) {
   const router = useRouter()
   const [alasan, setAlasan] = useState('')
   const [error, setError] = useState('')
   const [pending, startTransition] = useTransition()
   const [action, setAction] = useState<'approve' | 'reject' | null>(null)
 
-  const alreadyApproved = event.approvenasional === '1'
+  const alreadyApproved =
+    role === 'alk' ? event.approvenasional === '1' : event.approvebrimnas === '1'
   const notes = event.notenasional.trim()
+  const backHref = role === 'alk' ? '/dashboard/kota/alk' : '/dashboard/kota/brim'
 
   function goBack() {
-    router.push('/dashboard/kota/alk')
+    router.push(backHref)
     router.refresh()
   }
 
@@ -27,7 +37,10 @@ export function EventApproveClient({ event }: { event: EventDetailFull }) {
     setError('')
     setAction('approve')
     startTransition(async () => {
-      const res = await approveEventAlkNasional(event.id_event)
+      const res =
+        role === 'alk'
+          ? await approveEventAlkNasional(event.id_event)
+          : await approveEventBrimNasional(event.id_event)
       if (!res.ok) {
         setError(res.error)
         setAction(null)
@@ -45,7 +58,10 @@ export function EventApproveClient({ event }: { event: EventDetailFull }) {
     }
     setAction('reject')
     startTransition(async () => {
-      const res = await rejectEventAlkNasional(event.id_event, alasan)
+      const res =
+        role === 'alk'
+          ? await rejectEventAlkNasional(event.id_event, alasan)
+          : await rejectEventBrimNasional(event.id_event, alasan)
       if (!res.ok) {
         setError(res.error)
         setAction(null)
@@ -62,7 +78,7 @@ export function EventApproveClient({ event }: { event: EventDetailFull }) {
           <button
             type="button"
             onClick={goBack}
-            className="text-sm text-muted hover:text-fg transition-colors shrink-0"
+            className="text-sm text-muted hover:text-fg transition-colors shrink-0 cursor-pointer"
           >
             ← Kembali
           </button>
@@ -78,6 +94,26 @@ export function EventApproveClient({ event }: { event: EventDetailFull }) {
           <div className="px-4 pt-4 pb-3">
             <p className="text-[17px] font-bold text-fg leading-snug">{event.nama_event}</p>
             <p className="text-[12px] text-muted mt-1">{event.tglDisplay}</p>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {event.approvenasional === '1' ? (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-light text-green-dark">
+                  Approval ALK
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-light text-amber-dark">
+                  Belum ALK
+                </span>
+              )}
+              {event.approvebrimnas === '1' ? (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-light text-green-dark">
+                  Approval Brim
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-light text-amber-dark">
+                  Belum Brim
+                </span>
+              )}
+            </div>
           </div>
           {event.posterUrl ? (
             <div className="border-t border-border">
@@ -106,7 +142,9 @@ export function EventApproveClient({ event }: { event: EventDetailFull }) {
 
         {alreadyApproved ? (
           <div className="bg-green-light rounded-[14px] px-4 py-3 text-center">
-            <p className="text-[14px] font-semibold text-green-dark">Event sudah disetujui</p>
+            <p className="text-[14px] font-semibold text-green-dark">
+              {role === 'alk' ? 'Sudah disetujui ALK Nasional' : 'Sudah disetujui Brim Nasional'}
+            </p>
           </div>
         ) : (
           <>
@@ -130,7 +168,7 @@ export function EventApproveClient({ event }: { event: EventDetailFull }) {
                 type="button"
                 onClick={handleApprove}
                 disabled={pending}
-                className="flex-1 py-3.5 rounded-[14px] bg-green text-white font-semibold text-[15px] disabled:opacity-50"
+                className="flex-1 py-3.5 rounded-[14px] bg-green text-white font-semibold text-[15px] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 {pending && action === 'approve' ? '…' : 'Approve'}
               </button>
@@ -138,7 +176,7 @@ export function EventApproveClient({ event }: { event: EventDetailFull }) {
                 type="button"
                 onClick={handleReject}
                 disabled={pending}
-                className="flex-1 py-3.5 rounded-[14px] bg-red text-white font-semibold text-[15px] disabled:opacity-50"
+                className="flex-1 py-3.5 rounded-[14px] bg-red text-white font-semibold text-[15px] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 {pending && action === 'reject' ? '…' : 'Reject'}
               </button>

@@ -31,6 +31,20 @@ const WWTYPE_OPTIONS: { value: event_wwtype; label: string }[] = [
   { value: 'jfe', label: 'JFE' },
 ]
 
+/** Force HH:mm 24h (strips AM/PM if pasted from locale UI). */
+function normalizeJam24(raw: string): string {
+  const s = raw.trim()
+  const m = s.match(/^(\d{1,2})[:.](\d{2})(?:\s*(AM|PM))?$/i)
+  if (!m) return s
+  let h = Number(m[1])
+  const min = m[2]
+  const ap = m[3]?.toUpperCase()
+  if (ap === 'PM' && h < 12) h += 12
+  if (ap === 'AM' && h === 12) h = 0
+  if (h > 23 || Number(min) > 59) return s
+  return `${String(h).padStart(2, '0')}:${min}`
+}
+
 function parseTargetToLabels(stored: string, labelsMap: Record<string, string>): string[] {
   return stored.split(',').filter(Boolean).map((v) => labelsMap[v.trim()]).filter(Boolean)
 }
@@ -103,8 +117,8 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
     targetjumlah: event ? String(event.targetjumlah) : '',
     tglevent: event?.tglRaw ?? '',
     tgleventselesai: event?.tglSelesaiRaw ?? '',
-    jamevent: event?.jamevent ?? '',
-    jamselesaievent: event?.jamselesaievent ?? '',
+    jamevent: normalizeJam24(event?.jamevent ?? ''),
+    jamselesaievent: normalizeJam24(event?.jamselesaievent ?? ''),
     alamatevent: event?.alamatevent ?? '',
     radius: event ? String(event.radius) : '500',
     suratpemberitahuan: event?.suratpemberitahuan ?? '',
@@ -221,8 +235,8 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
           targetjumlah: parseInt(form.targetjumlah, 10) || 0,
           tglevent: parseLocalDate(form.tglevent),
           tgleventselesai: parseLocalDate(form.tgleventselesai || form.tglevent),
-          jamevent: form.jamevent,
-          jamselesaievent: form.jamselesaievent,
+          jamevent: normalizeJam24(form.jamevent),
+          jamselesaievent: normalizeJam24(form.jamselesaievent),
           alamatevent: form.alamatevent,
           longlatevent: latLng ? `${latLng.lat},${latLng.lng}` : '',
           radius: parseInt(form.radius, 10) || 0,
@@ -390,17 +404,27 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
           <div className="grid grid-cols-2 gap-3">
             <FormField label="Jam Mulai">
               <input
-                type="time"
+                type="text"
+                inputMode="numeric"
+                placeholder="09:00"
+                pattern="^([01]\d|2[0-3]):[0-5]\d$"
+                title="Format 24 jam, contoh 09:00 atau 21:30"
                 value={form.jamevent}
                 onChange={(e) => setField('jamevent', e.target.value)}
+                onBlur={(e) => setField('jamevent', normalizeJam24(e.target.value))}
                 className={inputCls}
               />
             </FormField>
             <FormField label="Jam Selesai">
               <input
-                type="time"
+                type="text"
+                inputMode="numeric"
+                placeholder="21:00"
+                pattern="^([01]\d|2[0-3]):[0-5]\d$"
+                title="Format 24 jam, contoh 09:00 atau 21:30"
                 value={form.jamselesaievent}
                 onChange={(e) => setField('jamselesaievent', e.target.value)}
+                onBlur={(e) => setField('jamselesaievent', normalizeJam24(e.target.value))}
                 className={inputCls}
               />
             </FormField>

@@ -1,7 +1,7 @@
 'use server'
 import { db } from '@/lib/db'
 import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
-import { formatTelegramMessage, notifyTelegram } from '@/lib/telegram'
+import { formatTelegramMessage, notifyTelegram, eventDetailLink } from '@/lib/telegram'
 
 export async function updatePesertaProfile(idPeserta: number, data: { nama: string; nowa: string; gereja: string; sekolah: string; idTempatKerja: number | null }) {
   await db.peserta.update({
@@ -33,11 +33,16 @@ export async function createRegistrasi(idPeserta: number, idEvent: number) {
       select: { nama: true },
     })
     void notifyTelegram(
-      formatTelegramMessage('[Event Nasional] Registrasi', {
-        Peserta: peserta?.nama ?? idPeserta,
-        Event: event.nama_event,
-        ID: idEvent,
+      formatTelegramMessage({
+        action: 'Registrasi',
+        eventName: event.nama_event,
+        fields: {
+          Peserta: peserta?.nama ?? idPeserta,
+          ID: idEvent,
+        },
+        layout: 'peserta',
       }),
+      { buttons: [{ text: '📋 Detail Event', url: eventDetailLink(idEvent) }] },
     )
   }
 }

@@ -6,10 +6,11 @@ import type { event_wwtype } from '@/lib/generated/enums'
 import {
   resolveEventCabang,
   isNasionalAdmin,
+  isNasionalBrim,
   NASIONAL_EVENT_CABANG,
 } from '@/lib/event-cabang'
 import { appendNotenasional } from '@/lib/event-approval'
-import { formatTelegramMessage, nasionalScopeLabel, notifyTelegram } from '@/lib/telegram'
+import { formatTelegramMessage, nasionalScopeLabel, notifyTelegram, eventActionButtons, eventFormTelegramFields } from '@/lib/telegram'
 
 const POSTER_BASE = 'https://sisko.levelupgen.com/uploads/poster/'
 
@@ -109,6 +110,7 @@ export type EventDashboard = {
   alamatevent: string
   posterUrl: string
   approvenasional: string
+  approvebrimnas: string
   notenasional: string
   khusus: string
 }
@@ -122,23 +124,30 @@ export async function getAllEventsByKotalevelup(
     select: {
       id_event: true, nama_event: true,
       tglevent: true, jamevent: true, alamatevent: true, posterevent: true,
-      approvenasional: true, notenasional: true, khusus: true,
+      approvenasional: true, approvebrimnas: true, notenasional: true, khusus: true,
     },
   })
-  return rows.map((e) => ({
-    id_event: e.id_event,
-    nama_event: e.nama_event,
-    tglMs: e.tglevent.getTime(),
-    tglDisplay: e.tglevent.toLocaleDateString('id-ID', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-    }),
-    jamevent: e.jamevent,
-    alamatevent: e.alamatevent,
-    posterUrl: `${POSTER_BASE}${e.posterevent}`,
-    approvenasional: e.approvenasional,
-    notenasional: e.notenasional ?? '',
-    khusus: e.khusus,
-  }))
+  return rows.map((e) => {
+    const ms = e.tglevent instanceof Date ? e.tglevent.getTime() : NaN
+    const tglMs = Number.isFinite(ms) ? ms : 0
+    return {
+      id_event: e.id_event,
+      nama_event: e.nama_event,
+      tglMs,
+      tglDisplay: tglMs
+        ? e.tglevent.toLocaleDateString('id-ID', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+          })
+        : 'Tanggal tidak valid',
+      jamevent: e.jamevent,
+      alamatevent: e.alamatevent,
+      posterUrl: `${POSTER_BASE}${e.posterevent}`,
+      approvenasional: e.approvenasional,
+      approvebrimnas: e.approvebrimnas ?? '0',
+      notenasional: e.notenasional ?? '',
+      khusus: e.khusus,
+    }
+  })
 }
 
 export type EventLocation = { longlatevent: string; radius: number }
@@ -185,6 +194,7 @@ export type EventDetailFull = {
   longlatevent: string
   radius: number
   approvenasional: string
+  approvebrimnas: string
   notenasional: string
   targetjumlah: number
   target: string
@@ -204,7 +214,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       jamevent: true, jamselesaievent: true,
       alamatevent: true, danaevent: true, posterevent: true,
       jenisevent: true, wwtype: true, linkevent: true, longlatevent: true,
-      radius: true, approvenasional: true, notenasional: true, targetjumlah: true,
+      radius: true, approvenasional: true, approvebrimnas: true, notenasional: true, targetjumlah: true,
       target: true, targetpengurus: true, suratpemberitahuan: true, khusus: true,
       registrasi: {
         select: {
@@ -255,6 +265,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
     longlatevent: event.longlatevent,
     radius: event.radius,
     approvenasional: event.approvenasional,
+    approvebrimnas: event.approvebrimnas ?? '0',
     notenasional: event.notenasional,
     targetjumlah: event.targetjumlah,
     target: event.target,
@@ -367,6 +378,7 @@ export async function createEvent(payload: EventFormPayload): Promise<number> {
       radius: payload.radius,
       linkevent: '',
       approvenasional: '0',
+      approvebrimnas: '0',
       approveadmin: '0',
       notenasional: '',
       noteadmin: '',
@@ -386,20 +398,47 @@ export async function createEvent(payload: EventFormPayload): Promise<number> {
 
   revalidatePath('/dashboard/kota/alk')
 
-  if (idCabang === NASIONAL_EVENT_CABANG) {
-    void notifyTelegram(
-      formatTelegramMessage('[Event Nasional] Dibuat', {
-        Nama: payload.nama_event,
-        Tipe: `${payload.jenisevent} / ${nasionalScopeLabel(khusus)}`,
-        Tanggal: payload.tglevent.toLocaleDateString('id-ID', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        }),
-        ID: id,
-      }),
-    )
+  const isNasionalEvent = idCabang === NASIONAL_EVENT_CABANG
+  let cabangLabel = isNasionalEvent ? nasionalScopeLabel(khusus) : idCabang
+  if (!isNasionalEvent) {
+    const cabangId = Number(idCabang)
+    if (Number.isFinite(cabangId)) {
+      const cabang = await db.cabang.findUnique({
+        where: { id_cabang: cabangId },
+        select: { namacabang: true },
+      })
+      if (cabang?.namacabang) cabangLabel = cabang.namacabang
+    }
   }
+
+  void notifyTelegram(
+    formatTelegramMessage({
+      tag: isNasionalEvent ? 'Event Nasional' : 'Event Kota',
+      action: 'Dibuat',
+      eventName: payload.nama_event,
+      fields: eventFormTelegramFields({
+        cabangLabel,
+        isNasional: isNasionalEvent,
+        khusus,
+        jenisevent: payload.jenisevent,
+        wwtype: payload.wwtype,
+        target: payload.target,
+        targetpengurus: payload.targetpengurus,
+        targetjumlah: payload.targetjumlah,
+        tglevent: payload.tglevent,
+        tgleventselesai: payload.tgleventselesai,
+        jamevent: payload.jamevent,
+        jamselesaievent: payload.jamselesaievent,
+        alamatevent: payload.alamatevent,
+        longlatevent: payload.longlatevent,
+        radius: payload.radius,
+        danaevent: payload.danaevent,
+        suratpemberitahuan: payload.suratpemberitahuan,
+        id,
+      }),
+    }),
+    { buttons: eventActionButtons(id, { longlatevent: payload.longlatevent }) },
+  )
 
   return id
 }
@@ -448,16 +487,32 @@ export async function updateEvent(
 
   if (isNasional) {
     void notifyTelegram(
-      formatTelegramMessage('[Event Nasional] Diedit', {
-        Nama: payload.nama_event,
-        Tipe: `${payload.jenisevent} / ${nasionalScopeLabel(khusus ?? '')}`,
-        Tanggal: payload.tglevent.toLocaleDateString('id-ID', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
+      formatTelegramMessage({
+        tag: 'Event Nasional',
+        action: 'Diedit',
+        eventName: payload.nama_event,
+        fields: eventFormTelegramFields({
+          cabangLabel: nasionalScopeLabel(khusus ?? ''),
+          isNasional: true,
+          khusus: khusus ?? '',
+          jenisevent: payload.jenisevent,
+          wwtype: payload.wwtype,
+          target: payload.target,
+          targetpengurus: payload.targetpengurus,
+          targetjumlah: payload.targetjumlah,
+          tglevent: payload.tglevent,
+          tgleventselesai: payload.tgleventselesai,
+          jamevent: payload.jamevent,
+          jamselesaievent: payload.jamselesaievent,
+          alamatevent: payload.alamatevent,
+          longlatevent: payload.longlatevent,
+          radius: payload.radius,
+          danaevent: payload.danaevent,
+          suratpemberitahuan: payload.suratpemberitahuan,
+          id,
         }),
-        ID: id,
       }),
+      { buttons: eventActionButtons(id, { longlatevent: payload.longlatevent }) },
     )
   }
 }
@@ -555,11 +610,108 @@ export async function approveEventAlkNasional(
   revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
 
   void notifyTelegram(
-    formatTelegramMessage('[Event Nasional] Approved ALK', {
-      Nama: event.nama_event,
-      Tipe: nasionalScopeLabel(event.khusus),
-      ID: idEvent,
+    formatTelegramMessage({
+      tag: 'Event Nasional',
+      action: 'Approved ALK',
+      eventName: event.nama_event,
+      fields: {
+        Tipe: nasionalScopeLabel(event.khusus),
+        ID: idEvent,
+      },
     }),
+    { buttons: eventActionButtons(idEvent) },
+  )
+  return { ok: true }
+}
+
+async function requireBrimNasional(): Promise<
+  { ok: true } | { ok: false; error: string }
+> {
+  const pengurusId = (await cookies()).get('pengurus_id')?.value
+  if (!pengurusId) return { ok: false, error: 'Unauthorized' }
+  const pengurus = await db.pengurus.findUnique({
+    where: { id_pengurus: Number(pengurusId) },
+    select: { username: true, divisi: true },
+  })
+  if (!pengurus || pengurus.divisi !== 'brim' || !isNasionalBrim(pengurus.username)) {
+    return { ok: false, error: 'Hanya Brim Nasional yang bisa approve' }
+  }
+  return { ok: true }
+}
+
+/** Brim Nasional approve → approvebrimnas = 1 */
+export async function approveEventBrimNasional(
+  idEvent: number,
+): Promise<EventApprovalResult> {
+  const gate = await requireBrimNasional()
+  if (!gate.ok) return gate
+
+  const event = await db.event.findUnique({
+    where: { id_event: idEvent },
+    select: { nama_event: true, khusus: true },
+  })
+  if (!event) return { ok: false, error: 'Event tidak ditemukan' }
+
+  await db.event.update({
+    where: { id_event: idEvent },
+    data: { approvebrimnas: '1' },
+  })
+  revalidatePath('/dashboard/kota/brim')
+  revalidatePath(`/dashboard/kota/brim/event/${idEvent}/approve`)
+
+  void notifyTelegram(
+    formatTelegramMessage({
+      tag: 'Event Nasional',
+      action: 'Approved Brim',
+      eventName: event.nama_event,
+      fields: {
+        Tipe: nasionalScopeLabel(event.khusus),
+        ID: idEvent,
+      },
+    }),
+    { buttons: eventActionButtons(idEvent) },
+  )
+  return { ok: true }
+}
+
+/** Brim Nasional reject → append "Brim Nasional: …" ke notenasional */
+export async function rejectEventBrimNasional(
+  idEvent: number,
+  alasan: string,
+): Promise<EventApprovalResult> {
+  const gate = await requireBrimNasional()
+  if (!gate.ok) return gate
+
+  const reason = alasan.trim()
+  if (!reason) return { ok: false, error: 'Alasan reject wajib diisi' }
+
+  const existing = await db.event.findUnique({
+    where: { id_event: idEvent },
+    select: { notenasional: true, nama_event: true, khusus: true },
+  })
+  if (!existing) return { ok: false, error: 'Event tidak ditemukan' }
+
+  await db.event.update({
+    where: { id_event: idEvent },
+    data: {
+      approvebrimnas: '0',
+      notenasional: appendNotenasional(existing.notenasional, 'brim', reason),
+    },
+  })
+  revalidatePath('/dashboard/kota/brim')
+  revalidatePath(`/dashboard/kota/brim/event/${idEvent}/approve`)
+
+  void notifyTelegram(
+    formatTelegramMessage({
+      tag: 'Event Nasional',
+      action: 'Rejected Brim',
+      eventName: existing.nama_event,
+      fields: {
+        Alasan: reason,
+        ID: idEvent,
+      },
+    }),
+    { buttons: eventActionButtons(idEvent) },
   )
   return { ok: true }
 }
@@ -592,11 +744,16 @@ export async function rejectEventAlkNasional(
   revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
 
   void notifyTelegram(
-    formatTelegramMessage('[Event Nasional] Rejected ALK', {
-      Nama: existing.nama_event,
-      Alasan: reason,
-      ID: idEvent,
+    formatTelegramMessage({
+      tag: 'Event Nasional',
+      action: 'Rejected ALK',
+      eventName: existing.nama_event,
+      fields: {
+        Alasan: reason,
+        ID: idEvent,
+      },
     }),
+    { buttons: eventActionButtons(idEvent) },
   )
   return { ok: true }
 }

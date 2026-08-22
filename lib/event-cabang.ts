@@ -3,9 +3,14 @@ export const NASIONAL_EVENT_CABANG = '0'
 export const NASIONAL_KHUSUS_VALUE = '1'
 
 const NASIONAL_ADMIN_USERNAMES = new Set(['sekretariatnasional@gmail.com'])
+const NASIONAL_BRIM_USERNAMES = new Set(['brimnasional@gmail.com'])
 
 export function isNasionalAdmin(username: string): boolean {
   return NASIONAL_ADMIN_USERNAMES.has(username.trim().toLowerCase())
+}
+
+export function isNasionalBrim(username: string): boolean {
+  return NASIONAL_BRIM_USERNAMES.has(username.trim().toLowerCase())
 }
 
 export function resolveEventCabang(pengurus: {
