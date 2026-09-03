@@ -137,6 +137,11 @@ export type pengaturan = Prisma.pengaturanModel
  */
 export type pengaturan_kota = Prisma.pengaturan_kotaModel
 /**
+ * Model wfe_serentak
+ * 
+ */
+export type wfe_serentak = Prisma.wfe_serentakModel
+/**
  * Model pengurus
  * 
  */

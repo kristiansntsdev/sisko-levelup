@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createEvent, updateEvent } from '@/lib/actions/event'
+import { getWfeSerentakForDate, type WfeSerentakRow } from '@/lib/actions/wfe-serentak'
 import type { EventDetailFull } from '@/lib/actions/event'
 import type { event_wwtype } from '@/lib/generated/enums'
 import {
@@ -109,6 +110,7 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
   const [danaDisplay, setDanaDisplay] = useState(() => fmtRp(event?.danaevent.replace(/\D/g, '') ?? ''))
   const [flyer, setFlyer] = useState<File | null>(null)
   const [flyerPreview, setFlyerPreview] = useState('')
+  const [jfeTemplate, setJfeTemplate] = useState<WfeSerentakRow | null>(null)
 
   const [form, setForm] = useState<FormState>({
     nama_event: event?.nama_event ?? '',
@@ -225,6 +227,18 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
       if (flyerPreview) URL.revokeObjectURL(flyerPreview)
     }
   }, [flyerPreview])
+
+  useEffect(() => {
+    if (form.wwtype !== 'jfe' || !form.tglevent) {
+      setJfeTemplate(null)
+      return
+    }
+    let stop = false
+    void getWfeSerentakForDate(form.tglevent).then((row) => {
+      if (!stop) setJfeTemplate(row)
+    })
+    return () => { stop = true }
+  }, [form.wwtype, form.tglevent])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -523,6 +537,18 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
           </FormField>
 
           <FormField label={mode === 'edit' ? 'Upload ulang poster' : 'Flyer Event'}>
+              {form.wwtype === 'jfe' && jfeTemplate && (
+                <div className="mb-3 rounded-[12px] border border-border overflow-hidden">
+                  <p className="px-3 py-2 text-[12px] text-muted">
+                    Flyer pusat WW JFE / WFE. Sesuaikan hanya: foto pembicara, tanggal, tempat, tema, logo kota.
+                  </p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={jfeTemplate.image_url} alt="Flyer pusat WW JFE" className="w-full object-cover" />
+                </div>
+              )}
+              {form.wwtype === 'jfe' && !jfeTemplate && form.tglevent && (
+                <p className="text-[12px] text-muted mb-2">Belum ada flyer pusat Brim untuk bulan tanggal ini.</p>
+              )}
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/gif"
@@ -559,8 +585,10 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
         >
           {isPending
             ? (flyer ? 'Mengunggah flyer...' : 'Menyimpan...')
-            : form.wwtype === 'bulanan' && flyer
-              ? 'Simpan & Review Flyer'
+            : form.suratpemberitahuan.trim()
+              || (form.wwtype === 'bulanan' && flyer)
+              || (form.wwtype === 'jfe' && Boolean(jfeTemplate) && Boolean(flyer || event?.posterUrl))
+              ? 'Simpan & Review'
               : mode === 'create' ? 'Buat Event' : 'Simpan Perubahan'}
         </button>
 

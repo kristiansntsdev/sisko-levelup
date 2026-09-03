@@ -82,6 +82,7 @@ model event {
   posterevent        String       @db.Text
   image_url          String       @default("") @db.Text
   flyer_qa           String       @default("") @db.LongText
+  berita_acara_qa    String       @default("") @db.LongText
   proposalevent      String       @db.Text
   id_cabang          String       @db.Text
   target             String       @db.Text
@@ -181,6 +182,16 @@ model pengaturan_kota {
   facebook    String @db.Text
   youtube     String @db.Text
   twitter     String @db.Text
+}
+
+model wfe_serentak {
+  id            Int      @id @default(autoincrement())
+  bulan_mulai   DateTime @db.Date
+  bulan_selesai DateTime @db.Date
+  image_url     String   @db.Text
+  created_at    DateTime @default(now()) @db.DateTime(0)
+
+  @@index([bulan_mulai, bulan_selesai], map: "idx_wfe_serentak_range")
 }
 
 model pengurus {

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import type { EventDetailFull } from '@/lib/actions/event'
+import { ajukanEvent, type EventDetailFull } from '@/lib/actions/event'
 import { isEventFullyApproved } from '@/lib/event-approval'
 import { FlyerQaSummary } from '@/components/kota/flyer-qa-summary'
+import { BeritaAcaraQaSummary } from '@/components/kota/berita-acara-qa-summary'
 
 const PAGE_SIZE = 10
 
@@ -67,6 +68,48 @@ function Pagination({
 interface EventDetailPageProps {
   event: EventDetailFull
   backUrl: string
+}
+
+function EventAjukanBar({
+  eventId,
+  flyerDiajukan,
+  show,
+}: {
+  eventId: number
+  flyerDiajukan: boolean
+  show: boolean
+}) {
+  const [diajukan, setDiajukan] = useState(flyerDiajukan)
+  const [msg, setMsg] = useState('')
+  const [isPending, startTransition] = useTransition()
+  if (!show) return null
+  return (
+    <div className="bg-surface border border-border rounded-card overflow-hidden px-4 py-4 flex flex-col gap-2">
+      {diajukan ? (
+        <p className="text-[13px] font-semibold text-green-dark">Sudah diajukan</p>
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            setMsg('')
+            startTransition(async () => {
+              const res = await ajukanEvent(eventId)
+              if (!res.ok) {
+                setMsg(res.error)
+                return
+              }
+              setDiajukan(true)
+            })
+          }}
+          disabled={isPending}
+          className="w-full py-3 bg-accent text-white rounded-btn text-[14px] font-semibold disabled:opacity-60"
+        >
+          {isPending ? 'Mengajukan...' : 'Ajukan'}
+        </button>
+      )}
+      {msg && <p className="text-[12px] text-red">{msg}</p>}
+    </div>
+  )
 }
 
 export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
@@ -160,6 +203,15 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
           eventId={event.id_event}
           initial={event.flyerQa}
           editHref={`/dashboard/kota/alk/event/${event.id_event}/edit`}
+        />
+        <BeritaAcaraQaSummary
+          eventId={event.id_event}
+          initial={event.beritaAcaraQa}
+        />
+        <EventAjukanBar
+          eventId={event.id_event}
+          flyerDiajukan={Boolean(event.flyerQa?.diajukan || event.beritaAcaraQa?.diajukan)}
+          show={Boolean(event.flyerQa || event.beritaAcaraQa)}
         />
 
         {/* Info table */}

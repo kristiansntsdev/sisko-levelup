@@ -1,21 +1,19 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import Link from 'next/link'
-import { pollFlyerReview, retryFlyerReview } from '@/lib/actions/event'
+import { pollBeritaAcaraReview, retryBeritaAcaraReview } from '@/lib/actions/event'
 import {
-  FLYER_QA_CHECKLIST_KEYS,
-  FLYER_QA_CHECKLIST_LABELS,
-  FLYER_QA_JFE_KEYS,
-  flyerQaReviewingStep,
-  type FlyerQaOverall,
-  type FlyerQaRecord,
-} from '@/lib/flyer-qa'
+  BA_QA_CHECKLIST_KEYS,
+  BA_QA_CHECKLIST_LABELS,
+  beritaAcaraQaReviewingStep,
+  type BaQaOverall,
+  type BeritaAcaraQaRecord,
+} from '@/lib/berita-acara-qa'
 
 const POLL_MS = 5_000
 const TIMEOUT_MS = 4 * 60 * 1_000
 
-const BADGE: Record<FlyerQaOverall, string> = {
+const BADGE: Record<BaQaOverall, string> = {
   PASS: 'bg-green-light text-green-dark',
   REVISI: 'bg-amber-light text-amber-dark',
   BLOKIR: 'bg-red-light text-red',
@@ -33,21 +31,19 @@ function ReviewingStatus({ startedAt }: { startedAt: number }) {
         <span className="absolute inline-flex size-full rounded-full bg-accent opacity-60 animate-ping" />
         <span className="relative inline-flex size-2.5 rounded-full bg-accent" />
       </span>
-      <p className="text-[13px] text-muted">{flyerQaReviewingStep(elapsed)}</p>
+      <p className="text-[13px] text-muted">{beritaAcaraQaReviewingStep(elapsed)}</p>
     </div>
   )
 }
 
-export function FlyerQaSummary({
+export function BeritaAcaraQaSummary({
   eventId,
   initial,
-  editHref,
   live = true,
 }: {
   eventId: number
-  initial: FlyerQaRecord | null
-  editHref?: string
-  /** false = snapshot dari DB (halaman approve), tanpa poll / Ajukan. */
+  initial: BeritaAcaraQaRecord | null
+  /** false = snapshot dari DB (halaman approve), tanpa poll. */
   live?: boolean
 }) {
   const [qa, setQa] = useState(initial)
@@ -69,7 +65,7 @@ export function FlyerQaSummary({
         setTimedOut(true)
         return
       }
-      void pollFlyerReview(eventId).then((next) => {
+      void pollBeritaAcaraReview(eventId).then((next) => {
         if (stop) return
         if (next) setQa(next)
         if (next?.state === 'reviewing') setTimeout(tick, POLL_MS)
@@ -91,7 +87,7 @@ export function FlyerQaSummary({
     setMsg('')
     startTransition(async () => {
       try {
-        const next = await retryFlyerReview(eventId)
+        const next = await retryBeritaAcaraReview(eventId)
         setQa(next)
         setTimedOut(false)
       } catch (err) {
@@ -103,7 +99,7 @@ export function FlyerQaSummary({
   return (
     <div className="bg-surface border border-border rounded-card overflow-hidden">
       <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-2">
-        <p className="text-[13px] font-semibold text-fg">Review Flyer AI</p>
+        <p className="text-[13px] font-semibold text-fg">Review Berita Acara AI</p>
         {qa.state === 'done' && qa.review && (
           <span className={`shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${BADGE[qa.review.status]}`}>
             {qa.review.status}
@@ -135,39 +131,16 @@ export function FlyerQaSummary({
         {qa.state === 'done' && qa.review && (
           <>
             <div className="flex flex-col gap-1.5">
-              {qa.review.dimensi && (
-                <div className="flex gap-2 text-[12px]">
-                  <span className="text-muted w-[7.5rem] shrink-0">Dimensi</span>
-                  <span className="text-fg font-medium truncate">{qa.review.dimensi.detail || qa.review.dimensi.rasio || '—'}</span>
-                </div>
-              )}
-              {FLYER_QA_CHECKLIST_KEYS.map((key) => {
+              {BA_QA_CHECKLIST_KEYS.map((key) => {
                 const item = qa.review!.checklist[key]
                 return (
                   <div key={key} className="flex gap-2 text-[12px]">
-                    <span className="text-muted w-[7.5rem] shrink-0">{FLYER_QA_CHECKLIST_LABELS[key]}</span>
+                    <span className="text-muted w-[7.5rem] shrink-0">{BA_QA_CHECKLIST_LABELS[key]}</span>
                     <span className="text-fg font-medium">{item.status}</span>
-                    {item.teks ? <span className="text-muted truncate">{item.teks}</span> : null}
+                    {item.detail ? <span className="text-muted truncate">{item.detail}</span> : null}
                   </div>
                 )
               })}
-              {(qa.review.mode === 'jfe' || FLYER_QA_JFE_KEYS.some((k) => qa.review!.checklist[k].detail !== 'tidak berlaku')) &&
-                FLYER_QA_JFE_KEYS.map((key) => {
-                  const item = qa.review!.checklist[key]
-                  return (
-                    <div key={key} className="flex gap-2 text-[12px]">
-                      <span className="text-muted w-[7.5rem] shrink-0">{FLYER_QA_CHECKLIST_LABELS[key]}</span>
-                      <span className="text-fg font-medium">{item.status}</span>
-                      {item.detail && item.detail !== 'tidak berlaku' ? (
-                        <span className="text-muted truncate">{item.detail}</span>
-                      ) : null}
-                    </div>
-                  )
-                })}
-              <div className="flex gap-2 text-[12px]">
-                <span className="text-muted w-[7.5rem] shrink-0">{FLYER_QA_CHECKLIST_LABELS.typo}</span>
-                <span className="text-fg font-medium">{qa.review.checklist.typo.status}</span>
-              </div>
             </div>
 
             {qa.review.temuan.length > 0 && (
@@ -186,21 +159,10 @@ export function FlyerQaSummary({
                 </ul>
               </div>
             )}
-            {qa.review.typo_list.length > 0 && (
-              <p className="text-[12px] text-muted">
-                Typo: {qa.review.typo_list.map((t) => `${t.tertulis} → ${t.usulan}`).join('; ')}
-              </p>
-            )}
           </>
         )}
 
         {msg && <p className="text-[12px] text-red">{msg}</p>}
-
-        {live && editHref && (
-          <Link href={editHref} className="text-[12px] text-accent font-medium">
-            Upload ulang poster
-          </Link>
-        )}
       </div>
     </div>
   )

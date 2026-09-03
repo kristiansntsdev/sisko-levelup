@@ -70,6 +70,7 @@ export const ModelName = {
   pengajar: 'pengajar',
   pengaturan: 'pengaturan',
   pengaturan_kota: 'pengaturan_kota',
+  wfe_serentak: 'wfe_serentak',
   pengurus: 'pengurus',
   peserta: 'peserta',
   playlist_teams: 'playlist_teams',
@@ -207,6 +208,7 @@ export const EventScalarFieldEnum = {
   posterevent: 'posterevent',
   image_url: 'image_url',
   flyer_qa: 'flyer_qa',
+  berita_acara_qa: 'berita_acara_qa',
   proposalevent: 'proposalevent',
   id_cabang: 'id_cabang',
   target: 'target',
@@ -338,6 +340,17 @@ export const Pengaturan_kotaScalarFieldEnum = {
 } as const
 
 export type Pengaturan_kotaScalarFieldEnum = (typeof Pengaturan_kotaScalarFieldEnum)[keyof typeof Pengaturan_kotaScalarFieldEnum]
+
+
+export const Wfe_serentakScalarFieldEnum = {
+  id: 'id',
+  bulan_mulai: 'bulan_mulai',
+  bulan_selesai: 'bulan_selesai',
+  image_url: 'image_url',
+  created_at: 'created_at'
+} as const
+
+export type Wfe_serentakScalarFieldEnum = (typeof Wfe_serentakScalarFieldEnum)[keyof typeof Wfe_serentakScalarFieldEnum]
 
 
 export const PengurusScalarFieldEnum = {
@@ -734,6 +747,7 @@ export const eventOrderByRelevanceFieldEnum = {
   posterevent: 'posterevent',
   image_url: 'image_url',
   flyer_qa: 'flyer_qa',
+  berita_acara_qa: 'berita_acara_qa',
   proposalevent: 'proposalevent',
   id_cabang: 'id_cabang',
   target: 'target',
@@ -850,6 +864,13 @@ export const pengaturan_kotaOrderByRelevanceFieldEnum = {
 } as const
 
 export type pengaturan_kotaOrderByRelevanceFieldEnum = (typeof pengaturan_kotaOrderByRelevanceFieldEnum)[keyof typeof pengaturan_kotaOrderByRelevanceFieldEnum]
+
+
+export const wfe_serentakOrderByRelevanceFieldEnum = {
+  image_url: 'image_url'
+} as const
+
+export type wfe_serentakOrderByRelevanceFieldEnum = (typeof wfe_serentakOrderByRelevanceFieldEnum)[keyof typeof wfe_serentakOrderByRelevanceFieldEnum]
 
 
 export const pengurusOrderByRelevanceFieldEnum = {

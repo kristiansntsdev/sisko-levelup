@@ -65,7 +65,7 @@ function getInitials(name: string) {
 }
 
 // ── Home tab ────────────────────────────────────────────────────
-function HomeTab({ nama, kotalevelup }: { nama: string; kotalevelup: string }) {
+function HomeTab({ nama, kotalevelup, isNasional }: { nama: string; kotalevelup: string; isNasional: boolean }) {
   const router = useRouter()
   return (
     <div className="max-w-[480px] mx-auto px-4 flex flex-col gap-4 pb-6">
@@ -101,6 +101,28 @@ function HomeTab({ nama, kotalevelup }: { nama: string; kotalevelup: string }) {
             </div>
           </Card>
         </button>
+        {isNasional && (
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard/kota/brim/wfe-flyer')}
+            className="text-left"
+          >
+            <Card variant="elevated" className="p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-accent-light flex items-center justify-center shrink-0">
+                    <FlyerIcon />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-fg">Flyer WW JFE serentak</p>
+                    <p className="text-xs text-muted mt-0.5">WFE — template pusat per bulan</p>
+                  </div>
+                </div>
+                <span className="text-muted text-lg">→</span>
+              </div>
+            </Card>
+          </button>
+        )}
         <button
           type="button"
           onClick={() => router.push('/dashboard/kota/brim/dokumentasi')}
@@ -387,7 +409,7 @@ export function BrimClient({ nama, kotalevelup, pengaturan, events, isNasional }
   const [activeTab, setActiveTab] = useState('home')
 
   const tabContent = {
-    home: <HomeTab nama={nama} kotalevelup={kotalevelup} />,
+    home: <HomeTab nama={nama} kotalevelup={kotalevelup} isNasional={isNasional} />,
     event: <EventTab events={events} />,
     settings: <SettingsTab pengaturan={pengaturan} />,
   }

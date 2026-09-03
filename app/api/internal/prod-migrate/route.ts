@@ -28,7 +28,7 @@ async function ensureEventColumn(name: string, ddl: string): Promise<boolean> {
   return missing
 }
 
-/** Idempotent prod: event.approvebrimnas, event.image_url, event.flyer_qa, brimnasional divisi=brim. */
+/** Idempotent prod: event columns, wfe_serentak, brimnasional divisi=brim. */
 export async function POST(req: NextRequest) {
   if (!checkSecret(req)) return unauthorized()
 
@@ -56,6 +56,33 @@ export async function POST(req: NextRequest) {
     Prisma.sql`UPDATE event SET flyer_qa = '' WHERE flyer_qa IS NULL`,
   )
 
+  const addedBeritaAcaraQa = await ensureEventColumn(
+    'berita_acara_qa',
+    'ALTER TABLE event ADD COLUMN berita_acara_qa LONGTEXT NULL',
+  )
+  const beritaAcaraQaBackfill = await db.$executeRaw(
+    Prisma.sql`UPDATE event SET berita_acara_qa = '' WHERE berita_acara_qa IS NULL`,
+  )
+
+  const tables = await db.$queryRaw<{ TABLE_NAME: string }[]>`
+    SELECT TABLE_NAME FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'wfe_serentak'
+  `
+  const addedWfeSerentak = tables.length === 0
+  if (addedWfeSerentak) {
+    await db.$executeRawUnsafe(`
+      CREATE TABLE wfe_serentak (
+        id INT NOT NULL AUTO_INCREMENT,
+        bulan_mulai DATE NOT NULL,
+        bulan_selesai DATE NOT NULL,
+        image_url TEXT NOT NULL,
+        created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_wfe_serentak_range (bulan_mulai, bulan_selesai)
+      )
+    `)
+  }
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -73,6 +100,9 @@ export async function POST(req: NextRequest) {
     imageBackfill,
     addedFlyerQa,
     flyerQaBackfill,
+    addedBeritaAcaraQa,
+    beritaAcaraQaBackfill,
+    addedWfeSerentak,
     brimUpdated: brim.count,
     brim: row,
   })

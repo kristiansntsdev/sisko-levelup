@@ -36,13 +36,21 @@ app/
   dashboard/kota/alk/approval/page.tsx # List approval squad dari table upgrade
   dashboard/kota/alk/event/[id]/approve/ # Sekretariat: approve/reject event
   dashboard/kota/brim/event/[id]/approve/ # Brim Nasional: approvebrimnas
+  dashboard/kota/brim/wfe-flyer/       # Brim Nasional: flyer pusat WW JFE / WFE serentak
 lib/actions/upgrade.ts                # joinVolunteer, joinSquad, approveSquad
+lib/actions/wfe-serentak.ts           # kampanye flyer pusat JFE (range bulan)
 lib/event-approval.ts                 # append notenasional (ALK/Brim prefixes)
 lib/event-poster.ts                    # resolveEventPosterUrl: posterevent then image_url
-lib/flyer-qa.ts                       # Cursor webhook QA flyer WW bulanan; parse + poll
+lib/flyer-qa.ts                       # Cursor webhook QA flyer WW bulanan + JFE/WFE; parse + poll
+lib/berita-acara-qa.ts                # Cursor webhook QA berita acara (link surat); parse + poll
 lib/telegram.ts                       # notifyTelegram → group (nasional ops)
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-09-02]
+- Flyer pusat WW JFE/WFE: Brim Nasional upload template + range bulan; event `jfe` di range di-QA vs template (satu webhook flyer); parser checklist align prompt produksi
+- QA Berita Acara: event dengan `suratpemberitahuan` → Cursor review (helper, bukan gate); kolom `berita_acara_qa`; satu Ajukan di detail + snapshot di approve ALK/Brim
+- Telegram Diajukan: `QA flyer` + `QA berita acara`; banner Butuh Revisi jika salah satu REVISI; Dibuat/Diedit ditahan jika ada review
 
 ## Recent Updates [2026-08-22]
 - WW bulanan + flyer: Ajukan ke Telegram; halaman approve ALK/Brim tampilkan snapshot QA dari DB (tanpa poll)

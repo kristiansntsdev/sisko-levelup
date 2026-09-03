@@ -416,6 +416,7 @@ export const ModelName = {
   pengajar: 'pengajar',
   pengaturan: 'pengaturan',
   pengaturan_kota: 'pengaturan_kota',
+  wfe_serentak: 'wfe_serentak',
   pengurus: 'pengurus',
   peserta: 'peserta',
   playlist_teams: 'playlist_teams',
@@ -454,7 +455,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1709,6 +1710,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.pengaturan_kotaCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.Pengaturan_kotaCountAggregateOutputType> | number
+        }
+      }
+    }
+    wfe_serentak: {
+      payload: Prisma.$wfe_serentakPayload<ExtArgs>
+      fields: Prisma.wfe_serentakFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.wfe_serentakFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wfe_serentakPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.wfe_serentakFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wfe_serentakPayload>
+        }
+        findFirst: {
+          args: Prisma.wfe_serentakFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wfe_serentakPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.wfe_serentakFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wfe_serentakPayload>
+        }
+        findMany: {
+          args: Prisma.wfe_serentakFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wfe_serentakPayload>[]
+        }
+        create: {
+          args: Prisma.wfe_serentakCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wfe_serentakPayload>
+        }
+        createMany: {
+          args: Prisma.wfe_serentakCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.wfe_serentakDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wfe_serentakPayload>
+        }
+        update: {
+          args: Prisma.wfe_serentakUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wfe_serentakPayload>
+        }
+        deleteMany: {
+          args: Prisma.wfe_serentakDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.wfe_serentakUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.wfe_serentakUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wfe_serentakPayload>
+        }
+        aggregate: {
+          args: Prisma.Wfe_serentakAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWfe_serentak>
+        }
+        groupBy: {
+          args: Prisma.wfe_serentakGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Wfe_serentakGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.wfe_serentakCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Wfe_serentakCountAggregateOutputType> | number
         }
       }
     }
@@ -3365,6 +3432,7 @@ export const EventScalarFieldEnum = {
   posterevent: 'posterevent',
   image_url: 'image_url',
   flyer_qa: 'flyer_qa',
+  berita_acara_qa: 'berita_acara_qa',
   proposalevent: 'proposalevent',
   id_cabang: 'id_cabang',
   target: 'target',
@@ -3496,6 +3564,17 @@ export const Pengaturan_kotaScalarFieldEnum = {
 } as const
 
 export type Pengaturan_kotaScalarFieldEnum = (typeof Pengaturan_kotaScalarFieldEnum)[keyof typeof Pengaturan_kotaScalarFieldEnum]
+
+
+export const Wfe_serentakScalarFieldEnum = {
+  id: 'id',
+  bulan_mulai: 'bulan_mulai',
+  bulan_selesai: 'bulan_selesai',
+  image_url: 'image_url',
+  created_at: 'created_at'
+} as const
+
+export type Wfe_serentakScalarFieldEnum = (typeof Wfe_serentakScalarFieldEnum)[keyof typeof Wfe_serentakScalarFieldEnum]
 
 
 export const PengurusScalarFieldEnum = {
@@ -3892,6 +3971,7 @@ export const eventOrderByRelevanceFieldEnum = {
   posterevent: 'posterevent',
   image_url: 'image_url',
   flyer_qa: 'flyer_qa',
+  berita_acara_qa: 'berita_acara_qa',
   proposalevent: 'proposalevent',
   id_cabang: 'id_cabang',
   target: 'target',
@@ -4008,6 +4088,13 @@ export const pengaturan_kotaOrderByRelevanceFieldEnum = {
 } as const
 
 export type pengaturan_kotaOrderByRelevanceFieldEnum = (typeof pengaturan_kotaOrderByRelevanceFieldEnum)[keyof typeof pengaturan_kotaOrderByRelevanceFieldEnum]
+
+
+export const wfe_serentakOrderByRelevanceFieldEnum = {
+  image_url: 'image_url'
+} as const
+
+export type wfe_serentakOrderByRelevanceFieldEnum = (typeof wfe_serentakOrderByRelevanceFieldEnum)[keyof typeof wfe_serentakOrderByRelevanceFieldEnum]
 
 
 export const pengurusOrderByRelevanceFieldEnum = {
@@ -4493,6 +4580,7 @@ export type GlobalOmitConfig = {
   pengajar?: Prisma.pengajarOmit
   pengaturan?: Prisma.pengaturanOmit
   pengaturan_kota?: Prisma.pengaturan_kotaOmit
+  wfe_serentak?: Prisma.wfe_serentakOmit
   pengurus?: Prisma.pengurusOmit
   peserta?: Prisma.pesertaOmit
   playlist_teams?: Prisma.playlist_teamsOmit
