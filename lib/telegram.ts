@@ -217,7 +217,8 @@ export function eventFormTelegramFields(input: {
     fields['Scope'] = nasionalScopeLabel(input.khusus ?? '')
   }
   fields['Jenis'] = input.jenisevent
-  fields['Tipe WW'] = input.wwtype === 'jfe' ? 'JFE' : 'Bulanan'
+  fields['Tipe WW'] =
+    input.wwtype === 'jfe' ? 'JFE' : input.wwtype === 'nasional' ? 'Nasional' : 'Bulanan'
 
   const target = decodeCsvLabels(input.target, TARGET_PESERTA_LABEL)
   if (target) fields['Target Peserta'] = target

@@ -158,6 +158,11 @@ export function needsWfeFlyerReview(
   return wwtype === 'jfe' && imageUrl.trim().length > 0 && Boolean(templateUrl?.trim())
 }
 
+/** Sekretariat-only tipe: skip all Cursor AI QA reviews. */
+export function skipsAiQa(wwtype: string): boolean {
+  return wwtype === 'nasional'
+}
+
 export function formatFlyerExpectedTanggal(d: Date): string {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
 }

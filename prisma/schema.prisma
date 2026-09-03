@@ -18,6 +18,7 @@ model absen {
   email          String   @db.Text
   id_event       String   @db.Text
   id_event_int   Int?
+  id_sesi        Int?
   hadir          String   @db.Text
   timestamp      DateTime @default(now()) @db.Timestamp(0)
   lampiran       String   @db.Text
@@ -25,6 +26,7 @@ model absen {
 
   @@index([id_event_int], map: "idx_absen_event_int")
   @@index([id_peserta_int], map: "idx_absen_peserta_int")
+  @@index([id_sesi], map: "idx_absen_sesi")
 }
 
 model absenwp {
@@ -103,6 +105,21 @@ model event {
   khusus             String       @db.Text
   suratpemberitahuan String       @db.Text
   registrasi         registrasi[]
+  event_sesi         event_sesi[]
+}
+
+model event_sesi {
+  id_sesi     Int      @id @default(autoincrement())
+  id_event    Int
+  nama        String   @db.VarChar(255)
+  tanggal     DateTime @db.Date
+  jam_mulai   String   @default("") @db.VarChar(8)
+  jam_selesai String   @default("") @db.VarChar(8)
+  wajib       Boolean  @default(true)
+  urutan      Int      @default(0)
+  event       event    @relation(fields: [id_event], references: [id_event], onDelete: Cascade, map: "event_sesi_event_fk")
+
+  @@index([id_event], map: "idx_event_sesi_event")
 }
 
 model feedback {
@@ -493,4 +510,5 @@ enum kas_kota_txn_kategori {
 enum event_wwtype {
   bulanan
   jfe
+  nasional
 }

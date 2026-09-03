@@ -11,6 +11,21 @@ import {
   scopeFromKhusus,
   type NasionalEventScope,
 } from '@/lib/event-cabang'
+import type { EventSesiInput } from '@/lib/event-sesi'
+
+type SesiFormRow = EventSesiInput & { _key: string }
+
+function newSesiRow(defaults?: Partial<EventSesiInput>): SesiFormRow {
+  return {
+    _key: crypto.randomUUID(),
+    id_sesi: defaults?.id_sesi,
+    nama: defaults?.nama ?? '',
+    tanggal: defaults?.tanggal ?? '',
+    jam_mulai: defaults?.jam_mulai ?? '',
+    jam_selesai: defaults?.jam_selesai ?? '',
+    wajib: defaults?.wajib ?? true,
+  }
+}
 
 const TARGET_OPTIONS = ['Umum', 'Volunteer', 'Squad', 'Core', 'Leader', 'Tim Nasional']
 const TARGET_VALUES: Record<string, string> = {
@@ -27,10 +42,14 @@ const TARGET_PENGURUS_LABELS: Record<string, string> = Object.fromEntries(
 )
 
 const JENIS_OPTIONS = ['Offline', 'Online']
-const WWTYPE_OPTIONS: { value: event_wwtype; label: string }[] = [
+const WWTYPE_OPTIONS_BASE: { value: event_wwtype; label: string }[] = [
   { value: 'bulanan', label: 'Bulanan' },
   { value: 'jfe', label: 'JFE' },
 ]
+const WWTYPE_OPTION_NASIONAL: { value: event_wwtype; label: string } = {
+  value: 'nasional',
+  label: 'Nasional',
+}
 
 /** Force HH:mm 24h (strips AM/PM if pasted from locale UI). */
 function normalizeJam24(raw: string): string {
@@ -111,6 +130,20 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
   const [flyer, setFlyer] = useState<File | null>(null)
   const [flyerPreview, setFlyerPreview] = useState('')
   const [jfeTemplate, setJfeTemplate] = useState<WfeSerentakRow | null>(null)
+  const [sesi, setSesi] = useState<SesiFormRow[]>(() =>
+    isNasional
+      ? (event?.sesi ?? []).map((s) =>
+          newSesiRow({
+            id_sesi: s.id_sesi,
+            nama: s.nama,
+            tanggal: s.tanggal,
+            jam_mulai: s.jam_mulai,
+            jam_selesai: s.jam_selesai,
+            wajib: s.wajib,
+          }),
+        )
+      : [],
+  )
 
   const [form, setForm] = useState<FormState>({
     nama_event: event?.nama_event ?? '',
@@ -154,68 +187,93 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
 
   function initMap() {
     if (!mapRef.current || mapsReadyRef.current) return
-    mapsReadyRef.current = true
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const g = (window as any).google.maps
-    const center = initialLatLng ?? { lat: -7.5, lng: 110.0 }
+    const g = (window as any).google?.maps
+    // loading=async: namespace ada dulu, constructor Map baru setelah importLibrary
+    if (!g?.importLibrary) return
 
-    const map = new g.Map(mapRef.current, {
-      center,
-      zoom: initialLatLng ? 15 : 5,
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: false,
-    })
-    mapInstanceRef.current = map
-
-    const marker = new g.Marker({ position: center, map, draggable: true })
-    markerRef.current = marker
-
-    marker.addListener('dragend', () => {
-      const pos = (marker as any).getPosition()
-      if (pos) setLatLngRef.current({ lat: pos.lat(), lng: pos.lng() })
-    })
-
-    map.addListener('click', (e: any) => {
-      const pos = { lat: e.latLng.lat(), lng: e.latLng.lng() }
-      ;(marker as any).setPosition(pos)
-      setLatLngRef.current(pos)
-    })
-
-    if (alamatRef.current) {
+    mapsReadyRef.current = true
+    void (async () => {
       try {
-        const ac = new g.places.Autocomplete(alamatRef.current, {
-          fields: ['formatted_address', 'geometry'],
-          componentRestrictions: { country: 'id' },
-        })
-        ac.addListener('place_changed', () => {
-          const place = ac.getPlace()
-          if (place.geometry?.location) {
-            const newPos = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() }
-            map.setCenter(newPos)
-            map.setZoom(15)
-            ;(marker as any).setPosition(newPos)
-            setLatLngRef.current(newPos)
-          }
-          if (place.formatted_address) setAlamatRef.current(place.formatted_address)
-        })
-      } catch { /* Places API might be restricted */ }
-    }
+        await Promise.all([g.importLibrary('maps'), g.importLibrary('places')])
+      } catch {
+        mapsReadyRef.current = false
+        return
+      }
+      if (!mapRef.current) {
+        mapsReadyRef.current = false
+        return
+      }
+
+      const center = initialLatLng ?? { lat: -7.5, lng: 110.0 }
+
+      const map = new g.Map(mapRef.current, {
+        center,
+        zoom: initialLatLng ? 15 : 5,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+      })
+      mapInstanceRef.current = map
+
+      const marker = new g.Marker({ position: center, map, draggable: true })
+      markerRef.current = marker
+
+      marker.addListener('dragend', () => {
+        const pos = (marker as { getPosition: () => { lat: () => number; lng: () => number } | null }).getPosition()
+        if (pos) setLatLngRef.current({ lat: pos.lat(), lng: pos.lng() })
+      })
+
+      map.addListener('click', (e: { latLng: { lat: () => number; lng: () => number } }) => {
+        const pos = { lat: e.latLng.lat(), lng: e.latLng.lng() }
+        ;(marker as { setPosition: (p: { lat: number; lng: number }) => void }).setPosition(pos)
+        setLatLngRef.current(pos)
+      })
+
+      if (alamatRef.current) {
+        try {
+          const ac = new g.places.Autocomplete(alamatRef.current, {
+            fields: ['formatted_address', 'geometry'],
+            componentRestrictions: { country: 'id' },
+          })
+          ac.addListener('place_changed', () => {
+            const place = ac.getPlace()
+            if (place.geometry?.location) {
+              const newPos = {
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+              }
+              map.setCenter(newPos)
+              map.setZoom(15)
+              ;(marker as { setPosition: (p: { lat: number; lng: number }) => void }).setPosition(newPos)
+              setLatLngRef.current(newPos)
+            }
+            if (place.formatted_address) setAlamatRef.current(place.formatted_address)
+          })
+        } catch { /* Places API might be restricted */ }
+      }
+    })()
   }
 
   useEffect(() => {
     if (typeof window === 'undefined' || !mapsApiKey) return
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((window as any).google?.maps) { initMap(); return }
+    const g = (window as any).google?.maps
+    if (g?.importLibrary) {
+      initMap()
+      return
+    }
     const scriptId = 'gmaps-script'
     const existing = document.getElementById(scriptId)
     if (existing) {
-      existing.addEventListener('load', initMap)
+      // Script sudah ada: kalau libraries siap → init; kalau masih load → tunggu
+      if (g?.importLibrary) initMap()
+      else existing.addEventListener('load', initMap)
       return () => existing.removeEventListener('load', initMap)
     }
     const script = document.createElement('script')
     script.id = scriptId
-    // loading=async = Google's recommended bootstrap (silences the console warning)
+    // loading=async = Google bootstrap; harus pakai importLibrary sebelum new Map()
     script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places&loading=async`
     script.async = true
     script.onload = initMap
@@ -265,6 +323,18 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
           danaevent: danaRaw,
           suratpemberitahuan: form.suratpemberitahuan,
           khusus: isNasional ? khususFromScope(nasionalScope) : '',
+          ...(isNasional
+            ? {
+                sesi: sesi
+                  .filter((s) => s.nama.trim())
+                  .map(({ _key: _, ...rest }) => ({
+                    ...rest,
+                    tanggal: rest.tanggal || form.tglevent,
+                    jam_mulai: normalizeJam24(rest.jam_mulai),
+                    jam_selesai: normalizeJam24(rest.jam_selesai),
+                  })),
+              }
+            : {}),
         }
 
         if (mode === 'create') {
@@ -353,13 +423,16 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
             </select>
           </FormField>
 
-          <FormField label="Tipe WW">
+          <FormField label={isNasional ? 'Tipe' : 'Tipe WW'}>
             <select
               value={form.wwtype}
               onChange={(e) => setField('wwtype', e.target.value as event_wwtype)}
               className={`${inputCls} appearance-none`}
             >
-              {WWTYPE_OPTIONS.map((o) => (
+              {(isNasional
+                ? [...WWTYPE_OPTIONS_BASE, WWTYPE_OPTION_NASIONAL]
+                : WWTYPE_OPTIONS_BASE
+              ).map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
@@ -452,6 +525,134 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
             </FormField>
           </div>
         </FormSection>
+
+        {isNasional && (
+          <FormSection title="Sesi Absen">
+            <p className="text-[12px] text-muted -mt-1">
+              Opsional. Kosong = absen sekali per event. Toggle wajib off untuk sesi paralel.
+            </p>
+            {sesi.length === 0 ? (
+              <p className="text-[13px] text-muted text-center py-2">Belum ada sesi.</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {sesi.map((row, idx) => (
+                  <div
+                    key={row._key}
+                    className="border border-border rounded-[12px] p-3 flex flex-col gap-2.5 bg-bg"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[12px] font-semibold text-muted">Sesi {idx + 1}</p>
+                      <button
+                        type="button"
+                        onClick={() => setSesi((prev) => prev.filter((s) => s._key !== row._key))}
+                        className="text-[18px] leading-none text-muted hover:text-red"
+                        aria-label="Hapus sesi"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Nama sesi"
+                      value={row.nama}
+                      onChange={(e) =>
+                        setSesi((prev) =>
+                          prev.map((s) => (s._key === row._key ? { ...s, nama: e.target.value } : s)),
+                        )
+                      }
+                      className={inputCls}
+                    />
+                    <input
+                      type="date"
+                      value={row.tanggal || form.tglevent}
+                      onChange={(e) =>
+                        setSesi((prev) =>
+                          prev.map((s) => (s._key === row._key ? { ...s, tanggal: e.target.value } : s)),
+                        )
+                      }
+                      className={inputCls}
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="Jam mulai"
+                        value={row.jam_mulai}
+                        onChange={(e) =>
+                          setSesi((prev) =>
+                            prev.map((s) =>
+                              s._key === row._key ? { ...s, jam_mulai: e.target.value } : s,
+                            ),
+                          )
+                        }
+                        onBlur={(e) =>
+                          setSesi((prev) =>
+                            prev.map((s) =>
+                              s._key === row._key
+                                ? { ...s, jam_mulai: normalizeJam24(e.target.value) }
+                                : s,
+                            ),
+                          )
+                        }
+                        className={inputCls}
+                      />
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="Jam selesai"
+                        value={row.jam_selesai}
+                        onChange={(e) =>
+                          setSesi((prev) =>
+                            prev.map((s) =>
+                              s._key === row._key ? { ...s, jam_selesai: e.target.value } : s,
+                            ),
+                          )
+                        }
+                        onBlur={(e) =>
+                          setSesi((prev) =>
+                            prev.map((s) =>
+                              s._key === row._key
+                                ? { ...s, jam_selesai: normalizeJam24(e.target.value) }
+                                : s,
+                            ),
+                          )
+                        }
+                        className={inputCls}
+                      />
+                    </div>
+                    <label className="flex items-center gap-2 text-[13px] text-fg cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={row.wajib}
+                        onChange={(e) =>
+                          setSesi((prev) =>
+                            prev.map((s) =>
+                              s._key === row._key ? { ...s, wajib: e.target.checked } : s,
+                            ),
+                          )
+                        }
+                        className="size-4 accent-[var(--accent)]"
+                      />
+                      Wajib (hitung kehadiran lengkap)
+                    </label>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() =>
+                setSesi((prev) => [
+                  ...prev,
+                  newSesiRow({ tanggal: form.tgleventselesai || form.tglevent }),
+                ])
+              }
+              className="w-full py-2.5 rounded-input border border-dashed border-border text-[13px] font-semibold text-fg2 hover:border-accent hover:text-accent transition-colors"
+            >
+              + Tambah sesi
+            </button>
+          </FormSection>
+        )}
 
         {/* Lokasi */}
         <FormSection title="Lokasi">
@@ -585,9 +786,11 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
         >
           {isPending
             ? (flyer ? 'Mengunggah flyer...' : 'Menyimpan...')
-            : form.suratpemberitahuan.trim()
-              || (form.wwtype === 'bulanan' && flyer)
-              || (form.wwtype === 'jfe' && Boolean(jfeTemplate) && Boolean(flyer || event?.posterUrl))
+            : form.wwtype !== 'nasional' && (
+                form.suratpemberitahuan.trim()
+                || (form.wwtype === 'bulanan' && flyer)
+                || (form.wwtype === 'jfe' && Boolean(jfeTemplate) && Boolean(flyer || event?.posterUrl))
+              )
               ? 'Simpan & Review'
               : mode === 'create' ? 'Buat Event' : 'Simpan Perubahan'}
         </button>

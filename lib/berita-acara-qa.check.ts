@@ -19,6 +19,8 @@ import {
 assert.equal(needsBeritaAcaraReview('https://docs.google.com/x'), true)
 assert.equal(needsBeritaAcaraReview(''), false)
 assert.equal(needsBeritaAcaraReview('  '), false)
+assert.equal(needsBeritaAcaraReview('https://docs.google.com/x', 'nasional'), false)
+assert.equal(needsBeritaAcaraReview('https://docs.google.com/x', 'bulanan'), true)
 
 assert.deepEqual(parseLatLng('-7.4, 111.4'), { lat: -7.4, lng: 111.4 })
 assert.equal(parseLatLng(''), null)

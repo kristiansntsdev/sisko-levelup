@@ -66,7 +66,8 @@ export type kas_kota_txn_kategori = (typeof kas_kota_txn_kategori)[keyof typeof 
 
 export const event_wwtype = {
   bulanan: 'bulanan',
-  jfe: 'jfe'
+  jfe: 'jfe',
+  nasional: 'nasional'
 } as const
 
 export type event_wwtype = (typeof event_wwtype)[keyof typeof event_wwtype]

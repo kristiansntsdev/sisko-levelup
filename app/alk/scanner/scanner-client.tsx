@@ -3,7 +3,8 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button, Card } from '@/components/ui'
 import { createAbsen, getPesertaPreview } from '@/lib/actions/absen'
-import { getEventLocation } from '@/lib/actions/event'
+import { getEventLocation, getEventSesi } from '@/lib/actions/event'
+import type { EventSesiRow } from '@/lib/event-sesi'
 import { decodeQR, type QRPayload } from '@/lib/qr'
 
 type ScanStatus = 'loading' | 'scanning' | 'stopped' | 'error' | 'unsupported'
@@ -25,10 +26,17 @@ type Preview = {
   gereja: string
 }
 
+function sesiLabel(s: EventSesiRow): string {
+  const jam = [s.jam_mulai, s.jam_selesai].filter(Boolean).join('–')
+  const badge = s.wajib ? '' : ' · opsional'
+  return jam ? `${s.nama} (${jam})${badge}` : `${s.nama}${badge}`
+}
+
 export function ScannerClient({ backUrl = '/alk' }: { backUrl?: string }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const eventId = searchParams.get('eventId') ?? ''
+  const initialSesiId = Number(searchParams.get('sesiId') || 0) || null
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -44,6 +52,26 @@ export function ScannerClient({ backUrl = '/alk' }: { backUrl?: string }) {
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment')
   const [locationStatus, setLocationStatus] = useState<LocationStatus>('idle')
   const [locationDistance, setLocationDistance] = useState<number | null>(null)
+  const [sesiList, setSesiList] = useState<EventSesiRow[]>([])
+  const [selectedSesiId, setSelectedSesiId] = useState<number | null>(initialSesiId)
+
+  useEffect(() => {
+    if (!eventId) return
+    let stop = false
+    void getEventSesi(Number(eventId)).then((rows) => {
+      if (stop) return
+      setSesiList(rows)
+      if (rows.length === 0) {
+        setSelectedSesiId(null)
+        return
+      }
+      setSelectedSesiId((prev) => {
+        if (prev != null && rows.some((r) => r.id_sesi === prev)) return prev
+        return rows[0].id_sesi
+      })
+    })
+    return () => { stop = true }
+  }, [eventId])
 
   useEffect(() => {
     if (!eventId || !('geolocation' in navigator)) return
@@ -169,16 +197,27 @@ export function ScannerClient({ backUrl = '/alk' }: { backUrl?: string }) {
 
   async function handleConfirm() {
     if (!preview) return
+    if (sesiList.length > 0 && selectedSesiId == null) {
+      setConfirmError('Pilih sesi absen dulu.')
+      return
+    }
     setConfirming(true)
     setConfirmError('')
     try {
-      const result = await createAbsen(preview.payload)
+      const result = await createAbsen(
+        preview.payload,
+        sesiList.length > 0 ? selectedSesiId : null,
+      )
       if (result.success) {
         router.push(`/alk/data-peserta?nama=${encodeURIComponent(result.nama)}&gereja=${encodeURIComponent(result.gereja)}`)
         return
       }
       if (result.reason === 'already_scanned') {
-        setConfirmError('Peserta ini sudah diabsen sebelumnya.')
+        setConfirmError('Peserta ini sudah diabsen di sesi ini.')
+      } else if (result.reason === 'sesi_required') {
+        setConfirmError('Pilih sesi absen dulu.')
+      } else if (result.reason === 'sesi_invalid') {
+        setConfirmError('Sesi tidak valid. Pilih ulang sesi.')
       } else if (result.reason === 'invalid_payload') {
         setConfirmError('QR tidak lengkap. Minta peserta buka ulang tiketnya.')
       } else {
@@ -202,19 +241,37 @@ export function ScannerClient({ backUrl = '/alk' }: { backUrl?: string }) {
     : scanStatus === 'stopped' ? 'Kamera dimatikan'
     : ''
 
+  const selectedSesi = sesiList.find((s) => s.id_sesi === selectedSesiId) ?? null
+
   return (
     <main className="min-h-screen bg-bg pb-safe flex flex-col">
 
       {/* Nav */}
       <nav className="w-full sticky top-0 z-10 bg-surface border-b border-border">
-        <div className="max-w-sm mx-auto px-5 pt-6 pb-4 flex items-center justify-between">
-          <button
-            onClick={() => { stopCamera(); router.push(backUrl) }}
-            className="text-sm text-muted hover:text-fg transition-colors"
-          >
-            ← Kembali
-          </button>
-          {eventId && <p className="text-xs text-muted">Event #{eventId}</p>}
+        <div className="max-w-sm mx-auto px-5 pt-6 pb-4 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => { stopCamera(); router.push(backUrl) }}
+              className="text-sm text-muted hover:text-fg transition-colors"
+            >
+              ← Kembali
+            </button>
+            {eventId && <p className="text-xs text-muted">Event #{eventId}</p>}
+          </div>
+          {sesiList.length > 0 && (
+            <div>
+              <p className="text-[12px] font-medium text-fg2 mb-1">Sesi absen</p>
+              <select
+                value={selectedSesiId ?? ''}
+                onChange={(e) => setSelectedSesiId(Number(e.target.value) || null)}
+                className="w-full px-3 py-2.5 border-[1.5px] border-border rounded-input text-[14px] bg-surface text-fg outline-none focus:border-accent appearance-none"
+              >
+                {sesiList.map((s) => (
+                  <option key={s.id_sesi} value={s.id_sesi}>{sesiLabel(s)}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -233,6 +290,9 @@ export function ScannerClient({ backUrl = '/alk' }: { backUrl?: string }) {
               </svg>
               Event #{preview.payload.ev} sesuai
             </div>
+            {selectedSesi && (
+              <p className="text-[12px] text-muted">Sesi: <span className="font-semibold text-fg">{selectedSesi.nama}</span></p>
+            )}
             {locationStatus === 'outside' && (
               <div className="flex items-center gap-2 px-3 py-2 rounded-[10px] bg-red-light">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
@@ -247,7 +307,11 @@ export function ScannerClient({ backUrl = '/alk' }: { backUrl?: string }) {
               <Button variant="secondary" fullWidth onClick={handleScanAgain} disabled={confirming}>
                 Scan Ulang
               </Button>
-              <Button fullWidth onClick={handleConfirm} disabled={confirming || locationStatus === 'outside'}>
+              <Button
+                fullWidth
+                onClick={handleConfirm}
+                disabled={confirming || locationStatus === 'outside' || (sesiList.length > 0 && selectedSesiId == null)}
+              >
                 {confirming ? 'Menyimpan...' : 'Absen Peserta'}
               </Button>
             </div>

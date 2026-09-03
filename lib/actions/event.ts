@@ -44,6 +44,12 @@ import {
 } from '@/lib/berita-acara-qa'
 import { getWfeSerentakForDate } from '@/lib/actions/wfe-serentak'
 import { formatTelegramMessage, nasionalScopeLabel, notifyTelegram, eventActionButtons, eventFormTelegramFields, eventTelegramScope } from '@/lib/telegram'
+import {
+  parseLocalDate,
+  toEventSesiRow,
+  type EventSesiInput,
+  type EventSesiRow,
+} from '@/lib/event-sesi'
 
 export type EventSummary = {
   id_event: number
@@ -195,6 +201,7 @@ export async function getEventLocation(id: number): Promise<EventLocation | null
 
 export type RegistrasiRow = {
   id_registrasi: number
+  id_peserta: number
   nama: string
   email: string
   gereja: string
@@ -206,6 +213,9 @@ export type AbsenRow = {
   email: string
   userlevel: string
   timestamp: string
+  id_sesi: number | null
+  sesiNama: string | null
+  id_peserta: number | null
 }
 
 export type EventDetailFull = {
@@ -237,6 +247,7 @@ export type EventDetailFull = {
   beritaAcaraQa: BeritaAcaraQaRecord | null
   registrasi: RegistrasiRow[]
   absen: AbsenRow[]
+  sesi: EventSesiRow[]
 }
 
 export async function getEventDetail(id: number): Promise<EventDetailFull | null> {
@@ -253,8 +264,12 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       registrasi: {
         select: {
           id_registrasi: true,
+          id_peserta: true,
           peserta: { select: { nama: true, email: true, gereja: true } },
         },
+      },
+      event_sesi: {
+        orderBy: [{ urutan: 'asc' }, { id_sesi: 'asc' }],
       },
     },
   })
@@ -265,10 +280,10 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       OR: [{ id_event_int: id }, { id_event: String(id) }],
     },
     orderBy: { timestamp: 'asc' },
-    select: { id_absen: true, id_peserta: true, email: true, timestamp: true },
+    select: { id_absen: true, id_peserta: true, id_peserta_int: true, email: true, timestamp: true, id_sesi: true },
   })
 
-  const pesertaIds = [...new Set(absenRows.map((a) => parseInt(a.id_peserta, 10)).filter((n) => !isNaN(n)))]
+  const pesertaIds = [...new Set(absenRows.map((a) => a.id_peserta_int ?? parseInt(a.id_peserta, 10)).filter((n) => n != null && !isNaN(n)))]
   const pesertaList = pesertaIds.length
     ? await db.peserta.findMany({
         where: { id_peserta: { in: pesertaIds } },
@@ -276,6 +291,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       })
     : []
   const pesertaMap = new Map(pesertaList.map((p) => [String(p.id_peserta), p]))
+  const sesiMap = new Map(event.event_sesi.map((s) => [s.id_sesi, s.nama]))
 
   return {
     id_event: event.id_event,
@@ -308,22 +324,86 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
     khusus: event.khusus,
     flyerQa: parseFlyerQa(event.flyer_qa),
     beritaAcaraQa: parseBeritaAcaraQa(event.berita_acara_qa),
+    sesi: event.event_sesi.map(toEventSesiRow),
     registrasi: event.registrasi.map((r) => ({
       id_registrasi: r.id_registrasi,
+      id_peserta: r.id_peserta,
       nama: r.peserta.nama,
       email: r.peserta.email,
       gereja: r.peserta.gereja,
     })),
     absen: absenRows.map((a) => {
-      const p = pesertaMap.get(a.id_peserta)
+      const pid = a.id_peserta_int ?? parseInt(a.id_peserta, 10)
+      const p = pesertaMap.get(String(pid)) ?? pesertaMap.get(a.id_peserta)
       return {
         id_absen: a.id_absen,
         nama: p?.nama ?? `Peserta #${a.id_peserta}`,
         email: a.email,
         userlevel: p?.userlevel ?? '',
         timestamp: a.timestamp.toISOString(),
+        id_sesi: a.id_sesi ?? null,
+        sesiNama: a.id_sesi != null ? (sesiMap.get(a.id_sesi) ?? null) : null,
+        id_peserta: Number.isFinite(pid) ? pid : null,
       }
     }),
+  }
+}
+
+export async function getEventSesi(idEvent: number): Promise<EventSesiRow[]> {
+  const rows = await db.event_sesi.findMany({
+    where: { id_event: idEvent },
+    orderBy: [{ urutan: 'asc' }, { id_sesi: 'asc' }],
+  })
+  return rows.map(toEventSesiRow)
+}
+
+/** Sync sesi list for a nasional event. Blocks delete if sesi already has absen. */
+async function syncEventSesi(idEvent: number, sesi: EventSesiInput[]): Promise<void> {
+  const existing = await db.event_sesi.findMany({
+    where: { id_event: idEvent },
+    select: { id_sesi: true },
+  })
+  const keepIds = new Set(sesi.map((s) => s.id_sesi).filter((id): id is number => id != null))
+  const toDelete = existing.filter((e) => !keepIds.has(e.id_sesi)).map((e) => e.id_sesi)
+
+  if (toDelete.length > 0) {
+    const withAbsen = await db.absen.findFirst({
+      where: { id_sesi: { in: toDelete } },
+      select: { id_absen: true },
+    })
+    if (withAbsen) {
+      throw new Error('Tidak bisa hapus sesi yang sudah punya absen')
+    }
+    await db.event_sesi.deleteMany({ where: { id_sesi: { in: toDelete } } })
+  }
+
+  for (let i = 0; i < sesi.length; i++) {
+    const s = sesi[i]
+    const nama = s.nama.trim()
+    if (!nama) continue
+    const data = {
+      nama,
+      tanggal: parseLocalDate(s.tanggal),
+      jam_mulai: s.jam_mulai.trim(),
+      jam_selesai: s.jam_selesai.trim(),
+      wajib: s.wajib !== false,
+      urutan: i,
+    }
+    if (s.id_sesi != null) {
+      const updated = await db.event_sesi.updateMany({
+        where: { id_sesi: s.id_sesi, id_event: idEvent },
+        data,
+      })
+      if (updated.count === 0) {
+        await db.event_sesi.create({
+          data: { id_event: idEvent, ...data },
+        })
+      }
+    } else {
+      await db.event_sesi.create({
+        data: { id_event: idEvent, ...data },
+      })
+    }
   }
 }
 
@@ -376,6 +456,8 @@ export type EventFormPayload = {
   danaevent: string
   suratpemberitahuan: string
   khusus: string
+  /** Sekretariat only; ignored for kota. */
+  sesi?: EventSesiInput[]
 }
 
 const FLYER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
@@ -403,6 +485,7 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
   const pengurusId = (await cookies()).get('pengurus_id')?.value
   let idCabang = payload.idCabang
   let khusus = payload.khusus || ''
+  let isNasionalPengurus = false
   if (pengurusId) {
     const pengurus = await db.pengurus.findUnique({
       where: { id_pengurus: Number(pengurusId) },
@@ -410,10 +493,14 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
     })
     if (pengurus?.divisi === 'alk') {
       idCabang = resolveEventCabang(pengurus)
+      isNasionalPengurus = isNasionalAdmin(pengurus.username)
       // only nasional may set khusus; kota admins always empty
-      if (!isNasionalAdmin(pengurus.username)) khusus = ''
+      if (!isNasionalPengurus) khusus = ''
     }
   }
+
+  const wwtype =
+    payload.wwtype === 'nasional' && !isNasionalPengurus ? 'bulanan' : payload.wwtype
 
   const imageUrl = flyer && flyer.size > 0 ? await uploadEventFlyer(flyer) : ''
 
@@ -434,7 +521,7 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
       targetpengurus: payload.targetpengurus,
       targetjumlah: payload.targetjumlah,
       jenisevent: payload.jenisevent,
-      wwtype: payload.wwtype,
+      wwtype,
       longlatevent: payload.longlatevent,
       radius: payload.radius,
       linkevent: '',
@@ -459,6 +546,10 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
     data: { linkevent: `${baseUrl}/join/${id}` },
   })
 
+  if (idCabang === NASIONAL_EVENT_CABANG && payload.sesi) {
+    await syncEventSesi(id, payload.sesi)
+  }
+
   revalidatePath('/dashboard/kota/alk')
 
   const isNasionalEvent = idCabang === NASIONAL_EVENT_CABANG
@@ -474,10 +565,10 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
     }
   }
 
-  const flyerRev = needsFlyerReview(payload.wwtype, imageUrl)
-  const jfeCampaign = payload.wwtype === 'jfe' ? await getWfeSerentakForDate(payload.tglevent) : null
-  const jfeRev = needsWfeFlyerReview(payload.wwtype, imageUrl, jfeCampaign?.image_url)
-  const baRev = needsBeritaAcaraReview(payload.suratpemberitahuan)
+  const flyerRev = needsFlyerReview(wwtype, imageUrl)
+  const jfeCampaign = wwtype === 'jfe' ? await getWfeSerentakForDate(payload.tglevent) : null
+  const jfeRev = needsWfeFlyerReview(wwtype, imageUrl, jfeCampaign?.image_url)
+  const baRev = needsBeritaAcaraReview(payload.suratpemberitahuan, wwtype)
   if (flyerRev || jfeRev) await kickoffFlyerReview(id)
   if (baRev) await kickoffBeritaAcaraReview(id)
   if (!flyerRev && !jfeRev && !baRev) {
@@ -491,7 +582,7 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
           isNasional: isNasionalEvent,
           khusus,
           jenisevent: payload.jenisevent,
-          wwtype: payload.wwtype,
+          wwtype,
           target: payload.target,
           targetpengurus: payload.targetpengurus,
           targetjumlah: payload.targetjumlah,
@@ -539,14 +630,17 @@ export async function updateEvent(
   })
   if (!current) throw new Error('Event tidak ditemukan')
 
+  const wwtype =
+    payload.wwtype === 'nasional' && !isNasional ? 'bulanan' : payload.wwtype
+
   const newFlyer = flyer && flyer.size > 0
   const imageUrl = newFlyer
     ? await uploadEventFlyer(flyer)
     : resolveEventPosterUrl(current.posterevent, current.image_url)
-  const flyerRev = needsFlyerReview(payload.wwtype, imageUrl)
-  const jfeCampaign = payload.wwtype === 'jfe' ? await getWfeSerentakForDate(payload.tglevent) : null
-  const jfeRev = needsWfeFlyerReview(payload.wwtype, imageUrl, jfeCampaign?.image_url)
-  const baRev = needsBeritaAcaraReview(payload.suratpemberitahuan)
+  const flyerRev = needsFlyerReview(wwtype, imageUrl)
+  const jfeCampaign = wwtype === 'jfe' ? await getWfeSerentakForDate(payload.tglevent) : null
+  const jfeRev = needsWfeFlyerReview(wwtype, imageUrl, jfeCampaign?.image_url)
+  const baRev = needsBeritaAcaraReview(payload.suratpemberitahuan, wwtype)
   const suratChanged =
     payload.suratpemberitahuan.trim() !== (current.suratpemberitahuan ?? '').trim()
   const dateChanged = payload.tglevent.getTime() !== current.tglevent.getTime()
@@ -556,7 +650,7 @@ export async function updateEvent(
     data: {
       nama_event: payload.nama_event,
       jenisevent: payload.jenisevent,
-      wwtype: payload.wwtype,
+      wwtype,
       target: payload.target,
       targetpengurus: payload.targetpengurus,
       targetjumlah: payload.targetjumlah,
@@ -573,6 +667,11 @@ export async function updateEvent(
       ...(newFlyer ? { image_url: imageUrl, posterevent: '' } : {}),
     },
   })
+
+  if (isNasional && payload.sesi) {
+    await syncEventSesi(id, payload.sesi)
+  }
+
   revalidatePath('/dashboard/kota/alk')
   revalidatePath(`/dashboard/kota/alk/event/${id}`)
 
@@ -591,7 +690,7 @@ export async function updateEvent(
           isNasional: true,
           khusus: khusus ?? '',
           jenisevent: payload.jenisevent,
-          wwtype: payload.wwtype,
+          wwtype,
           target: payload.target,
           targetpengurus: payload.targetpengurus,
           targetjumlah: payload.targetjumlah,
@@ -755,7 +854,7 @@ async function beritaAcaraQaPayloadForEvent(id: number) {
     },
   })
   if (!event) throw new Error('Event tidak ditemukan')
-  if (!needsBeritaAcaraReview(event.suratpemberitahuan)) {
+  if (!needsBeritaAcaraReview(event.suratpemberitahuan, event.wwtype)) {
     throw new Error('Event ini tidak perlu review berita acara')
   }
   const flyerUrl = resolveEventPosterUrl(event.posterevent, event.image_url)

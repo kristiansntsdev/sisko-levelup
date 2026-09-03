@@ -39,6 +39,7 @@ app/
   dashboard/kota/brim/wfe-flyer/       # Brim Nasional: flyer pusat WW JFE / WFE serentak
 lib/actions/upgrade.ts                # joinVolunteer, joinSquad, approveSquad
 lib/actions/wfe-serentak.ts           # kampanye flyer pusat JFE (range bulan)
+lib/event-sesi.ts                     # multi-sesi absen: wajib, hadirPenuh, dup key
 lib/event-approval.ts                 # append notenasional (ALK/Brim prefixes)
 lib/event-poster.ts                    # resolveEventPosterUrl: posterevent then image_url
 lib/flyer-qa.ts                       # Cursor webhook QA flyer WW bulanan + JFE/WFE; parse + poll
@@ -46,6 +47,10 @@ lib/berita-acara-qa.ts                # Cursor webhook QA berita acara (link sur
 lib/telegram.ts                       # notifyTelegram → group (nasional ops)
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-09-03]
+- Absensi multi-sesi Sekretariat: tabel `event_sesi` + `absen.id_sesi`; form nasional CRUD sesi (toggle wajib); scanner pilih sesi manual; detail event count per sesi + hadir lengkap; kota tetap 1 absen/event
+- Tipe event `nasional` (wwtype): opsi hanya di form Sekretariat; skip semua QA AI (flyer + berita acara)
 
 ## Recent Updates [2026-09-02]
 - Flyer pusat WW JFE/WFE: Brim Nasional upload template + range bulan; event `jfe` di range di-QA vs template (satu webhook flyer); parser checklist align prompt produksi

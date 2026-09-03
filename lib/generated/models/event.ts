@@ -425,6 +425,7 @@ export type eventWhereInput = {
   khusus?: Prisma.StringFilter<"event"> | string
   suratpemberitahuan?: Prisma.StringFilter<"event"> | string
   registrasi?: Prisma.RegistrasiListRelationFilter
+  event_sesi?: Prisma.Event_sesiListRelationFilter
 }
 
 export type eventOrderByWithRelationInput = {
@@ -459,6 +460,7 @@ export type eventOrderByWithRelationInput = {
   khusus?: Prisma.SortOrder
   suratpemberitahuan?: Prisma.SortOrder
   registrasi?: Prisma.registrasiOrderByRelationAggregateInput
+  event_sesi?: Prisma.event_sesiOrderByRelationAggregateInput
   _relevance?: Prisma.eventOrderByRelevanceInput
 }
 
@@ -497,6 +499,7 @@ export type eventWhereUniqueInput = Prisma.AtLeast<{
   khusus?: Prisma.StringFilter<"event"> | string
   suratpemberitahuan?: Prisma.StringFilter<"event"> | string
   registrasi?: Prisma.RegistrasiListRelationFilter
+  event_sesi?: Prisma.Event_sesiListRelationFilter
 }, "id_event">
 
 export type eventOrderByWithAggregationInput = {
@@ -604,6 +607,7 @@ export type eventCreateInput = {
   khusus: string
   suratpemberitahuan: string
   registrasi?: Prisma.registrasiCreateNestedManyWithoutEventInput
+  event_sesi?: Prisma.event_sesiCreateNestedManyWithoutEventInput
 }
 
 export type eventUncheckedCreateInput = {
@@ -638,6 +642,7 @@ export type eventUncheckedCreateInput = {
   khusus: string
   suratpemberitahuan: string
   registrasi?: Prisma.registrasiUncheckedCreateNestedManyWithoutEventInput
+  event_sesi?: Prisma.event_sesiUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type eventUpdateInput = {
@@ -671,6 +676,7 @@ export type eventUpdateInput = {
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
   registrasi?: Prisma.registrasiUpdateManyWithoutEventNestedInput
+  event_sesi?: Prisma.event_sesiUpdateManyWithoutEventNestedInput
 }
 
 export type eventUncheckedUpdateInput = {
@@ -705,6 +711,7 @@ export type eventUncheckedUpdateInput = {
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
   registrasi?: Prisma.registrasiUncheckedUpdateManyWithoutEventNestedInput
+  event_sesi?: Prisma.event_sesiUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type eventCreateManyInput = {
@@ -931,6 +938,20 @@ export type Enumevent_wwtypeFieldUpdateOperationsInput = {
   set?: $Enums.event_wwtype
 }
 
+export type eventCreateNestedOneWithoutEvent_sesiInput = {
+  create?: Prisma.XOR<Prisma.eventCreateWithoutEvent_sesiInput, Prisma.eventUncheckedCreateWithoutEvent_sesiInput>
+  connectOrCreate?: Prisma.eventCreateOrConnectWithoutEvent_sesiInput
+  connect?: Prisma.eventWhereUniqueInput
+}
+
+export type eventUpdateOneRequiredWithoutEvent_sesiNestedInput = {
+  create?: Prisma.XOR<Prisma.eventCreateWithoutEvent_sesiInput, Prisma.eventUncheckedCreateWithoutEvent_sesiInput>
+  connectOrCreate?: Prisma.eventCreateOrConnectWithoutEvent_sesiInput
+  upsert?: Prisma.eventUpsertWithoutEvent_sesiInput
+  connect?: Prisma.eventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.eventUpdateToOneWithWhereWithoutEvent_sesiInput, Prisma.eventUpdateWithoutEvent_sesiInput>, Prisma.eventUncheckedUpdateWithoutEvent_sesiInput>
+}
+
 export type eventCreateNestedOneWithoutRegistrasiInput = {
   create?: Prisma.XOR<Prisma.eventCreateWithoutRegistrasiInput, Prisma.eventUncheckedCreateWithoutRegistrasiInput>
   connectOrCreate?: Prisma.eventCreateOrConnectWithoutRegistrasiInput
@@ -943,6 +964,156 @@ export type eventUpdateOneRequiredWithoutRegistrasiNestedInput = {
   upsert?: Prisma.eventUpsertWithoutRegistrasiInput
   connect?: Prisma.eventWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.eventUpdateToOneWithWhereWithoutRegistrasiInput, Prisma.eventUpdateWithoutRegistrasiInput>, Prisma.eventUncheckedUpdateWithoutRegistrasiInput>
+}
+
+export type eventCreateWithoutEvent_sesiInput = {
+  nama_event: string
+  tglevent: Date | string
+  tgleventselesai: Date | string
+  jamevent: string
+  alamatevent: string
+  danaevent: string
+  posterevent: string
+  image_url?: string
+  flyer_qa?: string
+  berita_acara_qa?: string
+  proposalevent: string
+  id_cabang: string
+  target: string
+  targetpengurus: string
+  targetjumlah: number
+  jenisevent: string
+  wwtype?: $Enums.event_wwtype
+  jamselesaievent: string
+  longlatevent: string
+  radius: number
+  linkevent: string
+  approvenasional: string
+  approvebrimnas?: string
+  approveadmin: string
+  notenasional: string
+  noteadmin: string
+  qr: string
+  khusus: string
+  suratpemberitahuan: string
+  registrasi?: Prisma.registrasiCreateNestedManyWithoutEventInput
+}
+
+export type eventUncheckedCreateWithoutEvent_sesiInput = {
+  id_event?: number
+  nama_event: string
+  tglevent: Date | string
+  tgleventselesai: Date | string
+  jamevent: string
+  alamatevent: string
+  danaevent: string
+  posterevent: string
+  image_url?: string
+  flyer_qa?: string
+  berita_acara_qa?: string
+  proposalevent: string
+  id_cabang: string
+  target: string
+  targetpengurus: string
+  targetjumlah: number
+  jenisevent: string
+  wwtype?: $Enums.event_wwtype
+  jamselesaievent: string
+  longlatevent: string
+  radius: number
+  linkevent: string
+  approvenasional: string
+  approvebrimnas?: string
+  approveadmin: string
+  notenasional: string
+  noteadmin: string
+  qr: string
+  khusus: string
+  suratpemberitahuan: string
+  registrasi?: Prisma.registrasiUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type eventCreateOrConnectWithoutEvent_sesiInput = {
+  where: Prisma.eventWhereUniqueInput
+  create: Prisma.XOR<Prisma.eventCreateWithoutEvent_sesiInput, Prisma.eventUncheckedCreateWithoutEvent_sesiInput>
+}
+
+export type eventUpsertWithoutEvent_sesiInput = {
+  update: Prisma.XOR<Prisma.eventUpdateWithoutEvent_sesiInput, Prisma.eventUncheckedUpdateWithoutEvent_sesiInput>
+  create: Prisma.XOR<Prisma.eventCreateWithoutEvent_sesiInput, Prisma.eventUncheckedCreateWithoutEvent_sesiInput>
+  where?: Prisma.eventWhereInput
+}
+
+export type eventUpdateToOneWithWhereWithoutEvent_sesiInput = {
+  where?: Prisma.eventWhereInput
+  data: Prisma.XOR<Prisma.eventUpdateWithoutEvent_sesiInput, Prisma.eventUncheckedUpdateWithoutEvent_sesiInput>
+}
+
+export type eventUpdateWithoutEvent_sesiInput = {
+  nama_event?: Prisma.StringFieldUpdateOperationsInput | string
+  tglevent?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tgleventselesai?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  jamevent?: Prisma.StringFieldUpdateOperationsInput | string
+  alamatevent?: Prisma.StringFieldUpdateOperationsInput | string
+  danaevent?: Prisma.StringFieldUpdateOperationsInput | string
+  posterevent?: Prisma.StringFieldUpdateOperationsInput | string
+  image_url?: Prisma.StringFieldUpdateOperationsInput | string
+  flyer_qa?: Prisma.StringFieldUpdateOperationsInput | string
+  berita_acara_qa?: Prisma.StringFieldUpdateOperationsInput | string
+  proposalevent?: Prisma.StringFieldUpdateOperationsInput | string
+  id_cabang?: Prisma.StringFieldUpdateOperationsInput | string
+  target?: Prisma.StringFieldUpdateOperationsInput | string
+  targetpengurus?: Prisma.StringFieldUpdateOperationsInput | string
+  targetjumlah?: Prisma.IntFieldUpdateOperationsInput | number
+  jenisevent?: Prisma.StringFieldUpdateOperationsInput | string
+  wwtype?: Prisma.Enumevent_wwtypeFieldUpdateOperationsInput | $Enums.event_wwtype
+  jamselesaievent?: Prisma.StringFieldUpdateOperationsInput | string
+  longlatevent?: Prisma.StringFieldUpdateOperationsInput | string
+  radius?: Prisma.IntFieldUpdateOperationsInput | number
+  linkevent?: Prisma.StringFieldUpdateOperationsInput | string
+  approvenasional?: Prisma.StringFieldUpdateOperationsInput | string
+  approvebrimnas?: Prisma.StringFieldUpdateOperationsInput | string
+  approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
+  notenasional?: Prisma.StringFieldUpdateOperationsInput | string
+  noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
+  qr?: Prisma.StringFieldUpdateOperationsInput | string
+  khusus?: Prisma.StringFieldUpdateOperationsInput | string
+  suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  registrasi?: Prisma.registrasiUpdateManyWithoutEventNestedInput
+}
+
+export type eventUncheckedUpdateWithoutEvent_sesiInput = {
+  id_event?: Prisma.IntFieldUpdateOperationsInput | number
+  nama_event?: Prisma.StringFieldUpdateOperationsInput | string
+  tglevent?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tgleventselesai?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  jamevent?: Prisma.StringFieldUpdateOperationsInput | string
+  alamatevent?: Prisma.StringFieldUpdateOperationsInput | string
+  danaevent?: Prisma.StringFieldUpdateOperationsInput | string
+  posterevent?: Prisma.StringFieldUpdateOperationsInput | string
+  image_url?: Prisma.StringFieldUpdateOperationsInput | string
+  flyer_qa?: Prisma.StringFieldUpdateOperationsInput | string
+  berita_acara_qa?: Prisma.StringFieldUpdateOperationsInput | string
+  proposalevent?: Prisma.StringFieldUpdateOperationsInput | string
+  id_cabang?: Prisma.StringFieldUpdateOperationsInput | string
+  target?: Prisma.StringFieldUpdateOperationsInput | string
+  targetpengurus?: Prisma.StringFieldUpdateOperationsInput | string
+  targetjumlah?: Prisma.IntFieldUpdateOperationsInput | number
+  jenisevent?: Prisma.StringFieldUpdateOperationsInput | string
+  wwtype?: Prisma.Enumevent_wwtypeFieldUpdateOperationsInput | $Enums.event_wwtype
+  jamselesaievent?: Prisma.StringFieldUpdateOperationsInput | string
+  longlatevent?: Prisma.StringFieldUpdateOperationsInput | string
+  radius?: Prisma.IntFieldUpdateOperationsInput | number
+  linkevent?: Prisma.StringFieldUpdateOperationsInput | string
+  approvenasional?: Prisma.StringFieldUpdateOperationsInput | string
+  approvebrimnas?: Prisma.StringFieldUpdateOperationsInput | string
+  approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
+  notenasional?: Prisma.StringFieldUpdateOperationsInput | string
+  noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
+  qr?: Prisma.StringFieldUpdateOperationsInput | string
+  khusus?: Prisma.StringFieldUpdateOperationsInput | string
+  suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  registrasi?: Prisma.registrasiUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type eventCreateWithoutRegistrasiInput = {
@@ -975,6 +1146,7 @@ export type eventCreateWithoutRegistrasiInput = {
   qr: string
   khusus: string
   suratpemberitahuan: string
+  event_sesi?: Prisma.event_sesiCreateNestedManyWithoutEventInput
 }
 
 export type eventUncheckedCreateWithoutRegistrasiInput = {
@@ -1008,6 +1180,7 @@ export type eventUncheckedCreateWithoutRegistrasiInput = {
   qr: string
   khusus: string
   suratpemberitahuan: string
+  event_sesi?: Prisma.event_sesiUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type eventCreateOrConnectWithoutRegistrasiInput = {
@@ -1056,6 +1229,7 @@ export type eventUpdateWithoutRegistrasiInput = {
   qr?: Prisma.StringFieldUpdateOperationsInput | string
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  event_sesi?: Prisma.event_sesiUpdateManyWithoutEventNestedInput
 }
 
 export type eventUncheckedUpdateWithoutRegistrasiInput = {
@@ -1089,6 +1263,7 @@ export type eventUncheckedUpdateWithoutRegistrasiInput = {
   qr?: Prisma.StringFieldUpdateOperationsInput | string
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  event_sesi?: Prisma.event_sesiUncheckedUpdateManyWithoutEventNestedInput
 }
 
 
@@ -1098,10 +1273,12 @@ export type eventUncheckedUpdateWithoutRegistrasiInput = {
 
 export type EventCountOutputType = {
   registrasi: number
+  event_sesi: number
 }
 
 export type EventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   registrasi?: boolean | EventCountOutputTypeCountRegistrasiArgs
+  event_sesi?: boolean | EventCountOutputTypeCountEvent_sesiArgs
 }
 
 /**
@@ -1119,6 +1296,13 @@ export type EventCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extens
  */
 export type EventCountOutputTypeCountRegistrasiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.registrasiWhereInput
+}
+
+/**
+ * EventCountOutputType without action
+ */
+export type EventCountOutputTypeCountEvent_sesiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.event_sesiWhereInput
 }
 
 
@@ -1154,6 +1338,7 @@ export type eventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   khusus?: boolean
   suratpemberitahuan?: boolean
   registrasi?: boolean | Prisma.event$registrasiArgs<ExtArgs>
+  event_sesi?: boolean | Prisma.event$event_sesiArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
@@ -1195,6 +1380,7 @@ export type eventSelectScalar = {
 export type eventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_event" | "nama_event" | "tglevent" | "tgleventselesai" | "jamevent" | "alamatevent" | "danaevent" | "posterevent" | "image_url" | "flyer_qa" | "berita_acara_qa" | "proposalevent" | "id_cabang" | "target" | "targetpengurus" | "targetjumlah" | "jenisevent" | "wwtype" | "jamselesaievent" | "longlatevent" | "radius" | "linkevent" | "approvenasional" | "approvebrimnas" | "approveadmin" | "notenasional" | "noteadmin" | "qr" | "khusus" | "suratpemberitahuan", ExtArgs["result"]["event"]>
 export type eventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   registrasi?: boolean | Prisma.event$registrasiArgs<ExtArgs>
+  event_sesi?: boolean | Prisma.event$event_sesiArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1202,6 +1388,7 @@ export type $eventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   name: "event"
   objects: {
     registrasi: Prisma.$registrasiPayload<ExtArgs>[]
+    event_sesi: Prisma.$event_sesiPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id_event: number
@@ -1575,6 +1762,7 @@ readonly fields: eventFieldRefs;
 export interface Prisma__eventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   registrasi<T extends Prisma.event$registrasiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.event$registrasiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$registrasiPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  event_sesi<T extends Prisma.event$event_sesiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.event$event_sesiArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$event_sesiPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2003,6 +2191,30 @@ export type event$registrasiArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.RegistrasiScalarFieldEnum | Prisma.RegistrasiScalarFieldEnum[]
+}
+
+/**
+ * event.event_sesi
+ */
+export type event$event_sesiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the event_sesi
+   */
+  select?: Prisma.event_sesiSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the event_sesi
+   */
+  omit?: Prisma.event_sesiOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.event_sesiInclude<ExtArgs> | null
+  where?: Prisma.event_sesiWhereInput
+  orderBy?: Prisma.event_sesiOrderByWithRelationInput | Prisma.event_sesiOrderByWithRelationInput[]
+  cursor?: Prisma.event_sesiWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Event_sesiScalarFieldEnum | Prisma.Event_sesiScalarFieldEnum[]
 }
 
 /**

@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { ajukanEvent, type EventDetailFull } from '@/lib/actions/event'
 import { isEventFullyApproved } from '@/lib/event-approval'
 import { FlyerQaSummary } from '@/components/kota/flyer-qa-summary'
 import { BeritaAcaraQaSummary } from '@/components/kota/berita-acara-qa-summary'
+import { hadirPenuh, sesiWajibIds } from '@/lib/event-sesi'
 
 const PAGE_SIZE = 10
 
@@ -115,6 +116,7 @@ function EventAjukanBar({
 export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
   const [regPage, setRegPage] = useState(0)
   const [absenPage, setAbsenPage] = useState(0)
+  const [sesiFilter, setSesiFilter] = useState<number | 'all'>('all')
 
   const mapSrc = (() => {
     if (!event.longlatevent) return ''
@@ -125,14 +127,51 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
 
   const isApproved = isEventFullyApproved(event)
   const sameDates = event.tglDisplay === event.tglSelesaiDisplay
+  const hasSesi = event.sesi.length > 0
 
   const totalRegistrasi = event.registrasi.length
   const regTotalPages = Math.max(1, Math.ceil(totalRegistrasi / PAGE_SIZE))
   const pagedReg = event.registrasi.slice(regPage * PAGE_SIZE, (regPage + 1) * PAGE_SIZE)
 
-  const totalAbsen = event.absen.length
+  const filteredAbsen = useMemo(() => {
+    if (!hasSesi || sesiFilter === 'all') return event.absen
+    return event.absen.filter((a) => a.id_sesi === sesiFilter)
+  }, [event.absen, hasSesi, sesiFilter])
+
+  const totalAbsen = filteredAbsen.length
   const absenTotalPages = Math.max(1, Math.ceil(totalAbsen / PAGE_SIZE))
-  const pagedAbsen = event.absen.slice(absenPage * PAGE_SIZE, (absenPage + 1) * PAGE_SIZE)
+  const pagedAbsen = filteredAbsen.slice(absenPage * PAGE_SIZE, (absenPage + 1) * PAGE_SIZE)
+
+  const sesiCounts = useMemo(() => {
+    const map = new Map<number, number>()
+    for (const a of event.absen) {
+      if (a.id_sesi == null) continue
+      map.set(a.id_sesi, (map.get(a.id_sesi) ?? 0) + 1)
+    }
+    return map
+  }, [event.absen])
+
+  const hadirLengkapCount = useMemo(() => {
+    if (!hasSesi) return 0
+    const wajib = sesiWajibIds(event.sesi)
+    const byPeserta = new Map<number, number[]>()
+    for (const a of event.absen) {
+      if (a.id_peserta == null || a.id_sesi == null) continue
+      const list = byPeserta.get(a.id_peserta) ?? []
+      list.push(a.id_sesi)
+      byPeserta.set(a.id_peserta, list)
+    }
+    let n = 0
+    for (const r of event.registrasi) {
+      if (hadirPenuh(byPeserta.get(r.id_peserta) ?? [], wajib)) n++
+    }
+    return n
+  }, [event.absen, event.registrasi, event.sesi, hasSesi])
+
+  function setFilter(next: number | 'all') {
+    setSesiFilter(next)
+    setAbsenPage(0)
+  }
 
   const infoRows = [
     { label: 'Jenis Event', value: event.jenisevent },
@@ -290,9 +329,62 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
           <div className="px-4 py-3 border-b border-border flex items-center justify-between">
             <p className="text-[13px] font-semibold text-fg">Presensi (Scan QR)</p>
             <span className="text-[11px] text-muted bg-bg px-2 py-0.5 rounded-full border border-border">
-              {totalAbsen} hadir
+              {hasSesi ? `${totalAbsen} scan` : `${totalAbsen} hadir`}
             </span>
           </div>
+
+          {hasSesi && (
+            <div className="px-4 py-3 border-b border-border flex flex-col gap-2.5">
+              <div className="flex flex-col gap-1.5">
+                {event.sesi.map((s) => (
+                  <div key={s.id_sesi} className="flex items-center justify-between gap-2 text-[12px]">
+                    <span className="text-fg truncate">
+                      {s.nama}
+                      <span className="text-muted">
+                        {' '}· {s.wajib ? 'wajib' : 'opsional'}
+                      </span>
+                    </span>
+                    <span className="text-muted shrink-0">{sesiCounts.get(s.id_sesi) ?? 0} hadir</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[12px] font-medium text-fg">
+                Hadir lengkap:{' '}
+                <span className="text-accent">
+                  {hadirLengkapCount} / {totalRegistrasi}
+                </span>
+                <span className="text-muted font-normal"> (semua sesi wajib)</span>
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setFilter('all')}
+                  className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                    sesiFilter === 'all'
+                      ? 'border-accent bg-accent-light text-accent-dark font-semibold'
+                      : 'border-border text-muted'
+                  }`}
+                >
+                  Semua
+                </button>
+                {event.sesi.map((s) => (
+                  <button
+                    key={s.id_sesi}
+                    type="button"
+                    onClick={() => setFilter(s.id_sesi)}
+                    className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors max-w-[140px] truncate ${
+                      sesiFilter === s.id_sesi
+                        ? 'border-accent bg-accent-light text-accent-dark font-semibold'
+                        : 'border-border text-muted'
+                    }`}
+                  >
+                    {s.nama}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {totalAbsen === 0 ? (
             <div className="px-4 py-8 text-center">
               <p className="text-[13px] text-muted">Belum ada presensi.</p>
@@ -314,7 +406,9 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
                           </span>
                         )}
                       </p>
-                      <p className="text-[11px] text-muted truncate">{a.email}</p>
+                      <p className="text-[11px] text-muted truncate">
+                        {a.sesiNama ? `${a.sesiNama} · ` : ''}{a.email}
+                      </p>
                     </div>
                     <p className="text-[11px] text-muted shrink-0 text-right leading-tight">
                       {fmtTs(a.timestamp)}

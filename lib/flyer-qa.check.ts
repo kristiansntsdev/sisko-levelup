@@ -8,6 +8,7 @@ import {
   FLYER_QA_REVIEWING_STEPS,
   needsFlyerReview,
   needsWfeFlyerReview,
+  skipsAiQa,
   parseFlyerQa,
   parseFlyerQaReview,
   stringifyFlyerQa,
@@ -15,10 +16,14 @@ import {
 
 assert.equal(needsFlyerReview('bulanan', 'https://blob.example/a.png'), true)
 assert.equal(needsFlyerReview('jfe', 'https://blob.example/a.png'), false)
+assert.equal(needsFlyerReview('nasional', 'https://blob.example/a.png'), false)
 assert.equal(needsFlyerReview('bulanan', ''), false)
 assert.equal(needsWfeFlyerReview('jfe', 'https://blob.example/a.png', 'https://blob.example/t.png'), true)
 assert.equal(needsWfeFlyerReview('jfe', 'https://blob.example/a.png', ''), false)
 assert.equal(needsWfeFlyerReview('bulanan', 'https://blob.example/a.png', 'https://blob.example/t.png'), false)
+assert.equal(needsWfeFlyerReview('nasional', 'https://blob.example/a.png', 'https://blob.example/t.png'), false)
+assert.equal(skipsAiQa('nasional'), true)
+assert.equal(skipsAiQa('bulanan'), false)
 
 assert.equal(formatFlyerExpectedTanggal(new Date(2026, 7, 22)), '22 Agustus 2026')
 

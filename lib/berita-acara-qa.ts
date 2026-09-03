@@ -138,7 +138,9 @@ export const BA_QA_CHECKLIST_LABELS: Record<(typeof BA_QA_CHECKLIST_KEYS)[number
   sop_wfe: 'SOP WFE',
 }
 
-export function needsBeritaAcaraReview(suratUrl: string): boolean {
+export function needsBeritaAcaraReview(suratUrl: string, wwtype?: string): boolean {
+  // Sekretariat tipe nasional: no AI QA (flyer + berita acara)
+  if (wwtype === 'nasional') return false
   return suratUrl.trim().length > 0
 }
 

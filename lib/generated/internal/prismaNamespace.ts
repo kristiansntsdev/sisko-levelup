@@ -406,6 +406,7 @@ export const ModelName = {
   cabang: 'cabang',
   dokumentasikelaswp: 'dokumentasikelaswp',
   event: 'event',
+  event_sesi: 'event_sesi',
   feedback: 'feedback',
   gereja: 'gereja',
   kelaswp: 'kelaswp',
@@ -455,7 +456,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1050,6 +1051,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.eventCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.EventCountAggregateOutputType> | number
+        }
+      }
+    }
+    event_sesi: {
+      payload: Prisma.$event_sesiPayload<ExtArgs>
+      fields: Prisma.event_sesiFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.event_sesiFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_sesiPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.event_sesiFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_sesiPayload>
+        }
+        findFirst: {
+          args: Prisma.event_sesiFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_sesiPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.event_sesiFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_sesiPayload>
+        }
+        findMany: {
+          args: Prisma.event_sesiFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_sesiPayload>[]
+        }
+        create: {
+          args: Prisma.event_sesiCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_sesiPayload>
+        }
+        createMany: {
+          args: Prisma.event_sesiCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.event_sesiDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_sesiPayload>
+        }
+        update: {
+          args: Prisma.event_sesiUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_sesiPayload>
+        }
+        deleteMany: {
+          args: Prisma.event_sesiDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.event_sesiUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.event_sesiUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_sesiPayload>
+        }
+        aggregate: {
+          args: Prisma.Event_sesiAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEvent_sesi>
+        }
+        groupBy: {
+          args: Prisma.event_sesiGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Event_sesiGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.event_sesiCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Event_sesiCountAggregateOutputType> | number
         }
       }
     }
@@ -3350,6 +3417,7 @@ export const AbsenScalarFieldEnum = {
   email: 'email',
   id_event: 'id_event',
   id_event_int: 'id_event_int',
+  id_sesi: 'id_sesi',
   hadir: 'hadir',
   timestamp: 'timestamp',
   lampiran: 'lampiran',
@@ -3455,6 +3523,20 @@ export const EventScalarFieldEnum = {
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const Event_sesiScalarFieldEnum = {
+  id_sesi: 'id_sesi',
+  id_event: 'id_event',
+  nama: 'nama',
+  tanggal: 'tanggal',
+  jam_mulai: 'jam_mulai',
+  jam_selesai: 'jam_selesai',
+  wajib: 'wajib',
+  urutan: 'urutan'
+} as const
+
+export type Event_sesiScalarFieldEnum = (typeof Event_sesiScalarFieldEnum)[keyof typeof Event_sesiScalarFieldEnum]
 
 
 export const FeedbackScalarFieldEnum = {
@@ -3993,6 +4075,15 @@ export const eventOrderByRelevanceFieldEnum = {
 export type eventOrderByRelevanceFieldEnum = (typeof eventOrderByRelevanceFieldEnum)[keyof typeof eventOrderByRelevanceFieldEnum]
 
 
+export const event_sesiOrderByRelevanceFieldEnum = {
+  nama: 'nama',
+  jam_mulai: 'jam_mulai',
+  jam_selesai: 'jam_selesai'
+} as const
+
+export type event_sesiOrderByRelevanceFieldEnum = (typeof event_sesiOrderByRelevanceFieldEnum)[keyof typeof event_sesiOrderByRelevanceFieldEnum]
+
+
 export const feedbackOrderByRelevanceFieldEnum = {
   id_kelas: 'id_kelas',
   feedback: 'feedback'
@@ -4349,6 +4440,13 @@ export type Enumevent_wwtypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'peserta_status'
  */
 export type Enumpeserta_statusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'peserta_status'>
@@ -4359,13 +4457,6 @@ export type Enumpeserta_statusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'peserta_role'
  */
 export type Enumpeserta_roleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'peserta_role'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -4570,6 +4661,7 @@ export type GlobalOmitConfig = {
   cabang?: Prisma.cabangOmit
   dokumentasikelaswp?: Prisma.dokumentasikelaswpOmit
   event?: Prisma.eventOmit
+  event_sesi?: Prisma.event_sesiOmit
   feedback?: Prisma.feedbackOmit
   gereja?: Prisma.gerejaOmit
   kelaswp?: Prisma.kelaswpOmit

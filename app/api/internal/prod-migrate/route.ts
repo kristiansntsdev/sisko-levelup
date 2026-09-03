@@ -83,6 +83,55 @@ export async function POST(req: NextRequest) {
     `)
   }
 
+  const sesiTables = await db.$queryRaw<{ TABLE_NAME: string }[]>`
+    SELECT TABLE_NAME FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'event_sesi'
+  `
+  const addedEventSesi = sesiTables.length === 0
+  if (addedEventSesi) {
+    await db.$executeRawUnsafe(`
+      CREATE TABLE event_sesi (
+        id_sesi INT NOT NULL AUTO_INCREMENT,
+        id_event INT NOT NULL,
+        nama VARCHAR(255) NOT NULL,
+        tanggal DATE NOT NULL,
+        jam_mulai VARCHAR(8) NOT NULL DEFAULT '',
+        jam_selesai VARCHAR(8) NOT NULL DEFAULT '',
+        wajib TINYINT(1) NOT NULL DEFAULT 1,
+        urutan INT NOT NULL DEFAULT 0,
+        PRIMARY KEY (id_sesi),
+        KEY idx_event_sesi_event (id_event),
+        CONSTRAINT event_sesi_event_fk FOREIGN KEY (id_event) REFERENCES event (id_event) ON DELETE CASCADE
+      )
+    `)
+  }
+
+  const absenSesiCols = await db.$queryRaw<{ COLUMN_NAME: string }[]>`
+    SELECT COLUMN_NAME FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'absen'
+      AND COLUMN_NAME = 'id_sesi'
+  `
+  const addedAbsenIdSesi = absenSesiCols.length === 0
+  if (addedAbsenIdSesi) {
+    await db.$executeRawUnsafe(`ALTER TABLE absen ADD COLUMN id_sesi INT NULL`)
+    await db.$executeRawUnsafe(`ALTER TABLE absen ADD KEY idx_absen_sesi (id_sesi)`)
+  }
+
+  const wwtypeCols = await db.$queryRaw<{ COLUMN_TYPE: string }[]>`
+    SELECT COLUMN_TYPE FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'event'
+      AND COLUMN_NAME = 'wwtype'
+  `
+  const wwtypeType = wwtypeCols[0]?.COLUMN_TYPE ?? ''
+  const addedWwtypeNasional = !wwtypeType.includes('nasional')
+  if (addedWwtypeNasional) {
+    await db.$executeRawUnsafe(
+      `ALTER TABLE event MODIFY COLUMN wwtype ENUM('bulanan','jfe','nasional') NOT NULL DEFAULT 'bulanan'`,
+    )
+  }
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -103,6 +152,9 @@ export async function POST(req: NextRequest) {
     addedBeritaAcaraQa,
     beritaAcaraQaBackfill,
     addedWfeSerentak,
+    addedEventSesi,
+    addedAbsenIdSesi,
+    addedWwtypeNasional,
     brimUpdated: brim.count,
     brim: row,
   })

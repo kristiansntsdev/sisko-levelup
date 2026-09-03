@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 import { eventDateTime, isOnlineAbsenOpen } from '@/lib/event-absen-window'
 import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
+import { absenDuplicateWhere } from '@/lib/event-sesi'
 import type { QRPayload } from '@/lib/qr'
 import { formatTelegramMessage, notifyTelegram, eventDetailLink } from '@/lib/telegram'
 
@@ -79,9 +80,15 @@ export async function absenOnlineSelf(idRegistrasi: number): Promise<
   return { success: false, reason: 'error' }
 }
 
-export async function createAbsen(payload: QRPayload): Promise<
+export async function createAbsen(
+  payload: QRPayload,
+  idSesi?: number | null,
+): Promise<
   | { success: true; nama: string; gereja: string }
-  | { success: false; reason: 'invalid_payload' | 'already_scanned' | 'error' }
+  | {
+      success: false
+      reason: 'invalid_payload' | 'already_scanned' | 'sesi_required' | 'sesi_invalid' | 'error'
+    }
 > {
   const idPeserta = Number(payload.p)
   const idEvent = Number(payload.ev)
@@ -91,13 +98,23 @@ export async function createAbsen(payload: QRPayload): Promise<
   const idEventStr = String(payload.ev)
 
   try {
+    const sesiRows = await db.event_sesi.findMany({
+      where: { id_event: idEvent },
+      select: { id_sesi: true },
+    })
+    const hasSesi = sesiRows.length > 0
+    let resolvedSesi: number | null = null
+
+    if (hasSesi) {
+      if (idSesi == null) return { success: false, reason: 'sesi_required' }
+      if (!sesiRows.some((s) => s.id_sesi === idSesi)) {
+        return { success: false, reason: 'sesi_invalid' }
+      }
+      resolvedSesi = idSesi
+    }
+
     const existing = await db.absen.findFirst({
-      where: {
-        OR: [
-          { id_peserta: idPesertaStr, id_event: idEventStr },
-          { id_peserta_int: idPeserta, id_event_int: idEvent },
-        ],
-      },
+      where: absenDuplicateWhere(idPeserta, idEvent, resolvedSesi),
       select: { id_absen: true },
     })
     if (existing) return { success: false, reason: 'already_scanned' }
@@ -116,6 +133,7 @@ export async function createAbsen(payload: QRPayload): Promise<
           email: payload.e || '',
           id_event: idEventStr,
           id_event_int: idEvent,
+          id_sesi: resolvedSesi,
           hadir: '1',
           timestamp: new Date(),
           lampiran: '',

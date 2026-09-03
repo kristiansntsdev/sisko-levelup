@@ -63,6 +63,11 @@ export type dokumentasikelaswp = Prisma.dokumentasikelaswpModel
  */
 export type event = Prisma.eventModel
 /**
+ * Model event_sesi
+ * 
+ */
+export type event_sesi = Prisma.event_sesiModel
+/**
  * Model feedback
  * 
  */
