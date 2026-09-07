@@ -48,6 +48,11 @@ lib/telegram.ts                       # notifyTelegram → group (nasional ops)
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-09-07]
+- Tiket Aktif: registrasi dari awal bulan ini ke depan (`confirmed` + `absence`); bulan sebelumnya tidak ditampilkan
+- Absen online: jam event = WIB (bukan timezone server); tombol Absen Event disembunyikan sampai H-15 menit selesai; fix tgl Townhall 180794 6→7 Sep
+- Prod migrate: backfill `event.wwtype=''` → `bulanan` (737 row) — empty enum bikin Prisma P2023, list/detail kelihatan kosong
+
 ## Recent Updates [2026-09-06]
 - Fix tanggal event off-by-one WIB→UTC: `parseLocalDate`/`isoDate` pakai UTC midnight; form `tglRaw` tidak lagi `toISOString().slice(0,10)`; display Telegram/flyer `timeZone: 'UTC'`
 

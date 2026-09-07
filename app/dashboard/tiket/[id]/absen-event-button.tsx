@@ -81,17 +81,23 @@ export function AbsenEventButton({
     })
   }
 
+  // Hide CTA until window opens — only hint when too_early / closed / unknown
+  if (!open) {
+    return hint ? (
+      <p className="w-full text-center text-xs text-muted py-2">{hint}</p>
+    ) : null
+  }
+
   return (
     <div className="w-full flex flex-col gap-2">
       <button
         type="button"
         onClick={handleAbsen}
-        disabled={!open || pending}
+        disabled={pending}
         className="w-full py-3.5 rounded-full border border-fg bg-[#c8e7f5] text-fg text-[15px] font-semibold cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed hover:brightness-95 transition"
       >
         {pending ? 'Menyimpan…' : 'Absen Event'}
       </button>
-      {hint && <p className="text-xs text-muted text-center">{hint}</p>}
     </div>
   )
 }

@@ -132,6 +132,11 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Legacy rows often have '' (invalid enum index 0) — Prisma P2023 → pages look empty
+  const wwtypeBackfill = await db.$executeRaw(
+    Prisma.sql`UPDATE event SET wwtype = 'bulanan' WHERE wwtype IS NULL OR wwtype = ''`,
+  )
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -155,6 +160,7 @@ export async function POST(req: NextRequest) {
     addedEventSesi,
     addedAbsenIdSesi,
     addedWwtypeNasional,
+    wwtypeBackfill,
     brimUpdated: brim.count,
     brim: row,
   })

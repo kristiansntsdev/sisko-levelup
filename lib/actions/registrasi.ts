@@ -104,18 +104,18 @@ export async function getRegistrasiByPeserta(idPeserta: number) {
     data: { status: 'absence' },
   })
 
-  // Tiket Aktif = joined this month, including past dates (absence) so
-  // online absen masih bisa diakses kalau lupa. Exclude attend.
+  // Tiket Aktif = registrasi dari awal bulan ini ke depan (confirmed + absence).
+  // Tanggal lewat di bulan ini tetap tampil supaya absen online masih bisa.
+  // Exclude attend. Bulan sebelumnya tidak ditampilkan.
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
 
   const rows = await db.registrasi.findMany({
     where: {
       id_peserta: idPeserta,
       status: { in: ['confirmed', 'absence'] },
       event: {
-        tglevent: { gte: startOfMonth, lt: startOfNextMonth },
+        tglevent: { gte: startOfMonth },
       },
     },
     select: {

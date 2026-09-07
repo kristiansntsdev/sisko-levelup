@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
-import { Badge, Card } from '@/components/ui'
+import { Card } from '@/components/ui'
 import { getRegistrasiByPeserta } from '@/lib/actions/registrasi'
 import { getPesertaById } from '@/lib/actions/peserta'
 import { getDokumentasiForPeserta } from '@/lib/actions/dokumentasi'
@@ -65,7 +65,7 @@ export default function DashboardPage() {
 
   const isLoading = status === 'loading' || dataLoading
 
-  // Server already scopes to this month (confirmed + absence). Show all.
+  // Server already scopes from this month onward (confirmed + absence).
   const tiketAktif = registrasi
 
   const startOfToday = new Date()
@@ -162,10 +162,7 @@ export default function DashboardPage() {
           </section>
         ) : eventTerdekat ? (
           <section className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <p className="font-semibold text-fg">Event Terdekat</p>
-              <Badge variant="amber">bulan ini</Badge>
-            </div>
+            <p className="font-semibold text-fg">Event Terdekat</p>
             <Card className="p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
