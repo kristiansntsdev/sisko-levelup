@@ -45,6 +45,7 @@ import {
 import { getWfeSerentakForDate } from '@/lib/actions/wfe-serentak'
 import { formatTelegramMessage, nasionalScopeLabel, notifyTelegram, eventActionButtons, eventFormTelegramFields, eventTelegramScope } from '@/lib/telegram'
 import {
+  isoDate,
   parseLocalDate,
   toEventSesiRow,
   type EventSesiInput,
@@ -96,7 +97,7 @@ export async function getEventsByKotalevelup(
     events: rows.map((e) => ({
       id_event: e.id_event,
       tglDisplay: e.tglevent.toLocaleDateString('id-ID', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
       }),
       jamevent: e.jamevent,
       posterUrl: resolveEventPosterUrl(e.posterevent, e.image_url),
@@ -128,7 +129,7 @@ export async function getEventsByKotalevelupFull(
       id_event: e.id_event,
       nama_event: e.nama_event,
       tglDisplay: e.tglevent.toLocaleDateString('id-ID', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
       }),
       jamevent: e.jamevent,
       posterUrl: resolveEventPosterUrl(e.posterevent, e.image_url),
@@ -174,7 +175,7 @@ export async function getAllEventsByKotalevelup(
       tglMs,
       tglDisplay: tglMs
         ? e.tglevent.toLocaleDateString('id-ID', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
           })
         : 'Tanggal tidak valid',
       jamevent: e.jamevent,
@@ -297,13 +298,13 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
     id_event: event.id_event,
     nama_event: event.nama_event,
     tglDisplay: event.tglevent.toLocaleDateString('id-ID', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
     }),
     tglSelesaiDisplay: event.tgleventselesai.toLocaleDateString('id-ID', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
     }),
-    tglRaw: event.tglevent.toISOString().split('T')[0],
-    tglSelesaiRaw: event.tgleventselesai.toISOString().split('T')[0],
+    tglRaw: isoDate(event.tglevent),
+    tglSelesaiRaw: isoDate(event.tgleventselesai),
     jamevent: event.jamevent,
     jamselesaievent: event.jamselesaievent,
     alamatevent: event.alamatevent,
@@ -430,6 +431,7 @@ export async function getEventById(id: number): Promise<EventSummary | null> {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'UTC',
     }),
     jamevent: event.jamevent,
     posterUrl: resolveEventPosterUrl(event.posterevent, event.image_url),
@@ -598,7 +600,7 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
           id,
         }),
       }),
-      { buttons: eventActionButtons(id, { poster: imageUrl || undefined, longlatevent: payload.longlatevent }) },
+      { buttons: eventActionButtons(id, { poster: imageUrl || undefined, longlatevent: payload.longlatevent, jenisevent: payload.jenisevent }) },
     )
   }
 
@@ -706,7 +708,7 @@ export async function updateEvent(
           id,
         }),
       }),
-      { buttons: eventActionButtons(id, { longlatevent: payload.longlatevent }) },
+      { buttons: eventActionButtons(id, { longlatevent: payload.longlatevent, jenisevent: payload.jenisevent }) },
     )
   }
 }
@@ -1027,7 +1029,7 @@ export async function ajukanEvent(
         }),
       },
     }),
-    { buttons: eventActionButtons(id, { poster: poster || undefined, longlatevent: event.longlatevent }) },
+    { buttons: eventActionButtons(id, { poster: poster || undefined, longlatevent: event.longlatevent, jenisevent: event.jenisevent }) },
   )
   return { ok: true }
 }

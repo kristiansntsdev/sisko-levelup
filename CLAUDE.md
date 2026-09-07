@@ -48,6 +48,12 @@ lib/telegram.ts                       # notifyTelegram → group (nasional ops)
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-09-06]
+- Fix tanggal event off-by-one WIB→UTC: `parseLocalDate`/`isoDate` pakai UTC midnight; form `tglRaw` tidak lagi `toISOString().slice(0,10)`; display Telegram/flyer `timeZone: 'UTC'`
+
+## Recent Updates [2026-09-06]
+- Event Online: tidak tampil peta (form, detail ALK/VOL, tombol Telegram Maps); pin + radius tidak wajib di QA
+
 ## Recent Updates [2026-09-03]
 - Absensi multi-sesi Sekretariat: tabel `event_sesi` + `absen.id_sesi`; form nasional CRUD sesi (toggle wajib); scanner pilih sesi manual; detail event count per sesi + hadir lengkap; kota tetap 1 absen/event
 - Tipe event `nasional` (wwtype): opsi hanya di form Sekretariat; skip semua QA AI (flyer + berita acara)

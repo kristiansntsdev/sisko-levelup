@@ -17,27 +17,27 @@ const FLYER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif
 const FLYER_MAX_BYTES = 4 * 1024 * 1024
 
 function isoDate(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
+  const y = d.getUTCFullYear()
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(d.getUTCDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
 }
 
 function monthStart(ym: string): Date {
   const [y, m] = ym.split('-').map(Number)
   if (!y || !m || m < 1 || m > 12) throw new Error('Bulan tidak valid')
-  return new Date(y, m - 1, 1)
+  return new Date(Date.UTC(y, m - 1, 1))
 }
 
 function monthEnd(ym: string): Date {
   const [y, m] = ym.split('-').map(Number)
   if (!y || !m || m < 1 || m > 12) throw new Error('Bulan tidak valid')
-  return new Date(y, m, 0)
+  return new Date(Date.UTC(y, m, 0))
 }
 
 function parseDay(s: string): Date {
   const [y, m, d] = s.split('-').map(Number)
-  return new Date(y, m - 1, d)
+  return new Date(Date.UTC(y, m - 1, d))
 }
 
 async function requireBrimNasional(): Promise<void> {

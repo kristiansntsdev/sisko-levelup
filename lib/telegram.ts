@@ -61,14 +61,14 @@ export type TelegramButton = { text: string; url: string }
 /** Standard action row: Link Event · Flyer · Maps · Approval */
 export function eventActionButtons(
   idEvent: number,
-  opts?: { poster?: string; longlatevent?: string },
+  opts?: { poster?: string; longlatevent?: string; jenisevent?: string },
 ): TelegramButton[] {
   const buttons: TelegramButton[] = [
     { text: '🔗 Link Event', url: eventDetailLink(idEvent) },
   ]
   const flyer = opts?.poster ? eventFlyerLink(opts.poster) : ''
   if (flyer) buttons.push({ text: '🖼 Lihat Flyer', url: flyer })
-  const maps = opts?.longlatevent ? eventMapsLink(opts.longlatevent) : ''
+  const maps = opts?.jenisevent === 'Online' ? '' : (opts?.longlatevent ? eventMapsLink(opts.longlatevent) : '')
   if (maps) buttons.push({ text: '📍 Maps', url: maps })
   buttons.push({ text: '✅ Approval ALK', url: eventApproveLink(idEvent) })
   buttons.push({ text: '✅ Approval Brim', url: eventBrimApproveLink(idEvent) })
@@ -120,7 +120,12 @@ export function nasionalScopeLabel(khusus: string): string {
 
 export function eventTelegramDateLabel(mulai: Date, selesai: Date): string {
   const fmt = (d: Date) =>
-    d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+    d.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    })
   const a = fmt(mulai)
   const b = fmt(selesai)
   return a === b ? `${a} (1 hari)` : `${a} - ${b} (beberapa hari)`
@@ -180,6 +185,7 @@ function fmtDateId(d: Date): string {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
+    timeZone: 'UTC',
   })
 }
 
@@ -238,7 +244,7 @@ export function eventFormTelegramFields(input: {
   }
 
   if (input.alamatevent.trim()) fields['Alamat'] = input.alamatevent.trim()
-  const maps = input.longlatevent ? eventMapsLink(input.longlatevent) : ''
+  const maps = input.jenisevent === 'Online' ? '' : (input.longlatevent ? eventMapsLink(input.longlatevent) : '')
   if (maps) fields['Maps'] = maps
   if (input.jenisevent === 'Offline' && input.radius > 0) {
     fields['Radius'] = `${input.radius} m`

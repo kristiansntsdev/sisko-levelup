@@ -18,8 +18,8 @@ const detail = eventFormTelegramFields({
   target: '1,2',
   targetpengurus: '1',
   targetjumlah: 100,
-  tglevent: new Date(2026, 2, 2),
-  tgleventselesai: new Date(2026, 2, 2),
+  tglevent: new Date(Date.UTC(2026, 2, 2)),
+  tgleventselesai: new Date(Date.UTC(2026, 2, 2)),
   jamevent: '09:00',
   jamselesaievent: '12:00',
   alamatevent: 'Gedung A',
@@ -48,8 +48,8 @@ const withMaps = eventFormTelegramFields({
     target: '1',
     targetpengurus: '',
     targetjumlah: 0,
-    tglevent: new Date(2026, 2, 2),
-    tgleventselesai: new Date(2026, 2, 2),
+    tglevent: new Date(Date.UTC(2026, 2, 2)),
+    tgleventselesai: new Date(Date.UTC(2026, 2, 2)),
     jamevent: '09:00',
     jamselesaievent: '12:00',
     alamatevent: 'Gedung A',
@@ -61,6 +61,27 @@ const withMaps = eventFormTelegramFields({
 })
 assert.equal(withMaps['Maps'], 'https://maps.google.com/?q=-6.2,106.8')
 
+const onlineMaps = eventFormTelegramFields({
+  ...{
+    cabangLabel: 'Jakarta',
+    jenisevent: 'Online',
+    wwtype: 'bulanan',
+    target: '1',
+    targetpengurus: '',
+    targetjumlah: 0,
+    tglevent: new Date(Date.UTC(2026, 2, 2)),
+    tgleventselesai: new Date(Date.UTC(2026, 2, 2)),
+    jamevent: '09:00',
+    jamselesaievent: '12:00',
+    alamatevent: 'Zoom',
+    longlatevent: '-6.2,106.8',
+    radius: 500,
+    danaevent: '',
+    id: 205,
+  },
+})
+assert.equal(onlineMaps['Maps'], undefined)
+
 const buttons = eventActionButtons(205, { poster: 'flyer.jpg', longlatevent: '-6.2,106.8' })
 assert.equal(buttons.length, 5)
 assert.ok(buttons[0].url.endsWith('/dashboard/kota/alk/event/205'))
@@ -68,6 +89,13 @@ assert.ok(buttons[1].url.includes('/uploads/poster/flyer.jpg'))
 assert.equal(buttons[2].url, 'https://maps.google.com/?q=-6.2,106.8')
 assert.ok(buttons[3].url.endsWith('/alk/event/205/approve'))
 assert.ok(buttons[4].url.endsWith('/brim/event/205/approve'))
+
+const onlineButtons = eventActionButtons(205, {
+  poster: 'flyer.jpg',
+  longlatevent: '-6.2,106.8',
+  jenisevent: 'Online',
+})
+assert.ok(!onlineButtons.some((b) => b.text === '📍 Maps'))
 
 assert.equal(nasionalScopeLabel(''), 'seluruh_kota')
 assert.equal(isTelegramButtonUrl('http://localhost:3000/x'), false)
@@ -77,8 +105,8 @@ const kotaScope = eventTelegramScope({
   idCabang: '12',
   khusus: '',
   cabangName: 'LevelUP Ngawi',
-  tglevent: new Date(2026, 7, 22),
-  tgleventselesai: new Date(2026, 7, 22),
+  tglevent: new Date(Date.UTC(2026, 7, 22)),
+  tgleventselesai: new Date(Date.UTC(2026, 7, 22)),
 })
 assert.equal(kotaScope.tag, 'Event Kota')
 assert.equal(kotaScope.fields['Cabang'], 'LevelUP Ngawi')
@@ -86,7 +114,7 @@ assert.equal(kotaScope.fields['Tipe'], undefined)
 assert.equal(kotaScope.fields['Tanggal Event'], '22 Agustus 2026 (1 hari)')
 
 assert.equal(
-  eventTelegramDateLabel(new Date(2026, 7, 22), new Date(2026, 7, 24)),
+  eventTelegramDateLabel(new Date(Date.UTC(2026, 7, 22)), new Date(Date.UTC(2026, 7, 24))),
   '22 Agustus 2026 - 24 Agustus 2026 (beberapa hari)',
 )
 

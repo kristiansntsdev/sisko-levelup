@@ -70,16 +70,18 @@ export function absenDuplicateWhere(
   }
 }
 
+/** Calendar YYYY-MM-DD from a @db.Date (UTC midnight). Never use toISOString().slice(0,10). */
 export function isoDate(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
+  const y = d.getUTCFullYear()
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(d.getUTCDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
 }
 
+/** Parse form YYYY-MM-DD as UTC midnight so server-action JSON does not shift WIB→UTC day. */
 export function parseLocalDate(s: string): Date {
   const [y, m, d] = s.split('-').map(Number)
-  return new Date(y, m - 1, d)
+  return new Date(Date.UTC(y, m - 1, d))
 }
 
 export function toEventSesiRow(r: {

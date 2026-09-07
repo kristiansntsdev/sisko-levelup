@@ -119,7 +119,7 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
   const [sesiFilter, setSesiFilter] = useState<number | 'all'>('all')
 
   const mapSrc = (() => {
-    if (!event.longlatevent) return ''
+    if (event.jenisevent === 'Online' || !event.longlatevent) return ''
     const parts = event.longlatevent.split(',').map(Number)
     if (parts.length < 2 || parts.some(isNaN)) return ''
     return `https://maps.google.com/maps?q=${parts[0]},${parts[1]}&z=15&output=embed`

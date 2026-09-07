@@ -11,7 +11,7 @@ import {
   scopeFromKhusus,
   type NasionalEventScope,
 } from '@/lib/event-cabang'
-import type { EventSesiInput } from '@/lib/event-sesi'
+import { parseLocalDate, type EventSesiInput } from '@/lib/event-sesi'
 
 type SesiFormRow = EventSesiInput & { _key: string }
 
@@ -76,11 +76,6 @@ function labelsToValues(labels: string[], valuesMap: Record<string, string>): st
 function fmtRp(raw: string): string {
   const n = parseInt(raw, 10)
   return raw && !isNaN(n) ? n.toLocaleString('id-ID') : ''
-}
-
-function parseLocalDate(s: string): Date {
-  const [y, m, d] = s.split('-').map(Number)
-  return new Date(y, m - 1, d)
 }
 
 type FormState = {
@@ -185,6 +180,8 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
   const setAlamatRef = useRef((s: string) => setForm((prev) => ({ ...prev, alamatevent: s })))
   setAlamatRef.current = (s: string) => setForm((prev) => ({ ...prev, alamatevent: s }))
 
+  const isOnline = form.jenisevent === 'Online'
+
   function initMap() {
     if (!mapRef.current || mapsReadyRef.current) return
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -256,6 +253,12 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
   }
 
   useEffect(() => {
+    if (isOnline) {
+      mapsReadyRef.current = false
+      mapInstanceRef.current = null
+      markerRef.current = null
+      return
+    }
     if (typeof window === 'undefined' || !mapsApiKey) return
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const g = (window as any).google?.maps
@@ -278,7 +281,7 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
     script.async = true
     script.onload = initMap
     document.head.appendChild(script)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOnline, mapsApiKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {
@@ -318,8 +321,8 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
           jamevent: normalizeJam24(form.jamevent),
           jamselesaievent: normalizeJam24(form.jamselesaievent),
           alamatevent: form.alamatevent,
-          longlatevent: latLng ? `${latLng.lat},${latLng.lng}` : '',
-          radius: parseInt(form.radius, 10) || 0,
+          longlatevent: form.jenisevent === 'Online' ? '' : (latLng ? `${latLng.lat},${latLng.lng}` : ''),
+          radius: form.jenisevent === 'Online' ? 0 : parseInt(form.radius, 10) || 0,
           danaevent: danaRaw,
           suratpemberitahuan: form.suratpemberitahuan,
           khusus: isNasional ? khususFromScope(nasionalScope) : '',
@@ -668,44 +671,48 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
             />
           </FormField>
 
-          <div>
-            <p className="text-[12px] font-medium text-muted mb-1.5">
-              Peta — klik atau drag pin untuk set lokasi
-            </p>
-            <div
-              ref={mapRef}
-              className="w-full rounded-[12px] overflow-hidden border border-border"
-              style={{ height: '260px', background: 'var(--subtle)' }}
-            >
-              {!mapsApiKey && (
-                <div className="w-full h-full flex items-center justify-center">
-                  <p className="text-[13px] text-muted">Maps API tidak tersedia.</p>
+          {!isOnline && (
+            <>
+              <div>
+                <p className="text-[12px] font-medium text-muted mb-1.5">
+                  Peta — klik atau drag pin untuk set lokasi
+                </p>
+                <div
+                  ref={mapRef}
+                  className="w-full rounded-[12px] overflow-hidden border border-border"
+                  style={{ height: '260px', background: 'var(--subtle)' }}
+                >
+                  {!mapsApiKey && (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <p className="text-[13px] text-muted">Maps API tidak tersedia.</p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div className="px-3 py-2.5 bg-bg border border-border rounded-input">
-              <p className="text-[10px] text-muted mb-0.5">Latitude</p>
-              <p className="text-[13px] text-fg font-mono">{latLng ? latLng.lat.toFixed(7) : '—'}</p>
-            </div>
-            <div className="px-3 py-2.5 bg-bg border border-border rounded-input">
-              <p className="text-[10px] text-muted mb-0.5">Longitude</p>
-              <p className="text-[13px] text-fg font-mono">{latLng ? latLng.lng.toFixed(7) : '—'}</p>
-            </div>
-          </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="px-3 py-2.5 bg-bg border border-border rounded-input">
+                  <p className="text-[10px] text-muted mb-0.5">Latitude</p>
+                  <p className="text-[13px] text-fg font-mono">{latLng ? latLng.lat.toFixed(7) : '—'}</p>
+                </div>
+                <div className="px-3 py-2.5 bg-bg border border-border rounded-input">
+                  <p className="text-[10px] text-muted mb-0.5">Longitude</p>
+                  <p className="text-[13px] text-fg font-mono">{latLng ? latLng.lng.toFixed(7) : '—'}</p>
+                </div>
+              </div>
 
-          <FormField label="Radius Absen (meter)">
-            <input
-              type="number"
-              min={0}
-              value={form.radius}
-              onChange={(e) => setField('radius', e.target.value)}
-              className={inputCls}
-              placeholder="500"
-            />
-          </FormField>
+              <FormField label="Radius Absen (meter)">
+                <input
+                  type="number"
+                  min={0}
+                  value={form.radius}
+                  onChange={(e) => setField('radius', e.target.value)}
+                  className={inputCls}
+                  placeholder="500"
+                />
+              </FormField>
+            </>
+          )}
         </FormSection>
 
         {/* Lainnya */}

@@ -13,7 +13,7 @@
  * TUGAS:
  * 1. Buka surat_url. Google Docs: pakai export teks jika edit-link. Google Drive PDF: coba baca; gagal = BLOKIR.
  * 2. Bandingkan isi dokumen vs form (SISKO).
- * 3. Cek form_kosong: setiap key = data event belum lengkap (termasuk longlatevent, jam selesai, radius Offline, target, dana, flyer, alamat).
+ * 3. Cek form_kosong: setiap key = data event belum lengkap (termasuk longlatevent/radius Offline, jam selesai, target, dana, flyer, alamat).
  * 4. Cek (teks Indonesia, jangan pakai kode REJ-xx):
  *    - Pengajuan kurang dari H-14 (hari_menuju_event < 14)
  *    - Data event belum lengkap (form_kosong tidak kosong)
@@ -151,15 +151,15 @@ export function parseLatLng(longlatevent: string): { lat: number; lng: number } 
 }
 
 export function hariMenujuEvent(tglevent: Date, now = new Date()): number {
-  const a = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
-  const b = Date.UTC(tglevent.getFullYear(), tglevent.getMonth(), tglevent.getDate())
+  const a = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  const b = Date.UTC(tglevent.getUTCFullYear(), tglevent.getUTCMonth(), tglevent.getUTCDate())
   return Math.round((b - a) / 86_400_000)
 }
 
 export function isoDate(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
+  const y = d.getUTCFullYear()
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(d.getUTCDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
 }
 
@@ -176,7 +176,7 @@ export function collectFormKosong(form: BeritaAcaraFormSnapshot): string[] {
   if (!form.jamevent.trim()) empty.push('jamevent')
   if (!form.jamselesaievent.trim()) empty.push('jamselesaievent')
   if (!form.alamatevent.trim()) empty.push('alamatevent')
-  if (!parseLatLng(form.longlatevent)) empty.push('longlatevent')
+  if (form.jenisevent === 'Offline' && !parseLatLng(form.longlatevent)) empty.push('longlatevent')
   if (form.jenisevent === 'Offline' && !(form.radius > 0)) empty.push('radius')
   if (!form.danaevent.trim() || form.danaevent === '0') empty.push('danaevent')
   if (!form.suratpemberitahuan.trim()) empty.push('suratpemberitahuan')

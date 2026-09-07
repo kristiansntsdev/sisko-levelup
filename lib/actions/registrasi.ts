@@ -135,7 +135,12 @@ export async function getRegistrasiByPeserta(idPeserta: number) {
       status: r.status,
       nama_event: r.event?.nama_event ?? '',
       tglDisplay: tglevent
-        ? tglevent.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+        ? tglevent.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            timeZone: 'UTC',
+          })
         : '',
       tglMs: tglevent?.getTime() ?? 0,
     }

@@ -164,7 +164,12 @@ export function skipsAiQa(wwtype: string): boolean {
 }
 
 export function formatFlyerExpectedTanggal(d: Date): string {
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+  return d.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
 }
 
 export function emptyFlyerQa(partial?: Partial<FlyerQaRecord>): FlyerQaRecord {

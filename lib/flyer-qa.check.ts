@@ -25,7 +25,7 @@ assert.equal(needsWfeFlyerReview('nasional', 'https://blob.example/a.png', 'http
 assert.equal(skipsAiQa('nasional'), true)
 assert.equal(skipsAiQa('bulanan'), false)
 
-assert.equal(formatFlyerExpectedTanggal(new Date(2026, 7, 22)), '22 Agustus 2026')
+assert.equal(formatFlyerExpectedTanggal(new Date(Date.UTC(2026, 7, 22))), '22 Agustus 2026')
 
 const fenced = '```json\n{"mode":"jfe","status":"REVISI","kota":"Ngawi","nama_kegiatan":"We Worship","file_url":"https://x","template_url":"https://t","dimensi":{"width":1080,"height":1350,"rasio":"4:5","sesuai_standar":true,"detail":"ok"},"checklist":{"logo_pphtgd_kiri_atas":{"status":"ada","detail":"ok","posisi":"kiri_atas","teks":null},"logo_levelup_kanan_atas":{"status":"ada","detail":"ok","posisi":"kanan_atas","teks":"LevelUP NGAWI"},"nama_kegiatan":{"status":"ada","detail":"","posisi":"tengah","teks":"WE WORSHIP"},"tanggal_kegiatan":{"status":"mismatch","detail":"beda","posisi":null,"teks":"25 Juli"},"tempat_alamat_kegiatan":{"status":"ada","detail":"","posisi":null,"teks":"GKI"},"waktu_kegiatan":{"status":"ada","detail":"","posisi":null,"teks":"09:00"},"layout_pusat":{"status":"ada","detail":"sama","posisi":null,"teks":null},"elemen_tetap":{"status":"mismatch","detail":"chrome diubah","posisi":null,"teks":null},"typo":{"status":"bersih","detail":"","posisi":null,"teks":null}},"typo_list":[],"temuan":["Chrome beda"],"rekomendasi":["Ikuti flyer pusat"],"expected_match":{"nama_kegiatan":true,"tanggal":false,"waktu":true,"tempat":true}}\n```'
 const extracted = extractJsonObject(fenced)

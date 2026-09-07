@@ -27,8 +27,8 @@ assert.equal(parseLatLng(''), null)
 assert.equal(parseLatLng('7.4'), null)
 assert.equal(parseLatLng('foo,bar'), null)
 
-assert.equal(isoDate(new Date(2026, 7, 19)), '2026-08-19')
-assert.equal(hariMenujuEvent(new Date(2026, 7, 19), new Date(2026, 7, 11)), 8)
+assert.equal(isoDate(new Date(Date.UTC(2026, 7, 19))), '2026-08-19')
+assert.equal(hariMenujuEvent(new Date(Date.UTC(2026, 7, 19)), new Date(Date.UTC(2026, 7, 11))), 8)
 
 const baseForm = formSnapshotFromEvent({
   nama_event: 'We Worship',
@@ -37,8 +37,8 @@ const baseForm = formSnapshotFromEvent({
   target: '0',
   targetpengurus: '1',
   targetjumlah: 12,
-  tglevent: new Date(2026, 7, 19),
-  tgleventselesai: new Date(2026, 7, 19),
+  tglevent: new Date(Date.UTC(2026, 7, 19)),
+  tgleventselesai: new Date(Date.UTC(2026, 7, 19)),
   jamevent: '09:00',
   jamselesaievent: '',
   alamatevent: 'GKI',
@@ -59,8 +59,8 @@ const fullForm = formSnapshotFromEvent({
   longlatevent: '-7.4,111.4',
   danaevent: '1500000',
   flyer_ada: true,
-  tglevent: new Date(2026, 7, 19),
-  tgleventselesai: new Date(2026, 7, 19),
+  tglevent: new Date(Date.UTC(2026, 7, 19)),
+  tgleventselesai: new Date(Date.UTC(2026, 7, 19)),
 })
 assert.deepEqual(fullForm.lat, -7.4)
 assert.deepEqual(collectFormKosong(fullForm), [])
@@ -70,6 +70,7 @@ assert.ok(collectFormKosong(noFlyer).includes('flyer'))
 
 const onlineZeroRadius = { ...fullForm, jenisevent: 'Online', radius: 0 }
 assert.ok(!collectFormKosong(onlineZeroRadius).includes('radius'))
+assert.ok(!collectFormKosong({ ...onlineZeroRadius, longlatevent: '' }).includes('longlatevent'))
 const offlineZeroRadius = { ...fullForm, jenisevent: 'Offline', radius: 0 }
 assert.ok(collectFormKosong(offlineZeroRadius).includes('radius'))
 
@@ -77,7 +78,7 @@ const payload = buildBeritaAcaraQaPayload({
   kota: 'LevelUP Ngawi',
   flyerUrl: 'https://blob.example/a.png',
   form: fullForm,
-  tglevent: new Date(2026, 7, 19),
+  tglevent: new Date(Date.UTC(2026, 7, 19)),
 })
 assert.equal(payload.surat_url, 'https://docs.google.com/x')
 assert.equal(payload.kota, 'LevelUP Ngawi')

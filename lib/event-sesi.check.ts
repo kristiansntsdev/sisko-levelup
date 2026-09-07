@@ -1,4 +1,4 @@
-import { absenDuplicateWhere, hadirPenuh, sesiWajibIds } from './event-sesi'
+import { absenDuplicateWhere, hadirPenuh, isoDate, parseLocalDate, sesiWajibIds } from './event-sesi'
 
 const sesi = [
   { id_sesi: 1, wajib: true },
@@ -29,5 +29,9 @@ console.assert(
 
 const noSesi = absenDuplicateWhere(10, 99, null)
 console.assert('OR' in noSesi && Array.isArray(noSesi.OR) && noSesi.OR.length === 2, 'dup key no sesi')
+
+// Calendar date must survive JSON (server action) without WIB→UTC day shift
+const roundtrip = isoDate(new Date(parseLocalDate('2026-09-18').toISOString()))
+console.assert(roundtrip === '2026-09-18', `parseLocalDate/isoDate roundtrip got ${roundtrip}`)
 
 console.log('event-sesi.check.ts: ok')
