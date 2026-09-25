@@ -44,6 +44,8 @@ lib/event-sesi.ts                     # multi-sesi absen: wajib, hadirPenuh, dup
 lib/event-approval.ts                 # append notenasional (ALK/Brim prefixes)
 lib/event-poster.ts                    # resolveEventPosterUrl: posterevent then image_url
 lib/event-link.ts                     # eventEntryPath: Online -> /absen/{id}, Offline -> /join/{id}
+lib/event-absen-window.ts             # jendela absen online, hitung WIB eksplisit (bukan TZ proses)
+instrumentation.ts                    # pin process.env.TZ = Asia/Jakarta saat server boot
 lib/actions/absen-online.ts           # onlineCheckin: registrasi + absen satu aksi (idempoten)
 lib/flyer-qa.ts                       # Cursor webhook QA flyer WW bulanan + JFE/WFE; parse + poll
 lib/berita-acara-qa.ts                # Cursor webhook QA berita acara (link surat); parse + poll
@@ -52,6 +54,8 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-09-25]
+- Fix TZ jendela absen: `eventDateTime`/`getOnlineAbsenWindow` hitung WIB eksplisit (`Date.UTC` - `WIB_OFFSET_MS`), bukan `setHours` waktu lokal. Di server UTC dulu jam selesai 20:00 WIB dibaca jadi 20:00 UTC = absen baru buka 02:45 WIB besoknya
+- `instrumentation.ts` pin `TZ=Asia/Jakarta` untuk sisa query yang pakai batas hari/bulan lokal (auto-absence, Tiket Aktif bulan ini). Di Vercel bisa juga set env `TZ`
 - Absen online seamless: QR event Online -> `/absen/[eventId]`; auto login Google (`/login?auto=1`), registrasi + absen satu aksi `onlineCheckin`; data diri via form inline (bukan redirect `/daftar`); multi-sesi -> picker sesi tersisa; di luar jendela -> countdown auto-absen
 - `eventEntryPath` dipakai QRSheet ALK, `linkevent` (create + update), `eventJoinLink`; `/join/[id]` redirect ke `/absen/[id]` untuk event Online (QR lama tetap jalan)
 

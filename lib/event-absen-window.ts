@@ -1,4 +1,19 @@
-/** Online self-absen opens 15 minutes before jam selesai; stays open while tiket bulan ini still shows (end of month). */
+/**
+ * Jendela absen mandiri event Online.
+ *
+ * Semua jadwal event (`tglevent`, `jamevent`, …) adalah waktu dinding WIB:
+ * kolom DATE disimpan sebagai UTC midnight (lihat `isoDate`/`parseLocalDate`
+ * di `event-sesi.ts`) dan jam disimpan sebagai string "HH:mm" WIB.
+ *
+ * Perhitungan di bawah eksplisit WIB, bukan waktu lokal proses — server
+ * Vercel jalan UTC sementara HP peserta WIB, dan `setHours()` akan bikin
+ * keduanya beda 7 jam.
+ */
+
+/** Offset WIB (Asia/Jakarta, UTC+7). Indonesia tidak punya DST. */
+export const WIB_OFFSET_MS = 7 * 60 * 60 * 1000
+
+/** Absen dibuka 15 menit sebelum jam selesai; tetap terbuka sampai akhir bulan. */
 export const ONLINE_ABSEN_OPEN_BEFORE_END_MS = 15 * 60 * 1000
 
 /** Parse "HH:mm" / "H:mm" / "HH.mm" / "HH:mm:ss" → { h, m } or null. */
@@ -11,21 +26,31 @@ export function parseJam(jam: string): { h: number; m: number } | null {
   return { h, m: min }
 }
 
-/** Combine DATE + jam string into local Date. */
+/**
+ * Gabung kolom DATE (UTC midnight) + jam WIB jadi satu instant.
+ * Komponen tanggal dibaca sebagai UTC supaya tidak geser di server non-WIB.
+ */
 export function eventDateTime(date: Date, jam: string): Date | null {
   const parsed = parseJam(jam)
   if (!parsed) return null
-  const d = new Date(date)
-  d.setHours(parsed.h, parsed.m, 0, 0)
-  return d
+  const wallClock = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    parsed.h,
+    parsed.m,
+  )
+  return new Date(wallClock - WIB_OFFSET_MS)
 }
 
 export function getOnlineAbsenWindow(endAt: Date): { opensAt: Date; closesAt: Date } {
-  // ponytail: closes end-of-month so "tiket aktif bulan ini" masih bisa absen kalau lupa
-  const closesAt = new Date(endAt.getFullYear(), endAt.getMonth() + 1, 0, 23, 59, 59, 999)
+  // ponytail: tutup akhir bulan WIB supaya "tiket aktif bulan ini" masih bisa
+  // absen kalau lupa — bulan dihitung dari kalender WIB, bukan kalender UTC.
+  const wib = new Date(endAt.getTime() + WIB_OFFSET_MS)
+  const startOfNextMonth = Date.UTC(wib.getUTCFullYear(), wib.getUTCMonth() + 1, 1)
   return {
     opensAt: new Date(endAt.getTime() - ONLINE_ABSEN_OPEN_BEFORE_END_MS),
-    closesAt,
+    closesAt: new Date(startOfNextMonth - WIB_OFFSET_MS - 1),
   }
 }
 
@@ -45,16 +70,38 @@ export function onlineAbsenPhase(now: Date, endAt: Date | null): OnlineAbsenPhas
   return 'open'
 }
 
-// ponytail: assert-based self-check — fails loud if window math drifts
+// ponytail: assert-based self-check — fails loud if window math drifts.
+// Semua ekspektasi ditulis sebagai instant UTC supaya test ini sendiri tidak
+// bergantung pada TZ mesin yang menjalankannya.
 if (process.env.NODE_ENV !== 'production') {
-  const end = new Date('2026-08-21T20:00:00')
+  const tglSelesai = new Date(Date.UTC(2026, 7, 21)) // kolom DATE: 21 Agu 2026
+  const end = eventDateTime(tglSelesai, '20:00')! // 20:00 WIB = 13:00 UTC
+  console.assert(end.toISOString() === '2026-08-21T13:00:00.000Z', 'jam selesai WIB → UTC')
+
   const { opensAt, closesAt } = getOnlineAbsenWindow(end)
-  console.assert(opensAt.getTime() === new Date('2026-08-21T19:45:00').getTime(), 'opens 15m before end')
-  console.assert(closesAt.getTime() === new Date(2026, 7, 31, 23, 59, 59, 999).getTime(), 'closes end of month')
-  console.assert(isOnlineAbsenOpen(new Date('2026-08-21T19:45:00'), end), 'open at window start')
-  console.assert(isOnlineAbsenOpen(new Date('2026-08-25T12:00:00'), end), 'open after jam selesai same month')
-  console.assert(!isOnlineAbsenOpen(new Date('2026-08-21T19:44:59'), end), 'closed before window')
-  console.assert(!isOnlineAbsenOpen(new Date('2026-09-01T00:00:00'), end), 'closed next month')
+  console.assert(opensAt.toISOString() === '2026-08-21T12:45:00.000Z', 'buka 15 menit sebelum selesai')
+  console.assert(closesAt.toISOString() === '2026-08-31T16:59:59.999Z', 'tutup akhir bulan WIB')
+
+  console.assert(isOnlineAbsenOpen(opensAt, end), 'open tepat di awal jendela')
+  console.assert(!isOnlineAbsenOpen(new Date(opensAt.getTime() - 1), end), 'closed 1ms sebelum buka')
+  console.assert(isOnlineAbsenOpen(closesAt, end), 'open tepat di akhir jendela')
+  console.assert(!isOnlineAbsenOpen(new Date(closesAt.getTime() + 1), end), 'closed 1ms setelah tutup')
+  console.assert(isOnlineAbsenOpen(new Date('2026-08-25T05:00:00Z'), end), 'open setelah acara, bulan sama')
+
+  // Akhir bulan WIB, bukan UTC: 1 Sep 2026 06:00 WIB sudah lewat jendela
+  // walau di UTC masih 31 Agu.
+  console.assert(!isOnlineAbsenOpen(new Date('2026-08-31T23:00:00Z'), end), 'closed di 1 Sep WIB (31 Agu UTC)')
+
+  // Event tengah malam WIB tidak boleh mundur sehari.
+  const midnight = eventDateTime(new Date(Date.UTC(2026, 7, 21)), '00:30')!
+  console.assert(midnight.toISOString() === '2026-08-20T17:30:00.000Z', '00:30 WIB = 17:30 UTC hari sebelumnya')
+
+  console.assert(onlineAbsenPhase(new Date(opensAt.getTime() - 1), end) === 'too_early', 'phase too_early')
+  console.assert(onlineAbsenPhase(opensAt, end) === 'open', 'phase open')
+  console.assert(onlineAbsenPhase(new Date(closesAt.getTime() + 1), end) === 'closed', 'phase closed')
+  console.assert(onlineAbsenPhase(new Date(), null) === 'unknown', 'phase unknown')
+
   console.assert(parseJam('19:45')?.h === 19 && parseJam('19:45')?.m === 45, 'parseJam colon')
   console.assert(parseJam('19.00')?.m === 0, 'parseJam dot')
+  console.assert(parseJam('bukan jam') === null, 'parseJam invalid')
 }
