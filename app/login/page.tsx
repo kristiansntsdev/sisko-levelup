@@ -1,5 +1,5 @@
 'use client'
-import { Suspense } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui'
@@ -8,6 +8,25 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard'
+  // `auto=1` dipakai QR absen online: skip tap "Login By Google".
+  const auto = searchParams.get('auto') === '1'
+  const redirected = useRef(false)
+
+  useEffect(() => {
+    if (!auto || redirected.current) return
+    redirected.current = true
+    void signIn('google', { callbackUrl })
+  }, [auto, callbackUrl])
+
+  if (auto) {
+    return (
+      <main className="max-w-sm mx-auto h-screen bg-bg flex flex-col items-center justify-center gap-4 px-6">
+        <img src="/logoutama.png" alt="LevelUp" className="h-12 object-contain" />
+        <span className="w-7 h-7 rounded-full border-2 border-border border-t-fg animate-spin" />
+        <p className="text-sm text-muted">Mengalihkan ke Google…</p>
+      </main>
+    )
+  }
 
   return (
     <main className="max-w-sm mx-auto h-screen overflow-hidden bg-bg flex flex-col items-center justify-center px-6">

@@ -37,16 +37,23 @@ app/
   dashboard/kota/alk/event/[id]/approve/ # Sekretariat: approve/reject event
   dashboard/kota/brim/event/[id]/approve/ # Brim Nasional: approvebrimnas
   dashboard/kota/brim/wfe-flyer/       # Brim Nasional: flyer pusat WW JFE / WFE serentak
+  absen/[eventId]/                    # Event Online: scan QR -> login+registrasi+absen otomatis
 lib/actions/upgrade.ts                # joinVolunteer, joinSquad, approveSquad
 lib/actions/wfe-serentak.ts           # kampanye flyer pusat JFE (range bulan)
 lib/event-sesi.ts                     # multi-sesi absen: wajib, hadirPenuh, dup key
 lib/event-approval.ts                 # append notenasional (ALK/Brim prefixes)
 lib/event-poster.ts                    # resolveEventPosterUrl: posterevent then image_url
+lib/event-link.ts                     # eventEntryPath: Online -> /absen/{id}, Offline -> /join/{id}
+lib/actions/absen-online.ts           # onlineCheckin: registrasi + absen satu aksi (idempoten)
 lib/flyer-qa.ts                       # Cursor webhook QA flyer WW bulanan + JFE/WFE; parse + poll
 lib/berita-acara-qa.ts                # Cursor webhook QA berita acara (link surat); parse + poll
 lib/telegram.ts                       # notifyTelegram → group (nasional ops)
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-09-25]
+- Absen online seamless: QR event Online -> `/absen/[eventId]`; auto login Google (`/login?auto=1`), registrasi + absen satu aksi `onlineCheckin`; data diri via form inline (bukan redirect `/daftar`); multi-sesi -> picker sesi tersisa; di luar jendela -> countdown auto-absen
+- `eventEntryPath` dipakai QRSheet ALK, `linkevent` (create + update), `eventJoinLink`; `/join/[id]` redirect ke `/absen/[id]` untuk event Online (QR lama tetap jalan)
 
 ## Recent Updates [2026-09-06]
 - Fix tanggal event off-by-one WIB→UTC: `parseLocalDate`/`isoDate` pakai UTC midnight; form `tglRaw` tidak lagi `toISOString().slice(0,10)`; display Telegram/flyer `timeZone: 'UTC'`
