@@ -11,6 +11,7 @@ import {
   NASIONAL_EVENT_CABANG,
 } from '@/lib/event-cabang'
 import { appendNotenasional } from '@/lib/event-approval'
+import { eventEntryPath } from '@/lib/event-link'
 import { resolveEventPosterUrl } from '@/lib/event-poster'
 import {
   FLYER_QA_ALLOWED_DIFF,
@@ -58,6 +59,7 @@ export type EventSummary = {
   tglDisplay: string
   jamevent: string
   posterUrl: string
+  jenisevent: string
 }
 
 export type CabangOption = { id: string; nama: string }
@@ -151,6 +153,7 @@ export type EventDashboard = {
   approvebrimnas: string
   notenasional: string
   khusus: string
+  jenisevent: string
 }
 
 /** `null` = all cabang (Sekretariat / Brim Nasional). */
@@ -164,6 +167,7 @@ export async function getAllEventsByKotalevelup(
       id_event: true, nama_event: true,
       tglevent: true, jamevent: true, alamatevent: true, posterevent: true, image_url: true,
       approvenasional: true, approvebrimnas: true, notenasional: true, khusus: true,
+      jenisevent: true,
     },
   })
   return rows.map((e) => {
@@ -185,6 +189,7 @@ export async function getAllEventsByKotalevelup(
       approvebrimnas: e.approvebrimnas ?? '0',
       notenasional: e.notenasional ?? '',
       khusus: e.khusus,
+      jenisevent: e.jenisevent ?? '',
     }
   })
 }
@@ -418,6 +423,7 @@ export async function getEventById(id: number): Promise<EventSummary | null> {
       jamevent: true,
       posterevent: true,
       image_url: true,
+      jenisevent: true,
     },
   })
 
@@ -435,6 +441,7 @@ export async function getEventById(id: number): Promise<EventSummary | null> {
     }),
     jamevent: event.jamevent,
     posterUrl: resolveEventPosterUrl(event.posterevent, event.image_url),
+    jenisevent: event.jenisevent ?? '',
   }
 }
 
@@ -545,7 +552,7 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
   const baseUrl = (process.env.AUTH_URL ?? '').replace(/\/$/, '')
   await db.event.update({
     where: { id_event: id },
-    data: { linkevent: `${baseUrl}/join/${id}` },
+    data: { linkevent: `${baseUrl}${eventEntryPath(id, payload.jenisevent)}` },
   })
 
   if (idCabang === NASIONAL_EVENT_CABANG && payload.sesi) {
@@ -628,9 +635,20 @@ export async function updateEvent(
 
   const current = await db.event.findUnique({
     where: { id_event: id },
-    select: { image_url: true, posterevent: true, suratpemberitahuan: true, tglevent: true },
+    select: {
+      image_url: true, posterevent: true, suratpemberitahuan: true, tglevent: true,
+      linkevent: true,
+    },
   })
   if (!current) throw new Error('Event tidak ditemukan')
+
+  // Link bawaan sistem (/join atau /absen) ikut jenis event kalau diubah.
+  // Link manual dari panitia (mis. Zoom) tidak disentuh.
+  const baseUrl = (process.env.AUTH_URL ?? '').replace(/\/$/, '')
+  const systemLink = /\/(join|absen)\/\d+$/.test(current.linkevent ?? '')
+  const linkevent = systemLink
+    ? `${baseUrl}${eventEntryPath(id, payload.jenisevent)}`
+    : undefined
 
   const wwtype =
     payload.wwtype === 'nasional' && !isNasional ? 'bulanan' : payload.wwtype
@@ -665,6 +683,7 @@ export async function updateEvent(
       radius: payload.radius,
       danaevent: payload.danaevent,
       suratpemberitahuan: payload.suratpemberitahuan,
+      ...(linkevent !== undefined ? { linkevent } : {}),
       ...(khusus !== undefined ? { khusus } : {}),
       ...(newFlyer ? { image_url: imageUrl, posterevent: '' } : {}),
     },

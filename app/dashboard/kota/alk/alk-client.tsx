@@ -12,6 +12,7 @@ import {
 import type { KasKotaData } from '@/components/kota'
 import type { AlkBerandaStats, EventDashboard } from '@/lib/actions/event'
 import { isEventFullyApproved } from '@/lib/event-approval'
+import { eventEntryPath, isOnlineEvent } from '@/lib/event-link'
 import { logoutPengurus } from '@/app/admin/actions'
 
 interface Pengurus {
@@ -123,7 +124,11 @@ function QRSheet({ events, onClose }: { events: EventDashboard[]; onClose: () =>
 
   useEffect(() => { setOrigin(window.location.origin) }, [])
 
-  const joinUrl = origin && selectedId ? `${origin}/join/${selectedId}` : ''
+  const selected = events.find((e) => e.id_event === selectedId)
+  const online = isOnlineEvent(selected?.jenisevent)
+  // Event Online → QR langsung ke halaman absen sekali-scan.
+  const joinUrl =
+    origin && selectedId ? `${origin}${eventEntryPath(selectedId, selected?.jenisevent)}` : ''
   const qrSrc = joinUrl
     ? `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=12&data=${encodeURIComponent(joinUrl)}`
     : ''
@@ -161,7 +166,9 @@ function QRSheet({ events, onClose }: { events: EventDashboard[]; onClose: () =>
                   <img src={qrSrc} alt="QR Event" width={260} height={260} className="rounded-[8px]" />
                 </div>
                 <p className="text-[11px] text-muted text-center px-4">
-                  Peserta scan QR ini untuk mendaftar ke event
+                  {online
+                    ? 'Event Online — peserta scan QR ini untuk langsung terdaftar sekaligus absen'
+                    : 'Peserta scan QR ini untuk mendaftar ke event'}
                 </p>
               </div>
             )}
