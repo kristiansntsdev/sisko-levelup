@@ -1,4 +1,5 @@
 import { NASIONAL_EVENT_CABANG, NASIONAL_KHUSUS_VALUE } from '@/lib/event-cabang'
+import { eventEntryPath } from '@/lib/event-link'
 import { resolveEventPosterUrl } from '@/lib/event-poster'
 
 function escapeHtml(s: string): string {
@@ -26,8 +27,8 @@ export function isTelegramButtonUrl(url: string): boolean {
   }
 }
 
-export function eventJoinLink(idEvent: number): string {
-  return `${publicAppBase()}/join/${idEvent}`
+export function eventJoinLink(idEvent: number, jenisevent?: string): string {
+  return `${publicAppBase()}${eventEntryPath(idEvent, jenisevent)}`
 }
 
 export function eventApproveLink(idEvent: number): string {

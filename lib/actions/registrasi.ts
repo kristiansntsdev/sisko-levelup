@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
 import { resolveEventPosterUrl } from '@/lib/event-poster'
 import { formatTelegramMessage, notifyTelegram, eventDetailLink } from '@/lib/telegram'
+import { wibStartOfMonth, wibStartOfNextMonth, wibToday } from '@/lib/wib'
 
 export async function updatePesertaProfile(idPeserta: number, data: { nama: string; nowa: string; gereja: string; sekolah: string; idTempatKerja: number | null }) {
   await db.peserta.update({
@@ -91,24 +92,21 @@ export async function getRegistrasiDetail(idRegistrasi: number) {
 }
 
 export async function getRegistrasiByPeserta(idPeserta: number) {
-  // tgleventselesai is DATE (midnight). Compare against start of today so
-  // the event day itself is not treated as already ended.
-  const startOfToday = new Date()
-  startOfToday.setHours(0, 0, 0, 0)
+  // tgleventselesai is DATE (UTC midnight tanggal WIB). Bandingkan dengan
+  // tanggal WIB hari ini supaya hari-H event belum dianggap lewat.
   await db.registrasi.updateMany({
     where: {
       id_peserta: idPeserta,
       status: 'confirmed',
-      event: { tgleventselesai: { lt: startOfToday } },
+      event: { tgleventselesai: { lt: wibToday() } },
     },
     data: { status: 'absence' },
   })
 
-  // Tiket Aktif = registrasi dari awal bulan ini ke depan (confirmed + absence).
-  // Tanggal lewat di bulan ini tetap tampil supaya absen online masih bisa.
-  // Exclude attend. Bulan sebelumnya tidak ditampilkan.
-  const now = new Date()
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  // Tiket Aktif = joined this month, including past dates (absence) so
+  // online absen masih bisa diakses kalau lupa. Exclude attend.
+  const startOfMonth = wibStartOfMonth()
+  const startOfNextMonth = wibStartOfNextMonth()
 
   const rows = await db.registrasi.findMany({
     where: {

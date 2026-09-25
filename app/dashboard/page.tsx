@@ -8,6 +8,7 @@ import { getPesertaById } from '@/lib/actions/peserta'
 import { getDokumentasiForPeserta } from '@/lib/actions/dokumentasi'
 import type { DokumentasiPeserta } from '@/lib/actions/dokumentasi'
 import { joinVolunteer, joinSquad, getPendingSquadForMe } from '@/lib/actions/upgrade'
+import { wibToday } from '@/lib/wib'
 
 type Registrasi = Awaited<ReturnType<typeof getRegistrasiByPeserta>>[number]
 
@@ -68,10 +69,9 @@ export default function DashboardPage() {
   // Server already scopes from this month onward (confirmed + absence).
   const tiketAktif = registrasi
 
-  const startOfToday = new Date()
-  startOfToday.setHours(0, 0, 0, 0)
-  const eventTerdekat =
-    registrasi.find((r) => r.tglMs >= startOfToday.getTime()) ?? null
+  // tglMs berasal dari kolom DATE (UTC midnight tanggal WIB).
+  const startOfToday = wibToday().getTime()
+  const eventTerdekat = registrasi.find((r) => r.tglMs >= startOfToday) ?? null
 
   return (
     <main className="min-h-screen bg-bg pb-safe flex flex-col">
