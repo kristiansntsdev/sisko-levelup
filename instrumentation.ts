@@ -1,14 +1,14 @@
 /**
  * Dijalankan sekali saat server instance boot (Next.js instrumentation hook).
  *
- * Vercel jalan UTC secara default. Beberapa query masih pakai batas hari /
- * bulan waktu lokal (`setHours(0,0,0,0)`, `new Date(y, m, 1)`) untuk
- * dibandingkan dengan kolom DATE yang berisi tanggal WIB — mis. auto-absence
- * dan "Tiket Aktif bulan ini". Tanpa pin ini, batasnya meleset 7 jam: antara
- * 00:00–07:00 WIB server masih menganggap hari/bulan kemarin.
+ * Vercel jalan UTC secara default. Semua perhitungan tanggal yang dibandingkan
+ * dengan kolom `@db.Date` sudah eksplisit WIB (`lib/wib.ts`,
+ * `lib/event-absen-window.ts`), jadi pin ini bukan penyangga utama — dia
+ * jaring pengaman untuk kode baru yang tanpa sadar pakai `setHours()` /
+ * `new Date(y, m, d)`, dan bikin timestamp log ikut WIB.
  *
- * Jadwal absen online tidak bergantung pada ini — `lib/event-absen-window.ts`
- * menghitung WIB secara eksplisit.
+ * Di Vercel bisa juga di-set lewat environment variable `TZ`; pin di sini
+ * supaya perilakunya sama di lokal tanpa perlu ingat setting dashboard.
  */
 export function register() {
   process.env.TZ = 'Asia/Jakarta'

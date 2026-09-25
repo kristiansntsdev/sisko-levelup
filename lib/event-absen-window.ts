@@ -10,8 +10,7 @@
  * keduanya beda 7 jam.
  */
 
-/** Offset WIB (Asia/Jakarta, UTC+7). Indonesia tidak punya DST. */
-export const WIB_OFFSET_MS = 7 * 60 * 60 * 1000
+import { WIB_OFFSET_MS } from '@/lib/wib'
 
 /** Absen dibuka 15 menit sebelum jam selesai; tetap terbuka sampai akhir bulan. */
 export const ONLINE_ABSEN_OPEN_BEFORE_END_MS = 15 * 60 * 1000
