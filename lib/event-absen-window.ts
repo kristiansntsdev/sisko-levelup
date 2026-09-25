@@ -14,7 +14,6 @@ import { WIB_OFFSET_MS } from '@/lib/wib'
 
 /** Absen dibuka 15 menit sebelum jam selesai; tetap terbuka sampai akhir bulan. */
 export const ONLINE_ABSEN_OPEN_BEFORE_END_MS = 15 * 60 * 1000
-const WIB_OFFSET_MS = 7 * 60 * 60 * 1000
 
 /** Parse "HH:mm" / "H:mm" / "HH.mm" / "HH:mm:ss" → { h, m } or null. */
 export function parseJam(jam: string): { h: number; m: number } | null {
