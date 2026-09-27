@@ -2,6 +2,7 @@
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui'
+import { InstallApp } from '@/components/install-app'
 
 export default function LandingPage() {
   const router = useRouter()
@@ -24,6 +25,7 @@ export default function LandingPage() {
             Login by Google
           </span>
         </Button>
+        <InstallApp />
         {/* <Button variant="ghost" fullWidth onClick={() => router.push('/join/1')}>
           join squad →
         </Button> */}
