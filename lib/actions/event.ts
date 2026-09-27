@@ -2,6 +2,7 @@
 import { cookies } from 'next/headers'
 import { put } from '@vercel/blob'
 import { db } from '@/lib/db'
+import { setActor } from '@/lib/request-context'
 import { revalidatePath } from 'next/cache'
 import type { event_wwtype } from '@/lib/generated/enums'
 import {
@@ -506,6 +507,9 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
       // only nasional may set khusus; kota admins always empty
       if (!isNasionalPengurus) khusus = ''
     }
+    if (pengurus) {
+      setActor({ type: 'pengurus', id: Number(pengurusId), label: pengurus.username })
+    }
   }
 
   const wwtype =
@@ -631,6 +635,9 @@ export async function updateEvent(
       isNasional = true
       khusus = payload.khusus || ''
     }
+    if (pengurus) {
+      setActor({ type: 'pengurus', id: Number(pengurusId), label: pengurus.username })
+    }
   }
 
   const current = await db.event.findUnique({
@@ -737,9 +744,10 @@ async function requireAlkPengurus(): Promise<void> {
   if (!pengurusId) throw new Error('Unauthorized')
   const pengurus = await db.pengurus.findUnique({
     where: { id_pengurus: Number(pengurusId) },
-    select: { divisi: true },
+    select: { divisi: true, username: true },
   })
   if (!pengurus || pengurus.divisi !== 'alk') throw new Error('Unauthorized')
+  setActor({ type: 'pengurus', id: Number(pengurusId), label: pengurus.username })
 }
 
 async function eventKotaLabel(idCabang: string): Promise<string> {
@@ -1148,6 +1156,7 @@ async function requireSekretariatNasional(): Promise<
   if (!pengurus || pengurus.divisi !== 'alk' || !isNasionalAdmin(pengurus.username)) {
     return { ok: false, error: 'Hanya Sekretariat Nasional yang bisa approve' }
   }
+  setActor({ type: 'pengurus', id: Number(pengurusId), label: pengurus.username })
   return { ok: true }
 }
 
@@ -1196,6 +1205,7 @@ async function requireBrimNasional(): Promise<
   if (!pengurus || pengurus.divisi !== 'brim' || !isNasionalBrim(pengurus.username)) {
     return { ok: false, error: 'Hanya Brim Nasional yang bisa approve' }
   }
+  setActor({ type: 'pengurus', id: Number(pengurusId), label: pengurus.username })
   return { ok: true }
 }
 

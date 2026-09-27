@@ -440,7 +440,8 @@ export const ModelName = {
   kas_kota: 'kas_kota',
   kas_kota_txn: 'kas_kota_txn',
   dokumentasi_kota: 'dokumentasi_kota',
-  event_detail: 'event_detail'
+  event_detail: 'event_detail',
+  app_log: 'app_log'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -456,7 +457,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3364,6 +3365,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    app_log: {
+      payload: Prisma.$app_logPayload<ExtArgs>
+      fields: Prisma.app_logFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.app_logFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$app_logPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.app_logFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$app_logPayload>
+        }
+        findFirst: {
+          args: Prisma.app_logFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$app_logPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.app_logFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$app_logPayload>
+        }
+        findMany: {
+          args: Prisma.app_logFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$app_logPayload>[]
+        }
+        create: {
+          args: Prisma.app_logCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$app_logPayload>
+        }
+        createMany: {
+          args: Prisma.app_logCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.app_logDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$app_logPayload>
+        }
+        update: {
+          args: Prisma.app_logUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$app_logPayload>
+        }
+        deleteMany: {
+          args: Prisma.app_logDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.app_logUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.app_logUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$app_logPayload>
+        }
+        aggregate: {
+          args: Prisma.App_logAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateApp_log>
+        }
+        groupBy: {
+          args: Prisma.app_logGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.App_logGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.app_logCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.App_logCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3955,6 +4022,25 @@ export const Event_detailScalarFieldEnum = {
 export type Event_detailScalarFieldEnum = (typeof Event_detailScalarFieldEnum)[keyof typeof Event_detailScalarFieldEnum]
 
 
+export const App_logScalarFieldEnum = {
+  id: 'id',
+  level: 'level',
+  model_name: 'model_name',
+  operation: 'operation',
+  action: 'action',
+  actor_type: 'actor_type',
+  actor_id: 'actor_id',
+  actor_label: 'actor_label',
+  success: 'success',
+  error_message: 'error_message',
+  detail: 'detail',
+  route_path: 'route_path',
+  created_at: 'created_at'
+} as const
+
+export type App_logScalarFieldEnum = (typeof App_logScalarFieldEnum)[keyof typeof App_logScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -4405,6 +4491,19 @@ export const event_detailOrderByRelevanceFieldEnum = {
 export type event_detailOrderByRelevanceFieldEnum = (typeof event_detailOrderByRelevanceFieldEnum)[keyof typeof event_detailOrderByRelevanceFieldEnum]
 
 
+export const app_logOrderByRelevanceFieldEnum = {
+  model_name: 'model_name',
+  operation: 'operation',
+  action: 'action',
+  actor_label: 'actor_label',
+  error_message: 'error_message',
+  detail: 'detail',
+  route_path: 'route_path'
+} as const
+
+export type app_logOrderByRelevanceFieldEnum = (typeof app_logOrderByRelevanceFieldEnum)[keyof typeof app_logOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -4492,6 +4591,20 @@ export type Enumkas_kota_txn_tipeFieldRefInput<$PrismaModel> = FieldRefInputType
  * Reference to a field of type 'kas_kota_txn_kategori'
  */
 export type Enumkas_kota_txn_kategoriFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'kas_kota_txn_kategori'>
+    
+
+
+/**
+ * Reference to a field of type 'app_log_level'
+ */
+export type Enumapp_log_levelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'app_log_level'>
+    
+
+
+/**
+ * Reference to a field of type 'app_log_actor_type'
+ */
+export type Enumapp_log_actor_typeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'app_log_actor_type'>
     
 
 
@@ -4696,6 +4809,7 @@ export type GlobalOmitConfig = {
   kas_kota_txn?: Prisma.kas_kota_txnOmit
   dokumentasi_kota?: Prisma.dokumentasi_kotaOmit
   event_detail?: Prisma.event_detailOmit
+  app_log?: Prisma.app_logOmit
 }
 
 /* Types for Logging */

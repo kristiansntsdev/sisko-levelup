@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
+import { setActor } from '@/lib/request-context'
 
 // ponytail: membership approval baru sampai squad (userlevel 2). Core (3) belum.
 
@@ -14,6 +15,7 @@ async function requirePesertaId() {
   const session = await auth()
   const id = session?.user?.idPeserta
   if (!id) return null
+  setActor({ type: 'peserta', id, label: session?.user?.name ?? null })
   return id
 }
 
@@ -22,9 +24,10 @@ async function requireAlkPengurus() {
   if (!pengurusId) return null
   const pengurus = await db.pengurus.findUnique({
     where: { id_pengurus: Number(pengurusId) },
-    select: { kotalevelup: true, divisi: true },
+    select: { kotalevelup: true, divisi: true, username: true },
   })
   if (!pengurus || pengurus.divisi !== 'alk') return null
+  setActor({ type: 'pengurus', id: Number(pengurusId), label: pengurus.username })
   return pengurus
 }
 

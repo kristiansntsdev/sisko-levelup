@@ -94,7 +94,8 @@ export const ModelName = {
   kas_kota: 'kas_kota',
   kas_kota_txn: 'kas_kota_txn',
   dokumentasi_kota: 'dokumentasi_kota',
-  event_detail: 'event_detail'
+  event_detail: 'event_detail',
+  app_log: 'app_log'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -665,6 +666,25 @@ export const Event_detailScalarFieldEnum = {
 export type Event_detailScalarFieldEnum = (typeof Event_detailScalarFieldEnum)[keyof typeof Event_detailScalarFieldEnum]
 
 
+export const App_logScalarFieldEnum = {
+  id: 'id',
+  level: 'level',
+  model_name: 'model_name',
+  operation: 'operation',
+  action: 'action',
+  actor_type: 'actor_type',
+  actor_id: 'actor_id',
+  actor_label: 'actor_label',
+  success: 'success',
+  error_message: 'error_message',
+  detail: 'detail',
+  route_path: 'route_path',
+  created_at: 'created_at'
+} as const
+
+export type App_logScalarFieldEnum = (typeof App_logScalarFieldEnum)[keyof typeof App_logScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1113,4 +1133,17 @@ export const event_detailOrderByRelevanceFieldEnum = {
 } as const
 
 export type event_detailOrderByRelevanceFieldEnum = (typeof event_detailOrderByRelevanceFieldEnum)[keyof typeof event_detailOrderByRelevanceFieldEnum]
+
+
+export const app_logOrderByRelevanceFieldEnum = {
+  model_name: 'model_name',
+  operation: 'operation',
+  action: 'action',
+  actor_label: 'actor_label',
+  error_message: 'error_message',
+  detail: 'detail',
+  route_path: 'route_path'
+} as const
+
+export type app_logOrderByRelevanceFieldEnum = (typeof app_logOrderByRelevanceFieldEnum)[keyof typeof app_logOrderByRelevanceFieldEnum]
 

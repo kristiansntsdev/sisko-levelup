@@ -261,3 +261,10 @@ export type dokumentasi_kota = Prisma.dokumentasi_kotaModel
  * 
  */
 export type event_detail = Prisma.event_detailModel
+/**
+ * Model app_log
+ * Audit log: semua operasi tulis DB (via Prisma extension, lib/audit-log.ts)
+ * + error request global (instrumentation.ts onRequestError). Dibaca lewat
+ * route /logs (password LOG_PASSWORD).
+ */
+export type app_log = Prisma.app_logModel

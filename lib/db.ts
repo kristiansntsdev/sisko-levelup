@@ -1,5 +1,6 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "./generated/client";
+import { createAuditLogExtension } from "./audit-log";
 
 const ADAPTER_VERSION = 2;
 
@@ -51,4 +52,8 @@ function getPrismaClient() {
   return prisma;
 }
 
-export const db = getPrismaClient();
+const prismaBase = getPrismaClient();
+
+// Catat semua operasi tulis (create/update/upsert/delete/...) ke app_log,
+// lewat after() supaya tidak menambah latency request. Lihat lib/audit-log.ts.
+export const db = prismaBase.$extends(createAuditLogExtension(prismaBase));

@@ -5,6 +5,7 @@ import { put } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { isNasionalBrim } from '@/lib/event-cabang'
+import { setActor } from '@/lib/request-context'
 
 export type WfeSerentakRow = {
   id: number
@@ -50,6 +51,7 @@ async function requireBrimNasional(): Promise<void> {
   if (!pengurus || pengurus.divisi !== 'brim' || !isNasionalBrim(pengurus.username)) {
     throw new Error('Hanya Brim Nasional')
   }
+  setActor({ type: 'pengurus', id: Number(pengurusId), label: pengurus.username })
 }
 
 function toRow(r: { id: number; bulan_mulai: Date; bulan_selesai: Date; image_url: string }): WfeSerentakRow {

@@ -71,3 +71,21 @@ export const event_wwtype = {
 } as const
 
 export type event_wwtype = (typeof event_wwtype)[keyof typeof event_wwtype]
+
+
+export const app_log_level = {
+  info: 'info',
+  error: 'error'
+} as const
+
+export type app_log_level = (typeof app_log_level)[keyof typeof app_log_level]
+
+
+export const app_log_actor_type = {
+  pengurus: 'pengurus',
+  peserta: 'peserta',
+  system: 'system',
+  unknown: 'unknown'
+} as const
+
+export type app_log_actor_type = (typeof app_log_actor_type)[keyof typeof app_log_actor_type]

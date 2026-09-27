@@ -361,6 +361,40 @@ export type Enumkas_kota_txn_kategoriWithAggregatesFilter<$PrismaModel = never> 
   _max?: Prisma.NestedEnumkas_kota_txn_kategoriFilter<$PrismaModel>
 }
 
+export type Enumapp_log_levelFilter<$PrismaModel = never> = {
+  equals?: $Enums.app_log_level | Prisma.Enumapp_log_levelFieldRefInput<$PrismaModel>
+  in?: $Enums.app_log_level[]
+  notIn?: $Enums.app_log_level[]
+  not?: Prisma.NestedEnumapp_log_levelFilter<$PrismaModel> | $Enums.app_log_level
+}
+
+export type Enumapp_log_actor_typeFilter<$PrismaModel = never> = {
+  equals?: $Enums.app_log_actor_type | Prisma.Enumapp_log_actor_typeFieldRefInput<$PrismaModel>
+  in?: $Enums.app_log_actor_type[]
+  notIn?: $Enums.app_log_actor_type[]
+  not?: Prisma.NestedEnumapp_log_actor_typeFilter<$PrismaModel> | $Enums.app_log_actor_type
+}
+
+export type Enumapp_log_levelWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.app_log_level | Prisma.Enumapp_log_levelFieldRefInput<$PrismaModel>
+  in?: $Enums.app_log_level[]
+  notIn?: $Enums.app_log_level[]
+  not?: Prisma.NestedEnumapp_log_levelWithAggregatesFilter<$PrismaModel> | $Enums.app_log_level
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumapp_log_levelFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumapp_log_levelFilter<$PrismaModel>
+}
+
+export type Enumapp_log_actor_typeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.app_log_actor_type | Prisma.Enumapp_log_actor_typeFieldRefInput<$PrismaModel>
+  in?: $Enums.app_log_actor_type[]
+  notIn?: $Enums.app_log_actor_type[]
+  not?: Prisma.NestedEnumapp_log_actor_typeWithAggregatesFilter<$PrismaModel> | $Enums.app_log_actor_type
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumapp_log_actor_typeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumapp_log_actor_typeFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[]
@@ -723,6 +757,40 @@ export type NestedEnumkas_kota_txn_kategoriWithAggregatesFilter<$PrismaModel = n
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumkas_kota_txn_kategoriFilter<$PrismaModel>
   _max?: Prisma.NestedEnumkas_kota_txn_kategoriFilter<$PrismaModel>
+}
+
+export type NestedEnumapp_log_levelFilter<$PrismaModel = never> = {
+  equals?: $Enums.app_log_level | Prisma.Enumapp_log_levelFieldRefInput<$PrismaModel>
+  in?: $Enums.app_log_level[]
+  notIn?: $Enums.app_log_level[]
+  not?: Prisma.NestedEnumapp_log_levelFilter<$PrismaModel> | $Enums.app_log_level
+}
+
+export type NestedEnumapp_log_actor_typeFilter<$PrismaModel = never> = {
+  equals?: $Enums.app_log_actor_type | Prisma.Enumapp_log_actor_typeFieldRefInput<$PrismaModel>
+  in?: $Enums.app_log_actor_type[]
+  notIn?: $Enums.app_log_actor_type[]
+  not?: Prisma.NestedEnumapp_log_actor_typeFilter<$PrismaModel> | $Enums.app_log_actor_type
+}
+
+export type NestedEnumapp_log_levelWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.app_log_level | Prisma.Enumapp_log_levelFieldRefInput<$PrismaModel>
+  in?: $Enums.app_log_level[]
+  notIn?: $Enums.app_log_level[]
+  not?: Prisma.NestedEnumapp_log_levelWithAggregatesFilter<$PrismaModel> | $Enums.app_log_level
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumapp_log_levelFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumapp_log_levelFilter<$PrismaModel>
+}
+
+export type NestedEnumapp_log_actor_typeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.app_log_actor_type | Prisma.Enumapp_log_actor_typeFieldRefInput<$PrismaModel>
+  in?: $Enums.app_log_actor_type[]
+  notIn?: $Enums.app_log_actor_type[]
+  not?: Prisma.NestedEnumapp_log_actor_typeWithAggregatesFilter<$PrismaModel> | $Enums.app_log_actor_type
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumapp_log_actor_typeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumapp_log_actor_typeFilter<$PrismaModel>
 }
 
 

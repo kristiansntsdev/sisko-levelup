@@ -1,6 +1,8 @@
 'use server'
+import { cookies } from 'next/headers'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
+import { setActor } from '@/lib/request-context'
 import { revalidatePath } from 'next/cache'
 import { eventDateTime, isOnlineAbsenOpen } from '@/lib/event-absen-window'
 import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
@@ -33,6 +35,7 @@ export async function absenOnlineSelf(idRegistrasi: number): Promise<
   const session = await auth()
   const idPeserta = session?.user?.idPeserta
   if (!idPeserta) return { success: false, reason: 'unauthenticated' }
+  setActor({ type: 'peserta', id: idPeserta, label: session?.user?.name ?? null })
 
   const row = await db.registrasi.findUnique({
     where: { id_registrasi: idRegistrasi },
@@ -80,6 +83,19 @@ export async function absenOnlineSelf(idRegistrasi: number): Promise<
   return { success: false, reason: 'error' }
 }
 
+/** Scanner (/alk/scanner) belum punya halaman gate sendiri — ini satu-satunya
+ *  titik yang tahu pengurus mana yang scan, jadi dicek di sini juga. */
+async function requireAlkPengurusForScan(): Promise<{ id: number; label: string | null } | null> {
+  const pengurusId = (await cookies()).get('pengurus_id')?.value
+  if (!pengurusId) return null
+  const pengurus = await db.pengurus.findUnique({
+    where: { id_pengurus: Number(pengurusId) },
+    select: { divisi: true, username: true },
+  })
+  if (!pengurus || pengurus.divisi !== 'alk') return null
+  return { id: Number(pengurusId), label: pengurus.username }
+}
+
 export async function createAbsen(
   payload: QRPayload,
   idSesi?: number | null,
@@ -87,9 +103,19 @@ export async function createAbsen(
   | { success: true; nama: string; gereja: string }
   | {
       success: false
-      reason: 'invalid_payload' | 'already_scanned' | 'sesi_required' | 'sesi_invalid' | 'error'
+      reason:
+        | 'invalid_payload'
+        | 'already_scanned'
+        | 'sesi_required'
+        | 'sesi_invalid'
+        | 'unauthorized'
+        | 'error'
     }
 > {
+  const pengurus = await requireAlkPengurusForScan()
+  if (!pengurus) return { success: false, reason: 'unauthorized' }
+  setActor({ type: 'pengurus', id: pengurus.id, label: pengurus.label })
+
   const idPeserta = Number(payload.p)
   const idEvent = Number(payload.ev)
   if (!idPeserta || !idEvent) return { success: false, reason: 'invalid_payload' }

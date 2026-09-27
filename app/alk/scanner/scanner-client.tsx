@@ -220,6 +220,9 @@ export function ScannerClient({ backUrl = '/alk' }: { backUrl?: string }) {
         setConfirmError('Sesi tidak valid. Pilih ulang sesi.')
       } else if (result.reason === 'invalid_payload') {
         setConfirmError('QR tidak lengkap. Minta peserta buka ulang tiketnya.')
+      } else if (result.reason === 'unauthorized') {
+        setConfirmError('Sesi login habis, silakan login ulang.')
+        router.push('/admin')
       } else {
         setConfirmError('Gagal menyimpan absen. Coba lagi.')
       }

@@ -2,6 +2,7 @@
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
+import { setActor } from '@/lib/request-context'
 
 async function getPengurusKota() {
   const cookieStore = await cookies()
@@ -10,9 +11,10 @@ async function getPengurusKota() {
 
   const pengurus = await db.pengurus.findUnique({
     where: { id_pengurus: Number(pengurusId) },
-    select: { kotalevelup: true, divisi: true },
+    select: { kotalevelup: true, divisi: true, username: true },
   })
   if (!pengurus || pengurus.divisi !== 'brim') return null
+  setActor({ type: 'pengurus', id: Number(pengurusId), label: pengurus.username })
   return pengurus
 }
 

@@ -137,6 +137,37 @@ export async function POST(req: NextRequest) {
     Prisma.sql`UPDATE event SET wwtype = 'bulanan' WHERE wwtype IS NULL OR wwtype = ''`,
   )
 
+  const appLogTables = await db.$queryRaw<{ TABLE_NAME: string }[]>`
+    SELECT TABLE_NAME FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'app_log'
+  `
+  const addedAppLog = appLogTables.length === 0
+  if (addedAppLog) {
+    await db.$executeRawUnsafe(`
+      CREATE TABLE app_log (
+        id INT NOT NULL AUTO_INCREMENT,
+        level ENUM('info','error') NOT NULL DEFAULT 'info',
+        model_name VARCHAR(64) NULL,
+        operation VARCHAR(32) NULL,
+        action VARCHAR(128) NULL,
+        actor_type ENUM('pengurus','peserta','system','unknown') NOT NULL DEFAULT 'unknown',
+        actor_id INT NULL,
+        actor_label VARCHAR(255) NULL,
+        success TINYINT(1) NOT NULL DEFAULT 1,
+        error_message TEXT NULL,
+        detail LONGTEXT NULL,
+        route_path VARCHAR(255) NULL,
+        created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_app_log_created_at (created_at),
+        KEY idx_app_log_level_created (level, created_at),
+        KEY idx_app_log_model_created (model_name, created_at),
+        KEY idx_app_log_action_created (action, created_at),
+        KEY idx_app_log_actor (actor_type, actor_id)
+      )
+    `)
+  }
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -161,6 +192,7 @@ export async function POST(req: NextRequest) {
     addedAbsenIdSesi,
     addedWwtypeNasional,
     wwtypeBackfill,
+    addedAppLog,
     brimUpdated: brim.count,
     brim: row,
   })

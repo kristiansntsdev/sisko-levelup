@@ -2,6 +2,7 @@
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
+import { setActor } from '@/lib/request-context'
 
 async function getAlkPengurus() {
   const store = await cookies()
@@ -9,9 +10,11 @@ async function getAlkPengurus() {
   if (!id) return null
   const p = await db.pengurus.findUnique({
     where: { id_pengurus: Number(id) },
-    select: { kotalevelup: true, divisi: true },
+    select: { kotalevelup: true, divisi: true, username: true },
   })
-  return p?.divisi === 'brim' ? p : null
+  if (p?.divisi !== 'brim') return null
+  setActor({ type: 'pengurus', id: Number(id), label: p.username })
+  return p
 }
 
 export interface DokumentasiItem {

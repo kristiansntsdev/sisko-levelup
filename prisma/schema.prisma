@@ -470,6 +470,31 @@ model event_detail {
   updated_at  DateTime @default(now()) @db.DateTime(0)
 }
 
+/// Audit log: semua operasi tulis DB (via Prisma extension, lib/audit-log.ts)
+/// + error request global (instrumentation.ts onRequestError). Dibaca lewat
+/// route /logs (password LOG_PASSWORD).
+model app_log {
+  id            Int                @id @default(autoincrement())
+  level         app_log_level      @default(info)
+  model_name    String?            @db.VarChar(64)
+  operation     String?            @db.VarChar(32)
+  action        String?            @db.VarChar(128)
+  actor_type    app_log_actor_type @default(unknown)
+  actor_id      Int?
+  actor_label   String?            @db.VarChar(255)
+  success       Boolean            @default(true)
+  error_message String?            @db.Text
+  detail        String?            @db.LongText
+  route_path    String?            @db.VarChar(255)
+  created_at    DateTime           @default(now()) @db.DateTime(0)
+
+  @@index([created_at], map: "idx_app_log_created_at")
+  @@index([level, created_at], map: "idx_app_log_level_created")
+  @@index([model_name, created_at], map: "idx_app_log_model_created")
+  @@index([action, created_at], map: "idx_app_log_action_created")
+  @@index([actor_type, actor_id], map: "idx_app_log_actor")
+}
+
 enum peserta_status {
   active
   suspend
@@ -511,4 +536,16 @@ enum event_wwtype {
   bulanan
   jfe
   nasional
+}
+
+enum app_log_level {
+  info
+  error
+}
+
+enum app_log_actor_type {
+  pengurus
+  peserta
+  system
+  unknown
 }

@@ -1,6 +1,7 @@
 'use server'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
+import { setActor } from '@/lib/request-context'
 import { revalidatePath } from 'next/cache'
 import { createAbsen } from '@/lib/actions/absen'
 import { createRegistrasi } from '@/lib/actions/registrasi'
@@ -96,6 +97,7 @@ export async function onlineCheckin(
   const session = await auth()
   const idPeserta = session?.user?.idPeserta
   if (!idPeserta) return { status: 'failed', reason: 'unauthenticated' }
+  setActor({ type: 'peserta', id: idPeserta, label: session?.user?.name ?? null })
   if (!idEvent) return { status: 'failed', reason: 'not_found' }
 
   const event = await db.event.findUnique({
