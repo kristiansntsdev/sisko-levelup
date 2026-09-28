@@ -35,6 +35,7 @@ app/
   dashboard/kota/alk/page.tsx         # Beranda ALK (saldo + approval member)
   dashboard/kota/alk/approval/page.tsx # List approval squad dari table upgrade
   dashboard/kota/alk/event/[id]/approve/ # Sekretariat: approve/reject event
+  dashboard/kota/alk/event/[id]/dana/   # ALK Kota: form pengajuan support dana (per event)
   dashboard/kota/brim/event/[id]/approve/ # Brim Nasional: approvebrimnas
   dashboard/kota/brim/wfe-flyer/       # Brim Nasional: flyer pusat WW JFE / WFE serentak
   absen/[eventId]/                    # Event Online: scan QR -> login+registrasi+absen otomatis
@@ -51,8 +52,14 @@ lib/actions/absen-online.ts           # onlineCheckin: registrasi + absen satu a
 lib/flyer-qa.ts                       # Cursor webhook QA flyer WW bulanan + JFE/WFE; parse + poll
 lib/berita-acara-qa.ts                # Cursor webhook QA berita acara (link surat); parse + poll
 lib/telegram.ts                       # notifyTelegram → group (nasional ops)
+lib/actions/reimburse.ts              # submitReimburse (ALK Kota) + approve/rejectReimburseNasional (tabel reimburse)
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-09-28]
+- Pengajuan Support Dana: ALK Kota isi form per event (`/dashboard/kota/alk/event/[id]/dana`) → Sekretariat Nasional approve/reject di halaman approve event yang sudah ada (section baru, terpisah dari approval flyer/QA)
+- Pakai tabel `reimburse` yang sudah ada di schema (sebelumnya cuma dibaca raw SQL untuk stat Beranda ALK, belum pernah ditulis) — kolom `approvepphtgd`/`approvekeuangan`/dst masih kosong, di luar scope (tahap lanjutan)
+- Form terkunci (read-only) untuk ALK Kota begitu `reimburse.approvenasional='1'`; reject bisa diajukan ulang
 
 ## Recent Updates [2026-09-25]
 - Fix TZ jendela absen: `eventDateTime`/`getOnlineAbsenWindow` hitung WIB eksplisit (`Date.UTC` - `WIB_OFFSET_MS`), bukan `setHours` waktu lokal. Di server UTC dulu jam selesai 20:00 WIB dibaca jadi 20:00 UTC = absen baru buka 02:45 WIB besoknya

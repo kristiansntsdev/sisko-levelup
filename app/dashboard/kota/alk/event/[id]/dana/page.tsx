@@ -3,10 +3,9 @@ import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { getEventDetail } from '@/lib/actions/event'
 import { getReimburseForEvent } from '@/lib/actions/reimburse'
-import { isNasionalAdmin } from '@/lib/event-cabang'
-import { EventApproveClient } from './approve-client'
+import { DanaClient } from './dana-client'
 
-export default async function AlkEventApprovePage({
+export default async function EventDanaPage({
   params,
 }: {
   params: Promise<{ id: string }>
@@ -19,16 +18,22 @@ export default async function AlkEventApprovePage({
 
   const pengurus = await db.pengurus.findUnique({
     where: { id_pengurus: Number(pengurusId) },
-    select: { divisi: true, username: true },
+    select: { divisi: true },
   })
-  if (!pengurus || pengurus.divisi !== 'alk' || !isNasionalAdmin(pengurus.username)) {
-    redirect('/dashboard/kota/alk')
-  }
+  if (!pengurus || pengurus.divisi !== 'alk') redirect('/admin')
 
   const event = await getEventDetail(Number(id))
   if (!event) redirect('/dashboard/kota/alk')
 
   const reimburse = await getReimburseForEvent(event.id_event)
 
-  return <EventApproveClient event={event} role="alk" reimburse={reimburse} />
+  return (
+    <DanaClient
+      idEvent={event.id_event}
+      namaEvent={event.nama_event}
+      tglDisplay={event.tglDisplay}
+      jumlahPeserta={event.registrasi.length}
+      reimburse={reimburse}
+    />
+  )
 }
