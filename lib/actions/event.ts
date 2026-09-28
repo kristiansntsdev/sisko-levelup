@@ -1144,7 +1144,7 @@ async function telegramScopeForEvent(event: {
   })
 }
 
-async function requireSekretariatNasional(): Promise<
+export async function requireSekretariatNasional(): Promise<
   { ok: true } | { ok: false; error: string }
 > {
   const pengurusId = (await cookies()).get('pengurus_id')?.value

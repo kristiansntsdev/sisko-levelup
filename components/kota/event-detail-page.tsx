@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { ajukanEvent, type EventDetailFull } from '@/lib/actions/event'
+import type { ReimburseData } from '@/lib/actions/reimburse'
 import { isEventFullyApproved } from '@/lib/event-approval'
 import { FlyerQaSummary } from '@/components/kota/flyer-qa-summary'
 import { BeritaAcaraQaSummary } from '@/components/kota/berita-acara-qa-summary'
@@ -69,6 +70,34 @@ function Pagination({
 interface EventDetailPageProps {
   event: EventDetailFull
   backUrl: string
+  reimburse?: ReimburseData | null
+}
+
+function DanaSupportCard({ eventId, reimburse }: { eventId: number; reimburse?: ReimburseData | null }) {
+  const status =
+    reimburse?.approvenasional === '1'
+      ? { label: 'Disetujui', cls: 'bg-green-light text-green-dark' }
+      : reimburse?.approvenasional === '0'
+        ? { label: 'Ditolak', cls: 'bg-red-light text-red-dark' }
+        : reimburse
+          ? { label: 'Menunggu Approval', cls: 'bg-amber-light text-amber-dark' }
+          : null
+
+  return (
+    <Link
+      href={`/dashboard/kota/alk/event/${eventId}/dana`}
+      className="bg-surface border border-border rounded-card px-4 py-3.5 flex items-center justify-between gap-3 hover:opacity-80 transition-opacity"
+    >
+      <p className="text-[13px] font-semibold text-fg">Pengajuan Support Dana</p>
+      {status ? (
+        <span className={`shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${status.cls}`}>
+          {status.label}
+        </span>
+      ) : (
+        <span className="shrink-0 text-[12px] text-accent font-medium">Ajukan →</span>
+      )}
+    </Link>
+  )
 }
 
 function EventAjukanBar({
@@ -113,7 +142,7 @@ function EventAjukanBar({
   )
 }
 
-export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
+export function EventDetailPage({ event, backUrl, reimburse }: EventDetailPageProps) {
   const [regPage, setRegPage] = useState(0)
   const [absenPage, setAbsenPage] = useState(0)
   const [sesiFilter, setSesiFilter] = useState<number | 'all'>('all')
@@ -268,6 +297,8 @@ export function EventDetailPage({ event, backUrl }: EventDetailPageProps) {
             </div>
           ))}
         </div>
+
+        <DanaSupportCard eventId={event.id_event} reimburse={reimburse} />
 
         {/* Map */}
         {mapSrc && (

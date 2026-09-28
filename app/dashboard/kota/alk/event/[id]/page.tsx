@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { getEventDetail } from '@/lib/actions/event'
+import { getReimburseForEvent } from '@/lib/actions/reimburse'
 import { EventDetailPage } from '@/components/kota/event-detail-page'
 
 export default async function AlkEventDetailPage({
@@ -24,5 +25,7 @@ export default async function AlkEventDetailPage({
   const event = await getEventDetail(Number(id))
   if (!event) redirect('/dashboard/kota/alk')
 
-  return <EventDetailPage event={event} backUrl="/dashboard/kota/alk" />
+  const reimburse = await getReimburseForEvent(event.id_event)
+
+  return <EventDetailPage event={event} backUrl="/dashboard/kota/alk" reimburse={reimburse} />
 }
