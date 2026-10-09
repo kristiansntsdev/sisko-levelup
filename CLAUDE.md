@@ -56,6 +56,9 @@ lib/actions/reimburse.ts              # submitReimburse (ALK Kota) + approve/rej
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-10-09]
+- Form event: flyer > 4 MB ditolak di client (dulu Vercel 413 sebelum server action jalan → "Failed to fetch")
+
 ## Recent Updates [2026-09-28]
 - Pengajuan Support Dana: ALK Kota isi form per event (`/dashboard/kota/alk/event/[id]/dana`) → Sekretariat Nasional approve/reject di halaman approve event yang sudah ada (section baru, terpisah dari approval flyer/QA)
 - Pakai tabel `reimburse` yang sudah ada di schema (sebelumnya cuma dibaca raw SQL untuk stat Beranda ALK, belum pernah ditulis) — kolom `approvepphtgd`/`approvekeuangan`/dst masih kosong, di luar scope (tahap lanjutan)

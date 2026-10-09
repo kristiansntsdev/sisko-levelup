@@ -762,6 +762,15 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
                 accept="image/jpeg,image/png,image/webp,image/gif"
                 onChange={(e) => {
                   const file = e.target.files?.[0] ?? null
+                  // Vercel rejects request bodies > 4.5 MB before the server action runs ("Failed to fetch")
+                  if (file && file.size > 4 * 1024 * 1024) {
+                    e.target.value = ''
+                    setFlyer(null)
+                    setFlyerPreview('')
+                    setError(`Flyer maksimal 4 MB (file ini ${(file.size / 1024 / 1024).toFixed(1)} MB). Kompres dulu lalu upload ulang.`)
+                    return
+                  }
+                  setError('')
                   setFlyer(file)
                   setFlyerPreview(file ? URL.createObjectURL(file) : '')
                 }}
