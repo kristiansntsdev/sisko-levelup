@@ -104,6 +104,7 @@ model event {
   qr                 String       @db.Text
   khusus             String       @db.Text
   suratpemberitahuan String       @db.Text
+  created_at         DateTime?    @default(now()) @db.DateTime(0)
   registrasi         registrasi[]
   event_sesi         event_sesi[]
 }
@@ -288,26 +289,27 @@ model playlists {
 }
 
 model reimburse {
-  id_reimburse    Int    @id @default(autoincrement())
-  id_event        String @db.Text
-  ajukan          String @db.Text
-  namabank        String @db.Text
-  norek           String @db.Text
-  namarek         String @db.Text
-  danausul        String @db.Text
-  danariil        String @db.Text
-  laporan         String @db.Text
-  reimburse       String @db.Text
-  approvenasional String @db.Text
-  approvepphtgd   String @db.Text
-  approvekeuangan String @db.Text
-  notenasional    String @db.Text
-  notepphtgd      String @db.Text
-  notekeuangan    String @db.Text
-  bukti           String @db.Text
-  approveadmin    String @db.Text
-  noteadmin       String @db.Text
-  buktitf         String @db.Text
+  id_reimburse    Int       @id @default(autoincrement())
+  id_event        String    @db.Text
+  ajukan          String    @db.Text
+  namabank        String    @db.Text
+  norek           String    @db.Text
+  namarek         String    @db.Text
+  danausul        String    @db.Text
+  danariil        String    @db.Text
+  laporan         String    @db.Text
+  reimburse       String    @db.Text
+  approvenasional String    @db.Text
+  approvepphtgd   String    @db.Text
+  approvekeuangan String    @db.Text
+  notenasional    String    @db.Text
+  notepphtgd      String    @db.Text
+  notekeuangan    String    @db.Text
+  bukti           String    @db.Text
+  approveadmin    String    @db.Text
+  noteadmin       String    @db.Text
+  buktitf         String    @db.Text
+  laporan_at      DateTime? @db.DateTime(0)
 }
 
 model siswakelaswp {
@@ -455,10 +457,11 @@ model kas_kota_txn {
 }
 
 model dokumentasi_kota {
-  id          Int    @id @default(autoincrement())
-  id_event    Int    @unique
-  kotalevelup String @db.VarChar(255)
-  gdrive_link String @db.Text
+  id          Int       @id @default(autoincrement())
+  id_event    Int       @unique
+  kotalevelup String    @db.VarChar(255)
+  gdrive_link String    @db.Text
+  created_at  DateTime? @default(now()) @db.DateTime(0)
 }
 
 model event_detail {

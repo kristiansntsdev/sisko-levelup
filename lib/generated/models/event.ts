@@ -69,6 +69,7 @@ export type EventMinAggregateOutputType = {
   qr: string | null
   khusus: string | null
   suratpemberitahuan: string | null
+  created_at: Date | null
 }
 
 export type EventMaxAggregateOutputType = {
@@ -102,6 +103,7 @@ export type EventMaxAggregateOutputType = {
   qr: string | null
   khusus: string | null
   suratpemberitahuan: string | null
+  created_at: Date | null
 }
 
 export type EventCountAggregateOutputType = {
@@ -135,6 +137,7 @@ export type EventCountAggregateOutputType = {
   qr: number
   khusus: number
   suratpemberitahuan: number
+  created_at: number
   _all: number
 }
 
@@ -182,6 +185,7 @@ export type EventMinAggregateInputType = {
   qr?: true
   khusus?: true
   suratpemberitahuan?: true
+  created_at?: true
 }
 
 export type EventMaxAggregateInputType = {
@@ -215,6 +219,7 @@ export type EventMaxAggregateInputType = {
   qr?: true
   khusus?: true
   suratpemberitahuan?: true
+  created_at?: true
 }
 
 export type EventCountAggregateInputType = {
@@ -248,6 +253,7 @@ export type EventCountAggregateInputType = {
   qr?: true
   khusus?: true
   suratpemberitahuan?: true
+  created_at?: true
   _all?: true
 }
 
@@ -368,6 +374,7 @@ export type EventGroupByOutputType = {
   qr: string
   khusus: string
   suratpemberitahuan: string
+  created_at: Date | null
   _count: EventCountAggregateOutputType | null
   _avg: EventAvgAggregateOutputType | null
   _sum: EventSumAggregateOutputType | null
@@ -424,6 +431,7 @@ export type eventWhereInput = {
   qr?: Prisma.StringFilter<"event"> | string
   khusus?: Prisma.StringFilter<"event"> | string
   suratpemberitahuan?: Prisma.StringFilter<"event"> | string
+  created_at?: Prisma.DateTimeNullableFilter<"event"> | Date | string | null
   registrasi?: Prisma.RegistrasiListRelationFilter
   event_sesi?: Prisma.Event_sesiListRelationFilter
 }
@@ -459,6 +467,7 @@ export type eventOrderByWithRelationInput = {
   qr?: Prisma.SortOrder
   khusus?: Prisma.SortOrder
   suratpemberitahuan?: Prisma.SortOrder
+  created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   registrasi?: Prisma.registrasiOrderByRelationAggregateInput
   event_sesi?: Prisma.event_sesiOrderByRelationAggregateInput
   _relevance?: Prisma.eventOrderByRelevanceInput
@@ -498,6 +507,7 @@ export type eventWhereUniqueInput = Prisma.AtLeast<{
   qr?: Prisma.StringFilter<"event"> | string
   khusus?: Prisma.StringFilter<"event"> | string
   suratpemberitahuan?: Prisma.StringFilter<"event"> | string
+  created_at?: Prisma.DateTimeNullableFilter<"event"> | Date | string | null
   registrasi?: Prisma.RegistrasiListRelationFilter
   event_sesi?: Prisma.Event_sesiListRelationFilter
 }, "id_event">
@@ -533,6 +543,7 @@ export type eventOrderByWithAggregationInput = {
   qr?: Prisma.SortOrder
   khusus?: Prisma.SortOrder
   suratpemberitahuan?: Prisma.SortOrder
+  created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.eventCountOrderByAggregateInput
   _avg?: Prisma.eventAvgOrderByAggregateInput
   _max?: Prisma.eventMaxOrderByAggregateInput
@@ -574,6 +585,7 @@ export type eventScalarWhereWithAggregatesInput = {
   qr?: Prisma.StringWithAggregatesFilter<"event"> | string
   khusus?: Prisma.StringWithAggregatesFilter<"event"> | string
   suratpemberitahuan?: Prisma.StringWithAggregatesFilter<"event"> | string
+  created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"event"> | Date | string | null
 }
 
 export type eventCreateInput = {
@@ -606,6 +618,7 @@ export type eventCreateInput = {
   qr: string
   khusus: string
   suratpemberitahuan: string
+  created_at?: Date | string | null
   registrasi?: Prisma.registrasiCreateNestedManyWithoutEventInput
   event_sesi?: Prisma.event_sesiCreateNestedManyWithoutEventInput
 }
@@ -641,6 +654,7 @@ export type eventUncheckedCreateInput = {
   qr: string
   khusus: string
   suratpemberitahuan: string
+  created_at?: Date | string | null
   registrasi?: Prisma.registrasiUncheckedCreateNestedManyWithoutEventInput
   event_sesi?: Prisma.event_sesiUncheckedCreateNestedManyWithoutEventInput
 }
@@ -675,6 +689,7 @@ export type eventUpdateInput = {
   qr?: Prisma.StringFieldUpdateOperationsInput | string
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   registrasi?: Prisma.registrasiUpdateManyWithoutEventNestedInput
   event_sesi?: Prisma.event_sesiUpdateManyWithoutEventNestedInput
 }
@@ -710,6 +725,7 @@ export type eventUncheckedUpdateInput = {
   qr?: Prisma.StringFieldUpdateOperationsInput | string
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   registrasi?: Prisma.registrasiUncheckedUpdateManyWithoutEventNestedInput
   event_sesi?: Prisma.event_sesiUncheckedUpdateManyWithoutEventNestedInput
 }
@@ -745,6 +761,7 @@ export type eventCreateManyInput = {
   qr: string
   khusus: string
   suratpemberitahuan: string
+  created_at?: Date | string | null
 }
 
 export type eventUpdateManyMutationInput = {
@@ -777,6 +794,7 @@ export type eventUpdateManyMutationInput = {
   qr?: Prisma.StringFieldUpdateOperationsInput | string
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type eventUncheckedUpdateManyInput = {
@@ -810,6 +828,7 @@ export type eventUncheckedUpdateManyInput = {
   qr?: Prisma.StringFieldUpdateOperationsInput | string
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type eventOrderByRelevanceInput = {
@@ -849,6 +868,7 @@ export type eventCountOrderByAggregateInput = {
   qr?: Prisma.SortOrder
   khusus?: Prisma.SortOrder
   suratpemberitahuan?: Prisma.SortOrder
+  created_at?: Prisma.SortOrder
 }
 
 export type eventAvgOrderByAggregateInput = {
@@ -888,6 +908,7 @@ export type eventMaxOrderByAggregateInput = {
   qr?: Prisma.SortOrder
   khusus?: Prisma.SortOrder
   suratpemberitahuan?: Prisma.SortOrder
+  created_at?: Prisma.SortOrder
 }
 
 export type eventMinOrderByAggregateInput = {
@@ -921,6 +942,7 @@ export type eventMinOrderByAggregateInput = {
   qr?: Prisma.SortOrder
   khusus?: Prisma.SortOrder
   suratpemberitahuan?: Prisma.SortOrder
+  created_at?: Prisma.SortOrder
 }
 
 export type eventSumOrderByAggregateInput = {
@@ -936,6 +958,10 @@ export type EventScalarRelationFilter = {
 
 export type Enumevent_wwtypeFieldUpdateOperationsInput = {
   set?: $Enums.event_wwtype
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type eventCreateNestedOneWithoutEvent_sesiInput = {
@@ -996,6 +1022,7 @@ export type eventCreateWithoutEvent_sesiInput = {
   qr: string
   khusus: string
   suratpemberitahuan: string
+  created_at?: Date | string | null
   registrasi?: Prisma.registrasiCreateNestedManyWithoutEventInput
 }
 
@@ -1030,6 +1057,7 @@ export type eventUncheckedCreateWithoutEvent_sesiInput = {
   qr: string
   khusus: string
   suratpemberitahuan: string
+  created_at?: Date | string | null
   registrasi?: Prisma.registrasiUncheckedCreateNestedManyWithoutEventInput
 }
 
@@ -1079,6 +1107,7 @@ export type eventUpdateWithoutEvent_sesiInput = {
   qr?: Prisma.StringFieldUpdateOperationsInput | string
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   registrasi?: Prisma.registrasiUpdateManyWithoutEventNestedInput
 }
 
@@ -1113,6 +1142,7 @@ export type eventUncheckedUpdateWithoutEvent_sesiInput = {
   qr?: Prisma.StringFieldUpdateOperationsInput | string
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   registrasi?: Prisma.registrasiUncheckedUpdateManyWithoutEventNestedInput
 }
 
@@ -1146,6 +1176,7 @@ export type eventCreateWithoutRegistrasiInput = {
   qr: string
   khusus: string
   suratpemberitahuan: string
+  created_at?: Date | string | null
   event_sesi?: Prisma.event_sesiCreateNestedManyWithoutEventInput
 }
 
@@ -1180,6 +1211,7 @@ export type eventUncheckedCreateWithoutRegistrasiInput = {
   qr: string
   khusus: string
   suratpemberitahuan: string
+  created_at?: Date | string | null
   event_sesi?: Prisma.event_sesiUncheckedCreateNestedManyWithoutEventInput
 }
 
@@ -1229,6 +1261,7 @@ export type eventUpdateWithoutRegistrasiInput = {
   qr?: Prisma.StringFieldUpdateOperationsInput | string
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   event_sesi?: Prisma.event_sesiUpdateManyWithoutEventNestedInput
 }
 
@@ -1263,6 +1296,7 @@ export type eventUncheckedUpdateWithoutRegistrasiInput = {
   qr?: Prisma.StringFieldUpdateOperationsInput | string
   khusus?: Prisma.StringFieldUpdateOperationsInput | string
   suratpemberitahuan?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   event_sesi?: Prisma.event_sesiUncheckedUpdateManyWithoutEventNestedInput
 }
 
@@ -1337,6 +1371,7 @@ export type eventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   qr?: boolean
   khusus?: boolean
   suratpemberitahuan?: boolean
+  created_at?: boolean
   registrasi?: boolean | Prisma.event$registrasiArgs<ExtArgs>
   event_sesi?: boolean | Prisma.event$event_sesiArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
@@ -1375,9 +1410,10 @@ export type eventSelectScalar = {
   qr?: boolean
   khusus?: boolean
   suratpemberitahuan?: boolean
+  created_at?: boolean
 }
 
-export type eventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_event" | "nama_event" | "tglevent" | "tgleventselesai" | "jamevent" | "alamatevent" | "danaevent" | "posterevent" | "image_url" | "flyer_qa" | "berita_acara_qa" | "proposalevent" | "id_cabang" | "target" | "targetpengurus" | "targetjumlah" | "jenisevent" | "wwtype" | "jamselesaievent" | "longlatevent" | "radius" | "linkevent" | "approvenasional" | "approvebrimnas" | "approveadmin" | "notenasional" | "noteadmin" | "qr" | "khusus" | "suratpemberitahuan", ExtArgs["result"]["event"]>
+export type eventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_event" | "nama_event" | "tglevent" | "tgleventselesai" | "jamevent" | "alamatevent" | "danaevent" | "posterevent" | "image_url" | "flyer_qa" | "berita_acara_qa" | "proposalevent" | "id_cabang" | "target" | "targetpengurus" | "targetjumlah" | "jenisevent" | "wwtype" | "jamselesaievent" | "longlatevent" | "radius" | "linkevent" | "approvenasional" | "approvebrimnas" | "approveadmin" | "notenasional" | "noteadmin" | "qr" | "khusus" | "suratpemberitahuan" | "created_at", ExtArgs["result"]["event"]>
 export type eventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   registrasi?: boolean | Prisma.event$registrasiArgs<ExtArgs>
   event_sesi?: boolean | Prisma.event$event_sesiArgs<ExtArgs>
@@ -1421,6 +1457,7 @@ export type $eventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     qr: string
     khusus: string
     suratpemberitahuan: string
+    created_at: Date | null
   }, ExtArgs["result"]["event"]>
   composites: {}
 }
@@ -1822,6 +1859,7 @@ export interface eventFieldRefs {
   readonly qr: Prisma.FieldRef<"event", 'String'>
   readonly khusus: Prisma.FieldRef<"event", 'String'>
   readonly suratpemberitahuan: Prisma.FieldRef<"event", 'String'>
+  readonly created_at: Prisma.FieldRef<"event", 'DateTime'>
 }
     
 

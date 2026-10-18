@@ -53,8 +53,16 @@ lib/flyer-qa.ts                       # Cursor webhook QA flyer WW bulanan + JFE
 lib/berita-acara-qa.ts                # Cursor webhook QA berita acara (link surat); parse + poll
 lib/telegram.ts                       # notifyTelegram → group (nasional ops)
 lib/actions/reimburse.ts              # submitReimburse (ALK Kota) + approve/rejectReimburseNasional (tabel reimburse)
+lib/monitoring-sheet.ts               # Form Monitoring Teknis: status H-14 / H+14 / kelengkapan per event kota
+app/api/internal/monitoring-sheet/    # GET ?year= (Bearer MONITORING_SHEET_SECRET) → dibaca Apps Script
+scripts/monitoring-sheet.gs           # Apps Script: paste ke spreadsheet, sync tab per tahun tiap 5 menit
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-10-18]
+- Form Monitoring Teknis live di Google Sheets: Apps Script tarik `/api/internal/monitoring-sheet` tiap 5 menit, satu tab per tahun, section per bulan. Semua event kota (`id_cabang` ≠ 0)
+- Centang Berita Acara/Flyer + Keterangan = manual reviewer, dipertahankan per `id_event` (kolom P tersembunyi); kolom lain otomatis
+- Kolom baru (NULL untuk baris lama = "tidak tercatat" → centang manual dipertahankan): `event.created_at`, `dokumentasi_kota.created_at` (default CURRENT_TIMESTAMP), `reimburse.laporan_at` (diisi `submitReimburse` saat LPJ pertama kali ada). LPJ = `reimburse.laporan`
 
 ## Recent Updates [2026-10-09]
 - Form event: flyer > 4 MB ditolak di client (dulu Vercel 413 sebelum server action jalan → "Failed to fetch")

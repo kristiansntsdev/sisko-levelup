@@ -55,6 +55,7 @@ export type ReimburseMinAggregateOutputType = {
   approveadmin: string | null
   noteadmin: string | null
   buktitf: string | null
+  laporan_at: Date | null
 }
 
 export type ReimburseMaxAggregateOutputType = {
@@ -78,6 +79,7 @@ export type ReimburseMaxAggregateOutputType = {
   approveadmin: string | null
   noteadmin: string | null
   buktitf: string | null
+  laporan_at: Date | null
 }
 
 export type ReimburseCountAggregateOutputType = {
@@ -101,6 +103,7 @@ export type ReimburseCountAggregateOutputType = {
   approveadmin: number
   noteadmin: number
   buktitf: number
+  laporan_at: number
   _all: number
 }
 
@@ -134,6 +137,7 @@ export type ReimburseMinAggregateInputType = {
   approveadmin?: true
   noteadmin?: true
   buktitf?: true
+  laporan_at?: true
 }
 
 export type ReimburseMaxAggregateInputType = {
@@ -157,6 +161,7 @@ export type ReimburseMaxAggregateInputType = {
   approveadmin?: true
   noteadmin?: true
   buktitf?: true
+  laporan_at?: true
 }
 
 export type ReimburseCountAggregateInputType = {
@@ -180,6 +185,7 @@ export type ReimburseCountAggregateInputType = {
   approveadmin?: true
   noteadmin?: true
   buktitf?: true
+  laporan_at?: true
   _all?: true
 }
 
@@ -290,6 +296,7 @@ export type ReimburseGroupByOutputType = {
   approveadmin: string
   noteadmin: string
   buktitf: string
+  laporan_at: Date | null
   _count: ReimburseCountAggregateOutputType | null
   _avg: ReimburseAvgAggregateOutputType | null
   _sum: ReimburseSumAggregateOutputType | null
@@ -336,6 +343,7 @@ export type reimburseWhereInput = {
   approveadmin?: Prisma.StringFilter<"reimburse"> | string
   noteadmin?: Prisma.StringFilter<"reimburse"> | string
   buktitf?: Prisma.StringFilter<"reimburse"> | string
+  laporan_at?: Prisma.DateTimeNullableFilter<"reimburse"> | Date | string | null
 }
 
 export type reimburseOrderByWithRelationInput = {
@@ -359,6 +367,7 @@ export type reimburseOrderByWithRelationInput = {
   approveadmin?: Prisma.SortOrder
   noteadmin?: Prisma.SortOrder
   buktitf?: Prisma.SortOrder
+  laporan_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _relevance?: Prisma.reimburseOrderByRelevanceInput
 }
 
@@ -386,6 +395,7 @@ export type reimburseWhereUniqueInput = Prisma.AtLeast<{
   approveadmin?: Prisma.StringFilter<"reimburse"> | string
   noteadmin?: Prisma.StringFilter<"reimburse"> | string
   buktitf?: Prisma.StringFilter<"reimburse"> | string
+  laporan_at?: Prisma.DateTimeNullableFilter<"reimburse"> | Date | string | null
 }, "id_reimburse">
 
 export type reimburseOrderByWithAggregationInput = {
@@ -409,6 +419,7 @@ export type reimburseOrderByWithAggregationInput = {
   approveadmin?: Prisma.SortOrder
   noteadmin?: Prisma.SortOrder
   buktitf?: Prisma.SortOrder
+  laporan_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.reimburseCountOrderByAggregateInput
   _avg?: Prisma.reimburseAvgOrderByAggregateInput
   _max?: Prisma.reimburseMaxOrderByAggregateInput
@@ -440,6 +451,7 @@ export type reimburseScalarWhereWithAggregatesInput = {
   approveadmin?: Prisma.StringWithAggregatesFilter<"reimburse"> | string
   noteadmin?: Prisma.StringWithAggregatesFilter<"reimburse"> | string
   buktitf?: Prisma.StringWithAggregatesFilter<"reimburse"> | string
+  laporan_at?: Prisma.DateTimeNullableWithAggregatesFilter<"reimburse"> | Date | string | null
 }
 
 export type reimburseCreateInput = {
@@ -462,6 +474,7 @@ export type reimburseCreateInput = {
   approveadmin: string
   noteadmin: string
   buktitf: string
+  laporan_at?: Date | string | null
 }
 
 export type reimburseUncheckedCreateInput = {
@@ -485,6 +498,7 @@ export type reimburseUncheckedCreateInput = {
   approveadmin: string
   noteadmin: string
   buktitf: string
+  laporan_at?: Date | string | null
 }
 
 export type reimburseUpdateInput = {
@@ -507,6 +521,7 @@ export type reimburseUpdateInput = {
   approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
   noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
   buktitf?: Prisma.StringFieldUpdateOperationsInput | string
+  laporan_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type reimburseUncheckedUpdateInput = {
@@ -530,6 +545,7 @@ export type reimburseUncheckedUpdateInput = {
   approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
   noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
   buktitf?: Prisma.StringFieldUpdateOperationsInput | string
+  laporan_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type reimburseCreateManyInput = {
@@ -553,6 +569,7 @@ export type reimburseCreateManyInput = {
   approveadmin: string
   noteadmin: string
   buktitf: string
+  laporan_at?: Date | string | null
 }
 
 export type reimburseUpdateManyMutationInput = {
@@ -575,6 +592,7 @@ export type reimburseUpdateManyMutationInput = {
   approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
   noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
   buktitf?: Prisma.StringFieldUpdateOperationsInput | string
+  laporan_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type reimburseUncheckedUpdateManyInput = {
@@ -598,6 +616,7 @@ export type reimburseUncheckedUpdateManyInput = {
   approveadmin?: Prisma.StringFieldUpdateOperationsInput | string
   noteadmin?: Prisma.StringFieldUpdateOperationsInput | string
   buktitf?: Prisma.StringFieldUpdateOperationsInput | string
+  laporan_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type reimburseOrderByRelevanceInput = {
@@ -627,6 +646,7 @@ export type reimburseCountOrderByAggregateInput = {
   approveadmin?: Prisma.SortOrder
   noteadmin?: Prisma.SortOrder
   buktitf?: Prisma.SortOrder
+  laporan_at?: Prisma.SortOrder
 }
 
 export type reimburseAvgOrderByAggregateInput = {
@@ -654,6 +674,7 @@ export type reimburseMaxOrderByAggregateInput = {
   approveadmin?: Prisma.SortOrder
   noteadmin?: Prisma.SortOrder
   buktitf?: Prisma.SortOrder
+  laporan_at?: Prisma.SortOrder
 }
 
 export type reimburseMinOrderByAggregateInput = {
@@ -677,6 +698,7 @@ export type reimburseMinOrderByAggregateInput = {
   approveadmin?: Prisma.SortOrder
   noteadmin?: Prisma.SortOrder
   buktitf?: Prisma.SortOrder
+  laporan_at?: Prisma.SortOrder
 }
 
 export type reimburseSumOrderByAggregateInput = {
@@ -706,6 +728,7 @@ export type reimburseSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   approveadmin?: boolean
   noteadmin?: boolean
   buktitf?: boolean
+  laporan_at?: boolean
 }, ExtArgs["result"]["reimburse"]>
 
 
@@ -731,9 +754,10 @@ export type reimburseSelectScalar = {
   approveadmin?: boolean
   noteadmin?: boolean
   buktitf?: boolean
+  laporan_at?: boolean
 }
 
-export type reimburseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_reimburse" | "id_event" | "ajukan" | "namabank" | "norek" | "namarek" | "danausul" | "danariil" | "laporan" | "reimburse" | "approvenasional" | "approvepphtgd" | "approvekeuangan" | "notenasional" | "notepphtgd" | "notekeuangan" | "bukti" | "approveadmin" | "noteadmin" | "buktitf", ExtArgs["result"]["reimburse"]>
+export type reimburseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_reimburse" | "id_event" | "ajukan" | "namabank" | "norek" | "namarek" | "danausul" | "danariil" | "laporan" | "reimburse" | "approvenasional" | "approvepphtgd" | "approvekeuangan" | "notenasional" | "notepphtgd" | "notekeuangan" | "bukti" | "approveadmin" | "noteadmin" | "buktitf" | "laporan_at", ExtArgs["result"]["reimburse"]>
 
 export type $reimbursePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "reimburse"
@@ -759,6 +783,7 @@ export type $reimbursePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     approveadmin: string
     noteadmin: string
     buktitf: string
+    laporan_at: Date | null
   }, ExtArgs["result"]["reimburse"]>
   composites: {}
 }
@@ -1148,6 +1173,7 @@ export interface reimburseFieldRefs {
   readonly approveadmin: Prisma.FieldRef<"reimburse", 'String'>
   readonly noteadmin: Prisma.FieldRef<"reimburse", 'String'>
   readonly buktitf: Prisma.FieldRef<"reimburse", 'String'>
+  readonly laporan_at: Prisma.FieldRef<"reimburse", 'DateTime'>
 }
     
 

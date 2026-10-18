@@ -3586,7 +3586,8 @@ export const EventScalarFieldEnum = {
   noteadmin: 'noteadmin',
   qr: 'qr',
   khusus: 'khusus',
-  suratpemberitahuan: 'suratpemberitahuan'
+  suratpemberitahuan: 'suratpemberitahuan',
+  created_at: 'created_at'
 } as const
 
 export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
@@ -3822,7 +3823,8 @@ export const ReimburseScalarFieldEnum = {
   bukti: 'bukti',
   approveadmin: 'approveadmin',
   noteadmin: 'noteadmin',
-  buktitf: 'buktitf'
+  buktitf: 'buktitf',
+  laporan_at: 'laporan_at'
 } as const
 
 export type ReimburseScalarFieldEnum = (typeof ReimburseScalarFieldEnum)[keyof typeof ReimburseScalarFieldEnum]
@@ -4004,7 +4006,8 @@ export const Dokumentasi_kotaScalarFieldEnum = {
   id: 'id',
   id_event: 'id_event',
   kotalevelup: 'kotalevelup',
-  gdrive_link: 'gdrive_link'
+  gdrive_link: 'gdrive_link',
+  created_at: 'created_at'
 } as const
 
 export type Dokumentasi_kotaScalarFieldEnum = (typeof Dokumentasi_kotaScalarFieldEnum)[keyof typeof Dokumentasi_kotaScalarFieldEnum]

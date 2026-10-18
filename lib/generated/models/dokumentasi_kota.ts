@@ -41,6 +41,7 @@ export type Dokumentasi_kotaMinAggregateOutputType = {
   id_event: number | null
   kotalevelup: string | null
   gdrive_link: string | null
+  created_at: Date | null
 }
 
 export type Dokumentasi_kotaMaxAggregateOutputType = {
@@ -48,6 +49,7 @@ export type Dokumentasi_kotaMaxAggregateOutputType = {
   id_event: number | null
   kotalevelup: string | null
   gdrive_link: string | null
+  created_at: Date | null
 }
 
 export type Dokumentasi_kotaCountAggregateOutputType = {
@@ -55,6 +57,7 @@ export type Dokumentasi_kotaCountAggregateOutputType = {
   id_event: number
   kotalevelup: number
   gdrive_link: number
+  created_at: number
   _all: number
 }
 
@@ -74,6 +77,7 @@ export type Dokumentasi_kotaMinAggregateInputType = {
   id_event?: true
   kotalevelup?: true
   gdrive_link?: true
+  created_at?: true
 }
 
 export type Dokumentasi_kotaMaxAggregateInputType = {
@@ -81,6 +85,7 @@ export type Dokumentasi_kotaMaxAggregateInputType = {
   id_event?: true
   kotalevelup?: true
   gdrive_link?: true
+  created_at?: true
 }
 
 export type Dokumentasi_kotaCountAggregateInputType = {
@@ -88,6 +93,7 @@ export type Dokumentasi_kotaCountAggregateInputType = {
   id_event?: true
   kotalevelup?: true
   gdrive_link?: true
+  created_at?: true
   _all?: true
 }
 
@@ -182,6 +188,7 @@ export type Dokumentasi_kotaGroupByOutputType = {
   id_event: number
   kotalevelup: string
   gdrive_link: string
+  created_at: Date | null
   _count: Dokumentasi_kotaCountAggregateOutputType | null
   _avg: Dokumentasi_kotaAvgAggregateOutputType | null
   _sum: Dokumentasi_kotaSumAggregateOutputType | null
@@ -212,6 +219,7 @@ export type dokumentasi_kotaWhereInput = {
   id_event?: Prisma.IntFilter<"dokumentasi_kota"> | number
   kotalevelup?: Prisma.StringFilter<"dokumentasi_kota"> | string
   gdrive_link?: Prisma.StringFilter<"dokumentasi_kota"> | string
+  created_at?: Prisma.DateTimeNullableFilter<"dokumentasi_kota"> | Date | string | null
 }
 
 export type dokumentasi_kotaOrderByWithRelationInput = {
@@ -219,6 +227,7 @@ export type dokumentasi_kotaOrderByWithRelationInput = {
   id_event?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
   gdrive_link?: Prisma.SortOrder
+  created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _relevance?: Prisma.dokumentasi_kotaOrderByRelevanceInput
 }
 
@@ -230,6 +239,7 @@ export type dokumentasi_kotaWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.dokumentasi_kotaWhereInput | Prisma.dokumentasi_kotaWhereInput[]
   kotalevelup?: Prisma.StringFilter<"dokumentasi_kota"> | string
   gdrive_link?: Prisma.StringFilter<"dokumentasi_kota"> | string
+  created_at?: Prisma.DateTimeNullableFilter<"dokumentasi_kota"> | Date | string | null
 }, "id" | "id_event">
 
 export type dokumentasi_kotaOrderByWithAggregationInput = {
@@ -237,6 +247,7 @@ export type dokumentasi_kotaOrderByWithAggregationInput = {
   id_event?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
   gdrive_link?: Prisma.SortOrder
+  created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.dokumentasi_kotaCountOrderByAggregateInput
   _avg?: Prisma.dokumentasi_kotaAvgOrderByAggregateInput
   _max?: Prisma.dokumentasi_kotaMaxOrderByAggregateInput
@@ -252,12 +263,14 @@ export type dokumentasi_kotaScalarWhereWithAggregatesInput = {
   id_event?: Prisma.IntWithAggregatesFilter<"dokumentasi_kota"> | number
   kotalevelup?: Prisma.StringWithAggregatesFilter<"dokumentasi_kota"> | string
   gdrive_link?: Prisma.StringWithAggregatesFilter<"dokumentasi_kota"> | string
+  created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"dokumentasi_kota"> | Date | string | null
 }
 
 export type dokumentasi_kotaCreateInput = {
   id_event: number
   kotalevelup: string
   gdrive_link: string
+  created_at?: Date | string | null
 }
 
 export type dokumentasi_kotaUncheckedCreateInput = {
@@ -265,12 +278,14 @@ export type dokumentasi_kotaUncheckedCreateInput = {
   id_event: number
   kotalevelup: string
   gdrive_link: string
+  created_at?: Date | string | null
 }
 
 export type dokumentasi_kotaUpdateInput = {
   id_event?: Prisma.IntFieldUpdateOperationsInput | number
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
   gdrive_link?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type dokumentasi_kotaUncheckedUpdateInput = {
@@ -278,6 +293,7 @@ export type dokumentasi_kotaUncheckedUpdateInput = {
   id_event?: Prisma.IntFieldUpdateOperationsInput | number
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
   gdrive_link?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type dokumentasi_kotaCreateManyInput = {
@@ -285,12 +301,14 @@ export type dokumentasi_kotaCreateManyInput = {
   id_event: number
   kotalevelup: string
   gdrive_link: string
+  created_at?: Date | string | null
 }
 
 export type dokumentasi_kotaUpdateManyMutationInput = {
   id_event?: Prisma.IntFieldUpdateOperationsInput | number
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
   gdrive_link?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type dokumentasi_kotaUncheckedUpdateManyInput = {
@@ -298,6 +316,7 @@ export type dokumentasi_kotaUncheckedUpdateManyInput = {
   id_event?: Prisma.IntFieldUpdateOperationsInput | number
   kotalevelup?: Prisma.StringFieldUpdateOperationsInput | string
   gdrive_link?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type dokumentasi_kotaOrderByRelevanceInput = {
@@ -311,6 +330,7 @@ export type dokumentasi_kotaCountOrderByAggregateInput = {
   id_event?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
   gdrive_link?: Prisma.SortOrder
+  created_at?: Prisma.SortOrder
 }
 
 export type dokumentasi_kotaAvgOrderByAggregateInput = {
@@ -323,6 +343,7 @@ export type dokumentasi_kotaMaxOrderByAggregateInput = {
   id_event?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
   gdrive_link?: Prisma.SortOrder
+  created_at?: Prisma.SortOrder
 }
 
 export type dokumentasi_kotaMinOrderByAggregateInput = {
@@ -330,6 +351,7 @@ export type dokumentasi_kotaMinOrderByAggregateInput = {
   id_event?: Prisma.SortOrder
   kotalevelup?: Prisma.SortOrder
   gdrive_link?: Prisma.SortOrder
+  created_at?: Prisma.SortOrder
 }
 
 export type dokumentasi_kotaSumOrderByAggregateInput = {
@@ -344,6 +366,7 @@ export type dokumentasi_kotaSelect<ExtArgs extends runtime.Types.Extensions.Inte
   id_event?: boolean
   kotalevelup?: boolean
   gdrive_link?: boolean
+  created_at?: boolean
 }, ExtArgs["result"]["dokumentasi_kota"]>
 
 
@@ -353,9 +376,10 @@ export type dokumentasi_kotaSelectScalar = {
   id_event?: boolean
   kotalevelup?: boolean
   gdrive_link?: boolean
+  created_at?: boolean
 }
 
-export type dokumentasi_kotaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "id_event" | "kotalevelup" | "gdrive_link", ExtArgs["result"]["dokumentasi_kota"]>
+export type dokumentasi_kotaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "id_event" | "kotalevelup" | "gdrive_link" | "created_at", ExtArgs["result"]["dokumentasi_kota"]>
 
 export type $dokumentasi_kotaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "dokumentasi_kota"
@@ -365,6 +389,7 @@ export type $dokumentasi_kotaPayload<ExtArgs extends runtime.Types.Extensions.In
     id_event: number
     kotalevelup: string
     gdrive_link: string
+    created_at: Date | null
   }, ExtArgs["result"]["dokumentasi_kota"]>
   composites: {}
 }
@@ -738,6 +763,7 @@ export interface dokumentasi_kotaFieldRefs {
   readonly id_event: Prisma.FieldRef<"dokumentasi_kota", 'Int'>
   readonly kotalevelup: Prisma.FieldRef<"dokumentasi_kota", 'String'>
   readonly gdrive_link: Prisma.FieldRef<"dokumentasi_kota", 'String'>
+  readonly created_at: Prisma.FieldRef<"dokumentasi_kota", 'DateTime'>
 }
     
 

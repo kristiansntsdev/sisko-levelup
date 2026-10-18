@@ -28,6 +28,28 @@ async function ensureEventColumn(name: string, ddl: string): Promise<boolean> {
   return missing
 }
 
+/**
+ * Kolom timestamp baru: baris lama tetap NULL ("tidak tercatat"), baris baru
+ * dapat CURRENT_TIMESTAMP. ADD dengan DEFAULT langsung akan mengisi semua baris
+ * lama dengan waktu migrate — Form Monitoring jadi salah menilai H-14 / H+14.
+ */
+async function ensureTimestampColumn(table: string, name: string, withDefault: boolean): Promise<boolean> {
+  const cols = await db.$queryRaw<{ COLUMN_NAME: string }[]>`
+    SELECT COLUMN_NAME FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = ${table}
+      AND COLUMN_NAME = ${name}
+  `
+  if (cols.length > 0) return false
+  await db.$executeRawUnsafe(`ALTER TABLE ${table} ADD COLUMN ${name} DATETIME(0) NULL`)
+  if (withDefault) {
+    await db.$executeRawUnsafe(
+      `ALTER TABLE ${table} MODIFY COLUMN ${name} DATETIME(0) NULL DEFAULT CURRENT_TIMESTAMP`,
+    )
+  }
+  return true
+}
+
 /** Idempotent prod: event columns, wfe_serentak, brimnasional divisi=brim. */
 export async function POST(req: NextRequest) {
   if (!checkSecret(req)) return unauthorized()
@@ -168,6 +190,10 @@ export async function POST(req: NextRequest) {
     `)
   }
 
+  const addedEventCreatedAt = await ensureTimestampColumn('event', 'created_at', true)
+  const addedDokumentasiCreatedAt = await ensureTimestampColumn('dokumentasi_kota', 'created_at', true)
+  const addedReimburseLaporanAt = await ensureTimestampColumn('reimburse', 'laporan_at', false)
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -193,6 +219,9 @@ export async function POST(req: NextRequest) {
     addedWwtypeNasional,
     wwtypeBackfill,
     addedAppLog,
+    addedEventCreatedAt,
+    addedDokumentasiCreatedAt,
+    addedReimburseLaporanAt,
     brimUpdated: brim.count,
     brim: row,
   })

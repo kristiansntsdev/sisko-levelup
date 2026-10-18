@@ -93,11 +93,15 @@ export async function submitReimburse(idEvent: number, input: SubmitReimburseInp
     throw new Error('Pengajuan sudah disetujui, tidak bisa diedit')
   }
 
+  const laporan = input.laporan.trim()
   const data = {
     id_event: String(idEvent),
     ajukan: input.ajukan,
     bukti: input.bukti.trim(),
-    laporan: input.laporan.trim(),
+    laporan,
+    // Form Monitoring H+14: waktu LPJ pertama kali diisi. Baris lama yang sudah
+    // berisi laporan tanpa laporan_at tetap NULL (tidak tercatat), bukan "sekarang".
+    laporan_at: !laporan ? null : existing?.laporan ? existing.laporan_at : new Date(),
     danausul: input.danausul,
     danariil: input.danariil,
     norek: input.norek.trim(),
