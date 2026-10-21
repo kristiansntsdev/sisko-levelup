@@ -219,6 +219,8 @@ export type AbsenRow = {
   nama: string
   email: string
   userlevel: string
+  /** namacabang dari peserta.kotalevelup; kosong kalau tidak ketemu */
+  kota: string
   timestamp: string
   id_sesi: number | null
   sesiNama: string | null
@@ -294,10 +296,18 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
   const pesertaList = pesertaIds.length
     ? await db.peserta.findMany({
         where: { id_peserta: { in: pesertaIds } },
-        select: { id_peserta: true, nama: true, userlevel: true },
+        select: { id_peserta: true, nama: true, userlevel: true, kotalevelup: true },
       })
     : []
   const pesertaMap = new Map(pesertaList.map((p) => [String(p.id_peserta), p]))
+  const cabangIds = [...new Set(pesertaList.map((p) => Number(p.kotalevelup)).filter((n) => Number.isInteger(n) && n > 0))]
+  const cabangList = cabangIds.length
+    ? await db.cabang.findMany({
+        where: { id_cabang: { in: cabangIds } },
+        select: { id_cabang: true, namacabang: true },
+      })
+    : []
+  const cabangMap = new Map(cabangList.map((c) => [String(c.id_cabang), c.namacabang]))
   const sesiMap = new Map(event.event_sesi.map((s) => [s.id_sesi, s.nama]))
 
   return {
@@ -347,6 +357,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
         nama: p?.nama ?? `Peserta #${a.id_peserta}`,
         email: a.email,
         userlevel: p?.userlevel ?? '',
+        kota: (p && cabangMap.get(String(Number(p.kotalevelup)))) ?? '',
         timestamp: a.timestamp.toISOString(),
         id_sesi: a.id_sesi ?? null,
         sesiNama: a.id_sesi != null ? (sesiMap.get(a.id_sesi) ?? null) : null,

@@ -436,6 +436,11 @@ export function EventDetailPage({ event, backUrl, reimburse }: EventDetailPagePr
                             {USERLEVEL_LABEL[a.userlevel]}
                           </span>
                         )}
+                        {a.kota && (
+                          <span className="shrink-0 text-[12px] font-normal text-muted">
+                            – {a.kota}
+                          </span>
+                        )}
                       </p>
                       <p className="text-[11px] text-muted truncate">
                         {a.sesiNama ? `${a.sesiNama} · ` : ''}{a.email}
