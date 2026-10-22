@@ -1,13 +1,14 @@
 'use client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Button, Input } from '@/components/ui'
+import { Button, Input, Select } from '@/components/ui'
 import {
   onlineCheckin,
   type OnlineAbsenEvent,
   type OnlineCheckinProfile,
   type OnlineCheckinSesi,
 } from '@/lib/actions/absen-online'
+import type { CabangOption } from '@/lib/actions/event'
 import { getOnlineAbsenWindow } from '@/lib/event-absen-window'
 
 type View =
@@ -22,15 +23,17 @@ const FAIL_MESSAGE: Record<string, string> = {
   unauthenticated: 'Sesi login habis. Muat ulang halaman ini untuk login lagi.',
   not_found: 'Event tidak ditemukan.',
   not_online: 'Event ini bukan event online.',
-  invalid_profile: 'Nama dan No. WA wajib diisi.',
+  invalid_profile: 'Nama, No. WA, dan LevelUP wajib diisi.',
   error: 'Gagal menyimpan. Coba lagi.',
 }
 
 export function CheckinClient({
   event,
+  cabangs,
   defaultProfile,
 }: {
   event: OnlineAbsenEvent
+  cabangs: CabangOption[]
   defaultProfile: OnlineCheckinProfile
 }) {
   const [view, setView] = useState<View>({ kind: 'working' })
@@ -96,11 +99,12 @@ export function CheckinClient({
         {view.kind === 'profile' && (
           <ProfileForm
             profile={profile}
+            cabangs={cabangs}
             error={formError}
             onChange={(patch) => setProfile((p) => ({ ...p, ...patch }))}
             onSubmit={() => {
-              if (!profile.nama.trim() || !profile.nowa.trim()) {
-                setFormError('Nama dan No. WA wajib diisi.')
+              if (!profile.nama.trim() || !profile.nowa.trim() || !profile.kotalevelup) {
+                setFormError(FAIL_MESSAGE.invalid_profile)
                 return
               }
               setFormError('')
@@ -251,11 +255,13 @@ function Waiting({
 
 function ProfileForm({
   profile,
+  cabangs,
   error,
   onChange,
   onSubmit,
 }: {
   profile: OnlineCheckinProfile
+  cabangs: CabangOption[]
   error: string
   onChange: (patch: Partial<OnlineCheckinProfile>) => void
   onSubmit: () => void
@@ -283,6 +289,16 @@ function ProfileForm({
           value={profile.nowa}
           onChange={(e) => onChange({ nowa: e.target.value })}
         />
+        <Select
+          label="LevelUP Kota"
+          value={profile.kotalevelup}
+          onChange={(e) => onChange({ kotalevelup: e.target.value })}
+        >
+          <option value="" disabled>Pilih LevelUP...</option>
+          {cabangs.map((c) => (
+            <option key={c.id} value={c.id}>{c.nama}</option>
+          ))}
+        </Select>
         <Input
           label="Gereja"
           placeholder="Nama gereja"

@@ -7,6 +7,9 @@ export type { ButtonProps, ButtonVariant, ButtonSize } from './button';
 export { Input } from './input';
 export type { InputProps } from './input';
 
+export { Select } from './select';
+export type { SelectProps } from './select';
+
 export { Toggle } from './toggle';
 export type { ToggleProps } from './toggle';
 

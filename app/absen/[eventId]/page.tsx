@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { getOnlineAbsenEvent } from '@/lib/actions/absen-online'
+import { getCabangs } from '@/lib/actions/event'
 import { getPesertaById } from '@/lib/actions/peserta'
 import { isOnlineEvent } from '@/lib/event-link'
 import { CheckinClient } from './checkin-client'
@@ -40,14 +41,18 @@ export default async function AbsenOnlinePage({
     redirect(`/login?auto=1&callbackUrl=${encodeURIComponent(`/absen/${id}`)}`)
   }
 
-  const peserta = await getPesertaById(idPeserta)
+  const [peserta, cabangs] = await Promise.all([getPesertaById(idPeserta), getCabangs()])
 
   return (
     <CheckinClient
       event={event}
+      cabangs={cabangs}
       defaultProfile={{
         nama: peserta?.nama?.trim() || session?.user?.name || '',
         nowa: peserta?.nowa ?? '',
+        // Peserta baru (No. WA kosong) dapat kotalevelup default di auth.ts —
+        // kosongkan supaya dipilih sendiri.
+        kotalevelup: peserta?.nowa ? peserta.kotalevelup : '',
         gereja: peserta?.gereja ?? '',
         sekolah: peserta?.pekerjaan ?? '',
       }}

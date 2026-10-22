@@ -212,6 +212,8 @@ export type RegistrasiRow = {
   nama: string
   email: string
   gereja: string
+  /** namacabang dari peserta.kotalevelup; kosong kalau tidak ketemu */
+  kota: string
 }
 
 export type AbsenRow = {
@@ -274,7 +276,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
         select: {
           id_registrasi: true,
           id_peserta: true,
-          peserta: { select: { nama: true, email: true, gereja: true } },
+          peserta: { select: { nama: true, email: true, gereja: true, kotalevelup: true } },
         },
       },
       event_sesi: {
@@ -300,7 +302,11 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       })
     : []
   const pesertaMap = new Map(pesertaList.map((p) => [String(p.id_peserta), p]))
-  const cabangIds = [...new Set(pesertaList.map((p) => Number(p.kotalevelup)).filter((n) => Number.isInteger(n) && n > 0))]
+  const cabangIds = [...new Set(
+    [...pesertaList.map((p) => p.kotalevelup), ...event.registrasi.map((r) => r.peserta.kotalevelup)]
+      .map(Number)
+      .filter((n) => Number.isInteger(n) && n > 0),
+  )]
   const cabangList = cabangIds.length
     ? await db.cabang.findMany({
         where: { id_cabang: { in: cabangIds } },
@@ -348,6 +354,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       nama: r.peserta.nama,
       email: r.peserta.email,
       gereja: r.peserta.gereja,
+      kota: cabangMap.get(String(Number(r.peserta.kotalevelup))) ?? '',
     })),
     absen: absenRows.map((a) => {
       const pid = a.id_peserta_int ?? parseInt(a.id_peserta, 10)

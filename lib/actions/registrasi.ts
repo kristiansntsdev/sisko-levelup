@@ -5,12 +5,13 @@ import { resolveEventPosterUrl } from '@/lib/event-poster'
 import { formatTelegramMessage, notifyTelegram, eventDetailLink } from '@/lib/telegram'
 import { wibStartOfMonth, wibStartOfNextMonth, wibToday } from '@/lib/wib'
 
-export async function updatePesertaProfile(idPeserta: number, data: { nama: string; nowa: string; gereja: string; sekolah: string; idTempatKerja: number | null }) {
+export async function updatePesertaProfile(idPeserta: number, data: { nama: string; nowa: string; kotalevelup: string; gereja: string; sekolah: string; idTempatKerja: number | null }) {
   await db.peserta.update({
     where: { id_peserta: idPeserta },
     data: {
       nama: data.nama,
       nowa: data.nowa,
+      kotalevelup: data.kotalevelup,
       gereja: data.gereja,
       pekerjaan: data.sekolah,
       id_tempat_kerja: data.idTempatKerja,

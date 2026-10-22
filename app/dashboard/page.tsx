@@ -2,11 +2,12 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
-import { Card } from '@/components/ui'
+import { Button, Card, Select } from '@/components/ui'
 import { getRegistrasiByPeserta } from '@/lib/actions/registrasi'
 import { getPesertaById } from '@/lib/actions/peserta'
 import { getDokumentasiForPeserta } from '@/lib/actions/dokumentasi'
 import type { DokumentasiPeserta } from '@/lib/actions/dokumentasi'
+import { getCabangs, type CabangOption } from '@/lib/actions/event'
 import { joinVolunteer, joinSquad, getPendingSquadForMe } from '@/lib/actions/upgrade'
 import { wibToday } from '@/lib/wib'
 
@@ -27,6 +28,8 @@ export default function DashboardPage() {
   const [userLevel, setUserLevel] = useState<number | null>(null)
   const [dokumentasi, setDokumentasi] = useState<DokumentasiPeserta[]>([])
   const [pendingSquad, setPendingSquad] = useState(false)
+  const [kotalevelup, setKotalevelup] = useState('')
+  const [squadSheetOpen, setSquadSheetOpen] = useState(false)
   const [joinLoading, setJoinLoading] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
 
@@ -42,7 +45,7 @@ export default function DashboardPage() {
       setRegistrasi(regs)
       setDokumentasi(docs)
       setPendingSquad(pending)
-      if (p) { setNama(p.nama); setUserLevel(Number(p.userlevel)) }
+      if (p) { setNama(p.nama); setUserLevel(Number(p.userlevel)); setKotalevelup(p.kotalevelup) }
       setDataLoading(false)
     })
   }, [session?.user?.idPeserta])
@@ -56,12 +59,8 @@ export default function DashboardPage() {
       setJoinLoading(false)
       return
     }
-    if (userLevel === 1 && !pendingSquad) {
-      setJoinLoading(true)
-      const res = await joinSquad()
-      if (res.ok) setPendingSquad(true)
-      setJoinLoading(false)
-    }
+    // Squad (baru atau masih pending) → pilih LevelUP kota di sheet.
+    if (userLevel === 1) setSquadSheetOpen(true)
   }
 
   const isLoading = status === 'loading' || dataLoading
@@ -82,7 +81,7 @@ export default function DashboardPage() {
           {userLevel !== null && userLevel < 3 && (
             <button
               onClick={handleJoin}
-              disabled={joinLoading || (userLevel === 1 && pendingSquad) || userLevel === 2}
+              disabled={joinLoading || userLevel === 2}
               className="text-xs font-medium text-accent bg-accent-light px-3 py-1.5 rounded-full disabled:opacity-50"
             >
               {userLevel === 1 && pendingSquad ? 'menunggu approval' : JOIN_LABELS[userLevel]}
@@ -230,7 +229,96 @@ export default function DashboardPage() {
         )}
 
       </div>
+
+      {squadSheetOpen && (
+        <SquadSheet
+          pending={pendingSquad}
+          currentKota={kotalevelup}
+          onClose={() => setSquadSheetOpen(false)}
+          onDone={(kota) => {
+            setKotalevelup(kota)
+            setPendingSquad(true)
+            setSquadSheetOpen(false)
+          }}
+        />
+      )}
     </main>
+  )
+}
+
+function SquadSheet({
+  pending,
+  currentKota,
+  onClose,
+  onDone,
+}: {
+  pending: boolean
+  currentKota: string
+  onClose: () => void
+  onDone: (kota: string) => void
+}) {
+  const [cabangs, setCabangs] = useState<CabangOption[]>([])
+  const [kota, setKota] = useState(currentKota)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    getCabangs().then(setCabangs)
+  }, [])
+
+  const namaKota = cabangs.find((c) => c.id === currentKota)?.nama ?? 'LevelUP kota'
+
+  async function handleSubmit() {
+    if (!kota) { setError('Pilih LevelUP kota.'); return }
+    setError('')
+    setLoading(true)
+    const res = await joinSquad(kota)
+    setLoading(false)
+    if (res.ok) onDone(kota)
+    else setError(res.error)
+  }
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 z-[200] flex items-end"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="w-full max-w-[480px] mx-auto bg-surface rounded-t-[24px] px-5 pt-3 pb-10">
+        <div className="w-9 h-1 rounded-full bg-border mx-auto mb-5" />
+        <p className="text-[18px] font-bold text-fg">
+          {pending ? 'Pengajuan Squad' : 'Ajukan Jadi Member Kota'}
+        </p>
+        <p className="text-sm text-muted mt-1 mb-4">
+          {pending
+            ? `Pengajuan kamu ke ${namaKota} sedang menunggu approval ALK. Salah kota? Pindahkan di sini.`
+            : 'Pilih LevelUP kota tujuan. ALK kota itu yang akan approve kamu jadi squad.'}
+        </p>
+
+        <div className="flex flex-col gap-4">
+          <Select
+            label="LevelUP Kota"
+            value={kota}
+            onChange={(e) => setKota(e.target.value)}
+          >
+            <option value="" disabled>Pilih LevelUP...</option>
+            {cabangs.map((c) => (
+              <option key={c.id} value={c.id}>{c.nama}</option>
+            ))}
+          </Select>
+
+          {error && <p className="text-sm text-red font-medium">{error}</p>}
+
+          <Button
+            fullWidth
+            size="lg"
+            onClick={handleSubmit}
+            disabled={loading || !kota || (pending && kota === currentKota)}
+          >
+            {loading ? 'Mengirim...' : pending ? 'Pindahkan Pengajuan' : 'Ajukan'}
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }
 

@@ -59,6 +59,11 @@ scripts/monitoring-sheet.gs           # Apps Script: paste ke spreadsheet, sync 
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-10-22]
+- Daftar (`/daftar` + form data diri `/absen/[eventId]`): dropdown LevelUP Kota (`getCabangs`) → `peserta.kotalevelup`, wajib. Peserta baru (No. WA kosong) mulai kosong — `auth.ts` tetap isi `'2'` sebagai placeholder, jangan dipakai sebagai default form
+- Atom baru `components/ui/select.tsx` (`Select`, gaya sama dengan `Input`)
+- Join squad (dashboard): tombol buka sheet pilih LevelUP kota → `joinSquad(kotalevelup)` set `peserta.kotalevelup` + insert `upgrade`. Saat pending tombol tetap bisa diklik → pindah pengajuan ke kota lain (approval ALK ikut `peserta.kotalevelup`)
+
 ## Recent Updates [2026-10-18]
 - Form Monitoring Teknis live di Google Sheets: Apps Script tarik `/api/internal/monitoring-sheet` tiap 5 menit, satu tab per tahun, section per bulan. Semua event kota (`id_cabang` ≠ 0)
 - Centang Berita Acara/Flyer + Keterangan = manual reviewer, dipertahankan per `id_event` (kolom P tersembunyi); kolom lain otomatis

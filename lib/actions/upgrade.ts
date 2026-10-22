@@ -63,7 +63,12 @@ export async function joinVolunteer(): Promise<Result> {
   return { ok: true }
 }
 
-export async function joinSquad(): Promise<Result> {
+/**
+ * Ajukan jadi squad di LevelUP kota pilihan. Approval ALK difilter lewat
+ * `peserta.kotalevelup`, jadi kota disimpan di situ; dipanggil ulang saat
+ * pengajuan masih pending = pindah pengajuan ke kota lain.
+ */
+export async function joinSquad(kotalevelup: string): Promise<Result> {
   const idPeserta = await requirePesertaId()
   if (!idPeserta) return { ok: false, error: 'Tidak login' }
   const p = await db.peserta.findUnique({
@@ -71,22 +76,38 @@ export async function joinSquad(): Promise<Result> {
     select: { userlevel: true },
   })
   if (!p || p.userlevel !== '1') return { ok: false, error: 'Tidak bisa join squad' }
+  const cabang = await db.cabang.findUnique({
+    where: { id_cabang: Number(kotalevelup) || 0 },
+    select: { id_cabang: true },
+  })
+  if (!cabang) return { ok: false, error: 'Pilih LevelUP kota' }
   const existing = await db.upgrade.findFirst({
     where: { id_peserta: String(idPeserta) },
     select: { id_upgrade: true },
   })
-  if (existing) return { ok: true }
-  await db.upgrade.create({
-    data: {
-      id_peserta: String(idPeserta),
-      member: '2',
-      approveadmin: '',
-      approvesekertariat: '',
-      approvenasional: '',
-    },
+  const setKota = db.peserta.update({
+    where: { id_peserta: idPeserta },
+    data: { kotalevelup: String(cabang.id_cabang) },
   })
+  if (existing) {
+    await setKota
+  } else {
+    await db.$transaction([
+      setKota,
+      db.upgrade.create({
+        data: {
+          id_peserta: String(idPeserta),
+          member: '2',
+          approveadmin: '',
+          approvesekertariat: '',
+          approvenasional: '',
+        },
+      }),
+    ])
+  }
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/kota/alk')
+  revalidatePath('/dashboard/kota/alk/approval')
   return { ok: true }
 }
 

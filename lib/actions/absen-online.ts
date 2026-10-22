@@ -17,6 +17,8 @@ import { resolveEventPosterUrl } from '@/lib/event-poster'
 export type OnlineCheckinProfile = {
   nama: string
   nowa: string
+  /** `id_cabang` LevelUP pilihan peserta. */
+  kotalevelup: string
   gereja: string
   sekolah: string
 }
@@ -33,7 +35,7 @@ export type OnlineCheckinResult =
   | { status: 'attended' }
   /** Registrasi tercatat, absen belum bisa (di luar jendela). */
   | { status: 'registered'; phase: OnlineAbsenPhase; endAtMs: number | null }
-  /** Nama / No. WA masih kosong — isi dulu lalu kirim ulang. */
+  /** Nama / No. WA masih kosong — isi dulu (plus LevelUP) lalu kirim ulang. */
   | { status: 'need_profile' }
   /** Event multi-sesi — peserta pilih sesi yang sedang berjalan. */
   | { status: 'need_sesi'; sesi: OnlineCheckinSesi[] }
@@ -108,12 +110,13 @@ export async function onlineCheckin(
   if (!isOnlineEvent(event.jenisevent)) return { status: 'failed', reason: 'not_online' }
 
   try {
-    // 1. Data diri — nama + No. WA wajib sebelum registrasi.
+    // 1. Data diri — nama + No. WA + LevelUP wajib sebelum registrasi.
     const profile = input?.profile
     if (profile) {
       const nama = profile.nama.trim()
       const nowa = profile.nowa.trim()
-      if (!nama || !nowa) return { status: 'failed', reason: 'invalid_profile' }
+      const kotalevelup = profile.kotalevelup.trim()
+      if (!nama || !nowa || !kotalevelup) return { status: 'failed', reason: 'invalid_profile' }
       const sekolah = profile.sekolah.trim()
       const idTempatKerja = sekolah ? await upsertJobsPlace(sekolah) : null
       await db.peserta.update({
@@ -121,6 +124,7 @@ export async function onlineCheckin(
         data: {
           nama,
           nowa,
+          kotalevelup,
           gereja: profile.gereja.trim(),
           pekerjaan: sekolah,
           id_tempat_kerja: idTempatKerja,

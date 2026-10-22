@@ -2,9 +2,10 @@
 import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { Button, Input } from '@/components/ui'
+import { Button, Input, Select } from '@/components/ui'
 import { createRegistrasi, updatePesertaProfile } from '@/lib/actions/registrasi'
 import { getPesertaById } from '@/lib/actions/peserta'
+import { getCabangs, type CabangOption } from '@/lib/actions/event'
 import { upsertJobsPlace } from '@/lib/actions/jobs-place'
 
 function DaftarForm() {
@@ -15,10 +16,16 @@ function DaftarForm() {
 
   const [nama, setNama] = useState('')
   const [nowa, setNowa] = useState('')
+  const [kotalevelup, setKotalevelup] = useState('')
+  const [cabangs, setCabangs] = useState<CabangOption[]>([])
   const [gereja, setGereja] = useState('')
   const [sekolah, setSekolah] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    getCabangs().then(setCabangs)
+  }, [])
 
   useEffect(() => {
     const idPeserta = session?.user?.idPeserta
@@ -26,7 +33,12 @@ function DaftarForm() {
     getPesertaById(idPeserta).then((p) => {
       if (!p) return
       setNama(p.nama)
-      if (p.nowa) setNowa(p.nowa)
+      // Peserta baru dari login Google dapat kotalevelup default di auth.ts —
+      // biarkan kosong supaya dipilih sendiri, bukan ikut default.
+      if (p.nowa) {
+        setNowa(p.nowa)
+        setKotalevelup(p.kotalevelup)
+      }
       if (p.gereja) setGereja(p.gereja)
       if (p.pekerjaan) setSekolah(p.pekerjaan)
     })
@@ -38,12 +50,13 @@ function DaftarForm() {
     if (!eventId) { setError('Event tidak ditemukan.'); return }
     if (!nama.trim()) { setError('Nama wajib diisi.'); return }
     if (!nowa.trim()) { setError('Nomor WA wajib diisi.'); return }
+    if (!kotalevelup) { setError('Pilih LevelUP kota kamu.'); return }
 
     setError('')
     setLoading(true)
     try {
       const idTempatKerja = sekolah.trim() ? await upsertJobsPlace(sekolah.trim()) : null
-      await updatePesertaProfile(idPeserta, { nama: nama.trim(), nowa, gereja, sekolah, idTempatKerja })
+      await updatePesertaProfile(idPeserta, { nama: nama.trim(), nowa, kotalevelup, gereja, sekolah, idTempatKerja })
       await createRegistrasi(idPeserta, eventId)
       router.push('/dashboard')
     } catch (e) {
@@ -96,6 +109,16 @@ function DaftarForm() {
             value={nowa}
             onChange={(e) => setNowa(e.target.value)}
           />
+          <Select
+            label="LevelUP Kota"
+            value={kotalevelup}
+            onChange={(e) => setKotalevelup(e.target.value)}
+          >
+            <option value="" disabled>Pilih LevelUP...</option>
+            {cabangs.map((c) => (
+              <option key={c.id} value={c.id}>{c.nama}</option>
+            ))}
+          </Select>
           <Input
             label="Gereja"
             placeholder="Nama gereja"

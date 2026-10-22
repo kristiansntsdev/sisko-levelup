@@ -339,7 +339,14 @@ export function EventDetailPage({ event, backUrl, reimburse }: EventDetailPagePr
                       {regPage * PAGE_SIZE + i + 1}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-medium text-fg truncate">{r.nama}</p>
+                      <p className="text-[13px] font-medium text-fg truncate flex items-center gap-1.5">
+                        <span className="truncate">{r.nama}</span>
+                        {r.kota && (
+                          <span className="shrink-0 text-[12px] font-normal text-muted">
+                            – {r.kota}
+                          </span>
+                        )}
+                      </p>
                       <p className="text-[11px] text-muted truncate">{r.email}</p>
                     </div>
                   </div>
