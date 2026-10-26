@@ -108,6 +108,8 @@ export async function joinSquad(kotalevelup: string): Promise<Result> {
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/kota/alk')
   revalidatePath('/dashboard/kota/alk/approval')
+  revalidatePath('/dashboard/v2/kota/alk')
+  revalidatePath('/dashboard/v2/kota/alk/approval')
   return { ok: true }
 }
 
@@ -159,6 +161,8 @@ export async function approveSquad(idUpgrade: number): Promise<Result> {
   ])
   revalidatePath('/dashboard/kota/alk')
   revalidatePath('/dashboard/kota/alk/approval')
+  revalidatePath('/dashboard/v2/kota/alk')
+  revalidatePath('/dashboard/v2/kota/alk/approval')
   revalidatePath('/dashboard')
   return { ok: true }
 }

@@ -71,9 +71,19 @@ interface EventDetailPageProps {
   event: EventDetailFull
   backUrl: string
   reimburse?: ReimburseData | null
+  /** Prefix for dana/edit links, e.g. `/dashboard/v2/kota/alk/event` */
+  eventBasePath?: string
 }
 
-function DanaSupportCard({ eventId, reimburse }: { eventId: number; reimburse?: ReimburseData | null }) {
+function DanaSupportCard({
+  eventId,
+  reimburse,
+  eventBasePath,
+}: {
+  eventId: number
+  reimburse?: ReimburseData | null
+  eventBasePath: string
+}) {
   const status =
     reimburse?.approvenasional === '1'
       ? { label: 'Disetujui', cls: 'bg-green-light text-green-dark' }
@@ -85,7 +95,7 @@ function DanaSupportCard({ eventId, reimburse }: { eventId: number; reimburse?: 
 
   return (
     <Link
-      href={`/dashboard/kota/alk/event/${eventId}/dana`}
+      href={`${eventBasePath}/${eventId}/dana`}
       className="bg-surface border border-border rounded-card px-4 py-3.5 flex items-center justify-between gap-3 hover:opacity-80 transition-opacity"
     >
       <p className="text-[13px] font-semibold text-fg">Pengajuan Support Dana</p>
@@ -142,7 +152,12 @@ function EventAjukanBar({
   )
 }
 
-export function EventDetailPage({ event, backUrl, reimburse }: EventDetailPageProps) {
+export function EventDetailPage({
+  event,
+  backUrl,
+  reimburse,
+  eventBasePath = '/dashboard/kota/alk/event',
+}: EventDetailPageProps) {
   const [regPage, setRegPage] = useState(0)
   const [absenPage, setAbsenPage] = useState(0)
   const [sesiFilter, setSesiFilter] = useState<number | 'all'>('all')
@@ -224,7 +239,7 @@ export function EventDetailPage({ event, backUrl, reimburse }: EventDetailPagePr
             Detail Event
           </p>
           <Link
-            href={`/dashboard/kota/alk/event/${event.id_event}/edit`}
+            href={`${eventBasePath}/${event.id_event}/edit`}
             className="text-sm text-accent font-medium hover:opacity-80 transition-opacity shrink-0"
           >
             Edit
@@ -270,7 +285,7 @@ export function EventDetailPage({ event, backUrl, reimburse }: EventDetailPagePr
         <FlyerQaSummary
           eventId={event.id_event}
           initial={event.flyerQa}
-          editHref={`/dashboard/kota/alk/event/${event.id_event}/edit`}
+          editHref={`${eventBasePath}/${event.id_event}/edit`}
         />
         <BeritaAcaraQaSummary
           eventId={event.id_event}
@@ -298,7 +313,7 @@ export function EventDetailPage({ event, backUrl, reimburse }: EventDetailPagePr
           ))}
         </div>
 
-        <DanaSupportCard eventId={event.id_event} reimburse={reimburse} />
+        <DanaSupportCard eventId={event.id_event} reimburse={reimburse} eventBasePath={eventBasePath} />
 
         {/* Map */}
         {mapSrc && (

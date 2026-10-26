@@ -143,10 +143,12 @@ export function EventApproveClient({
   event,
   role,
   reimburse,
+  backHref: backHrefProp,
 }: {
   event: EventDetailFull
   role: 'alk' | 'brim'
   reimburse?: ReimburseData | null
+  backHref?: string
 }) {
   const router = useRouter()
   const [alasan, setAlasan] = useState('')
@@ -157,7 +159,8 @@ export function EventApproveClient({
   const alreadyApproved =
     role === 'alk' ? event.approvenasional === '1' : event.approvebrimnas === '1'
   const notes = event.notenasional.trim()
-  const backHref = role === 'alk' ? '/dashboard/kota/alk' : '/dashboard/kota/brim'
+  const backHref =
+    backHrefProp ?? (role === 'alk' ? '/dashboard/kota/alk' : '/dashboard/kota/brim')
 
   function goBack() {
     router.push(backHref)

@@ -34,7 +34,7 @@ app/
   page.tsx                            # Landing overview LevelUP (gerakan) + cuplikan event → /login + /daftar
   login/page.tsx                      # PWA login: email+password (peserta lalu pengurus) + Google
   daftar/page.tsx                     # Pendaftaran; Google baru → completeRegistration
-  dashboard/layout.tsx                # MemberShell bottom nav (skip /dashboard/kota)
+  dashboard/layout.tsx                # MemberShell bottom nav (skip /dashboard/kota + /dashboard/v2/kota)
   dashboard/page.tsx                  # Beranda PWA: MemberCard, level, tiket, ModeSwitch
   dashboard/kartu/                    # Detail Kartu Anggota
   dashboard/tiket/                    # My Tickets (TicketRow) + [id] QR detail proto
@@ -43,10 +43,14 @@ app/
   dashboard/profil/                   # Profil + masuk pengurus sheet
   events/page.tsx                     # List event anggota (proto EventsScreen)
   join/[eventId]/                    # View Event + Get Ticket (Offline; Online → /absen)
-  dashboard/kota/alk/page.tsx         # Beranda ALK (saldo + approval member)
+  dashboard/kota/alk/page.tsx         # Beranda ALK legacy (Kas/Surat shell) — fallback
+  dashboard/v2/kota/alk/              # Sekretariat PWA v2 (proto k-*): beranda, anggota, approval, event, scan, lainnya
+lib/alk-auth.ts                       # requireAlkPengurus for v2 kota ALK
+lib/actions/pengurus-kota.ts          # list/create/update pengurus per kota (Anggota tab)
 lib/actions/pwa-auth.ts               # loginEmailPassword, completeRegistration, dual session
-lib/pengurus-session.ts               # pengurus cookie helpers (shared admin + PWA)
+lib/pengurus-session.ts               # pengurus cookie helpers; alk dest → /dashboard/v2/kota/alk
 lib/pwa-member.ts                     # tier labels + MemberCardData
+components/alk-v2/                    # Sekretariat v2 shell + screens (PWA look, real data)
 components/pwa/                       # LevelUP PWA UI kit + MemberShell (PlainBar/Panel/Qr)
   dashboard/kota/alk/approval/page.tsx # List approval squad dari table upgrade
   dashboard/kota/alk/event/[id]/approve/ # Sekretariat: approve/reject event
@@ -75,6 +79,8 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-10-27]
+- PWA iOS Add to Home Screen: Hero + PlainBar sisakan `env(safe-area-inset-top)` supaya nama/judul tidak ketutup status bar (`black-translucent` + `viewport-fit: cover`)
+- Sekretariat PWA v2 di `/dashboard/v2/kota/alk` (desain proto `k-*`): AlkShell nav Beranda/Anggota/Scan/Event/Lainnya; real data; Anggota = CRUD pengurus; `pengurusDest(alk)` → v2; legacy `/dashboard/kota/alk` tetap (Kas/Surat)
 - Tiket: progress daftar di kartu Registration (`n dari targetjumlah`). Penuh (`n >= target`, target > 0) → tombol Registration Full; `createRegistrasi` menolak tiket baru (join, daftar, absen online). Strip event `FULL`. Yang sudah punya tiket tetap bisa lihat tiket
 - View Event `/join/[id]`: poster full width tinggi alami (bukan crop 16:10); role target 0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 Tim Nasional, pengurus 1 Admin LK · 2 BRIM
 - `/` = landing LevelUP gaya kolase/zine Gen Z: kertas lecek (SVG feTurbulence), pinggir sobek (`torn()` clip-path polygon), font Permanent Marker (dimuat di `app/page.tsx` saja), label strip hitam/kuning, poster event asli ditempel selotip, doodle crown/heart/smiley; copy dari levelupgen.com (visi 2033, WFE, ministries) + scroller event; Get Ticket → `/login?callbackUrl=/join/{id}`. Logo putih wajib di atas chip merah (tak terbaca di latar terang)

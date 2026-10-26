@@ -100,11 +100,21 @@ interface EventFormProps {
   mapsApiKey: string
   event?: EventDetailFull
   backUrl: string
+  /** Prefix for post-save redirect, e.g. `/dashboard/v2/kota/alk/event` */
+  eventBasePath?: string
   /** Sekretariat nasional: show seluruh kota / khusus scope inputs */
   isNasional?: boolean
 }
 
-export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasional = false }: EventFormProps) {
+export function EventForm({
+  mode,
+  idCabang,
+  mapsApiKey,
+  event,
+  backUrl,
+  eventBasePath = '/dashboard/kota/alk/event',
+  isNasional = false,
+}: EventFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
@@ -342,10 +352,10 @@ export function EventForm({ mode, idCabang, mapsApiKey, event, backUrl, isNasion
 
         if (mode === 'create') {
           const id = await createEvent({ ...payload, idCabang }, flyer)
-          router.push(`/dashboard/kota/alk/event/${id}`)
+          router.push(`${eventBasePath}/${id}`)
         } else {
           await updateEvent(event!.id_event, payload, flyer)
-          router.push(`/dashboard/kota/alk/event/${event!.id_event}`)
+          router.push(`${eventBasePath}/${event!.id_event}`)
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Gagal menyimpan. Coba lagi.')

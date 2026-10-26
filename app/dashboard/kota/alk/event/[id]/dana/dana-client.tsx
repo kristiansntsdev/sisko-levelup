@@ -23,12 +23,14 @@ export function DanaClient({
   tglDisplay,
   jumlahPeserta,
   reimburse,
+  backUrl: backUrlProp,
 }: {
   idEvent: number
   namaEvent: string
   tglDisplay: string
   jumlahPeserta: number
   reimburse: ReimburseData | null
+  backUrl?: string
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -47,7 +49,7 @@ export function DanaClient({
 
   const isApproved = reimburse?.approvenasional === '1'
   const isRejected = reimburse?.approvenasional === '0'
-  const backUrl = `/dashboard/kota/alk/event/${idEvent}`
+  const backUrl = backUrlProp ?? `/dashboard/kota/alk/event/${idEvent}`
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

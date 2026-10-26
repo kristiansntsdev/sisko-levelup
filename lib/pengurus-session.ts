@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import { db } from '@/lib/db'
 
 export function pengurusDest(divisi: string | null | undefined): string | null {
-  if (divisi === 'alk') return '/dashboard/kota/alk'
+  if (divisi === 'alk') return '/dashboard/v2/kota/alk'
   if (divisi === 'brim') return '/dashboard/kota/brim'
   if (divisi === 'vol') return '/dashboard/kota/vol'
   return null

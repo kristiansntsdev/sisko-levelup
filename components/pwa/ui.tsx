@@ -71,6 +71,8 @@ export function Chevrons({ className = '' }: { className?: string }) {
 export function Hero({ className = '', children, decor = '-right-6 top-6 w-40' }: { className?: string; children: ReactNode; decor?: string }) {
   return (
     <div className={`relative overflow-hidden text-white px-5 ${className}`} style={HERO_BG}>
+      {/* iOS Add to Home Screen (black-translucent) draws under the status bar. Inset is 0 in Safari. */}
+      <div aria-hidden className="h-[env(safe-area-inset-top)]" />
       <Chevrons className={`${decor} opacity-[.12]`} />
       <div className="relative">{children}</div>
     </div>
@@ -309,16 +311,18 @@ export function PlainBar({
 }) {
   const left = back ?? close
   return (
-    <div className="sticky top-0 z-20 h-14 grid grid-cols-[48px_1fr_48px] items-center px-2 text-white bg-linear-to-b from-[#d73640] to-[#b3202a] shadow-[0_6px_16px_-8px_rgba(124,18,25,.6)]">
-      {left ? (
-        <button type="button" onClick={left} aria-label={back ? 'Kembali' : 'Tutup'} className="w-11 h-11 flex items-center justify-center rounded-full active:bg-white/10">
-          <Icon name={back ? 'chevronLeft' : 'x'} className="w-7 h-7" sw={2} />
-        </button>
-      ) : (
-        <span />
-      )}
-      <h2 className="text-center text-[17px] font-bold truncate">{title}</h2>
-      {right ?? <span />}
+    <div className="sticky top-0 z-20 pt-[env(safe-area-inset-top)] text-white bg-linear-to-b from-[#d73640] to-[#b3202a] shadow-[0_6px_16px_-8px_rgba(124,18,25,.6)]">
+      <div className="h-14 grid grid-cols-[48px_1fr_48px] items-center px-2">
+        {left ? (
+          <button type="button" onClick={left} aria-label={back ? 'Kembali' : 'Tutup'} className="w-11 h-11 flex items-center justify-center rounded-full active:bg-white/10">
+            <Icon name={back ? 'chevronLeft' : 'x'} className="w-7 h-7" sw={2} />
+          </button>
+        ) : (
+          <span />
+        )}
+        <h2 className="text-center text-[17px] font-bold truncate">{title}</h2>
+        {right ?? <span />}
+      </div>
     </div>
   )
 }

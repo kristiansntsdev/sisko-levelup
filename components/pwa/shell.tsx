@@ -24,9 +24,13 @@ function pathMatches(pathname: string, match: string[]) {
   return match.some((m) => pathname === m || (m !== '/dashboard' && pathname.startsWith(m + '/')))
 }
 
+function isKotaAdminPath(pathname: string) {
+  return pathname.startsWith('/dashboard/kota') || pathname.startsWith('/dashboard/v2/kota')
+}
+
 /** Hide bottom nav on full-screen flows and admin kota dashboards. */
 export function shouldHideMemberNav(pathname: string) {
-  if (pathname.startsWith('/dashboard/kota')) return true
+  if (isKotaAdminPath(pathname)) return true
   if (pathname.startsWith('/login') || pathname.startsWith('/daftar')) return true
   if (pathname.startsWith('/events') || pathname.startsWith('/join/')) return true
   if (/^\/dashboard\/tiket\/\d+/.test(pathname)) return true
@@ -36,7 +40,7 @@ export function shouldHideMemberNav(pathname: string) {
 
 function isMemberShellPath(pathname: string) {
   if (!pathname.startsWith('/dashboard')) return false
-  if (pathname.startsWith('/dashboard/kota')) return false
+  if (isKotaAdminPath(pathname)) return false
   return true
 }
 
