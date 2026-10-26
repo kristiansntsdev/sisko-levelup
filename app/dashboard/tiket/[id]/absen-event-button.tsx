@@ -38,7 +38,7 @@ export function AbsenEventButton({
 
   if (done) {
     return (
-      <p className="w-full text-center text-sm font-medium text-green py-3">
+      <p className="rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 text-emerald-700 text-[14px] font-semibold text-center py-3">
         Absen berhasil tercatat.
       </p>
     )
@@ -49,7 +49,7 @@ export function AbsenEventButton({
     phase === 'too_early'
       ? 'Absen dibuka 15 menit sebelum acara selesai.'
       : phase === 'closed'
-        ? 'Waktu absen sudah berakhir (lewat bulan event).'
+        ? 'Jendela absen sudah ditutup.'
         : phase === 'unknown'
           ? 'Jadwal selesai event belum lengkap.'
           : null
@@ -81,23 +81,25 @@ export function AbsenEventButton({
     })
   }
 
-  // Hide CTA until window opens — only hint when too_early / closed / unknown
   if (!open) {
     return hint ? (
-      <p className="w-full text-center text-xs text-muted py-2">{hint}</p>
+      <p className="text-[12.5px] text-slate-500 text-center py-2">{hint}</p>
     ) : null
   }
 
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div>
       <button
         type="button"
         onClick={handleAbsen}
         disabled={pending}
-        className="w-full py-3.5 rounded-full border border-fg bg-[#c8e7f5] text-fg text-[15px] font-semibold cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed hover:brightness-95 transition"
+        className="w-full py-3.5 rounded-2xl bg-[#c9232c] text-white font-bold shadow-[0_8px_20px_-6px_rgba(201,35,44,.6)] disabled:opacity-40 active:scale-[.99] transition"
       >
         {pending ? 'Menyimpan…' : 'Absen Event'}
       </button>
+      <p className="text-[11.5px] text-slate-400 text-center mt-2">
+        Event online: absen mandiri dibuka 15 menit sebelum selesai, berlaku sampai akhir bulan.
+      </p>
     </div>
   )
 }

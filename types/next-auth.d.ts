@@ -6,7 +6,13 @@ declare module 'next-auth' {
       authUserId?: string
       idPeserta?: number | null
       idPengurus?: number | null
+      needsRegistration?: boolean
     } & DefaultSession['user']
+  }
+
+  interface User {
+    idPeserta?: number | null
+    idPengurus?: number | null
   }
 }
 
@@ -16,5 +22,6 @@ declare module 'next-auth/jwt' {
     idPeserta?: number | null
     idPengurus?: number | null
     isNew?: boolean
+    needsRegistration?: boolean
   }
 }

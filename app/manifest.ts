@@ -2,13 +2,13 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Sisko",
-    short_name: "Sisko",
-    description: "Sistem Organisasi",
-    start_url: "/",
+    name: "LevelUP",
+    short_name: "LevelUP",
+    description: "LevelUP — The Jeremiah Generation",
+    start_url: "/dashboard",
     display: "standalone",
-    background_color: "#950001",
-    theme_color: "#950001",
+    background_color: "#b3202a",
+    theme_color: "#b3202a",
     icons: [
       {
         src: "/icons/icon-192.png",

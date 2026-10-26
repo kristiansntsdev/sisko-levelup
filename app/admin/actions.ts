@@ -1,7 +1,11 @@
 'use server'
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
+import {
+  clearPengurusCookie,
+  pengurusDest,
+  setPengurusCookie,
+} from '@/lib/pengurus-session'
 
 export async function loginPengurus(
   _prev: { error: string } | null,
@@ -18,26 +22,14 @@ export async function loginPengurus(
 
   if (!pengurus) return { error: 'Username atau password salah.' }
 
-  const divisi = pengurus.divisi
-  const dest =
-    divisi === 'alk' ? '/dashboard/kota/alk'
-    : divisi === 'brim' ? '/dashboard/kota/brim'
-    : divisi === 'vol' ? '/dashboard/kota/vol'
-    : null
+  const dest = pengurusDest(pengurus.divisi)
   if (!dest) return { error: 'Divisi tidak dikenali.' }
 
-  const cookieStore = await cookies()
-  cookieStore.set('pengurus_id', String(pengurus.id_pengurus), {
-    httpOnly: true,
-    path: '/',
-    maxAge: 60 * 60 * 8,
-  })
-
+  await setPengurusCookie(pengurus.id_pengurus)
   redirect(dest)
 }
 
 export async function logoutPengurus() {
-  const cookieStore = await cookies()
-  cookieStore.delete('pengurus_id')
+  await clearPengurusCookie()
   redirect('/admin')
 }

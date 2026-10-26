@@ -31,8 +31,23 @@
 
 ```
 app/
-  dashboard/page.tsx                  # Dashboard user: join volunteer/squad
+  page.tsx                            # Landing overview LevelUP (gerakan) + cuplikan event → /login + /daftar
+  login/page.tsx                      # PWA login: email+password (peserta lalu pengurus) + Google
+  daftar/page.tsx                     # Pendaftaran; Google baru → completeRegistration
+  dashboard/layout.tsx                # MemberShell bottom nav (skip /dashboard/kota)
+  dashboard/page.tsx                  # Beranda PWA: MemberCard, level, tiket, ModeSwitch
+  dashboard/kartu/                    # Detail Kartu Anggota
+  dashboard/tiket/                    # My Tickets (TicketRow) + [id] QR detail proto
+  dashboard/riwayat/                  # Milestone stub dari registrasi
+  dashboard/kesaksian/                # Kesaksian UI stub
+  dashboard/profil/                   # Profil + masuk pengurus sheet
+  events/page.tsx                     # List event anggota (proto EventsScreen)
+  join/[eventId]/                    # View Event + Get Ticket (Offline; Online → /absen)
   dashboard/kota/alk/page.tsx         # Beranda ALK (saldo + approval member)
+lib/actions/pwa-auth.ts               # loginEmailPassword, completeRegistration, dual session
+lib/pengurus-session.ts               # pengurus cookie helpers (shared admin + PWA)
+lib/pwa-member.ts                     # tier labels + MemberCardData
+components/pwa/                       # LevelUP PWA UI kit + MemberShell (PlainBar/Panel/Qr)
   dashboard/kota/alk/approval/page.tsx # List approval squad dari table upgrade
   dashboard/kota/alk/event/[id]/approve/ # Sekretariat: approve/reject event
   dashboard/kota/alk/event/[id]/dana/   # ALK Kota: form pengajuan support dana (per event)
@@ -58,6 +73,21 @@ app/api/internal/monitoring-sheet/    # GET ?year= (Bearer MONITORING_SHEET_SECR
 scripts/monitoring-sheet.gs           # Apps Script: paste ke spreadsheet, sync tab per tahun tiap 5 menit
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-10-27]
+- Tiket: progress daftar di kartu Registration (`n dari targetjumlah`). Penuh (`n >= target`, target > 0) → tombol Registration Full; `createRegistrasi` menolak tiket baru (join, daftar, absen online). Strip event `FULL`. Yang sudah punya tiket tetap bisa lihat tiket
+- View Event `/join/[id]`: poster full width tinggi alami (bukan crop 16:10); role target 0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 Tim Nasional, pengurus 1 Admin LK · 2 BRIM
+- `/` = landing LevelUP gaya kolase/zine Gen Z: kertas lecek (SVG feTurbulence), pinggir sobek (`torn()` clip-path polygon), font Permanent Marker (dimuat di `app/page.tsx` saja), label strip hitam/kuning, poster event asli ditempel selotip, doodle crown/heart/smiley; copy dari levelupgen.com (visi 2033, WFE, ministries) + scroller event; Get Ticket → `/login?callbackUrl=/join/{id}`. Logo putih wajib di atas chip merah (tak terbaca di latar terang)
+
+## Recent Updates [2026-10-26]
+- PWA Events/Tickets/View Event align prototype: `/events` search + kota sheet + venue chips + EventCard strip OPEN; `/dashboard/tiket` TicketRow perforated QR + tab gelap; ticket detail poster + gold QR frame; `/join/[id]` JPCC panels + Get Ticket sheet (bukan full-bleed poster lama)
+- Member PWA dari prototype (admin `/admin` + `/dashboard/kota/*` tetap): login email+password cek peserta lalu pengurus; Google tanpa auto-create peserta → `needsRegistration` → `/daftar` `completeRegistration`; dual session ModeSwitch; shell bottom nav; MemberCard/beranda/tiket/profil; stub riwayat/kesaksian/daily words
+- Prototype MemberCard (Detail Kartu Anggota): tanpa QR + tanggal; Status Anggota tetap Aktif; label tier userlevel 0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC (`Leader` → PIC)
+
+## Recent Updates [2026-10-24]
+- Prototype Sekretariat tab Anggota = daftar `pengurus` saja (Admin LK/BRIM); tanpa status aktif — set email + password; Tambah hanya pengurus (bukan peserta). Peserta lewat PWA daftar → Volunteer → Squad → Approval Member
+- `/prototype`: prototype UI klik-able (publik, tanpa auth, data dummy di `components/prototype/data.ts`) dari desain `public/LEVELUP PWA - ALL.pdf` + `LEVELUP Alk – ALL.pdf`, struktur meniru PWA anggota PPHTGD. Mode PWA Anggota + Sekretariat; `?s=<screen>` buka layar langsung (id di `components/prototype/screens.ts`). Logo transparan `public/prototype/levelup-logo.png` diekstrak dari PDF
+- Prototype: Events/View Event meniru MyJPCC (status OPEN/FULL/CLOSED, eligibility dari Target Peserta/Pengurus) → Get Ticket → tiket QR payload `{p,e,ev}` (sama `lib/qr.ts`); Sekretariat absen per event + sesi (wajib/opsional, hadir lengkap) & form Buat Event mengikuti `components/kota/event-form.tsx`. Aturan di `components/prototype/logic.ts` memakai `hadirPenuh`/`sesiWajibIds` + `onlineAbsenPhase` asli; jam prototype tetap Jumat 23 Okt 2026 19:25 WIB. Filter Events per LevelUP Kota (`cabang`, default kota anggota; event nasional `id_cabang '0'` selalu tampil); Sekretariat hanya melihat event kotanya + nasional. Login prototype: pengurus email+password → Sekretariat, anggota pilih akun Google; akun Google baru → Pendaftaran (`?s=daftar`, field = `app/daftar`) → Tamu → Join Volunteer → Join Squad (pilih kota, bisa dipindah) → Approval Member Sekretariat (`?s=k-approval`); Core belum dibuka seperti sisko. 1 HP = 1 sesi peserta (Google) + 1 sesi pengurus (email+password): tidak ada konsep suami-istri sama sekali (LevelUP = anak muda; relasi pasangan, ganti akun, dan copy "suami-istri" dari PPHTGD dibuang); toggle Kartu Saya/Akun Sekretariat hanya saat sesi pengurus aktif, keluar per sesi
 
 ## Recent Updates [2026-10-22]
 - Daftar (`/daftar` + form data diri `/absen/[eventId]`): dropdown LevelUP Kota (`getCabangs`) → `peserta.kotalevelup`, wajib. Peserta baru (No. WA kosong) mulai kosong — `auth.ts` tetap isi `'2'` sebagai placeholder, jangan dipakai sebagai default form

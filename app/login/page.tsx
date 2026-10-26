@@ -1,16 +1,38 @@
 'use client'
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
-import { Button } from '@/components/ui'
+import { loginEmailPassword } from '@/lib/actions/pwa-auth'
+import {
+  BTN_RED,
+  Chevrons,
+  Field,
+  GoogleIcon,
+  Hero,
+  Icon,
+  Logo,
+  PAGE_BG,
+} from '@/components/pwa/ui'
+
+const LOGIN_INPUT =
+  'w-full min-w-0 bg-transparent px-4 py-3.5 text-[16px] font-semibold outline-none placeholder:font-medium placeholder:text-slate-300'
+const LOGIN_BOX =
+  'flex items-center rounded-2xl bg-slate-50 ring-1 ring-slate-200 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-[#c9232c]'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard'
-  // `auto=1` dipakai QR absen online: skip tap "Login By Google".
   const auto = searchParams.get('auto') === '1'
   const redirected = useRef(false)
+
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [show, setShow] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [soon, setSoon] = useState(false)
 
   useEffect(() => {
     if (!auto || redirected.current) return
@@ -18,47 +40,145 @@ function LoginForm() {
     void signIn('google', { callbackUrl })
   }, [auto, callbackUrl])
 
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && password.length >= 6
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!valid || loading) return
+    setError('')
+    setLoading(true)
+    try {
+      const res = await loginEmailPassword(email, password)
+      if ('error' in res) {
+        setError(res.error)
+        setLoading(false)
+        return
+      }
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+        callbackUrl,
+      })
+      if (result?.error) {
+        setError('Email atau password salah.')
+        setLoading(false)
+        return
+      }
+      router.push(callbackUrl)
+      router.refresh()
+    } catch (err) {
+      // pengurus path: server action redirect()
+      const dig = err && typeof err === 'object' && 'digest' in err ? String((err as { digest: string }).digest) : ''
+      if (dig.startsWith('NEXT_REDIRECT')) throw err
+      setError('Gagal masuk. Coba lagi.')
+      setLoading(false)
+    }
+  }
+
   if (auto) {
     return (
-      <main className="max-w-sm mx-auto h-screen bg-bg flex flex-col items-center justify-center gap-4 px-6">
-        <img src="/logoutama.png" alt="LevelUp" className="h-12 object-contain" />
-        <span className="w-7 h-7 rounded-full border-2 border-border border-t-fg animate-spin" />
-        <p className="text-sm text-muted">Mengalihkan ke Google…</p>
+      <main className={`min-h-screen ${PAGE_BG} flex flex-col items-center justify-center gap-4 px-6 font-[family-name:var(--font-proto)]`}>
+        <Logo className="h-12 w-auto" />
+        <span className="w-7 h-7 rounded-full border-2 border-slate-200 border-t-[#c9232c] animate-spin" />
+        <p className="text-sm text-slate-500">Mengalihkan ke Google…</p>
       </main>
     )
   }
 
   return (
-    <main className="max-w-sm mx-auto h-screen overflow-hidden bg-bg flex flex-col items-center justify-center px-6">
-      {/* Logo + button grouped tightly */}
-      <div className="flex flex-col items-center w-full gap-5">
-        <div className="text-center">
-          <img src="/logoutama.png" alt="LevelUp" className="h-14 mx-auto mb-4 object-contain" />
-          <h1 className="text-xl font-semibold text-fg">Masuk ke Sisko</h1>
-          <p className="text-sm text-muted mt-1">Gunakan akun Google kamu untuk melanjutkan</p>
-        </div>
+    <main className={`min-h-screen ${PAGE_BG} pb-safe font-[family-name:var(--font-proto)]`}>
+      <Hero className="pt-16 md:pt-12 pb-28 text-center" decor="-right-8 top-4 w-44">
+        <Chevrons className="-left-12 top-36 w-32 opacity-[.08]" />
+        <Logo className="h-[92px] w-auto mx-auto drop-shadow-[0_6px_14px_rgba(60,0,5,.35)]" />
+      </Hero>
+      <div className="px-5 -mt-16 relative max-w-[430px] mx-auto">
+        <form
+          onSubmit={onSubmit}
+          className="bg-white rounded-3xl shadow-[0_18px_40px_-14px_rgba(80,20,25,.3)] p-6"
+        >
+          <h2 className="font-extrabold text-[22px] text-[#3b1417]">Masuk</h2>
+          <p className="text-[13.5px] text-slate-500 mt-1 mb-5">
+            Email + password (peserta atau pengurus), atau masuk dengan Google
+          </p>
+          <div className="space-y-4">
+            <Field label="Email">
+              <span className={LOGIN_BOX}>
+                <input
+                  type="email"
+                  inputMode="email"
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value.trim())}
+                  placeholder="contoh@gmail.com"
+                  className={LOGIN_INPUT}
+                />
+              </span>
+            </Field>
+            <Field label="Password">
+              <span className={LOGIN_BOX}>
+                <input
+                  type={show ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className={LOGIN_INPUT}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShow(!show)}
+                  aria-label={show ? 'Sembunyikan password' : 'Tampilkan password'}
+                  className="shrink-0 w-11 h-11 mr-1 flex items-center justify-center rounded-full text-slate-400 active:bg-slate-100"
+                >
+                  <Icon name={show ? 'eyeOff' : 'eye'} className="w-5 h-5" />
+                </button>
+              </span>
+            </Field>
+          </div>
+          <div className="flex justify-end mt-2">
+            <button
+              type="button"
+              onClick={() => setSoon(true)}
+              className="text-[12.5px] font-semibold text-[#c9232c] py-1"
+            >
+              Lupa password?
+            </button>
+          </div>
+          {error && <p className="text-sm text-[#c9232c] font-medium mt-2">{error}</p>}
+          {soon && <p className="text-[12.5px] text-slate-500 mt-2">Reset password segera tersedia.</p>}
+          <button type="submit" disabled={!valid || loading} className={`mt-3 w-full py-3.5 ${BTN_RED}`}>
+            {loading ? 'Masuk…' : 'Masuk'}
+          </button>
+        </form>
 
-        <div className="w-full">
-          <Button
-            variant="secondary"
-            fullWidth
-            size="lg"
-            onClick={() => signIn('google', { callbackUrl })}
-          >
-            <span className="flex items-center justify-center gap-2">
-              <GoogleIcon />
-              Login By Google
-            </span>
-          </Button>
+        <div className="flex items-center gap-3 mt-7 text-[12px] text-slate-400">
+          <span className="flex-1 h-px bg-slate-200" />
+          Anggota LevelUP
+          <span className="flex-1 h-px bg-slate-200" />
         </div>
+        <button
+          type="button"
+          onClick={() => signIn('google', { callbackUrl })}
+          className="mt-4 w-full py-3 rounded-2xl bg-white ring-1 ring-slate-200 font-semibold text-slate-700 flex items-center justify-center gap-2 active:bg-slate-50"
+        >
+          <GoogleIcon />
+          Masuk dengan Google
+        </button>
+        <p className="text-center text-[13px] text-slate-500 mt-5">
+          Belum terdaftar anggota?{' '}
+          <Link href="/daftar" className="font-semibold text-[#c9232c]">
+            Pendaftaran Anggota
+          </Link>
+        </p>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="mt-6 w-full text-center text-sm text-slate-400"
+        >
+          ← Kembali
+        </button>
       </div>
-
-      <button
-        onClick={() => router.back()}
-        className="absolute bottom-8 text-sm text-muted hover:text-fg transition-colors"
-      >
-        ← Kembali
-      </button>
     </main>
   )
 }
@@ -68,16 +188,5 @@ export default function LoginPage() {
     <Suspense>
       <LoginForm />
     </Suspense>
-  )
-}
-
-function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4" />
-      <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853" />
-      <path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05" />
-      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335" />
-    </svg>
   )
 }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Space_Grotesk, Instrument_Serif, DM_Mono } from "next/font/google";
+import { Barlow_Semi_Condensed, DM_Sans, Space_Grotesk, Instrument_Serif, DM_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui";
 import { Providers } from "@/components/providers";
 import "./globals.css";
@@ -32,6 +32,19 @@ const dmMono = DM_Mono({
   display: "swap",
 });
 
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-proto",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const barlow = Barlow_Semi_Condensed({
+  variable: "--font-proto-card",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -40,8 +53,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Sisko",
-  description: "Sistem Organisasi",
+  title: "LevelUP — The Jeremiah Generation",
+  description: "Gerakan anak muda LevelUP: komunitas kota, We Worship, pemuridan, dan panggilan melayani",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -63,7 +76,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className={`${dmSans.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} ${dmMono.variable} h-full antialiased`}>
+    <html lang="id" className={`${dmSans.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} ${dmMono.variable} ${jakarta.variable} ${barlow.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-bg text-fg font-sans">
         <Providers>
           {children}

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getEventById } from '@/lib/actions/event'
-import { checkRegistrasi } from '@/lib/actions/registrasi'
+import { countActiveRegistrasi, findRegistrasiId } from '@/lib/actions/registrasi'
 import { auth } from '@/auth'
 import { isOnlineEvent } from '@/lib/event-link'
 import { JoinClient } from './join-client'
@@ -20,10 +20,18 @@ export default async function JoinPage({
   // halaman absen sekali-scan.
   if (event && isOnlineEvent(event.jenisevent)) redirect(`/absen/${event.id_event}`)
 
-  const idPeserta = (session?.user as any)?.idPeserta as number | undefined
-  const isRegistered = idPeserta
-    ? await checkRegistrasi(idPeserta, Number(eventId))
-    : false
+  const idPeserta = session?.user?.idPeserta
+  const [registrasiId, registered] = await Promise.all([
+    idPeserta ? findRegistrasiId(idPeserta, Number(eventId)) : null,
+    event ? countActiveRegistrasi(event.id_event) : 0,
+  ])
 
-  return <JoinClient event={event} isRegistered={isRegistered} />
+  return (
+    <JoinClient
+      event={event}
+      isRegistered={registrasiId != null}
+      registrasiId={registrasiId}
+      registered={registered}
+    />
+  )
 }

@@ -58,9 +58,31 @@ export type EventSummary = {
   id_event: number
   nama_event: string
   tglDisplay: string
+  tglSelesaiDisplay: string
   jamevent: string
+  jamselesaievent: string
+  alamatevent: string
   posterUrl: string
   jenisevent: string
+  wwtype: string
+  category: string
+  id_cabang: string
+  cabangName: string
+  target: string
+  targetpengurus: string
+  targetjumlah: number
+  tglMs: number
+  tglSelesaiMs: number
+}
+
+const WW_CATEGORY: Record<string, string> = {
+  bulanan: 'WW Bulanan',
+  jfe: 'WW JFE',
+  nasional: 'Nasional',
+}
+
+function eventCategory(wwtype: string) {
+  return WW_CATEGORY[wwtype] ?? 'Event'
 }
 
 export type CabangOption = { id: string; nama: string }
@@ -75,10 +97,30 @@ export async function getCabangs(): Promise<CabangOption[]> {
 
 export type EventListItem = {
   id_event: number
+  nama_event: string
   tglDisplay: string
+  tglRange: string
   jamevent: string
   posterUrl: string
   tglMs: number
+  tglSelesaiMs: number
+  jenisevent: string
+  category: string
+  id_cabang: string
+  cabangName: string
+  regState: 'OPEN' | 'FULL' | 'CLOSED'
+}
+
+function fmtEventDay(d: Date) {
+  return d.toLocaleDateString('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+  })
+}
+
+function fmtEventRange(start: Date, end: Date) {
+  if (start.getTime() === end.getTime()) return fmtEventDay(start)
+  const a = start.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', timeZone: 'UTC' })
+  return `${a} - ${fmtEventDay(end)}`
 }
 
 export async function getEventsByKotalevelup(
@@ -86,60 +128,90 @@ export async function getEventsByKotalevelup(
   page: number,
 ): Promise<{ events: EventListItem[]; total: number }> {
   const PAGE_SIZE = 10
-  const [rows, total] = await Promise.all([
+  const today = (await import('@/lib/wib')).wibToday()
+  const cabangWhere =
+    kotalevelup === 'all'
+      ? {}
+      : { OR: [{ id_cabang: kotalevelup }, { id_cabang: NASIONAL_EVENT_CABANG }] }
+  const where = {
+    ...cabangWhere,
+    tgleventselesai: { gte: today },
+  }
+  const [rows, total, cabangs] = await Promise.all([
     db.event.findMany({
-      where: { id_cabang: kotalevelup },
-      orderBy: { id_event: 'desc' },
+      where,
+      orderBy: { tglevent: 'asc' },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
-      select: { id_event: true, tglevent: true, jamevent: true, posterevent: true, image_url: true },
+      select: {
+        id_event: true,
+        nama_event: true,
+        tglevent: true,
+        tgleventselesai: true,
+        jamevent: true,
+        posterevent: true,
+        image_url: true,
+        jenisevent: true,
+        wwtype: true,
+        id_cabang: true,
+        targetjumlah: true,
+      },
     }),
-    db.event.count({ where: { id_cabang: kotalevelup } }),
+    db.event.count({ where }),
+    db.cabang.findMany({ select: { id_cabang: true, namacabang: true } }),
   ])
+  const counts = rows.length
+    ? await db.registrasi.groupBy({
+        by: ['id_event'],
+        where: {
+          id_event: { in: rows.map((e) => e.id_event) },
+          status: { not: 'cancelled' },
+        },
+        _count: { _all: true },
+      })
+    : []
+  const taken = new Map(counts.map((c) => [c.id_event, c._count._all]))
+  const cabangMap = new Map(cabangs.map((c) => [String(c.id_cabang), c.namacabang]))
+  const now = Date.now()
   return {
-    events: rows.map((e) => ({
-      id_event: e.id_event,
-      tglDisplay: e.tglevent.toLocaleDateString('id-ID', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
-      }),
-      jamevent: e.jamevent,
-      posterUrl: resolveEventPosterUrl(e.posterevent, e.image_url),
-      tglMs: e.tglevent.getTime(),
-    })),
+    events: rows.map((e) => {
+      const endMs = e.tgleventselesai.getTime()
+      const target = e.targetjumlah ?? 0
+      const n = taken.get(e.id_event) ?? 0
+      const regState =
+        now >= endMs + 86400000 ? 'CLOSED'
+          : target > 0 && n >= target ? 'FULL'
+            : 'OPEN'
+      return {
+        id_event: e.id_event,
+        nama_event: e.nama_event,
+        tglDisplay: e.tglevent.toLocaleDateString('id-ID', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
+        }),
+        tglRange: fmtEventRange(e.tglevent, e.tgleventselesai),
+        jamevent: e.jamevent,
+        posterUrl: resolveEventPosterUrl(e.posterevent, e.image_url),
+        tglMs: e.tglevent.getTime(),
+        tglSelesaiMs: endMs,
+        jenisevent: e.jenisevent || 'Offline',
+        category: eventCategory(e.wwtype),
+        id_cabang: e.id_cabang,
+        cabangName: e.id_cabang === NASIONAL_EVENT_CABANG ? 'Nasional' : cabangMap.get(e.id_cabang) ?? `Kota #${e.id_cabang}`,
+        regState,
+      }
+    }),
     total,
   }
 }
 
-export type EventFull = EventListItem & { nama_event: string }
+/** @deprecated Prefer getEventsByKotalevelup — already includes nama_event. */
+export type EventFull = EventListItem
 
 export async function getEventsByKotalevelupFull(
   kotalevelup: string,
   page: number,
 ): Promise<{ events: EventFull[]; total: number }> {
-  const PAGE_SIZE = 10
-  const [rows, total] = await Promise.all([
-    db.event.findMany({
-      where: { id_cabang: kotalevelup },
-      orderBy: { id_event: 'desc' },
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-      select: { id_event: true, nama_event: true, tglevent: true, jamevent: true, posterevent: true, image_url: true },
-    }),
-    db.event.count({ where: { id_cabang: kotalevelup } }),
-  ])
-  return {
-    events: rows.map((e) => ({
-      id_event: e.id_event,
-      nama_event: e.nama_event,
-      tglDisplay: e.tglevent.toLocaleDateString('id-ID', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
-      }),
-      jamevent: e.jamevent,
-      posterUrl: resolveEventPosterUrl(e.posterevent, e.image_url),
-      tglMs: e.tglevent.getTime(),
-    })),
-    total,
-  }
+  return getEventsByKotalevelup(kotalevelup, page)
 }
 
 export type EventDashboard = {
@@ -439,14 +511,31 @@ export async function getEventById(id: number): Promise<EventSummary | null> {
       id_event: true,
       nama_event: true,
       tglevent: true,
+      tgleventselesai: true,
       jamevent: true,
+      jamselesaievent: true,
+      alamatevent: true,
       posterevent: true,
       image_url: true,
       jenisevent: true,
+      wwtype: true,
+      id_cabang: true,
+      target: true,
+      targetpengurus: true,
+      targetjumlah: true,
     },
   })
 
   if (!event) return null
+
+  const cabangId = Number(event.id_cabang)
+  const cabang =
+    event.id_cabang === NASIONAL_EVENT_CABANG || !Number.isFinite(cabangId)
+      ? null
+      : await db.cabang.findUnique({
+          where: { id_cabang: cabangId },
+          select: { namacabang: true },
+        })
 
   return {
     id_event: event.id_event,
@@ -458,9 +547,24 @@ export async function getEventById(id: number): Promise<EventSummary | null> {
       day: 'numeric',
       timeZone: 'UTC',
     }),
+    tglSelesaiDisplay: fmtEventDay(event.tgleventselesai),
     jamevent: event.jamevent,
+    jamselesaievent: event.jamselesaievent ?? '',
+    alamatevent: event.alamatevent ?? '',
     posterUrl: resolveEventPosterUrl(event.posterevent, event.image_url),
     jenisevent: event.jenisevent ?? '',
+    wwtype: event.wwtype,
+    category: eventCategory(event.wwtype),
+    id_cabang: event.id_cabang,
+    cabangName:
+      event.id_cabang === NASIONAL_EVENT_CABANG
+        ? 'Nasional'
+        : cabang?.namacabang ?? `Kota #${event.id_cabang}`,
+    target: event.target ?? '',
+    targetpengurus: event.targetpengurus ?? '',
+    targetjumlah: event.targetjumlah ?? 0,
+    tglMs: event.tglevent.getTime(),
+    tglSelesaiMs: event.tgleventselesai.getTime(),
   }
 }
 

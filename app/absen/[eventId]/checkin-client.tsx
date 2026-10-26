@@ -24,6 +24,7 @@ const FAIL_MESSAGE: Record<string, string> = {
   not_found: 'Event tidak ditemukan.',
   not_online: 'Event ini bukan event online.',
   invalid_profile: 'Nama, No. WA, dan LevelUP wajib diisi.',
+  full: 'Kuota tiket sudah penuh.',
   error: 'Gagal menyimpan. Coba lagi.',
 }
 

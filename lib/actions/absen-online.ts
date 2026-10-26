@@ -41,7 +41,7 @@ export type OnlineCheckinResult =
   | { status: 'need_sesi'; sesi: OnlineCheckinSesi[] }
   | {
       status: 'failed'
-      reason: 'unauthenticated' | 'not_found' | 'not_online' | 'invalid_profile' | 'error'
+      reason: 'unauthenticated' | 'not_found' | 'not_online' | 'invalid_profile' | 'full' | 'error'
     }
 
 export type OnlineAbsenEvent = {
@@ -144,7 +144,10 @@ export async function onlineCheckin(
       where: { id_peserta_id_event: { id_peserta: idPeserta, id_event: idEvent } },
       select: { id_registrasi: true },
     })
-    if (!registrasi) await createRegistrasi(idPeserta, idEvent)
+    if (!registrasi) {
+      const ticket = await createRegistrasi(idPeserta, idEvent)
+      if ('full' in ticket) return { status: 'failed', reason: 'full' }
+    }
 
     // 3. Sudah absen? (non-sesi: satu baris cukup; sesi: semua sesi selesai)
     const [sesiRows, absenRows] = await Promise.all([
