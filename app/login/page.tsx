@@ -171,13 +171,12 @@ function LoginForm() {
             Pendaftaran Anggota
           </Link>
         </p>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="mt-6 w-full text-center text-sm text-slate-400"
+        <Link
+          href="/"
+          className="mt-6 w-full text-center text-sm text-slate-400 block"
         >
           ← Kembali
-        </button>
+        </Link>
       </div>
     </main>
   )
