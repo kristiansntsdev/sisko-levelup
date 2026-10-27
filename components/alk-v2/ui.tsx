@@ -55,6 +55,7 @@ const DATE_TONE = {
   red: 'bg-[#fbeceb] text-[#c9232c] ring-1 ring-[#f3d3d3]',
   solid: 'bg-[#c9232c] text-white',
   slate: 'bg-slate-100 text-slate-500 ring-1 ring-slate-200',
+  glass: 'bg-white/15 text-white ring-1 ring-white/30',
 }
 
 export function DateBlock({ d, m, tone = 'red' }: { d: string; m: string; tone?: keyof typeof DATE_TONE }) {

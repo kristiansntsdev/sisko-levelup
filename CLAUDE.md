@@ -58,7 +58,8 @@ lib/actions/pengurus-kota.ts          # list/create/update pengurus per kota (An
 lib/actions/pwa-auth.ts               # loginEmailPassword, completeRegistration, dual session
 lib/pengurus-session.ts               # pengurus cookie helpers; alk dest → /dashboard/v2/kota/alk
 lib/pwa-member.ts                     # tier labels + MemberCardData
-components/alk-v2/                    # Sekretariat v2 shell + screens (PWA look, real data); event-approve = Approval Event
+components/alk-v2/                    # Sekretariat v2 shell + screens (PWA look, real data); event-approve = Approval Event; event-detail = Detail Event
+  dashboard/v2/kota/alk/event/[id]/   # Detail Event v2 (EventDetailV2Client, proto KEventScreen)
   dashboard/v2/kota/alk/event/[id]/approve/ # Nasional: approve/reject event (v2 UI)
 components/pwa/                       # LevelUP PWA UI kit + MemberShell (PlainBar/Panel/Qr)
   dashboard/kota/alk/approval/page.tsx # List approval squad dari table upgrade
@@ -88,6 +89,7 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-10-27]
+- Sekretariat v2 Detail Event: `/dashboard/v2/kota/alk/event/[id]` pakai `EventDetailV2Client` (Hero+TopBar+DateBlock glass, Stepper status, Ajukan/Scanner CTA, poster, QA, ListCard detail/registrasi/presensi) align `KEventScreen`; legacy `EventDetailPage` tetap di `/dashboard/kota/alk/event/[id]`
 - Sekretariat Scan: tombol **Fullscreen Scan** → overlay kiri kamera penuh / kanan list absen live (poll 4s); QR auto-absen (tanpa konfirmasi); popup hijau/merah 1 detik lalu scan lanjut; Esc/✕ tutup
 - `/program` (layout dulu): 2 program dari PDF Fokus Kegiatan — 01 Penyembahan (Membangun tahta bagi Kristus, Mzm 22:4) + 02 Pemuridan (Murid yang memuridkan, Mat 28:19-20), kartu ayat + kartu Tujuan, galeri `Dokumentasi` masonry (`columns-*`, `<img>` tinggi alami, polaroid + caption) + empty state. `PROGRAMS[].docs` = foto contoh (`public/program/`, `public/about/`); nanti diganti upload dashboard BRIM Nasional (`{ src, caption }`), di luar scope
 - `ZineHeader`: Tentang + Program + Masuk; di mobile Tentang/Program turun ke baris kedua (logo tidak boleh menyusut). `Snap`/`Heading`/`HL` pindah ke `components/landing/zine.tsx`

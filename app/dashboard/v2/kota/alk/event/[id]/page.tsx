@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { requireAlkPengurus } from '@/lib/alk-auth'
 import { getEventDetail } from '@/lib/actions/event'
 import { getReimburseForEvent } from '@/lib/actions/reimburse'
-import { EventDetailPage } from '@/components/kota/event-detail-page'
+import { EventDetailV2Client } from '@/components/alk-v2/event-detail'
 import { ALK_BASE, ALK_EVENT_BASE } from '@/components/alk-v2/paths'
 
 export default async function AlkV2EventDetailPage({
@@ -18,7 +18,7 @@ export default async function AlkV2EventDetailPage({
   const reimburse = await getReimburseForEvent(event.id_event)
 
   return (
-    <EventDetailPage
+    <EventDetailV2Client
       event={event}
       backUrl={`${ALK_BASE}/event`}
       reimburse={reimburse}
