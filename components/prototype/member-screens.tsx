@@ -1224,7 +1224,7 @@ export function ProfileScreen() {
     ['shield', 'Level', LEVEL_STEPS.find(([l]) => l === me.level)?.[1] ?? (me.level === 'Leader' ? 'PIC' : me.level)],
   ]
   const menu: [IconName, string][] = [
-    ['camera', 'Ganti Foto Profil'], ['edit', 'Ajukan Perubahan Data'], ['lock', 'Privasi & Keamanan'], ['help', 'Bantuan'],
+    ['camera', 'Ganti Foto Profil'], ['edit', 'Perubahan Data'], ['lock', 'Privasi & Keamanan'], ['help', 'Bantuan'],
   ]
 
   return (

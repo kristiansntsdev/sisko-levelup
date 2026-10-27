@@ -33,7 +33,6 @@ export default function ProfilPage() {
   const [email, setEmail] = useState('')
   const [level, setLevel] = useState('0')
   const [gender, setGender] = useState('L')
-  const [foto, setFoto] = useState('')
   const [nowa, setNowa] = useState('')
   const [gereja, setGereja] = useState('')
   const [card, setCard] = useState<MemberCardData | null>(null)
@@ -61,7 +60,6 @@ export default function ProfilPage() {
         setEmail(p.email)
         setLevel(p.userlevel)
         setGender(p.gender === 'P' || p.gender === 'Perempuan' ? 'P' : 'L')
-        setFoto(p.foto)
         setNowa(p.nowa)
         setGereja(p.gereja)
       }
@@ -94,8 +92,7 @@ export default function ProfilPage() {
     { icon: 'shield', k: 'Level', v: USERLEVEL_LABEL[level] ?? 'Tamu' },
   ]
 
-  const menu: { icon: 'edit' | 'lock' | 'help'; t: string }[] = [
-    { icon: 'edit', t: 'Ajukan Perubahan Data' },
+  const soonMenu: { icon: 'lock' | 'help'; t: string }[] = [
     { icon: 'lock', t: 'Privasi & Keamanan' },
     { icon: 'help', t: 'Bantuan' },
   ]
@@ -105,7 +102,7 @@ export default function ProfilPage() {
       <Hero className="pt-6 md:pt-4 pb-20 rounded-b-[32px] text-center">
         <span className="relative block w-24 h-24 mx-auto">
           <span className="block w-24 h-24 rounded-full ring-4 ring-white/40 overflow-hidden bg-white/10">
-            <Avatar g={gender} photo={foto || undefined} />
+            <Avatar g={gender} />
           </span>
         </span>
         <p className="font-extrabold text-lg mt-3">{nama || session?.user?.name}</p>
@@ -159,7 +156,16 @@ export default function ProfilPage() {
         )}
 
         <div className={`${CARD} divide-y divide-slate-100 text-[14px]`}>
-          {menu.map((m) => (
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard/profil/edit')}
+            className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50"
+          >
+            <TintIcon name="edit" tint="slate" size="w-9 h-9 rounded-xl" icon="w-[18px] h-[18px]" />
+            <span className="flex-1 font-semibold text-slate-800">Perubahan Data</span>
+            <Icon name="chevron" className="w-5 h-5 text-slate-300" sw={2} />
+          </button>
+          {soonMenu.map((m) => (
             <button
               key={m.t}
               type="button"

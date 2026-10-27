@@ -38,9 +38,9 @@ function newSesiRow(defaults?: Partial<EventSesiInput>): SesiFormRow {
   }
 }
 
-const TARGET_OPTIONS = ['Umum', 'Volunteer', 'Squad', 'Core', 'Leader', 'Tim Nasional']
+const TARGET_OPTIONS = ['Umum', 'Volunteer', 'Squad', 'Core', 'PIC', 'LevelUP Pusat']
 const TARGET_VALUES: Record<string, string> = {
-  Umum: '0', Volunteer: '1', Squad: '2', Core: '3', Leader: '4', 'Tim Nasional': '5',
+  Umum: '0', Volunteer: '1', Squad: '2', Core: '3', PIC: '4', 'LevelUP Pusat': '5',
 }
 const TARGET_LABELS: Record<string, string> = Object.fromEntries(
   Object.entries(TARGET_VALUES).map(([k, v]) => [v, k]),

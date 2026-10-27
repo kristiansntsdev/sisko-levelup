@@ -33,7 +33,8 @@
 app/
   page.tsx                            # Landing overview LevelUP (gerakan) + cuplikan event → /login + /daftar
   login/page.tsx                      # PWA login: email+password (peserta lalu pengurus) + Google
-  daftar/page.tsx                     # Pendaftaran; Google baru → completeRegistration
+  daftar/page.tsx                     # Pendaftaran v2 Gen Z (intro → form live MemberCard → kartu jadi); Google baru → completeRegistration
+  daftar/layout.tsx                   # Permanent Marker (--font-marker) khusus /daftar
   dashboard/layout.tsx                # MemberShell bottom nav (skip /dashboard/kota + /dashboard/v2/kota)
   dashboard/page.tsx                  # Beranda PWA: MemberCard, level, tiket, ModeSwitch
   dashboard/kartu/                    # Detail Kartu Anggota
@@ -41,6 +42,8 @@ app/
   dashboard/riwayat/                  # Milestone stub dari registrasi
   dashboard/kesaksian/                # Kesaksian UI stub
   dashboard/profil/                   # Profil + masuk pengurus sheet
+  dashboard/profil/edit/              # Perubahan Data v2 (SectionCard; email/kota locked; wilayah cascade)
+lib/actions/wilayah.ts                # listProvinsi/Kabupaten/Kecamatan/Desa (BPS codes)
   events/page.tsx                     # List event anggota (proto EventsScreen)
   join/[eventId]/                    # View Event + Get Ticket (Offline; Online → /absen)
   dashboard/kota/alk/page.tsx         # Beranda ALK legacy (Kas/Surat shell) — fallback
@@ -80,6 +83,9 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-10-27]
+- Profil Perubahan Data → page `/dashboard/profil/edit` (v2 Hero+SectionCard): identitas, wilayah cascade BPS, komunitas, pendidikan; email + LevelUP Kota locked; `lib/actions/wilayah.ts`; `updatePesertaProfile` field penuh (kota optional)
+- `/daftar` (Gabung LevelUP) redesign v2 + Gen Z: Hero merah + progress 3 langkah (kuning), headline Permanent Marker + sticker kuning (`#ffd83d`, senada landing), MemberCard miring sebagai teaser / live preview (nama, gereja, kota ke-update saat ngetik; foto Google), form `SectionCard` Tentang kamu / Komunitasmu, LevelUP Kota = sheet searchable (bukan `<select>`), jalur level Tamu→Volunteer→Squad→Core; sukses = kartu `LUP-{id}` + Next up (tiket / Join Volunteer). Logika submit tidak berubah. Nama cabang sudah berawalan "LevelUP" — jangan prefix lagi
+- Tier labels: userlevel 4 = PIC, 5 = LevelUP Pusat (bukan Leader/Tim Nasional); MemberCard Tamu / PIC / LevelUP Pusat tanpa suffix `/ MEMBER`
 - Sekretariat v2 Buat/Edit Event: `EventForm variant="v2"` (Hero+TopBar, SectionCard Info/Waktu/Sesi/Lokasi/Lainnya, FLD, chip target, BTN_RED) align `KEventNewScreen`; legacy kota path tetap
 - Event form Maps: fix kotak abu pertama buka — `ensureGoogleMaps` promise shared + poll `importLibrary` (race `loading=async` / stale onload remount); bukan deprecation Marker/Autocomplete
 - Sekretariat v2 Approval Event: `/dashboard/v2/kota/alk/event/[id]/approve` pakai `EventApproveV2Client` (PlainBar + CARD + Pill + Approve/Reject saja, gaya proto); Perlu Tindakan nasional → langsung ke halaman ini
@@ -87,7 +93,7 @@ task.md                               # Blocked: approval sampai core
 - Sekretariat v2: Perlu Tindakan + Pengajuan Event punya search + pagination; Scan pakai desain proto (pilih event/sesi, kamera gold frame, Nyalakan Kamera) bukan ScannerClient lama
 - Sekretariat PWA v2 di `/dashboard/v2/kota/alk` (desain proto `k-*`): AlkShell nav Beranda/Anggota/Scan/Event/Lainnya; real data; Anggota = CRUD pengurus; `pengurusDest(alk)` → v2; legacy `/dashboard/kota/alk` tetap (Kas/Surat)
 - Tiket: progress daftar di kartu Registration (`n dari targetjumlah`). Penuh (`n >= target`, target > 0) → tombol Registration Full; `createRegistrasi` menolak tiket baru (join, daftar, absen online). Strip event `FULL`. Yang sudah punya tiket tetap bisa lihat tiket
-- View Event `/join/[id]`: poster full width tinggi alami (bukan crop 16:10); role target 0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 Tim Nasional, pengurus 1 Admin LK · 2 BRIM
+- View Event `/join/[id]`: poster full width tinggi alami (bukan crop 16:10); role target 0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 LevelUP Pusat, pengurus 1 Admin LK · 2 BRIM
 - `/` = landing LevelUP gaya kolase/zine Gen Z: kertas lecek (SVG feTurbulence), pinggir sobek (`torn()` clip-path polygon), font Permanent Marker (dimuat di `app/page.tsx` saja), label strip hitam/kuning, poster event asli ditempel selotip, doodle crown/heart/smiley; copy dari levelupgen.com (visi 2033, WFE, ministries) + scroller event; Get Ticket → `/login?callbackUrl=/join/{id}`. Logo putih wajib di atas chip merah (tak terbaca di latar terang)
 
 ## Recent Updates [2026-10-26]

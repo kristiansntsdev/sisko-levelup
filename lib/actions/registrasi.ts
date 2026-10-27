@@ -5,16 +5,47 @@ import { resolveEventPosterUrl } from '@/lib/event-poster'
 import { formatTelegramMessage, notifyTelegram, eventDetailLink } from '@/lib/telegram'
 import { wibStartOfMonth, wibStartOfNextMonth, wibToday } from '@/lib/wib'
 
-export async function updatePesertaProfile(idPeserta: number, data: { nama: string; nowa: string; kotalevelup: string; gereja: string; sekolah: string; idTempatKerja: number | null }) {
+export async function updatePesertaProfile(
+  idPeserta: number,
+  data: {
+    nama: string
+    nowa: string
+    /** Omit on profil edit — kota locked after daftar. */
+    kotalevelup?: string
+    gereja: string
+    sekolah: string
+    idTempatKerja: number | null
+    gender?: string
+    tempatlahir?: string
+    tgllahir?: string
+    pendidikan?: string
+    jurusan?: string
+    provinsi?: string
+    kabupaten?: string
+    kecamatan?: string
+    desa?: string
+    alamat?: string
+  },
+) {
   await db.peserta.update({
     where: { id_peserta: idPeserta },
     data: {
       nama: data.nama,
       nowa: data.nowa,
-      kotalevelup: data.kotalevelup,
+      ...(data.kotalevelup != null ? { kotalevelup: data.kotalevelup } : {}),
       gereja: data.gereja,
       pekerjaan: data.sekolah,
       id_tempat_kerja: data.idTempatKerja,
+      ...(data.gender != null ? { gender: data.gender } : {}),
+      ...(data.tempatlahir != null ? { tempatlahir: data.tempatlahir } : {}),
+      ...(data.tgllahir != null ? { tgllahir: data.tgllahir } : {}),
+      ...(data.pendidikan != null ? { pendidikan: data.pendidikan } : {}),
+      ...(data.jurusan != null ? { jurusan: data.jurusan } : {}),
+      ...(data.provinsi != null ? { provinsi: data.provinsi } : {}),
+      ...(data.kabupaten != null ? { kabupaten: data.kabupaten } : {}),
+      ...(data.kecamatan != null ? { kecamatan: data.kecamatan } : {}),
+      ...(data.desa != null ? { desa: data.desa } : {}),
+      ...(data.alamat != null ? { alamat: data.alamat } : {}),
     },
   })
 }

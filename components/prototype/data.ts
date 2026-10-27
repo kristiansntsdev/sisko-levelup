@@ -1,10 +1,10 @@
 // Dummy data for /prototype — static, not connected to the database
 
 export type Gender = 'L' | 'P'
-export type Level = 'Umum' | 'Volunteer' | 'Squad' | 'Core' | 'Leader' | 'Tim Nasional'
+export type Level = 'Umum' | 'Volunteer' | 'Squad' | 'Core' | 'Leader' | 'PIC' | 'Tim Nasional' | 'LevelUP Pusat'
 
 // Same option lists as components/kota/event-form.tsx
-export const TARGET_OPTIONS: Level[] = ['Umum', 'Volunteer', 'Squad', 'Core', 'Leader', 'Tim Nasional']
+export const TARGET_OPTIONS: Level[] = ['Umum', 'Volunteer', 'Squad', 'Core', 'PIC', 'LevelUP Pusat']
 export const TARGET_PENGURUS_OPTIONS = ['Admin LK', 'BRIM']
 export const WWTYPE_LABEL = { bulanan: 'Bulanan', jfe: 'JFE', nasional: 'Nasional' } as const
 export type WwType = keyof typeof WWTYPE_LABEL
@@ -116,7 +116,7 @@ export const GUESTS: Person[] = [
   { key: 'kevin', name: 'Kevin Purba', g: 'L', church: 'GBI Kasih Karunia', city: 'Kota Binjai', email: 'kevin.purba@gmail.com', level: 'Volunteer' },
   { key: 'nadia', name: 'Nadia Sembiring', g: 'P', church: 'GBI Rehobot', city: 'Kota Pematangsiantar', email: 'nadia.sembiring@gmail.com', level: 'Squad' },
   { key: 'yoel', name: 'Yoel Ginting', g: 'L', church: 'GPdI Bukit Sion', city: 'Kota Tebing Tinggi', email: 'yoel.ginting@gmail.com', level: 'Core' },
-  { key: 'priska', name: 'Priska Damanik', g: 'P', church: 'GPdI Filadelfia', city: 'Kota Binjai', email: 'priska.damanik@gmail.com', level: 'Leader' },
+  { key: 'priska', name: 'Priska Damanik', g: 'P', church: 'GPdI Filadelfia', city: 'Kota Binjai', email: 'priska.damanik@gmail.com', level: 'PIC' },
   { key: 'hana', name: 'Hana Sinaga', g: 'P', church: 'GSJA Kristus Raja', city: 'Kota Pematangsiantar', email: 'hana.sinaga@gmail.com', level: 'Squad' },
   { key: 'stefani', name: 'Stefani Purba', g: 'P', church: 'GBI Kasih Karunia', city: 'Kota Medan', email: 'stefani.purba@gmail.com', level: 'Volunteer' },
   { key: 'andre', name: 'Andre Lumbantobing', g: 'L', church: 'GPdI Bukit Sion', city: 'Kota Medan', email: 'andre.lumbantobing@gmail.com', level: 'Volunteer' },
@@ -124,7 +124,7 @@ export const GUESTS: Person[] = [
 
 // ---------------- Keanggotaan (alur sisko: daftar → Tamu → Volunteer → Squad) ----------------
 
-// userlevel 0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC (Leader); approval baru sampai Squad (Core belum dibuka)
+// userlevel 0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 LevelUP Pusat; approval baru sampai Squad (Core belum dibuka)
 export const LEVEL_STEPS: [Level, string][] = [['Umum', 'Tamu'], ['Volunteer', 'Volunteer'], ['Squad', 'Squad'], ['Core', 'Core']]
 
 // Tabel `upgrade`: pengajuan Squad, di-approve ALK kota yang dipilih (peserta.kotalevelup)
@@ -185,7 +185,7 @@ export interface Ev {
 export const EVENTS: Ev[] = [
   {
     id: 'ignite', no: 412, cabang: '0', name: 'Igniting Leader', category: 'Leadership', jenis: 'Offline', wwtype: 'nasional', scope: 'seluruh_kota',
-    target: ['Core', 'Leader'], targetPengurus: ['Admin LK'], quota: 40, booked: 9,
+    target: ['Core', 'PIC'], targetPengurus: ['Admin LK'], quota: 40, booked: 9,
     tgl: '2026-10-23', tglSelesai: '2026-10-23', jam: '18:00', jamSelesai: '20:00',
     venue: 'GBI Kasih Karunia', alamat: 'GBI Kasih Karunia, Jl. Gatot Subroto No. 12, Medan', latlng: '3.5952,98.6722', radius: 300,
     dana: 3500000, surat: 'https://s.id/surat-igniting-leader', status: 'live',
@@ -261,7 +261,7 @@ export const EVENTS: Ev[] = [
   },
   {
     id: 'align', no: 430, cabang: '0', name: 'Align Leader', category: 'Align', jenis: 'Online', wwtype: 'nasional', scope: 'khusus',
-    target: ['Leader', 'Tim Nasional'], targetPengurus: [], quota: 300, booked: 141,
+    target: ['PIC', 'LevelUP Pusat'], targetPengurus: [], quota: 300, booked: 141,
     tgl: '2026-11-11', tglSelesai: '2026-11-11', jam: '12:00', jamSelesai: '13:00',
     venue: 'Online', alamat: 'Online melalui sisko.levelupgen.com >> Events', latlng: '', radius: 0,
     dana: 0, surat: '', status: 'approved',
@@ -321,7 +321,7 @@ export const EVENTS: Ev[] = [
   },
   {
     id: 'retreat', no: 435, cabang: '12', name: 'Retreat Hamba Tuhan', category: 'Retreat', jenis: 'Offline', wwtype: 'bulanan', scope: '',
-    target: ['Core', 'Leader'], targetPengurus: [], quota: 60, booked: 0,
+    target: ['Core', 'PIC'], targetPengurus: [], quota: 60, booked: 0,
     tgl: '2026-11-14', tglSelesai: '2026-11-14', jam: '08:00', jamSelesai: '16:00',
     venue: 'Wisma Doa Berastagi', alamat: 'Wisma Doa Berastagi, Jl. Jamin Ginting, Berastagi', latlng: '3.1919,98.5093', radius: 500,
     dana: 4500000, surat: 'https://s.id/surat-retreat', status: 'rejected',

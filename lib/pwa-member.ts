@@ -1,10 +1,11 @@
-/** userlevel string → display labels (prototype: Tamu / Volunteer / Squad / Core / PIC) */
+/** userlevel string → display labels (0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 LevelUP Pusat) */
 export const USERLEVEL_LABEL: Record<string, string> = {
   '0': 'Tamu',
   '1': 'Volunteer',
   '2': 'Squad',
   '3': 'Core',
   '4': 'PIC',
+  '5': 'LevelUP Pusat',
 }
 
 export const USERLEVEL_TIER: Record<string, string> = {
@@ -13,6 +14,7 @@ export const USERLEVEL_TIER: Record<string, string> = {
   '2': 'SQUAD',
   '3': 'CORE',
   '4': 'PIC',
+  '5': 'LEVELUP PUSAT',
 }
 
 export const LEVEL_STEPS: [string, string][] = [
@@ -54,6 +56,7 @@ export function memberCardFromPeserta(p: {
     church: p.gereja || '—',
     city: p.kotaName || '—',
     tier: USERLEVEL_TIER[p.userlevel] ?? 'TAMU',
-    photo: p.foto || undefined,
+    // ponytail: skip peserta.foto until upload flow exists (legacy = bare filename, broken on PWA)
+    photo: undefined,
   }
 }

@@ -19,6 +19,13 @@ export async function getPesertaById(idPeserta: number) {
       tgllahir: true,
       email: true,
       foto: true,
+      pendidikan: true,
+      jurusan: true,
+      provinsi: true,
+      kabupaten: true,
+      kecamatan: true,
+      desa: true,
+      alamat: true,
     },
   })
 }

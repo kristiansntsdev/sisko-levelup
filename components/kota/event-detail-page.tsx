@@ -17,6 +17,7 @@ const USERLEVEL_LABEL: Record<string, string> = {
   '2': 'squad',
   '3': 'core',
   '4': 'pic',
+  '5': 'levelup pusat',
 }
 
 function fmtRp(s: string) {

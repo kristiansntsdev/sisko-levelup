@@ -60,9 +60,12 @@ export function eligible(e: Ev, a: Account) {
 
 // ---------------- Keanggotaan ----------------
 
-// Label kartu: userlevel 0 Tamu, 1 Volunteer, 2 Squad, 3 Core, 4 PIC (event-form Leader = '4')
+// Label kartu: 0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 LevelUP Pusat
 export const tierOf = (level: Level) =>
-  level === 'Umum' ? 'TAMU' : level === 'Leader' ? 'PIC' : level.toUpperCase()
+  level === 'Umum' ? 'TAMU'
+    : level === 'Leader' || level === 'PIC' ? 'PIC'
+    : level === 'Tim Nasional' || level === 'LevelUP Pusat' ? 'LEVELUP PUSAT'
+    : level.toUpperCase()
 
 // Same detection as lib/actions/jobs-place.ts (upsertJobsPlace)
 const SEKOLAH_PREFIXES = /^(sd|mi|smp|mts|sma|smk|man|ma|sman|smkn|smpn|sdn)\b/i

@@ -163,8 +163,8 @@ const TARGET_PESERTA_LABEL: Record<string, string> = {
   '1': 'Volunteer',
   '2': 'Squad',
   '3': 'Core',
-  '4': 'Leader',
-  '5': 'Tim Nasional',
+  '4': 'PIC',
+  '5': 'LevelUP Pusat',
 }
 const TARGET_PENGURUS_LABEL: Record<string, string> = {
   '1': 'Admin LK',

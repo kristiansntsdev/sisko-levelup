@@ -18,7 +18,7 @@ import {
   SheetHead,
 } from '@/components/pwa/ui'
 
-const TARGET_ROLE: Record<string, string> = { ...USERLEVEL_LABEL, '5': 'Tim Nasional' }
+const TARGET_ROLE: Record<string, string> = USERLEVEL_LABEL
 const PENGURUS_ROLE: Record<string, string> = { '1': 'Admin LK', '2': 'BRIM' }
 
 function roleNames(stored: string, map: Record<string, string>) {

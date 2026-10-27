@@ -220,7 +220,12 @@ export function MemberCard({ m, onClick }: { m: MemberCardData; onClick?: () => 
                   <p className="text-[12px] font-bold uppercase">{m.city}</p>
                 </div>
                 <div className="w-[74px] shrink-0 flex flex-col items-center text-center -mt-1">
-                  {m.tier.length > 4 ? (
+                  {/* Tamu / PIC / LevelUP Pusat: no "/ MEMBER" suffix */}
+                  {m.tier === 'TAMU' || m.tier === 'PIC' || m.tier === 'LEVELUP PUSAT' ? (
+                    <p className={`font-bold leading-[1.05] tracking-wide ${m.tier === 'LEVELUP PUSAT' ? 'text-[13px]' : 'text-[22px]'}`}>
+                      {m.tier === 'LEVELUP PUSAT' ? <>LEVELUP<br />PUSAT</> : m.tier}
+                    </p>
+                  ) : m.tier.length > 4 ? (
                     <p className="text-[15px] font-bold leading-[1.05] tracking-wide">
                       {m.tier}
                       <br />/ MEMBER
