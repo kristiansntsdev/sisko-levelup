@@ -1,7 +1,8 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { AlkBerandaStats, EventDashboard } from '@/lib/actions/event'
+import { PAGE_SIZE_TODO, Pager, SearchBox } from './list-tools'
 import {
   ALK_BASE,
   Avatar,
@@ -17,7 +18,7 @@ import {
   type Tint,
 } from './ui'
 
-type Todo = { i: IconName; tint: Tint; t: string; s: string; href?: string; soon?: string }
+type Todo = { i: IconName; tint: Tint; t: string; s: string; href?: string; soon?: string; key: string }
 
 export function BerandaClient({
   nama,
@@ -36,6 +37,8 @@ export function BerandaClient({
 }) {
   const router = useRouter()
   const [soon, setSoon] = useState<string | null>(null)
+  const [todoQ, setTodoQ] = useState('')
+  const [todoPage, setTodoPage] = useState(0)
   const totalPeserta = stats.pesertaVolunteer + stats.pesertaSquad + stats.pesertaCore
   const eventCount = stats.eventOffline + stats.eventOnline
   const pct = totalPeserta ? Math.round((stats.pesertaCore / totalPeserta) * 100) : 0
@@ -49,42 +52,58 @@ export function BerandaClient({
     ['receipt', 'Saldo Kas', fmtRp(saldo)],
   ]
 
-  const todos: Todo[] = []
-  if (pendingApprovals) {
-    todos.push({
-      i: 'userPlus',
-      tint: 'gold',
-      t: `${pendingApprovals} pengajuan Squad menunggu approval`,
-      s: `Approval Member · ${namaCabang}`,
-      href: `${ALK_BASE}/approval`,
-    })
-  }
-  for (const e of events) {
-    if (e.approvenasional === '0' && e.notenasional) {
-      todos.push({
-        i: 'alert',
-        tint: 'rose',
-        t: `${e.nama_event} ditolak pusat`,
-        s: 'Lihat alasan & ajukan ulang',
-        href: `${ALK_BASE}/event/${e.id_event}`,
-      })
-    } else if (e.approvenasional !== '1' && !e.notenasional) {
-      todos.push({
-        i: 'calendar',
-        tint: 'amber',
-        t: `${e.nama_event} sedang direview`,
-        s: e.tglDisplay,
-        href: `${ALK_BASE}/event/${e.id_event}`,
+  const todos: Todo[] = useMemo(() => {
+    const list: Todo[] = []
+    if (pendingApprovals) {
+      list.push({
+        key: 'squad',
+        i: 'userPlus',
+        tint: 'gold',
+        t: `${pendingApprovals} pengajuan Squad menunggu approval`,
+        s: `Approval Member · ${namaCabang}`,
+        href: `${ALK_BASE}/approval`,
       })
     }
-  }
-  todos.push({
-    i: 'shield',
-    tint: 'gold',
-    t: 'Pengajuan Set Role',
-    s: 'Fitur segera tersedia',
-    soon: 'Set Role',
-  })
+    for (const e of events) {
+      if (e.approvenasional === '0' && e.notenasional) {
+        list.push({
+          key: `rej-${e.id_event}`,
+          i: 'alert',
+          tint: 'rose',
+          t: `${e.nama_event} ditolak pusat`,
+          s: 'Lihat alasan & ajukan ulang',
+          href: `${ALK_BASE}/event/${e.id_event}`,
+        })
+      } else if (e.approvenasional !== '1' && !e.notenasional) {
+        list.push({
+          key: `rev-${e.id_event}`,
+          i: 'calendar',
+          tint: 'amber',
+          t: `${e.nama_event} sedang direview`,
+          s: e.tglDisplay,
+          href: `${ALK_BASE}/event/${e.id_event}`,
+        })
+      }
+    }
+    list.push({
+      key: 'set-role',
+      i: 'shield',
+      tint: 'gold',
+      t: 'Pengajuan Set Role',
+      s: 'Fitur segera tersedia',
+      soon: 'Set Role',
+    })
+    return list
+  }, [events, namaCabang, pendingApprovals])
+
+  const filteredTodos = useMemo(() => {
+    const needle = todoQ.trim().toLowerCase()
+    if (!needle) return todos
+    return todos.filter((t) => `${t.t} ${t.s}`.toLowerCase().includes(needle))
+  }, [todos, todoQ])
+
+  const todoPages = Math.max(1, Math.ceil(filteredTodos.length / PAGE_SIZE_TODO))
+  const pagedTodos = filteredTodos.slice(todoPage * PAGE_SIZE_TODO, (todoPage + 1) * PAGE_SIZE_TODO)
 
   const menu: { i: IconName; t: string; tint: Tint; href?: string; soon?: string; badge?: number }[] = [
     { i: 'qr', t: 'Scan Absensi', tint: 'red', href: `${ALK_BASE}/scanner` },
@@ -154,21 +173,36 @@ export function BerandaClient({
       <div className="px-5 mt-5 space-y-7 pb-4">
         <div>
           <h3 className={`${H3} mb-3`}>Perlu Tindakan</h3>
-          <div className={`${CARD} divide-y divide-slate-100 overflow-hidden`}>
-            {todos.map((t) => (
-              <Row
-                key={t.t}
-                icon={t.i}
-                tint={t.tint}
-                title={t.t}
-                sub={t.s}
-                onClick={() => {
-                  if (t.soon) flash(t.soon)
-                  else if (t.href) router.push(t.href)
-                }}
-              />
-            ))}
+          <div className="mb-3">
+            <SearchBox
+              value={todoQ}
+              onChange={(v) => {
+                setTodoQ(v)
+                setTodoPage(0)
+              }}
+              placeholder="Cari pengajuan / event..."
+            />
           </div>
+          <div className={`${CARD} divide-y divide-slate-100 overflow-hidden`}>
+            {pagedTodos.length === 0 ? (
+              <p className="px-4 py-8 text-center text-[13px] text-slate-400">Tidak ada yang cocok</p>
+            ) : (
+              pagedTodos.map((t) => (
+                <Row
+                  key={t.key}
+                  icon={t.i}
+                  tint={t.tint}
+                  title={t.t}
+                  sub={t.s}
+                  onClick={() => {
+                    if (t.soon) flash(t.soon)
+                    else if (t.href) router.push(t.href)
+                  }}
+                />
+              ))
+            )}
+          </div>
+          <Pager page={todoPage} totalPages={todoPages} onChange={setTodoPage} />
         </div>
         <div>
           <h3 className={`${H3} mb-4`}>Menu Sekretariat</h3>

@@ -204,9 +204,74 @@ export async function createAbsen(
       )
     }
 
+    try {
+      revalidatePath(`/dashboard/v2/kota/alk/event/${idEvent}`)
+      revalidatePath('/dashboard/v2/kota/alk')
+      revalidatePath('/dashboard/v2/kota/alk/scanner')
+    } catch {
+      /* ok */
+    }
+
     return { success: true, nama: peserta?.nama ?? '', gereja: peserta?.gereja ?? '' }
   } catch (err) {
     console.error('[createAbsen]', err)
     return { success: false, reason: 'error' }
   }
+}
+
+export type RecentAbsenRow = {
+  id_absen: number
+  nama: string
+  gereja: string
+  gender: string
+  id_sesi: number | null
+  time: string
+}
+
+export async function getRecentAbsenForEvent(
+  idEvent: number,
+  limit = 5,
+): Promise<RecentAbsenRow[]> {
+  const rows = await db.absen.findMany({
+    where: {
+      OR: [{ id_event_int: idEvent }, { id_event: String(idEvent) }],
+    },
+    orderBy: { timestamp: 'desc' },
+    take: limit,
+    select: {
+      id_absen: true,
+      id_peserta_int: true,
+      id_peserta: true,
+      id_sesi: true,
+      timestamp: true,
+    },
+  })
+  const ids = rows
+    .map((r) => r.id_peserta_int ?? Number(r.id_peserta))
+    .filter((n) => Number.isFinite(n))
+  const pesertas = ids.length
+    ? await db.peserta.findMany({
+        where: { id_peserta: { in: ids } },
+        select: { id_peserta: true, nama: true, gereja: true, gender: true },
+      })
+    : []
+  const byId = new Map(pesertas.map((p) => [p.id_peserta, p]))
+  return rows.map((r) => {
+    const pid = r.id_peserta_int ?? Number(r.id_peserta)
+    const p = byId.get(pid)
+    const ts = r.timestamp instanceof Date ? r.timestamp : new Date(r.timestamp)
+    return {
+      id_absen: r.id_absen,
+      nama: p?.nama ?? `Peserta #${pid}`,
+      gereja: p?.gereja ?? '',
+      gender: p?.gender ?? 'L',
+      id_sesi: r.id_sesi,
+      time: ts.toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Jakarta',
+      }),
+    }
+  })
 }

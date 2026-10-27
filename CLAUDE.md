@@ -80,6 +80,7 @@ task.md                               # Blocked: approval sampai core
 
 ## Recent Updates [2026-10-27]
 - PWA iOS Add to Home Screen: Hero + PlainBar sisakan `env(safe-area-inset-top)` supaya nama/judul tidak ketutup status bar (`black-translucent` + `viewport-fit: cover`)
+- Sekretariat v2: Perlu Tindakan + Pengajuan Event punya search + pagination; Scan pakai desain proto (pilih event/sesi, kamera gold frame, Nyalakan Kamera) bukan ScannerClient lama
 - Sekretariat PWA v2 di `/dashboard/v2/kota/alk` (desain proto `k-*`): AlkShell nav Beranda/Anggota/Scan/Event/Lainnya; real data; Anggota = CRUD pengurus; `pengurusDest(alk)` → v2; legacy `/dashboard/kota/alk` tetap (Kas/Surat)
 - Tiket: progress daftar di kartu Registration (`n dari targetjumlah`). Penuh (`n >= target`, target > 0) → tombol Registration Full; `createRegistrasi` menolak tiket baru (join, daftar, absen online). Strip event `FULL`. Yang sudah punya tiket tetap bisa lihat tiket
 - View Event `/join/[id]`: poster full width tinggi alami (bukan crop 16:10); role target 0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 Tim Nasional, pengurus 1 Admin LK · 2 BRIM
