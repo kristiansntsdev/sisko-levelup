@@ -32,6 +32,8 @@
 ```
 app/
   page.tsx                            # Landing overview LevelUP (gerakan) + cuplikan event → /login + /daftar
+  about/page.tsx                      # Tentang LevelUP (dari PROFILE_LUP.pdf): cerita, Visi, Misi, Values; foto public/about/
+components/landing/zine.tsx           # Design system landing (kertas lecek, torn, Strip, Tape, doodle, ZineHeader/Footer) dipakai / + /about
   login/page.tsx                      # PWA login: email+password (peserta lalu pengurus) + Google
   daftar/page.tsx                     # Pendaftaran v2 Gen Z (intro → form live MemberCard → kartu jadi); Google baru → completeRegistration
   daftar/layout.tsx                   # Permanent Marker (--font-marker) khusus /daftar
@@ -83,6 +85,9 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-10-27]
+- `/about` (Tentang LevelUP) dari Community Profile PDF: hero "From God's Presence to God's Mission" + teks Tentang, cerita 2019 / 2025 DeeperWP / 44 kota, lalu 3 inti: Visi (versi revisi halaman 6 PDF, highlight kuning + ring Amanat Agung), 4 Misi (sticky note), 5 Values (polaroid + foto per value), CTA "Be part of us". Foto diekstrak ke `public/about/`
+- Primitive landing (paper/torn/Strip/Tape/doodle/CtaButtons) dipindah ke `components/landing/zine.tsx` + `ZinePage`/`ZineHeader`/`ZineFooter`; header kedua halaman punya link Tentang + Masuk. Halaman zine baru wajib pakai modul ini, jangan salin ulang
+- Catatan: visi di landing `/` (levelupgen.com, Pentakosta 2033) beda dengan visi PDF di `/about`
 - Tiket detail `/dashboard/tiket/[id]`: poster full width tinggi alami (`h-auto`), bukan crop `aspect-[16/9]` + `object-cover` (sama pola View Event `/join`)
 - Profil Perubahan Data → page `/dashboard/profil/edit` (v2 Hero+SectionCard): identitas, wilayah cascade BPS, komunitas, pendidikan; email + LevelUP Kota locked; `lib/actions/wilayah.ts`; `updatePesertaProfile` field penuh (kota optional)
 - `/daftar` (Gabung LevelUP) redesign v2 + Gen Z: Hero merah + progress 3 langkah (kuning), headline Permanent Marker + sticker kuning (`#ffd83d`, senada landing), MemberCard miring sebagai teaser / live preview (nama, gereja, kota ke-update saat ngetik; foto Google), form `SectionCard` Tentang kamu / Komunitasmu, LevelUP Kota = sheet searchable (bukan `<select>`), jalur level Tamu→Volunteer→Squad→Core; sukses = kartu `LUP-{id}` + Next up (tiket / Join Volunteer). Logika submit tidak berubah. Nama cabang sudah berawalan "LevelUP" — jangan prefix lagi
