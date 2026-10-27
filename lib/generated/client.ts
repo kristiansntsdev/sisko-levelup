@@ -207,6 +207,11 @@ export type transaksi = Prisma.transaksiModel
  */
 export type upgrade = Prisma.upgradeModel
 /**
+ * Model pindah_kota
+ * Pengajuan pindah LevelUP Kota — hanya Sekretariat Nasional yang approve/reject
+ */
+export type pindah_kota = Prisma.pindah_kotaModel
+/**
  * Model wilayah_desa
  * 
  */

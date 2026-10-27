@@ -1,10 +1,17 @@
 'use client'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, useTransition, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { getPesertaById, getMemberCardForPeserta } from '@/lib/actions/peserta'
 import { upsertJobsPlace } from '@/lib/actions/jobs-place'
 import { updatePesertaProfile } from '@/lib/actions/registrasi'
+import { getCabangs, type CabangOption } from '@/lib/actions/event'
+import {
+  ajukanPindahKota,
+  batalPindahKota,
+  getPindahKotaForMe,
+  type PindahKotaMine,
+} from '@/lib/actions/pindah-kota'
 import {
   listDesa,
   listKabupaten,
@@ -12,7 +19,17 @@ import {
   listProvinsi,
   type WilayahOption,
 } from '@/lib/actions/wilayah'
-import { BTN_RED, FLD, Field, Hero } from '@/components/pwa/ui'
+import {
+  BTN_RED,
+  FLD,
+  Field,
+  Hero,
+  Icon,
+  Pill,
+  Sheet,
+  SheetHead,
+  TintIcon,
+} from '@/components/pwa/ui'
 import { Note, SectionCard, Seg, TopBar } from '@/components/alk-v2/ui'
 
 const FLD_LOCKED = `${FLD} opacity-60 cursor-not-allowed bg-slate-100 focus:bg-slate-100 focus:ring-1 focus:ring-slate-200`
@@ -60,6 +77,13 @@ export default function ProfilEditPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [cabangs, setCabangs] = useState<CabangOption[]>([])
+  const [pindah, setPindah] = useState<PindahKotaMine | null>(null)
+  const [kotaSheetOpen, setKotaSheetOpen] = useState(false)
+  const [kotaQ, setKotaQ] = useState('')
+  const [pindahCatatan, setPindahCatatan] = useState('')
+  const [pindahError, setPindahError] = useState('')
+  const [pindahPending, startPindah] = useTransition()
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -71,10 +95,12 @@ export default function ProfilEditPage() {
 
     let cancelled = false
     ;(async () => {
-      const [p, card, provs] = await Promise.all([
+      const [p, card, provs, cabangList, pindahMine] = await Promise.all([
         getPesertaById(id),
         getMemberCardForPeserta(id),
         listProvinsi(),
+        getCabangs(),
+        getPindahKotaForMe(),
       ])
       if (cancelled || !p) return
 
@@ -92,6 +118,9 @@ export default function ProfilEditPage() {
       setPendidikan(p.pendidikan || '')
       setJurusan(p.jurusan || '')
       setProvinsiOpts(provs)
+      setCabangs(cabangList)
+      setPindah(pindahMine)
+      if (pindahMine?.status === '') setPindahCatatan(pindahMine.catatan)
 
       const prov = p.provinsi || ''
       const kab = p.kabupaten || ''
@@ -149,6 +178,42 @@ export default function ProfilEditPage() {
     setDesaOpts(id ? await listDesa(id) : [])
   }
 
+  async function refreshPindah() {
+    setPindah(await getPindahKotaForMe())
+  }
+
+  function openAjukanSheet() {
+    setPindahError('')
+    setKotaQ('')
+    setKotaSheetOpen(true)
+  }
+
+  function submitPindah(keKota: string) {
+    setPindahError('')
+    startPindah(async () => {
+      const res = await ajukanPindahKota(keKota, pindahCatatan)
+      if (!res.ok) {
+        setPindahError(res.error)
+        return
+      }
+      setKotaSheetOpen(false)
+      await refreshPindah()
+    })
+  }
+
+  function handleBatalPindah() {
+    setPindahError('')
+    startPindah(async () => {
+      const res = await batalPindahKota()
+      if (!res.ok) {
+        setPindahError(res.error)
+        return
+      }
+      setPindahCatatan('')
+      await refreshPindah()
+    })
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!idPeserta) return
@@ -202,7 +267,7 @@ export default function ProfilEditPage() {
       <Hero className="pt-3 pb-16 rounded-b-[32px]">
         <TopBar title="Perubahan Data" back={() => router.push('/dashboard/profil')} />
         <p className="text-[13px] text-white/80 mt-2 px-0.5">
-          Email & LevelUP Kota terkunci. Data lain bisa kamu ubah.
+          Email terkunci. LevelUP Kota lewat pengajuan ke Sekretariat Nasional.
         </p>
       </Hero>
 
@@ -329,10 +394,78 @@ export default function ProfilEditPage() {
           </Field>
         </SectionCard>
 
-        <SectionCard icon="church" tint="red" title="Komunitas" sub="LevelUP Kota terkunci">
+        <SectionCard icon="church" tint="red" title="Komunitas" sub="LevelUP Kota via pengajuan">
           <Field label="LevelUP Kota">
             <input className={FLD_LOCKED} value={kotaName} disabled readOnly />
           </Field>
+
+          {pindah?.status === '' ? (
+            <div className="rounded-xl bg-amber-50 ring-1 ring-amber-200 px-3.5 py-3 space-y-2">
+              <div className="flex items-start gap-2">
+                <Pill tone="amber">Pending</Pill>
+                <p className="text-[13px] text-amber-900 leading-snug flex-1">
+                  Menunggu approval Sekretariat Nasional → <b>{pindah.keNama}</b>
+                </p>
+              </div>
+              {pindah.catatan ? (
+                <p className="text-[12px] text-slate-600">Catatan: {pindah.catatan}</p>
+              ) : null}
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  disabled={pindahPending}
+                  onClick={openAjukanSheet}
+                  className="flex-1 py-2.5 rounded-xl bg-white ring-1 ring-slate-200 text-[13px] font-bold text-[#3b1417] disabled:opacity-50"
+                >
+                  Ubah tujuan
+                </button>
+                <button
+                  type="button"
+                  disabled={pindahPending}
+                  onClick={handleBatalPindah}
+                  className="flex-1 py-2.5 rounded-xl bg-white ring-1 ring-rose-200 text-[13px] font-bold text-rose-600 disabled:opacity-50"
+                >
+                  Batalkan
+                </button>
+              </div>
+            </div>
+          ) : pindah?.status === '0' ? (
+            <div className="rounded-xl bg-rose-50 ring-1 ring-rose-200 px-3.5 py-3 space-y-2">
+              <div className="flex items-start gap-2">
+                <Pill tone="red">Ditolak</Pill>
+                <p className="text-[13px] text-rose-800 leading-snug flex-1">
+                  Pengajuan ke <b>{pindah.keNama}</b> ditolak.
+                </p>
+              </div>
+              {pindah.notenasional ? (
+                <p className="text-[12px] text-rose-700">Alasan: {pindah.notenasional}</p>
+              ) : null}
+              <button
+                type="button"
+                disabled={pindahPending}
+                onClick={openAjukanSheet}
+                className={`w-full py-2.5 text-[13px] ${BTN_RED}`}
+              >
+                Ajukan ulang
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              disabled={pindahPending}
+              onClick={openAjukanSheet}
+              className="w-full py-3 rounded-xl bg-[#fbeceb] ring-1 ring-[#f3d3d3] text-[#c9232c] text-[13.5px] font-bold disabled:opacity-50"
+            >
+              Ajukan perubahan LevelUP Kota
+            </button>
+          )}
+
+          {pindahError ? (
+            <p role="alert" className="text-[12.5px] text-rose-600 font-medium">
+              {pindahError}
+            </p>
+          ) : null}
+
           <Field label="Gereja">
             <input
               className={FLD}
@@ -371,7 +504,7 @@ export default function ProfilEditPage() {
         </SectionCard>
 
         <Note>
-          Perubahan langsung tersimpan ke kartu anggota. Email & LevelUP Kota hanya bisa diubah lewat pengurus.
+          Perubahan data langsung tersimpan ke kartu anggota. Email terkunci. LevelUP Kota berubah setelah Sekretariat Nasional menyetujui pengajuanmu.
         </Note>
 
         {error && (
@@ -384,6 +517,92 @@ export default function ProfilEditPage() {
           {saving ? 'Menyimpan…' : 'Simpan'}
         </button>
       </form>
+
+      <Sheet
+        open={kotaSheetOpen}
+        onClose={() => {
+          setKotaSheetOpen(false)
+          setKotaQ('')
+        }}
+      >
+        <SheetHead
+          title="Pilih LevelUP Kota tujuan"
+          sub="Pengajuan ditinjau Sekretariat Nasional"
+        />
+        <Field label="Alasan (opsional)">
+          <textarea
+            className={`${FLD} min-h-[72px] resize-y`}
+            placeholder="Kenapa mau pindah kota?"
+            value={pindahCatatan}
+            onChange={(e) => setPindahCatatan(e.target.value)}
+          />
+        </Field>
+        <label className="mt-3 flex items-center gap-2.5 rounded-full bg-slate-50 ring-1 ring-slate-200 px-4 py-3 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#c9232c] transition">
+          <Icon name="search" className="w-5 h-5 text-[#c9232c]" />
+          <input
+            type="search"
+            value={kotaQ}
+            onChange={(e) => setKotaQ(e.target.value)}
+            placeholder="Cari kota..."
+            autoFocus
+            className="flex-1 min-w-0 bg-transparent outline-none text-[16px] placeholder:text-slate-400"
+          />
+          {kotaQ ? (
+            <button
+              type="button"
+              onClick={() => setKotaQ('')}
+              aria-label="Hapus pencarian"
+              className="text-slate-400 active:text-slate-600"
+            >
+              <Icon name="x" className="w-5 h-5" />
+            </button>
+          ) : null}
+        </label>
+        <div className="mt-3 space-y-2 max-h-[45vh] overflow-y-auto -mx-1 px-1">
+          {(() => {
+            const needle = kotaQ.trim().toLowerCase()
+            const shown = needle
+              ? cabangs.filter((c) => c.nama.toLowerCase().includes(needle))
+              : cabangs
+            if (!shown.length) {
+              return (
+                <p className="text-center text-[13px] text-slate-400 py-8">
+                  Gak ketemu “{kotaQ.trim()}”
+                </p>
+              )
+            }
+            return shown.map((c) => {
+              const on = pindah?.status === '' && pindah.ke_kota === c.id
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  disabled={pindahPending}
+                  onClick={() => submitPindah(c.id)}
+                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-left transition disabled:opacity-50 ${
+                    on ? 'ring-2 ring-[#c9232c] bg-[#fbeceb]/60' : 'ring-1 ring-[#efe3cc] bg-white'
+                  }`}
+                >
+                  <TintIcon
+                    name="pin"
+                    tint={on ? 'red' : 'gold'}
+                    size="w-9 h-9 rounded-xl"
+                    icon="w-[18px] h-[18px]"
+                  />
+                  <span
+                    className={`flex-1 min-w-0 font-bold text-[14.5px] truncate ${
+                      on ? 'text-[#c9232c]' : 'text-[#3b1417]'
+                    }`}
+                  >
+                    {c.nama}
+                  </span>
+                  {on ? <Icon name="check" className="w-5 h-5 text-[#c9232c] shrink-0" sw={2.6} /> : null}
+                </button>
+              )
+            })
+          })()}
+        </div>
+      </Sheet>
     </main>
   )
 }

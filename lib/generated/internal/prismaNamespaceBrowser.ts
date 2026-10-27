@@ -84,6 +84,7 @@ export const ModelName = {
   tags: 'tags',
   transaksi: 'transaksi',
   upgrade: 'upgrade',
+  pindah_kota: 'pindah_kota',
   wilayah_desa: 'wilayah_desa',
   wilayah_kabupaten: 'wilayah_kabupaten',
   wilayah_kecamatan: 'wilayah_kecamatan',
@@ -551,6 +552,21 @@ export const UpgradeScalarFieldEnum = {
 } as const
 
 export type UpgradeScalarFieldEnum = (typeof UpgradeScalarFieldEnum)[keyof typeof UpgradeScalarFieldEnum]
+
+
+export const Pindah_kotaScalarFieldEnum = {
+  id_pindah: 'id_pindah',
+  id_peserta: 'id_peserta',
+  dari_kota: 'dari_kota',
+  ke_kota: 'ke_kota',
+  catatan: 'catatan',
+  status: 'status',
+  notenasional: 'notenasional',
+  created_at: 'created_at',
+  decided_at: 'decided_at'
+} as const
+
+export type Pindah_kotaScalarFieldEnum = (typeof Pindah_kotaScalarFieldEnum)[keyof typeof Pindah_kotaScalarFieldEnum]
 
 
 export const Wilayah_desaScalarFieldEnum = {
@@ -1060,6 +1076,18 @@ export const upgradeOrderByRelevanceFieldEnum = {
 } as const
 
 export type upgradeOrderByRelevanceFieldEnum = (typeof upgradeOrderByRelevanceFieldEnum)[keyof typeof upgradeOrderByRelevanceFieldEnum]
+
+
+export const pindah_kotaOrderByRelevanceFieldEnum = {
+  id_peserta: 'id_peserta',
+  dari_kota: 'dari_kota',
+  ke_kota: 'ke_kota',
+  catatan: 'catatan',
+  status: 'status',
+  notenasional: 'notenasional'
+} as const
+
+export type pindah_kotaOrderByRelevanceFieldEnum = (typeof pindah_kotaOrderByRelevanceFieldEnum)[keyof typeof pindah_kotaOrderByRelevanceFieldEnum]
 
 
 export const wilayah_desaOrderByRelevanceFieldEnum = {

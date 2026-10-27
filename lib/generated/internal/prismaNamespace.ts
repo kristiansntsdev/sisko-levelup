@@ -430,6 +430,7 @@ export const ModelName = {
   tags: 'tags',
   transaksi: 'transaksi',
   upgrade: 'upgrade',
+  pindah_kota: 'pindah_kota',
   wilayah_desa: 'wilayah_desa',
   wilayah_kabupaten: 'wilayah_kabupaten',
   wilayah_kecamatan: 'wilayah_kecamatan',
@@ -457,7 +458,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2639,6 +2640,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    pindah_kota: {
+      payload: Prisma.$pindah_kotaPayload<ExtArgs>
+      fields: Prisma.pindah_kotaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.pindah_kotaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pindah_kotaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.pindah_kotaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pindah_kotaPayload>
+        }
+        findFirst: {
+          args: Prisma.pindah_kotaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pindah_kotaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.pindah_kotaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pindah_kotaPayload>
+        }
+        findMany: {
+          args: Prisma.pindah_kotaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pindah_kotaPayload>[]
+        }
+        create: {
+          args: Prisma.pindah_kotaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pindah_kotaPayload>
+        }
+        createMany: {
+          args: Prisma.pindah_kotaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.pindah_kotaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pindah_kotaPayload>
+        }
+        update: {
+          args: Prisma.pindah_kotaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pindah_kotaPayload>
+        }
+        deleteMany: {
+          args: Prisma.pindah_kotaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.pindah_kotaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.pindah_kotaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$pindah_kotaPayload>
+        }
+        aggregate: {
+          args: Prisma.Pindah_kotaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePindah_kota>
+        }
+        groupBy: {
+          args: Prisma.pindah_kotaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Pindah_kotaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.pindah_kotaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Pindah_kotaCountAggregateOutputType> | number
+        }
+      }
+    }
     wilayah_desa: {
       payload: Prisma.$wilayah_desaPayload<ExtArgs>
       fields: Prisma.wilayah_desaFieldRefs
@@ -3909,6 +3976,21 @@ export const UpgradeScalarFieldEnum = {
 export type UpgradeScalarFieldEnum = (typeof UpgradeScalarFieldEnum)[keyof typeof UpgradeScalarFieldEnum]
 
 
+export const Pindah_kotaScalarFieldEnum = {
+  id_pindah: 'id_pindah',
+  id_peserta: 'id_peserta',
+  dari_kota: 'dari_kota',
+  ke_kota: 'ke_kota',
+  catatan: 'catatan',
+  status: 'status',
+  notenasional: 'notenasional',
+  created_at: 'created_at',
+  decided_at: 'decided_at'
+} as const
+
+export type Pindah_kotaScalarFieldEnum = (typeof Pindah_kotaScalarFieldEnum)[keyof typeof Pindah_kotaScalarFieldEnum]
+
+
 export const Wilayah_desaScalarFieldEnum = {
   id: 'id',
   kecamatan_id: 'kecamatan_id',
@@ -4418,6 +4500,18 @@ export const upgradeOrderByRelevanceFieldEnum = {
 export type upgradeOrderByRelevanceFieldEnum = (typeof upgradeOrderByRelevanceFieldEnum)[keyof typeof upgradeOrderByRelevanceFieldEnum]
 
 
+export const pindah_kotaOrderByRelevanceFieldEnum = {
+  id_peserta: 'id_peserta',
+  dari_kota: 'dari_kota',
+  ke_kota: 'ke_kota',
+  catatan: 'catatan',
+  status: 'status',
+  notenasional: 'notenasional'
+} as const
+
+export type pindah_kotaOrderByRelevanceFieldEnum = (typeof pindah_kotaOrderByRelevanceFieldEnum)[keyof typeof pindah_kotaOrderByRelevanceFieldEnum]
+
+
 export const wilayah_desaOrderByRelevanceFieldEnum = {
   id: 'id',
   kecamatan_id: 'kecamatan_id',
@@ -4801,6 +4895,7 @@ export type GlobalOmitConfig = {
   tags?: Prisma.tagsOmit
   transaksi?: Prisma.transaksiOmit
   upgrade?: Prisma.upgradeOmit
+  pindah_kota?: Prisma.pindah_kotaOmit
   wilayah_desa?: Prisma.wilayah_desaOmit
   wilayah_kabupaten?: Prisma.wilayah_kabupatenOmit
   wilayah_kecamatan?: Prisma.wilayah_kecamatanOmit

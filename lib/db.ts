@@ -2,7 +2,8 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "./generated/client";
 import { createAuditLogExtension } from "./audit-log";
 
-const ADAPTER_VERSION = 2;
+// Bump when prisma generate adds models the HMR-cached singleton would miss.
+const ADAPTER_VERSION = 3;
 
 function sslFromDatabaseUrl(url: URL) {
   const sslaccept = url.searchParams.get("sslaccept");

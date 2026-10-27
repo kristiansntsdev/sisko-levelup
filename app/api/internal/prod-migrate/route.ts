@@ -194,6 +194,30 @@ export async function POST(req: NextRequest) {
   const addedDokumentasiCreatedAt = await ensureTimestampColumn('dokumentasi_kota', 'created_at', true)
   const addedReimburseLaporanAt = await ensureTimestampColumn('reimburse', 'laporan_at', false)
 
+  const pindahKotaTables = await db.$queryRaw<{ TABLE_NAME: string }[]>`
+    SELECT TABLE_NAME FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pindah_kota'
+  `
+  const addedPindahKota = pindahKotaTables.length === 0
+  if (addedPindahKota) {
+    await db.$executeRawUnsafe(`
+      CREATE TABLE pindah_kota (
+        id_pindah INT NOT NULL AUTO_INCREMENT,
+        id_peserta TEXT NOT NULL,
+        dari_kota TEXT NOT NULL,
+        ke_kota TEXT NOT NULL,
+        catatan TEXT NOT NULL,
+        status TEXT NOT NULL,
+        notenasional TEXT NOT NULL,
+        created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        decided_at DATETIME(0) NULL,
+        PRIMARY KEY (id_pindah),
+        KEY idx_pindah_kota_peserta (id_peserta(64)),
+        KEY idx_pindah_kota_status (status(8))
+      )
+    `)
+  }
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -222,6 +246,7 @@ export async function POST(req: NextRequest) {
     addedEventCreatedAt,
     addedDokumentasiCreatedAt,
     addedReimburseLaporanAt,
+    addedPindahKota,
     brimUpdated: brim.count,
     brim: row,
   })

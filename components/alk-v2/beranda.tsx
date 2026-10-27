@@ -35,6 +35,7 @@ export function BerandaClient({
   stats,
   saldo,
   pendingApprovals,
+  pendingPindahKota = 0,
   events,
   isNasional = false,
 }: {
@@ -43,6 +44,7 @@ export function BerandaClient({
   stats: AlkBerandaStats
   saldo: number
   pendingApprovals: number
+  pendingPindahKota?: number
   events: EventDashboard[]
   isNasional?: boolean
 }) {
@@ -73,6 +75,16 @@ export function BerandaClient({
         t: `${pendingApprovals} pengajuan Squad menunggu approval`,
         s: `Approval Member · ${namaCabang}`,
         href: `${ALK_BASE}/approval`,
+      })
+    }
+    if (isNasional && pendingPindahKota) {
+      list.push({
+        key: 'pindah-kota',
+        i: 'pin',
+        tint: 'amber',
+        t: `${pendingPindahKota} pengajuan pindah LevelUP Kota`,
+        s: 'Approve / Tolak · Sekretariat Nasional',
+        href: `${ALK_BASE}/pindah-kota`,
       })
     }
     for (const e of events) {
@@ -120,7 +132,7 @@ export function BerandaClient({
       soon: 'Set Role',
     })
     return list
-  }, [events, isNasional, namaCabang, pendingApprovals])
+  }, [events, isNasional, namaCabang, pendingApprovals, pendingPindahKota])
 
   const filteredTodos = useMemo(() => {
     const needle = todoQ.trim().toLowerCase()

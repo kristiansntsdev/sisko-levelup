@@ -44,8 +44,10 @@ components/landing/zine.tsx           # Design system landing (kertas lecek, tor
   dashboard/riwayat/                  # Milestone stub dari registrasi
   dashboard/kesaksian/                # Kesaksian UI stub
   dashboard/profil/                   # Profil + masuk pengurus sheet
-  dashboard/profil/edit/              # Perubahan Data v2 (SectionCard; email/kota locked; wilayah cascade)
+  dashboard/profil/edit/              # Perubahan Data v2; ajukan pindah LevelUP Kota (nasional approve)
 lib/actions/wilayah.ts                # listProvinsi/Kabupaten/Kecamatan/Desa (BPS codes)
+lib/actions/pindah-kota.ts            # ajukan/batal/list/approve/reject pindah LevelUP Kota (nasional only)
+  dashboard/v2/kota/alk/pindah-kota/  # Nasional: antrian Approve/Tolak pindah kota
   events/page.tsx                     # List event anggota (proto EventsScreen)
   join/[eventId]/                    # View Event + Get Ticket (Offline; Online → /absen)
   dashboard/kota/alk/page.tsx         # Beranda ALK legacy (Kas/Surat shell) — fallback
@@ -85,6 +87,7 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-10-27]
+- Profil edit: **Ajukan perubahan LevelUP Kota** → tabel `pindah_kota`; kota tetap sampai `sekretariatnasional` Approve; Tolak + alasan; antrian `/dashboard/v2/kota/alk/pindah-kota` + todo beranda nasional; `prod-migrate` CREATE TABLE idempotent
 - `/about` (Tentang LevelUP) dari Community Profile PDF: hero "From God's Presence to God's Mission" + teks Tentang, cerita 2019 / 2025 DeeperWP / 44 kota, lalu 3 inti: Visi (versi revisi halaman 6 PDF, highlight kuning + ring Amanat Agung), 4 Misi (sticky note), 5 Values (polaroid + foto per value), CTA "Be part of us". Foto diekstrak ke `public/about/`
 - Primitive landing (paper/torn/Strip/Tape/doodle/CtaButtons) dipindah ke `components/landing/zine.tsx` + `ZinePage`/`ZineHeader`/`ZineFooter`; header kedua halaman punya link Tentang + Masuk. Halaman zine baru wajib pakai modul ini, jangan salin ulang
 - Catatan: visi di landing `/` (levelupgen.com, Pentakosta 2033) beda dengan visi PDF di `/about`

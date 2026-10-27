@@ -6,6 +6,7 @@ import {
 } from '@/lib/actions/event'
 import { getKasKota } from '@/lib/actions/kas-kota'
 import { countPendingSquadApprovals } from '@/lib/actions/upgrade'
+import { countPendingPindahKota } from '@/lib/actions/pindah-kota'
 import { BerandaClient } from '@/components/alk-v2/beranda'
 
 export default async function AlkV2BerandaPage() {
@@ -13,16 +14,18 @@ export default async function AlkV2BerandaPage() {
   const idCabang = Number(pengurus.cabang)
   const scope = pengurus.isNasional ? null : pengurus.cabang
 
-  const [events, cabang, kasKota, stats, pendingApprovals] = await Promise.all([
-    getAlkBerandaTodoEvents(scope),
-    db.cabang.findUnique({
-      where: { id_cabang: idCabang },
-      select: { namacabang: true },
-    }),
-    getKasKota(idCabang),
-    getAlkBerandaStats(scope),
-    countPendingSquadApprovals(),
-  ])
+  const [events, cabang, kasKota, stats, pendingApprovals, pendingPindahKota] =
+    await Promise.all([
+      getAlkBerandaTodoEvents(scope),
+      db.cabang.findUnique({
+        where: { id_cabang: idCabang },
+        select: { namacabang: true },
+      }),
+      getKasKota(idCabang),
+      getAlkBerandaStats(scope),
+      countPendingSquadApprovals(),
+      pengurus.isNasional ? countPendingPindahKota() : Promise.resolve(0),
+    ])
 
   return (
     <BerandaClient
@@ -31,6 +34,7 @@ export default async function AlkV2BerandaPage() {
       stats={stats}
       saldo={kasKota.saldo}
       pendingApprovals={pendingApprovals}
+      pendingPindahKota={pendingPindahKota}
       events={events}
       isNasional={pengurus.isNasional}
     />

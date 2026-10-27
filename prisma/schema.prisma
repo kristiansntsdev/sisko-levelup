@@ -377,6 +377,19 @@ model upgrade {
   approvenasional    String @db.Text
 }
 
+/// Pengajuan pindah LevelUP Kota — hanya Sekretariat Nasional yang approve/reject
+model pindah_kota {
+  id_pindah    Int       @id @default(autoincrement())
+  id_peserta   String    @db.Text
+  dari_kota    String    @db.Text
+  ke_kota      String    @db.Text
+  catatan      String    @db.Text
+  status       String    @db.Text
+  notenasional String    @db.Text
+  created_at   DateTime  @default(now()) @db.DateTime(0)
+  decided_at   DateTime? @db.DateTime(0)
+}
+
 model wilayah_desa {
   id           String  @id @db.VarChar(10)
   kecamatan_id String? @db.VarChar(7)
