@@ -16,9 +16,12 @@ import {
 } from '@/components/pwa/ui'
 
 const LOGIN_INPUT =
-  'w-full min-w-0 bg-transparent px-4 py-3.5 text-[16px] font-semibold outline-none placeholder:font-medium placeholder:text-slate-300'
+  'w-full min-w-0 bg-transparent px-4 py-3.5 text-[16px] font-semibold outline-none placeholder:font-medium placeholder:text-slate-300 ' +
+  // Chrome autofill paints a blue rect that ignores parent radius — cover + clip via LOGIN_BOX
+  'autofill:shadow-[inset_0_0_0_1000px_#f8fafc] autofill:[-webkit-text-fill-color:#0f172a] ' +
+  'focus:autofill:shadow-[inset_0_0_0_1000px_#fff]'
 const LOGIN_BOX =
-  'flex items-center rounded-2xl bg-slate-50 ring-1 ring-slate-200 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-[#c9232c]'
+  'flex items-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-200 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-[#c9232c]'
 
 function LoginForm() {
   const router = useRouter()
