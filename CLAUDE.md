@@ -83,6 +83,7 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-10-27]
+- Tiket detail `/dashboard/tiket/[id]`: poster full width tinggi alami (`h-auto`), bukan crop `aspect-[16/9]` + `object-cover` (sama pola View Event `/join`)
 - Profil Perubahan Data → page `/dashboard/profil/edit` (v2 Hero+SectionCard): identitas, wilayah cascade BPS, komunitas, pendidikan; email + LevelUP Kota locked; `lib/actions/wilayah.ts`; `updatePesertaProfile` field penuh (kota optional)
 - `/daftar` (Gabung LevelUP) redesign v2 + Gen Z: Hero merah + progress 3 langkah (kuning), headline Permanent Marker + sticker kuning (`#ffd83d`, senada landing), MemberCard miring sebagai teaser / live preview (nama, gereja, kota ke-update saat ngetik; foto Google), form `SectionCard` Tentang kamu / Komunitasmu, LevelUP Kota = sheet searchable (bukan `<select>`), jalur level Tamu→Volunteer→Squad→Core; sukses = kartu `LUP-{id}` + Next up (tiket / Join Volunteer). Logika submit tidak berubah. Nama cabang sudah berawalan "LevelUP" — jangan prefix lagi
 - Tier labels: userlevel 4 = PIC, 5 = LevelUP Pusat (bukan Leader/Tim Nasional); MemberCard Tamu / PIC / LevelUP Pusat tanpa suffix `/ MEMBER`

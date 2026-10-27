@@ -70,8 +70,8 @@ export function TicketView({
       <div className="px-4 py-5 space-y-4 pb-safe">
         <div className="bg-white rounded-[24px] shadow-[0_10px_30px_-14px_rgba(15,23,42,.35)] overflow-hidden">
           {detail.posterUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={detail.posterUrl} alt="" className="w-full aspect-[16/9] object-cover object-top" />
+            // eslint-disable-next-line @next/next/no-img-element -- full flyer, no cover crop
+            <img src={detail.posterUrl} alt="" className="w-full h-auto block bg-slate-200" />
           ) : (
             <div className="w-full aspect-[16/9] bg-linear-to-br from-[#d73640] to-[#8a1620]" />
           )}

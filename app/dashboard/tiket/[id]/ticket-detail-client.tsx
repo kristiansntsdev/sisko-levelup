@@ -1,7 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import {
-  EventThumb,
   GOLD_LINE,
   PAGE_BG,
   Pill,
@@ -65,11 +64,13 @@ export function TicketDetailClient({
     <main>
       <PlainBar title="Ticket" back={() => router.push('/dashboard/tiket')} />
       <div className="px-4 py-5 space-y-4 pb-8">
-        <div className="bg-white rounded-[24px] shadow-[0_10px_30px_-14px_rgba(15,23,42,.35)]">
-          <EventThumb
-            src={posterUrl || ''}
-            className="w-full aspect-[16/9] rounded-t-[24px]"
-          />
+        <div className="bg-white rounded-[24px] shadow-[0_10px_30px_-14px_rgba(15,23,42,.35)] overflow-hidden">
+          {posterUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- full flyer, no cover crop
+            <img src={posterUrl} alt="" className="w-full h-auto block bg-slate-200" />
+          ) : (
+            <div className="w-full aspect-[16/9] bg-linear-to-br from-[#d73640] to-[#8a1620]" />
+          )}
           <div className={GOLD_LINE} />
           <div className="px-5 pt-4 pb-4">
             <div className="flex items-center justify-between gap-3">
