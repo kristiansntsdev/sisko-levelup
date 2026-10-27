@@ -129,6 +129,31 @@ export function Torn({ seed, sides = 'tb', amp = 10, className = '', inner = '',
   )
 }
 
+export const HL = 'bg-[linear-gradient(transparent_58%,#ffd83d_58%)] [box-decoration-break:clone] px-1'
+
+export function Snap({ src, alt, sizes, seed, ratio = 'aspect-[4/3]', className = '', children }: { src: string; alt: string; sizes: string; seed: number; ratio?: string; className?: string; children?: ReactNode }) {
+  return (
+    <div className={className}>
+      <figure className="relative bg-[#fffdf7] p-2 pb-3 shadow-[0_14px_24px_-10px_rgba(40,30,10,.5)]">
+        <Tape seed={seed} className={`-top-3 left-1/2 -translate-x-1/2 h-6 w-20 ${seed % 2 ? 'rotate-3' : '-rotate-2'}`} />
+        <div className={`relative ${ratio} overflow-hidden bg-stone-200`}>
+          <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />
+        </div>
+        {children && <figcaption className="px-1.5 pt-4 pb-2">{children}</figcaption>}
+      </figure>
+    </div>
+  )
+}
+
+export function Heading({ n, children }: { n: string; children: ReactNode }) {
+  return (
+    <h2 className={`${MK} text-[clamp(2.2rem,6.5vw,3.6rem)] leading-none uppercase`}>
+      <span className="mr-3 text-[#e02a2f]">{n}</span>
+      {children}
+    </h2>
+  )
+}
+
 export function CtaButtons({ className = '' }: { className?: string }) {
   return (
     <div className={`flex flex-wrap items-center gap-4 ${className}`}>
@@ -157,27 +182,34 @@ export function ZinePage({ children }: { children: ReactNode }) {
   )
 }
 
+const NAV = [
+  ['/about', 'Tentang', 'paper', '-rotate-1'],
+  ['/program', 'Program', 'yellow', 'rotate-1'],
+] as const
+
 export function ZineHeader() {
   return (
-    <header className="relative z-30 flex items-center justify-between gap-3 px-5 sm:px-8 pt-[max(1.1rem,env(safe-area-inset-top))] max-w-6xl mx-auto">
-      <Link href="/" aria-label="LevelUP beranda" className={`relative -rotate-3 ${LIFT} ${PRESS}`}>
+    <header className="relative z-30 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 px-5 sm:px-8 pt-[max(1.1rem,env(safe-area-inset-top))] max-w-6xl mx-auto">
+      <Link href="/" aria-label="LevelUP beranda" className={`relative shrink-0 -rotate-3 ${LIFT} ${PRESS}`}>
         <span className="block bg-[#e02a2f] px-3 py-2" style={{ clipPath: torn(3, 4, 'tblr', 8) }}>
           <Image src={LOGO} alt="LevelUP" width={623} height={243} priority className="h-7 sm:h-8 w-auto" />
         </span>
         <Tape className="-top-2.5 left-1/2 -translate-x-1/2 rotate-2 h-5 w-14" />
       </Link>
-      <nav className="flex items-center gap-2.5 sm:gap-3">
-        <Link href="/about" className={`${LIFT} ${PRESS}`}>
-          <Strip tone="paper" seed={12} className="h-10 px-4 sm:px-5 text-[14px] sm:text-[15px] -rotate-1">
-            Tentang
-          </Strip>
-        </Link>
-        <Link href="/login" className={`${LIFT} ${PRESS}`}>
-          <Strip tone="ink" seed={9} className="h-10 px-4 sm:px-5 text-[14px] sm:text-[15px] rotate-2">
-            Masuk
-          </Strip>
-        </Link>
+      <nav className="order-last sm:order-none w-full sm:w-auto sm:ml-auto flex justify-end items-center gap-2.5 sm:gap-3">
+        {NAV.map(([href, label, tone, rot], i) => (
+          <Link key={href} href={href} className={`${LIFT} ${PRESS}`}>
+            <Strip tone={tone} seed={12 + i} className={`h-9 sm:h-10 px-3.5 sm:px-5 text-[13px] sm:text-[15px] ${rot}`}>
+              {label}
+            </Strip>
+          </Link>
+        ))}
       </nav>
+      <Link href="/login" className={`${LIFT} ${PRESS}`}>
+        <Strip tone="ink" seed={9} className="h-10 px-4 sm:px-5 text-[14px] sm:text-[15px] rotate-2">
+          Masuk
+        </Strip>
+      </Link>
     </header>
   )
 }

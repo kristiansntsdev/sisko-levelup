@@ -1,7 +1,5 @@
-import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
-import Image from 'next/image'
-import { Brush, Crown, CtaButtons, Dot, Heart, LIFT, MK, PRESS, Ring, Scribble, Smiley, Strip, Tape, Torn, ZineFooter, ZineHeader, ZinePage, torn, type Tone } from '@/components/landing/zine'
+import { Brush, Crown, CtaButtons, Dot, Heading, Heart, HL, LIFT, MK, PRESS, Ring, Scribble, Smiley, Snap, Strip, Tape, Torn, ZineFooter, ZineHeader, ZinePage, torn, type Tone } from '@/components/landing/zine'
 
 export const metadata: Metadata = {
   title: 'Tentang LevelUP — Visi, Misi & Values',
@@ -51,31 +49,6 @@ const SECTIONS = [
   ['misi', 'Misi', 'paper'],
   ['values', 'Values', 'ink'],
 ] as const
-
-const HL = 'bg-[linear-gradient(transparent_58%,#ffd83d_58%)] [box-decoration-break:clone] px-1'
-
-function Snap({ src, alt, sizes, seed, ratio = 'aspect-[4/3]', className = '', children }: { src: string; alt: string; sizes: string; seed: number; ratio?: string; className?: string; children?: ReactNode }) {
-  return (
-    <div className={className}>
-      <figure className="relative bg-[#fffdf7] p-2 pb-3 shadow-[0_14px_24px_-10px_rgba(40,30,10,.5)]">
-        <Tape seed={seed} className={`-top-3 left-1/2 -translate-x-1/2 h-6 w-20 ${seed % 2 ? 'rotate-3' : '-rotate-2'}`} />
-        <div className={`relative ${ratio} overflow-hidden bg-stone-200`}>
-          <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />
-        </div>
-        {children && <figcaption className="px-1.5 pt-4 pb-2">{children}</figcaption>}
-      </figure>
-    </div>
-  )
-}
-
-function Heading({ n, children }: { n: string; children: ReactNode }) {
-  return (
-    <h2 className={`${MK} text-[clamp(2.2rem,6.5vw,3.6rem)] leading-none uppercase`}>
-      <span className="mr-3 text-[#e02a2f]">{n}</span>
-      {children}
-    </h2>
-  )
-}
 
 export default function AboutPage() {
   return (

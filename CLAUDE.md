@@ -33,6 +33,7 @@
 app/
   page.tsx                            # Landing overview LevelUP (gerakan) + cuplikan event → /login + /daftar
   about/page.tsx                      # Tentang LevelUP (dari PROFILE_LUP.pdf): cerita, Visi, Misi, Values; foto public/about/
+  program/page.tsx                    # Program: Penyembahan + Pemuridan (ayat, tujuan) + galeri dokumentasi masonry (stub; nanti dari dashboard BRIM)
 components/landing/zine.tsx           # Design system landing (kertas lecek, torn, Strip, Tape, doodle, ZineHeader/Footer) dipakai / + /about
   login/page.tsx                      # PWA login: email+password (peserta lalu pengurus) + Google
   daftar/page.tsx                     # Pendaftaran v2 Gen Z (intro → form live MemberCard → kartu jadi); Google baru → completeRegistration
@@ -87,6 +88,8 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-10-27]
+- `/program` (layout dulu): 2 program dari PDF Fokus Kegiatan — 01 Penyembahan (Membangun tahta bagi Kristus, Mzm 22:4) + 02 Pemuridan (Murid yang memuridkan, Mat 28:19-20), kartu ayat + kartu Tujuan, galeri `Dokumentasi` masonry (`columns-*`, `<img>` tinggi alami, polaroid + caption) + empty state. `PROGRAMS[].docs` = foto contoh (`public/program/`, `public/about/`); nanti diganti upload dashboard BRIM Nasional (`{ src, caption }`), di luar scope
+- `ZineHeader`: Tentang + Program + Masuk; di mobile Tentang/Program turun ke baris kedua (logo tidak boleh menyusut). `Snap`/`Heading`/`HL` pindah ke `components/landing/zine.tsx`
 - Profil edit: **Ajukan perubahan LevelUP Kota** → tabel `pindah_kota`; kota tetap sampai `sekretariatnasional` Approve; Tolak + alasan; antrian `/dashboard/v2/kota/alk/pindah-kota` + todo beranda nasional; `prod-migrate` CREATE TABLE idempotent
 - `/about` (Tentang LevelUP) dari Community Profile PDF: hero "From God's Presence to God's Mission" + teks Tentang, cerita 2019 / 2025 DeeperWP / 44 kota, lalu 3 inti: Visi (versi revisi halaman 6 PDF, highlight kuning + ring Amanat Agung), 4 Misi (sticky note), 5 Values (polaroid + foto per value), CTA "Be part of us". Foto diekstrak ke `public/about/`
 - Primitive landing (paper/torn/Strip/Tape/doodle/CtaButtons) dipindah ke `components/landing/zine.tsx` + `ZinePage`/`ZineHeader`/`ZineFooter`; header kedua halaman punya link Tentang + Masuk. Halaman zine baru wajib pakai modul ini, jangan salin ulang
