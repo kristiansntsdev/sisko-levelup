@@ -31,5 +31,5 @@ export async function loginPengurus(
 
 export async function logoutPengurus() {
   await clearPengurusCookie()
-  redirect('/admin')
+  redirect('/login')
 }
