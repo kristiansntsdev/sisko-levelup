@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import type { AlkBerandaStats, EventDashboard } from '@/lib/actions/event'
 import { PAGE_SIZE_TODO, Pager, SearchBox } from './list-tools'
 import {
@@ -18,7 +18,16 @@ import {
   type Tint,
 } from './ui'
 
-type Todo = { i: IconName; tint: Tint; t: string; s: string; href?: string; soon?: string; key: string }
+type Todo = {
+  i: IconName
+  tint: Tint
+  t: string
+  s: ReactNode
+  search?: string
+  href?: string
+  soon?: string
+  key: string
+}
 
 export function BerandaClient({
   nama,
@@ -27,6 +36,7 @@ export function BerandaClient({
   saldo,
   pendingApprovals,
   events,
+  isNasional = false,
 }: {
   nama: string
   namaCabang: string
@@ -34,6 +44,7 @@ export function BerandaClient({
   saldo: number
   pendingApprovals: number
   events: EventDashboard[]
+  isNasional?: boolean
 }) {
   const router = useRouter()
   const [soon, setSoon] = useState<string | null>(null)
@@ -44,7 +55,7 @@ export function BerandaClient({
   const pct = totalPeserta ? Math.round((stats.pesertaCore / totalPeserta) * 100) : 0
 
   const tiles: [IconName, string, string | number][] = [
-    ['users', 'Total LevelUP Kota', totalPeserta],
+    ['users', 'Total LevelUP Kota', stats.totalCabang],
     ['check', 'Total CORE', stats.pesertaCore],
     ['users', 'Squad', stats.pesertaSquad],
     ['userPlus', 'Volunteer', stats.pesertaVolunteer],
@@ -71,17 +82,32 @@ export function BerandaClient({
           i: 'alert',
           tint: 'rose',
           t: `${e.nama_event} ditolak pusat`,
-          s: 'Lihat alasan & ajukan ulang',
-          href: `${ALK_BASE}/event/${e.id_event}`,
+          s: isNasional ? 'Lihat alasan penolakan' : 'Lihat alasan & ajukan ulang',
+          href: isNasional
+            ? `${ALK_BASE}/event/${e.id_event}/approve`
+            : `${ALK_BASE}/event/${e.id_event}`,
         })
       } else if (e.approvenasional !== '1' && !e.notenasional) {
         list.push({
           key: `rev-${e.id_event}`,
           i: 'calendar',
           tint: 'amber',
-          t: `${e.nama_event} sedang direview`,
-          s: e.tglDisplay,
-          href: `${ALK_BASE}/event/${e.id_event}`,
+          t: isNasional
+            ? `${e.nama_event} menunggu approval`
+            : `${e.nama_event} sedang direview`,
+          s: isNasional ? (
+            <>
+              {e.tglDisplay}
+              <br />
+              Approve / Reject
+            </>
+          ) : (
+            e.tglDisplay
+          ),
+          search: `${e.tglDisplay} Approve Reject`,
+          href: isNasional
+            ? `${ALK_BASE}/event/${e.id_event}/approve`
+            : `${ALK_BASE}/event/${e.id_event}`,
         })
       }
     }
@@ -94,12 +120,14 @@ export function BerandaClient({
       soon: 'Set Role',
     })
     return list
-  }, [events, namaCabang, pendingApprovals])
+  }, [events, isNasional, namaCabang, pendingApprovals])
 
   const filteredTodos = useMemo(() => {
     const needle = todoQ.trim().toLowerCase()
     if (!needle) return todos
-    return todos.filter((t) => `${t.t} ${t.s}`.toLowerCase().includes(needle))
+    return todos.filter((t) =>
+      `${t.t} ${t.search ?? (typeof t.s === 'string' ? t.s : '')}`.toLowerCase().includes(needle),
+    )
   }, [todos, todoQ])
 
   const todoPages = Math.max(1, Math.ceil(filteredTodos.length / PAGE_SIZE_TODO))

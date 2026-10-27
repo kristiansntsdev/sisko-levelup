@@ -101,7 +101,6 @@ export function AnggotaListClient({
 function MemberEditSheet({ m, onClose }: { m: PengurusKotaRow; onClose: () => void }) {
   const router = useRouter()
   const [email, setEmail] = useState(m.username)
-  const [password, setPassword] = useState('')
   const [role, setRole] = useState<'Admin LK' | 'BRIM'>(divisiToRole(m.divisi))
   const [error, setError] = useState('')
   const [toast, setToast] = useState<string | null>(null)
@@ -113,7 +112,6 @@ function MemberEditSheet({ m, onClose }: { m: PengurusKotaRow; onClose: () => vo
       const res = await updatePengurusKota({
         id: m.id_pengurus,
         email,
-        password: password || undefined,
         role,
       })
       if (!res.ok) {
@@ -129,7 +127,7 @@ function MemberEditSheet({ m, onClose }: { m: PengurusKotaRow; onClose: () => vo
   return (
     <>
       <Sheet open onClose={onClose}>
-        <SheetHead title={m.nama} sub="Ubah email + password login" />
+        <SheetHead title={m.nama} sub="Ubah email / peran login" />
         <div className="space-y-4">
           <Field label="Peran">
             <Seg
@@ -144,13 +142,13 @@ function MemberEditSheet({ m, onClose }: { m: PengurusKotaRow; onClose: () => vo
           <Field label="Email">
             <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" className={FLD} />
           </Field>
-          <Field label="Password baru (opsional)">
+          <Field label="Password">
             <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={m.password}
               type="text"
-              className={FLD}
-              placeholder="Kosongkan jika tidak diubah"
+              readOnly
+              disabled
+              className={`${FLD} disabled:opacity-70 disabled:cursor-not-allowed`}
             />
           </Field>
           {error && <p className="text-[13px] text-rose-600">{error}</p>}

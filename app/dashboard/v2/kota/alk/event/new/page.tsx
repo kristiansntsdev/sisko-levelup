@@ -12,6 +12,7 @@ export default async function AlkV2NewEventPage() {
       backUrl={`${ALK_BASE}/event`}
       eventBasePath={ALK_EVENT_BASE}
       isNasional={pengurus.isNasional}
+      variant="v2"
     />
   )
 }

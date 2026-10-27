@@ -8,6 +8,7 @@ export type PengurusKotaRow = {
   id_pengurus: number
   nama: string
   username: string
+  password: string
   divisi: string | null
   kotalevelup: string
   me: boolean
@@ -15,11 +16,18 @@ export type PengurusKotaRow = {
 
 type Result = { ok: true } | { ok: false; error: string }
 
+/** Akun sistem / non-kota — tidak tampil di tab Anggota. */
+const HIDDEN_PENGURUS_IDS = [10, 18, 19, 20, 21] as const
+
 export async function listPengurusKota(): Promise<PengurusKotaRow[]> {
   const me = await requireAlkPengurus()
+  // Nasional: seluruh tabel pengurus (kecuali akun sistem). Kota: hanya cabangnya.
   const where = me.isNasional
-    ? { OR: [{ kotalevelup: me.cabang }, { kotalevelup: '0' }] }
-    : { kotalevelup: me.kotalevelup }
+    ? { id_pengurus: { notIn: [...HIDDEN_PENGURUS_IDS] } }
+    : {
+        kotalevelup: me.kotalevelup,
+        id_pengurus: { notIn: [...HIDDEN_PENGURUS_IDS] },
+      }
   const rows = await db.pengurus.findMany({
     where,
     orderBy: { nama: 'asc' },
@@ -27,6 +35,7 @@ export async function listPengurusKota(): Promise<PengurusKotaRow[]> {
       id_pengurus: true,
       nama: true,
       username: true,
+      password: true,
       divisi: true,
       kotalevelup: true,
     },
@@ -83,6 +92,9 @@ export async function updatePengurusKota(input: {
   const email = input.email.trim().toLowerCase()
   if (!email.includes('@')) return { ok: false, error: 'Email tidak valid' }
 
+  if ((HIDDEN_PENGURUS_IDS as readonly number[]).includes(input.id)) {
+    return { ok: false, error: 'Akun sistem tidak bisa diubah' }
+  }
   const row = await db.pengurus.findUnique({
     where: { id_pengurus: input.id },
     select: { id_pengurus: true, kotalevelup: true },

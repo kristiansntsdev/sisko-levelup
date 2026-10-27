@@ -23,6 +23,7 @@ export default async function AlkV2EditEventPage({
       backUrl={`${ALK_EVENT_BASE}/${event.id_event}`}
       eventBasePath={ALK_EVENT_BASE}
       isNasional={pengurus.isNasional}
+      variant="v2"
     />
   )
 }

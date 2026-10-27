@@ -227,25 +227,33 @@ export type EventDashboard = {
   notenasional: string
   khusus: string
   jenisevent: string
+  wwtype: string
+  id_cabang: string
+  cabangName: string
 }
 
 /** `null` = all cabang (Sekretariat / Brim Nasional). */
 export async function getAllEventsByKotalevelup(
   kotalevelup: string | null,
 ): Promise<EventDashboard[]> {
-  const rows = await db.event.findMany({
-    where: kotalevelup == null ? undefined : { id_cabang: kotalevelup },
-    orderBy: { tglevent: 'desc' },
-    select: {
-      id_event: true, nama_event: true,
-      tglevent: true, jamevent: true, alamatevent: true, posterevent: true, image_url: true,
-      approvenasional: true, approvebrimnas: true, notenasional: true, khusus: true,
-      jenisevent: true,
-    },
-  })
+  const [rows, cabangs] = await Promise.all([
+    db.event.findMany({
+      where: kotalevelup == null ? undefined : { id_cabang: kotalevelup },
+      orderBy: { tglevent: 'desc' },
+      select: {
+        id_event: true, nama_event: true,
+        tglevent: true, jamevent: true, alamatevent: true, posterevent: true, image_url: true,
+        approvenasional: true, approvebrimnas: true, notenasional: true, khusus: true,
+        jenisevent: true, wwtype: true, id_cabang: true,
+      },
+    }),
+    db.cabang.findMany({ select: { id_cabang: true, namacabang: true } }),
+  ])
+  const cabangMap = new Map(cabangs.map((c) => [String(c.id_cabang), c.namacabang]))
   return rows.map((e) => {
     const ms = e.tglevent instanceof Date ? e.tglevent.getTime() : NaN
     const tglMs = Number.isFinite(ms) ? ms : 0
+    const idCabang = e.id_cabang ?? ''
     return {
       id_event: e.id_event,
       nama_event: e.nama_event,
@@ -263,6 +271,12 @@ export async function getAllEventsByKotalevelup(
       notenasional: e.notenasional ?? '',
       khusus: e.khusus,
       jenisevent: e.jenisevent ?? '',
+      wwtype: e.wwtype ?? '',
+      id_cabang: idCabang,
+      cabangName:
+        idCabang === NASIONAL_EVENT_CABANG
+          ? 'Nasional'
+          : cabangMap.get(idCabang) ?? `Kota #${idCabang}`,
     }
   })
 }
@@ -1184,6 +1198,8 @@ export async function ajukanEvent(
 }
 
 export type AlkBerandaStats = {
+  /** Jumlah cabang LevelUP (nasional = semua; kota = 1) */
+  totalCabang: number
   pesertaVolunteer: number
   pesertaCore: number
   pesertaSquad: number
@@ -1200,33 +1216,56 @@ function toNum(v: unknown): number {
   return Number.isFinite(n) ? n : 0
 }
 
-export async function getAlkBerandaStats(idCabang: string): Promise<AlkBerandaStats> {
-  const [volunteer, core, squad, offline, online, usulRows, riilRows, eventRows] = await Promise.all([
-    db.peserta.count({ where: { kotalevelup: idCabang, userlevel: '1' } }),
-    db.peserta.count({ where: { kotalevelup: idCabang, userlevel: '3' } }),
-    db.peserta.count({ where: { kotalevelup: idCabang, userlevel: '2' } }),
-    db.event.count({ where: { id_cabang: idCabang, jenisevent: 'Offline' } }),
-    db.event.count({ where: { id_cabang: idCabang, jenisevent: 'Online' } }),
-    db.$queryRaw<[{ total_dana_usul: unknown }]>`
-      SELECT SUM(r.danausul) AS total_dana_usul
-      FROM reimburse r
-      INNER JOIN event e ON r.id_event = e.id_event
-      WHERE e.id_cabang = ${idCabang}
-    `,
-    db.$queryRaw<[{ total_dana_riil: unknown }]>`
-      SELECT SUM(r.danariil) AS total_dana_riil
-      FROM reimburse r
-      INNER JOIN event e ON r.id_event = e.id_event
-      WHERE e.id_cabang = ${idCabang}
-    `,
-    db.$queryRaw<[{ total_dana_event: unknown }]>`
-      SELECT SUM(e.danaevent) AS total_dana_event
-      FROM event e
-      WHERE e.id_cabang = ${idCabang}
-    `,
-  ])
+/** `null` = scope nasional (semua cabang + semua peserta). */
+export async function getAlkBerandaStats(idCabang: string | null): Promise<AlkBerandaStats> {
+  const pesertaLvl = (level: string) =>
+    idCabang == null
+      ? { userlevel: level }
+      : { kotalevelup: idCabang, userlevel: level }
+  const eventJenis = (jenis: string) =>
+    idCabang == null ? { jenisevent: jenis } : { id_cabang: idCabang, jenisevent: jenis }
+
+  const [totalCabang, volunteer, core, squad, offline, online, usulRows, riilRows, eventRows] =
+    await Promise.all([
+      idCabang == null ? db.cabang.count() : Promise.resolve(1),
+      db.peserta.count({ where: pesertaLvl('1') }),
+      db.peserta.count({ where: pesertaLvl('3') }),
+      db.peserta.count({ where: pesertaLvl('2') }),
+      db.event.count({ where: eventJenis('Offline') }),
+      db.event.count({ where: eventJenis('Online') }),
+      idCabang == null
+        ? db.$queryRaw<[{ total_dana_usul: unknown }]>`
+            SELECT SUM(r.danausul) AS total_dana_usul FROM reimburse r
+          `
+        : db.$queryRaw<[{ total_dana_usul: unknown }]>`
+            SELECT SUM(r.danausul) AS total_dana_usul
+            FROM reimburse r
+            INNER JOIN event e ON r.id_event = e.id_event
+            WHERE e.id_cabang = ${idCabang}
+          `,
+      idCabang == null
+        ? db.$queryRaw<[{ total_dana_riil: unknown }]>`
+            SELECT SUM(r.danariil) AS total_dana_riil FROM reimburse r
+          `
+        : db.$queryRaw<[{ total_dana_riil: unknown }]>`
+            SELECT SUM(r.danariil) AS total_dana_riil
+            FROM reimburse r
+            INNER JOIN event e ON r.id_event = e.id_event
+            WHERE e.id_cabang = ${idCabang}
+          `,
+      idCabang == null
+        ? db.$queryRaw<[{ total_dana_event: unknown }]>`
+            SELECT SUM(e.danaevent) AS total_dana_event FROM event e
+          `
+        : db.$queryRaw<[{ total_dana_event: unknown }]>`
+            SELECT SUM(e.danaevent) AS total_dana_event
+            FROM event e
+            WHERE e.id_cabang = ${idCabang}
+          `,
+    ])
 
   return {
+    totalCabang,
     pesertaVolunteer: volunteer,
     pesertaCore: core,
     pesertaSquad: squad,

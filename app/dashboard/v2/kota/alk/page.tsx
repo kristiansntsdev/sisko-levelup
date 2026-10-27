@@ -19,7 +19,7 @@ export default async function AlkV2BerandaPage() {
       select: { namacabang: true },
     }),
     getKasKota(idCabang),
-    getAlkBerandaStats(pengurus.cabang),
+    getAlkBerandaStats(pengurus.isNasional ? null : pengurus.cabang),
     countPendingSquadApprovals(),
   ])
 
@@ -31,6 +31,7 @@ export default async function AlkV2BerandaPage() {
       saldo={kasKota.saldo}
       pendingApprovals={pendingApprovals}
       events={events}
+      isNasional={pengurus.isNasional}
     />
   )
 }

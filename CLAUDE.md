@@ -50,7 +50,8 @@ lib/actions/pengurus-kota.ts          # list/create/update pengurus per kota (An
 lib/actions/pwa-auth.ts               # loginEmailPassword, completeRegistration, dual session
 lib/pengurus-session.ts               # pengurus cookie helpers; alk dest → /dashboard/v2/kota/alk
 lib/pwa-member.ts                     # tier labels + MemberCardData
-components/alk-v2/                    # Sekretariat v2 shell + screens (PWA look, real data)
+components/alk-v2/                    # Sekretariat v2 shell + screens (PWA look, real data); event-approve = Approval Event
+  dashboard/v2/kota/alk/event/[id]/approve/ # Nasional: approve/reject event (v2 UI)
 components/pwa/                       # LevelUP PWA UI kit + MemberShell (PlainBar/Panel/Qr)
   dashboard/kota/alk/approval/page.tsx # List approval squad dari table upgrade
   dashboard/kota/alk/event/[id]/approve/ # Sekretariat: approve/reject event
@@ -79,6 +80,9 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-10-27]
+- Sekretariat v2 Buat/Edit Event: `EventForm variant="v2"` (Hero+TopBar, SectionCard Info/Waktu/Sesi/Lokasi/Lainnya, FLD, chip target, BTN_RED) align `KEventNewScreen`; legacy kota path tetap
+- Event form Maps: fix kotak abu pertama buka — `ensureGoogleMaps` promise shared + poll `importLibrary` (race `loading=async` / stale onload remount); bukan deprecation Marker/Autocomplete
+- Sekretariat v2 Approval Event: `/dashboard/v2/kota/alk/event/[id]/approve` pakai `EventApproveV2Client` (PlainBar + CARD + Pill + Approve/Reject saja, gaya proto); Perlu Tindakan nasional → langsung ke halaman ini
 - PWA iOS Add to Home Screen: Hero + PlainBar sisakan `env(safe-area-inset-top)` supaya nama/judul tidak ketutup status bar (`black-translucent` + `viewport-fit: cover`)
 - Sekretariat v2: Perlu Tindakan + Pengajuan Event punya search + pagination; Scan pakai desain proto (pilih event/sesi, kamera gold frame, Nyalakan Kamera) bukan ScannerClient lama
 - Sekretariat PWA v2 di `/dashboard/v2/kota/alk` (desain proto `k-*`): AlkShell nav Beranda/Anggota/Scan/Event/Lainnya; real data; Anggota = CRUD pengurus; `pengurusDest(alk)` → v2; legacy `/dashboard/kota/alk` tetap (Kas/Surat)
