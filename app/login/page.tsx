@@ -82,7 +82,9 @@ function LoginForm() {
   if (auto) {
     return (
       <main className={`min-h-screen ${PAGE_BG} flex flex-col items-center justify-center gap-4 px-6 font-[family-name:var(--font-proto)]`}>
-        <Logo className="h-12 w-auto" />
+        <Link href="/" aria-label="Beranda LevelUP">
+          <Logo className="h-12 w-auto" />
+        </Link>
         <span className="w-7 h-7 rounded-full border-2 border-slate-200 border-t-[#c9232c] animate-spin" />
         <p className="text-sm text-slate-500">Mengalihkan ke Google…</p>
       </main>
@@ -93,7 +95,9 @@ function LoginForm() {
     <main className={`min-h-screen ${PAGE_BG} pb-safe font-[family-name:var(--font-proto)]`}>
       <Hero className="pt-16 md:pt-12 pb-28 text-center" decor="-right-8 top-4 w-44">
         <Chevrons className="-left-12 top-36 w-32 opacity-[.08]" />
-        <Logo className="h-[92px] w-auto mx-auto drop-shadow-[0_6px_14px_rgba(60,0,5,.35)]" />
+        <Link href="/" aria-label="Beranda LevelUP" className="inline-block">
+          <Logo className="h-[92px] w-auto mx-auto drop-shadow-[0_6px_14px_rgba(60,0,5,.35)]" />
+        </Link>
       </Hero>
       <div className="px-5 -mt-16 relative max-w-[430px] mx-auto">
         <form
