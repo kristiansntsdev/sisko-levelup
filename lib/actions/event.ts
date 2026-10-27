@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { put } from '@vercel/blob'
 import { db } from '@/lib/db'
 import { setActor } from '@/lib/request-context'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, unstable_cache } from 'next/cache'
 import type { event_wwtype } from '@/lib/generated/enums'
 import {
   resolveEventCabang,
@@ -1216,8 +1216,7 @@ function toNum(v: unknown): number {
   return Number.isFinite(n) ? n : 0
 }
 
-/** `null` = scope nasional (semua cabang + semua peserta). */
-export async function getAlkBerandaStats(idCabang: string | null): Promise<AlkBerandaStats> {
+async function queryAlkBerandaStats(idCabang: string | null): Promise<AlkBerandaStats> {
   const pesertaLvl = (level: string) =>
     idCabang == null
       ? { userlevel: level }
@@ -1275,6 +1274,83 @@ export async function getAlkBerandaStats(idCabang: string | null): Promise<AlkBe
     danaRiil: toNum(riilRows[0]?.total_dana_riil),
     danaEvent: toNum(eventRows[0]?.total_dana_event),
   }
+}
+
+/** `null` = scope nasional. Cached ~5 menit — tile beranda mahal (banyak COUNT). */
+export async function getAlkBerandaStats(idCabang: string | null): Promise<AlkBerandaStats> {
+  const scope = idCabang ?? 'nasional'
+  return unstable_cache(
+    () => queryAlkBerandaStats(idCabang),
+    ['alk-beranda-stats', scope],
+    { revalidate: 300, tags: ['alk-beranda-stats', `alk-beranda-stats:${scope}`] },
+  )()
+}
+
+/** Event belum approve / ditolak saja — cukup untuk “Perlu Tindakan”, tanpa load semua event. */
+export async function getAlkBerandaTodoEvents(
+  idCabang: string | null,
+): Promise<EventDashboard[]> {
+  const scope = idCabang ?? 'nasional'
+  return unstable_cache(
+    async () => {
+      const rows = await db.event.findMany({
+        where: {
+          ...(idCabang == null ? {} : { id_cabang: idCabang }),
+          NOT: { approvenasional: '1' },
+        },
+        orderBy: { tglevent: 'desc' },
+        take: 200,
+        select: {
+          id_event: true,
+          nama_event: true,
+          tglevent: true,
+          jamevent: true,
+          alamatevent: true,
+          posterevent: true,
+          image_url: true,
+          approvenasional: true,
+          approvebrimnas: true,
+          notenasional: true,
+          khusus: true,
+          jenisevent: true,
+          wwtype: true,
+          id_cabang: true,
+        },
+      })
+      return rows.map((e) => {
+        const ms = e.tglevent instanceof Date ? e.tglevent.getTime() : NaN
+        const tglMs = Number.isFinite(ms) ? ms : 0
+        const idC = e.id_cabang ?? ''
+        return {
+          id_event: e.id_event,
+          nama_event: e.nama_event,
+          tglMs,
+          tglDisplay: tglMs
+            ? e.tglevent.toLocaleDateString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: 'UTC',
+              })
+            : 'Tanggal tidak valid',
+          jamevent: e.jamevent,
+          alamatevent: e.alamatevent,
+          posterUrl: resolveEventPosterUrl(e.posterevent, e.image_url),
+          approvenasional: e.approvenasional,
+          approvebrimnas: e.approvebrimnas ?? '0',
+          notenasional: e.notenasional ?? '',
+          khusus: e.khusus,
+          jenisevent: e.jenisevent ?? '',
+          wwtype: e.wwtype ?? '',
+          id_cabang: idC,
+          cabangName: idC === NASIONAL_EVENT_CABANG ? 'Nasional' : idC,
+        }
+      })
+    },
+    ['alk-beranda-todos', scope],
+    { revalidate: 60, tags: ['alk-beranda-todos', `alk-beranda-todos:${scope}`] },
+  )()
 }
 
 export type EventApprovalResult = { ok: true } | { ok: false; error: string }

@@ -1,8 +1,8 @@
 import { db } from '@/lib/db'
 import { requireAlkPengurus } from '@/lib/alk-auth'
 import {
-  getAllEventsByKotalevelup,
   getAlkBerandaStats,
+  getAlkBerandaTodoEvents,
 } from '@/lib/actions/event'
 import { getKasKota } from '@/lib/actions/kas-kota'
 import { countPendingSquadApprovals } from '@/lib/actions/upgrade'
@@ -11,15 +11,16 @@ import { BerandaClient } from '@/components/alk-v2/beranda'
 export default async function AlkV2BerandaPage() {
   const pengurus = await requireAlkPengurus()
   const idCabang = Number(pengurus.cabang)
+  const scope = pengurus.isNasional ? null : pengurus.cabang
 
   const [events, cabang, kasKota, stats, pendingApprovals] = await Promise.all([
-    getAllEventsByKotalevelup(pengurus.isNasional ? null : pengurus.cabang),
+    getAlkBerandaTodoEvents(scope),
     db.cabang.findUnique({
       where: { id_cabang: idCabang },
       select: { namacabang: true },
     }),
     getKasKota(idCabang),
-    getAlkBerandaStats(pengurus.isNasional ? null : pengurus.cabang),
+    getAlkBerandaStats(scope),
     countPendingSquadApprovals(),
   ])
 
