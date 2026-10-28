@@ -306,6 +306,7 @@ export type AbsenRow = {
   id_absen: number
   nama: string
   email: string
+  gereja: string
   userlevel: string
   /** namacabang dari peserta.kotalevelup; kosong kalau tidak ketemu */
   kota: string
@@ -384,7 +385,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
   const pesertaList = pesertaIds.length
     ? await db.peserta.findMany({
         where: { id_peserta: { in: pesertaIds } },
-        select: { id_peserta: true, nama: true, userlevel: true, kotalevelup: true },
+        select: { id_peserta: true, nama: true, gereja: true, userlevel: true, kotalevelup: true },
       })
     : []
   const pesertaMap = new Map(pesertaList.map((p) => [String(p.id_peserta), p]))
@@ -449,6 +450,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
         id_absen: a.id_absen,
         nama: p?.nama ?? `Peserta #${a.id_peserta}`,
         email: a.email,
+        gereja: p?.gereja ?? '',
         userlevel: p?.userlevel ?? '',
         kota: (p && cabangMap.get(String(Number(p.kotalevelup)))) ?? '',
         timestamp: a.timestamp.toISOString(),

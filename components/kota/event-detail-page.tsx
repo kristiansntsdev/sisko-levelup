@@ -363,6 +363,9 @@ export function EventDetailPage({
                           </span>
                         )}
                       </p>
+                      {r.gereja ? (
+                        <p className="text-[11px] text-muted truncate">{r.gereja}</p>
+                      ) : null}
                       <p className="text-[11px] text-muted truncate">{r.email}</p>
                     </div>
                   </div>
@@ -465,8 +468,11 @@ export function EventDetailPage({
                           </span>
                         )}
                       </p>
+                      {a.gereja ? (
+                        <p className="text-[11px] text-muted truncate">{a.gereja}</p>
+                      ) : null}
                       <p className="text-[11px] text-muted truncate">
-                        {a.sesiNama ? `${a.sesiNama} · ` : ''}{a.email}
+                        {[a.sesiNama, a.email].filter(Boolean).join(' · ')}
                       </p>
                     </div>
                     <p className="text-[11px] text-muted shrink-0 text-right leading-tight">

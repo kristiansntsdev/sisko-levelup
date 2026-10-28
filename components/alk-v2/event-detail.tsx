@@ -618,6 +618,9 @@ export function EventDetailV2Client({
                                 <span className="font-normal text-slate-400"> – {r.kota}</span>
                               ) : null}
                             </p>
+                            {r.gereja ? (
+                              <p className="text-[11.5px] text-slate-400 truncate">{r.gereja}</p>
+                            ) : null}
                             <p className="text-[11.5px] text-slate-400 truncate">{r.email}</p>
                           </div>
                         </div>
@@ -712,9 +715,11 @@ export function EventDetailV2Client({
                                 </span>
                               )}
                             </p>
+                            {a.gereja ? (
+                              <p className="text-[11.5px] text-slate-400 truncate">{a.gereja}</p>
+                            ) : null}
                             <p className="text-[11.5px] text-slate-400 truncate">
-                              {a.sesiNama ? `${a.sesiNama} · ` : ''}
-                              {a.email}
+                              {[a.sesiNama, a.email].filter(Boolean).join(' · ')}
                             </p>
                           </div>
                           <p className="text-[11px] text-slate-400 shrink-0 text-right leading-tight whitespace-pre-line">
