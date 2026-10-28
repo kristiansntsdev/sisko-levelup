@@ -35,6 +35,8 @@ export type OnlineCheckinResult =
   | { status: 'attended' }
   /** Registrasi tercatat, absen belum bisa (di luar jendela). */
   | { status: 'registered'; phase: OnlineAbsenPhase; endAtMs: number | null }
+  /** Event nasional — tiket masih menunggu Sekretariat Nasional. */
+  | { status: 'pending_approval' }
   /** Nama / No. WA masih kosong — isi dulu (plus LevelUP) lalu kirim ulang. */
   | { status: 'need_profile' }
   /** Event multi-sesi — peserta pilih sesi yang sedang berjalan. */
@@ -142,11 +144,18 @@ export async function onlineCheckin(
     //    turun lagi jadi `confirmed` saat QR di-scan ulang.
     const registrasi = await db.registrasi.findUnique({
       where: { id_peserta_id_event: { id_peserta: idPeserta, id_event: idEvent } },
-      select: { id_registrasi: true },
+      select: { id_registrasi: true, status: true },
     })
     if (!registrasi) {
       const ticket = await createRegistrasi(idPeserta, idEvent)
       if ('full' in ticket) return { status: 'failed', reason: 'full' }
+      if (ticket.pending) return { status: 'pending_approval' }
+    } else if (registrasi.status === 'pending') {
+      return { status: 'pending_approval' }
+    } else if (registrasi.status === 'cancelled') {
+      const ticket = await createRegistrasi(idPeserta, idEvent)
+      if ('full' in ticket) return { status: 'failed', reason: 'full' }
+      if (ticket.pending) return { status: 'pending_approval' }
     }
 
     // 3. Sudah absen? (non-sesi: satu baris cukup; sesi: semua sesi selesai)

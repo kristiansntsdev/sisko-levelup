@@ -15,6 +15,7 @@ type View =
   | { kind: 'working' }
   | { kind: 'attended' }
   | { kind: 'waiting'; opensAtMs: number | null; closed: boolean }
+  | { kind: 'pending_approval' }
   | { kind: 'profile' }
   | { kind: 'sesi'; sesi: OnlineCheckinSesi[] }
   | { kind: 'error'; message: string }
@@ -52,6 +53,9 @@ export function CheckinClient({
           return
         case 'need_profile':
           setView({ kind: 'profile' })
+          return
+        case 'pending_approval':
+          setView({ kind: 'pending_approval' })
           return
         case 'need_sesi':
           setView({ kind: 'sesi', sesi: res.sesi })
@@ -96,6 +100,8 @@ export function CheckinClient({
             onOpen={() => void run()}
           />
         )}
+
+        {view.kind === 'pending_approval' && <PendingApproval eventId={event.id_event} />}
 
         {view.kind === 'profile' && (
           <ProfileForm
@@ -176,6 +182,26 @@ function Attended({ eventName }: { eventName: string }) {
       </div>
       <Link href="/dashboard" className="text-sm text-fg underline mt-1">
         Ke Dashboard
+      </Link>
+    </div>
+  )
+}
+
+function PendingApproval({ eventId }: { eventId: number }) {
+  return (
+    <div className="border border-border rounded-card p-6 flex flex-col items-center gap-3 text-center">
+      <div className="w-14 h-14 rounded-full bg-[#f5e8c8] border border-fg flex items-center justify-center text-2xl">
+        …
+      </div>
+      <div>
+        <p className="text-base font-bold text-fg">Menunggu approval</p>
+        <p className="text-sm text-muted mt-1">
+          Event nasional — tiket dicek Sekretariat Nasional dulu. Setelah disetujui, scan QR lagi
+          untuk absen.
+        </p>
+      </div>
+      <Link href={`/join/${eventId}`} className="text-sm text-fg underline mt-1">
+        Lihat status pengajuan
       </Link>
     </div>
   )

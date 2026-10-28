@@ -378,9 +378,11 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
             ? 'Sudah diabsen'
             : res.reason === 'sesi_required'
               ? 'Pilih sesi absen dulu'
-              : res.reason === 'unauthorized'
-                ? 'Login habis'
-                : 'Gagal absen'
+              : res.reason === 'not_approved'
+                ? 'Tiket belum di-approve'
+                : res.reason === 'unauthorized'
+                  ? 'Login habis'
+                  : 'Gagal absen'
         showFlash({ ok: false, title: errTitle })
         return 'continue'
       }
@@ -519,7 +521,9 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
       if (res.reason === 'already_scanned') setError('Peserta ini sudah diabsen di sesi ini.')
       else if (res.reason === 'sesi_required') setError('Pilih sesi absen dulu.')
       else if (res.reason === 'sesi_invalid') setError('Sesi tidak valid. Pilih ulang sesi.')
-      else if (res.reason === 'unauthorized') setError('Sesi login habis, login ulang.')
+      else if (res.reason === 'not_approved') {
+        setError('Event nasional: tiket belum di-approve Sekretariat Nasional.')
+      } else if (res.reason === 'unauthorized') setError('Sesi login habis, login ulang.')
       else setError('Gagal menyimpan absen. Coba lagi.')
     })
   }

@@ -43,6 +43,11 @@ export function eventDetailLink(idEvent: number): string {
   return `${publicAppBase()}/dashboard/kota/alk/event/${idEvent}`
 }
 
+/** Antrian approve tiket event nasional (Sekretariat Nasional). */
+export function tiketNasionalApproveLink(): string {
+  return `${publicAppBase()}/dashboard/v2/kota/alk/tiket-nasional`
+}
+
 export function eventFlyerLink(posterevent: string, imageUrl?: string): string {
   return resolveEventPosterUrl(posterevent, imageUrl)
 }

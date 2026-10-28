@@ -49,8 +49,10 @@ components/landing/zine.tsx           # Design system landing (kertas lecek, tor
 lib/actions/wilayah.ts                # listProvinsi/Kabupaten/Kecamatan/Desa (BPS codes)
 lib/actions/pindah-kota.ts            # ajukan/batal/list/approve/reject pindah LevelUP Kota (nasional only)
   dashboard/v2/kota/alk/pindah-kota/  # Nasional: antrian Approve/Tolak pindah kota
+  dashboard/v2/kota/alk/tiket-nasional/ # Nasional: antrian Approve/Tolak tiket event nasional (wwtype)
+lib/registrasi-status.ts              # nasional Get Ticket → pending; absen only after confirmed
   events/page.tsx                     # List event anggota (proto EventsScreen)
-  join/[eventId]/                    # View Event + Get Ticket (Offline; Online → /absen)
+  join/[eventId]/                    # View Event + Get Ticket (Offline; Online → /absen; nasional → approve dulu)
   dashboard/kota/alk/page.tsx         # Beranda ALK legacy (Kas/Surat shell) — fallback
   dashboard/v2/kota/alk/              # Sekretariat PWA v2 (proto k-*): beranda, anggota, approval, event, scan, lainnya
 lib/alk-auth.ts                       # requireAlkPengurus for v2 kota ALK
@@ -87,6 +89,9 @@ app/api/internal/monitoring-sheet/    # GET ?year= (Bearer MONITORING_SHEET_SECR
 scripts/monitoring-sheet.gs           # Apps Script: paste ke spreadsheet, sync tab per tahun tiap 5 menit
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-10-28]
+- Event nasional (`wwtype=nasional`): Get Ticket → `registrasi.status=pending` sampai Sekretariat Nasional Approve → `confirmed` (Tolak → `cancelled`, bisa ajukan ulang). CTA Ajukan Tiket / Menunggu Approval; antrian `/dashboard/v2/kota/alk/tiket-nasional` + todo beranda nasional; scan/absen ditolak kalau belum approved; Online nasional tidak auto-redirect `/absen` (pakai join dulu)
 
 ## Recent Updates [2026-10-27]
 - Sekretariat v2 Detail Event: `/dashboard/v2/kota/alk/event/[id]` pakai `EventDetailV2Client` (Hero+TopBar+DateBlock glass, Stepper status, Ajukan/Scanner CTA, poster, QA, ListCard detail/registrasi/presensi) align `KEventScreen`; legacy `EventDetailPage` tetap di `/dashboard/kota/alk/event/[id]`

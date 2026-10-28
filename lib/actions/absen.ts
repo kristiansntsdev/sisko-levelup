@@ -7,6 +7,10 @@ import { revalidatePath } from 'next/cache'
 import { eventDateTime, isOnlineAbsenOpen } from '@/lib/event-absen-window'
 import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
 import { absenDuplicateWhere } from '@/lib/event-sesi'
+import {
+  canAbsenNasionalTicket,
+  needsNasionalTicketApproval,
+} from '@/lib/registrasi-status'
 import type { QRPayload } from '@/lib/qr'
 import { formatTelegramMessage, notifyTelegram, eventDetailLink } from '@/lib/telegram'
 
@@ -55,6 +59,9 @@ export async function absenOnlineSelf(idRegistrasi: number): Promise<
   if (!row) return { success: false, reason: 'not_found' }
   if (row.id_peserta !== idPeserta) return { success: false, reason: 'forbidden' }
   if (row.event?.jenisevent !== 'Online') return { success: false, reason: 'not_online' }
+  if (row.status === 'pending' || row.status === 'cancelled') {
+    return { success: false, reason: 'forbidden' }
+  }
 
   const endAt =
     row.event.tgleventselesai && row.event.jamselesaievent
@@ -108,6 +115,7 @@ export async function createAbsen(
         | 'already_scanned'
         | 'sesi_required'
         | 'sesi_invalid'
+        | 'not_approved'
         | 'unauthorized'
         | 'error'
     }
@@ -145,10 +153,26 @@ export async function createAbsen(
     })
     if (existing) return { success: false, reason: 'already_scanned' }
 
-    const peserta = await db.peserta.findUnique({
-      where: { id_peserta: idPeserta },
-      select: { nama: true, gereja: true },
-    })
+    const [peserta, eventGate, ticket] = await Promise.all([
+      db.peserta.findUnique({
+        where: { id_peserta: idPeserta },
+        select: { nama: true, gereja: true },
+      }),
+      db.event.findUnique({
+        where: { id_event: idEvent },
+        select: { wwtype: true },
+      }),
+      db.registrasi.findUnique({
+        where: { id_peserta_id_event: { id_peserta: idPeserta, id_event: idEvent } },
+        select: { status: true },
+      }),
+    ])
+    if (
+      needsNasionalTicketApproval(eventGate?.wwtype) &&
+      !canAbsenNasionalTicket(ticket?.status)
+    ) {
+      return { success: false, reason: 'not_approved' }
+    }
 
     // Absen row first (Presensi source of truth), then flip registrasi status.
     await db.$transaction(async (tx) => {

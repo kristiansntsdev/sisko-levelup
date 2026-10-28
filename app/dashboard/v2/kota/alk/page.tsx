@@ -7,6 +7,7 @@ import {
 import { getKasKota } from '@/lib/actions/kas-kota'
 import { countPendingSquadApprovals } from '@/lib/actions/upgrade'
 import { countPendingPindahKota } from '@/lib/actions/pindah-kota'
+import { countPendingTiketNasional } from '@/lib/actions/registrasi'
 import { BerandaClient } from '@/components/alk-v2/beranda'
 
 export default async function AlkV2BerandaPage() {
@@ -14,7 +15,7 @@ export default async function AlkV2BerandaPage() {
   const idCabang = Number(pengurus.cabang)
   const scope = pengurus.isNasional ? null : pengurus.cabang
 
-  const [events, cabang, kasKota, stats, pendingApprovals, pendingPindahKota] =
+  const [events, cabang, kasKota, stats, pendingApprovals, pendingPindahKota, pendingTiketNasional] =
     await Promise.all([
       getAlkBerandaTodoEvents(scope),
       db.cabang.findUnique({
@@ -25,6 +26,7 @@ export default async function AlkV2BerandaPage() {
       getAlkBerandaStats(scope),
       countPendingSquadApprovals(),
       pengurus.isNasional ? countPendingPindahKota() : Promise.resolve(0),
+      pengurus.isNasional ? countPendingTiketNasional() : Promise.resolve(0),
     ])
 
   return (
@@ -35,6 +37,7 @@ export default async function AlkV2BerandaPage() {
       saldo={kasKota.saldo}
       pendingApprovals={pendingApprovals}
       pendingPindahKota={pendingPindahKota}
+      pendingTiketNasional={pendingTiketNasional}
       events={events}
       isNasional={pengurus.isNasional}
     />

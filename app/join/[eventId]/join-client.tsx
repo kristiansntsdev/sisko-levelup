@@ -4,8 +4,9 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import type { EventSummary } from '@/lib/actions/event'
 import { getPesertaById } from '@/lib/actions/peserta'
-import { createRegistrasi, findRegistrasiId } from '@/lib/actions/registrasi'
+import { createRegistrasi, findRegistrasiMine } from '@/lib/actions/registrasi'
 import { USERLEVEL_LABEL } from '@/lib/pwa-member'
+import { needsNasionalTicketApproval } from '@/lib/registrasi-status'
 import {
   BTN_RED,
   EventThumb,
@@ -39,11 +40,13 @@ export function JoinClient({
   event,
   isRegistered,
   registrasiId: initialRegId,
+  pendingApproval: initialPending,
   registered,
 }: {
   event: EventSummary | null
   isRegistered: boolean
   registrasiId: number | null
+  pendingApproval: boolean
   registered: number
 }) {
   const router = useRouter()
@@ -52,10 +55,12 @@ export function JoinClient({
   const [loading, setLoading] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [regId, setRegId] = useState<number | null>(initialRegId)
+  const [awaitingApproval, setAwaitingApproval] = useState(initialPending)
   const [over, setOver] = useState(false)
   const [nama, setNama] = useState(session?.user?.name ?? '')
   const [email, setEmail] = useState(session?.user?.email ?? '')
   const mine = Boolean(regId) || isRegistered
+  const needsApproval = needsNasionalTicketApproval(event?.wwtype)
 
   useEffect(() => {
     const idPeserta = session?.user?.idPeserta
@@ -66,12 +71,14 @@ export function JoinClient({
         setEmail(p.email)
       }
     })
-    if (event && !regId) {
-      findRegistrasiId(idPeserta, event.id_event).then((id) => {
-        if (id) setRegId(id)
+    if (event && !regId && !awaitingApproval) {
+      findRegistrasiMine(idPeserta, event.id_event).then((row) => {
+        if (!row) return
+        if (row.status === 'pending') setAwaitingApproval(true)
+        else setRegId(row.id)
       })
     }
-  }, [session?.user?.idPeserta, event, regId])
+  }, [session?.user?.idPeserta, event, regId, awaitingApproval])
 
   if (!event) {
     return (
@@ -128,9 +135,13 @@ export function JoinClient({
       setLoading(false)
       return
     }
-    setRegId(ticket.id)
     setConfirmOpen(false)
     setLoading(false)
+    if (ticket.pending) {
+      setAwaitingApproval(true)
+      return
+    }
+    setRegId(ticket.id)
     router.push(`/dashboard/tiket/${ticket.id}`)
   }
 
@@ -142,6 +153,8 @@ export function JoinClient({
     >
       Lihat Tiket Saya
     </button>
+  ) : awaitingApproval ? (
+    <Disabled>Menunggu Approval Sekretariat</Disabled>
   ) : closed ? (
     <Disabled>Registration Closed</Disabled>
   ) : full ? (
@@ -158,7 +171,7 @@ export function JoinClient({
       }}
       className={`w-full py-3.5 rounded-xl bg-[#c9232c] text-white text-[17px] font-bold shadow-[0_8px_20px_-6px_rgba(201,35,44,.6)] active:scale-[.99] transition`}
     >
-      Get Ticket
+      {needsApproval ? 'Ajukan Tiket' : 'Get Ticket'}
     </button>
   )
 
@@ -250,7 +263,14 @@ export function JoinClient({
       </div>
 
       <Sheet open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <SheetHead title="Konfirmasi Pendaftaran" sub="Tiket dibuat atas nama akun yang sedang aktif" />
+        <SheetHead
+          title={needsApproval ? 'Ajukan Tiket Nasional' : 'Konfirmasi Pendaftaran'}
+          sub={
+            needsApproval
+              ? 'Pengajuan dicek Sekretariat Nasional sebelum tiket aktif'
+              : 'Tiket dibuat atas nama akun yang sedang aktif'
+          }
+        />
         <div className="flex gap-3 rounded-2xl bg-[#faf7f2] ring-1 ring-[#efe3cc] p-3">
           <EventThumb src={event.posterUrl} className="w-16 h-16 rounded-xl shrink-0" />
           <div className="min-w-0">
@@ -269,10 +289,12 @@ export function JoinClient({
           </div>
         </dl>
         <p className="text-[12px] text-slate-500 mt-2">
-          Satu tiket untuk satu akun. Ajak temanmu ambil tiket dari akunnya sendiri.
+          {needsApproval
+            ? 'Setelah disetujui, tiket muncul di My Tickets dan bisa dipakai absen / masuk event.'
+            : 'Satu tiket untuk satu akun. Ajak temanmu ambil tiket dari akunnya sendiri.'}
         </p>
         <button type="button" disabled={loading} onClick={takeTicket} className={`mt-4 w-full py-3.5 ${BTN_RED}`}>
-          {loading ? 'Mendaftar...' : 'Ambil Tiket'}
+          {loading ? 'Mengirim...' : needsApproval ? 'Kirim Pengajuan' : 'Ambil Tiket'}
         </button>
       </Sheet>
     </main>

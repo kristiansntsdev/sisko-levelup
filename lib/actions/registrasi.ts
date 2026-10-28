@@ -1,8 +1,22 @@
 'use server'
+import { cookies } from 'next/headers'
+import { revalidatePath } from 'next/cache'
+import { auth } from '@/auth'
 import { db } from '@/lib/db'
-import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
+import { isNasionalAdmin, NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
 import { resolveEventPosterUrl } from '@/lib/event-poster'
-import { formatTelegramMessage, notifyTelegram, eventDetailLink } from '@/lib/telegram'
+import {
+  needsNasionalTicketApproval,
+  ticketStatusOnRequest,
+} from '@/lib/registrasi-status'
+import { setActor } from '@/lib/request-context'
+import {
+  formatTelegramMessage,
+  notifyTelegram,
+  eventDetailLink,
+  tiketNasionalApproveLink,
+} from '@/lib/telegram'
+import { USERLEVEL_LABEL } from '@/lib/pwa-member'
 import { wibStartOfMonth, wibStartOfNextMonth, wibToday } from '@/lib/wib'
 
 export async function updatePesertaProfile(
@@ -57,57 +71,73 @@ export async function countActiveRegistrasi(idEvent: number): Promise<number> {
   })
 }
 
-export type CreateRegistrasiResult = { id: number } | { full: true }
+export type CreateRegistrasiResult =
+  | { id: number; pending?: true }
+  | { full: true }
+
+const LIVE_TICKET = ['pending', 'confirmed', 'attend', 'absence'] as const
 
 export async function createRegistrasi(idPeserta: number, idEvent: number): Promise<CreateRegistrasiResult> {
+  const event = await db.event.findUnique({
+    where: { id_event: idEvent },
+    select: { id_cabang: true, nama_event: true, wwtype: true, targetjumlah: true },
+  })
+  if (!event) return { full: true }
+
   const existing = await db.registrasi.findUnique({
     where: { id_peserta_id_event: { id_peserta: idPeserta, id_event: idEvent } },
-    select: { status: true },
+    select: { id_registrasi: true, status: true },
   })
-  const live = existing != null && existing.status !== 'cancelled'
-  if (!live) {
-    const cap = await db.event.findUnique({
-      where: { id_event: idEvent },
-      select: { targetjumlah: true },
-    })
-    const target = cap?.targetjumlah ?? 0
-    if (target > 0) {
-      const taken = await countActiveRegistrasi(idEvent)
-      // ponytail: dua request barengan bisa lewati hitungan ini; kunci baris event kalau perlu ketat.
-      if (taken >= target) return { full: true }
-    }
+
+  // Jangan downgrade tiket yang sudah live (confirmed/attend/absence/pending).
+  if (existing && LIVE_TICKET.includes(existing.status as (typeof LIVE_TICKET)[number])) {
+    return existing.status === 'pending'
+      ? { id: existing.id_registrasi, pending: true }
+      : { id: existing.id_registrasi }
   }
 
+  const target = event.targetjumlah ?? 0
+  if (target > 0) {
+    const taken = await countActiveRegistrasi(idEvent)
+    // ponytail: dua request barengan bisa lewati hitungan ini; kunci baris event kalau perlu ketat.
+    if (taken >= target) return { full: true }
+  }
+
+  const status = ticketStatusOnRequest(event.wwtype)
   const row = await db.registrasi.upsert({
     where: { id_peserta_id_event: { id_peserta: idPeserta, id_event: idEvent } },
-    create: { id_peserta: idPeserta, id_event: idEvent, status: 'confirmed' },
-    update: { status: 'confirmed' },
+    create: { id_peserta: idPeserta, id_event: idEvent, status },
+    update: { status },
     select: { id_registrasi: true },
   })
 
-  const event = await db.event.findUnique({
-    where: { id_event: idEvent },
-    select: { id_cabang: true, nama_event: true },
-  })
-  if (event?.id_cabang === NASIONAL_EVENT_CABANG) {
+  if (event.id_cabang === NASIONAL_EVENT_CABANG || needsNasionalTicketApproval(event.wwtype)) {
     const peserta = await db.peserta.findUnique({
       where: { id_peserta: idPeserta },
       select: { nama: true },
     })
+    const pending = status === 'pending'
     void notifyTelegram(
       formatTelegramMessage({
-        action: 'Registrasi',
+        action: pending ? 'Pengajuan Tiket' : 'Registrasi',
         eventName: event.nama_event,
         fields: {
           Peserta: peserta?.nama ?? idPeserta,
           ID: idEvent,
+          ...(pending ? { Status: 'Menunggu Sekretariat Nasional' } : {}),
         },
         layout: 'peserta',
       }),
-      { buttons: [{ text: '📋 Detail Event', url: eventDetailLink(idEvent) }] },
+      {
+        buttons: [
+          pending
+            ? { text: '✅ Approval Tiket', url: tiketNasionalApproveLink() }
+            : { text: '📋 Detail Event', url: eventDetailLink(idEvent) },
+        ],
+      },
     )
   }
-  return { id: row.id_registrasi }
+  return status === 'pending' ? { id: row.id_registrasi, pending: true } : { id: row.id_registrasi }
 }
 
 export async function checkRegistrasi(idPeserta: number, idEvent: number): Promise<boolean> {
@@ -126,6 +156,206 @@ export async function findRegistrasiId(idPeserta: number, idEvent: number): Prom
     select: { id_registrasi: true },
   })
   return row?.id_registrasi ?? null
+}
+
+export type RegistrasiMine =
+  | { id: number; status: 'pending' }
+  | { id: number; status: 'confirmed' | 'attend' | 'absence' }
+
+/** Pending atau tiket live — untuk CTA View Event. */
+export async function findRegistrasiMine(
+  idPeserta: number,
+  idEvent: number,
+): Promise<RegistrasiMine | null> {
+  const row = await db.registrasi.findFirst({
+    where: {
+      id_peserta: idPeserta,
+      id_event: idEvent,
+      status: { in: ['pending', 'confirmed', 'attend', 'absence'] },
+    },
+    select: { id_registrasi: true, status: true },
+  })
+  if (!row) return null
+  if (row.status === 'pending') return { id: row.id_registrasi, status: 'pending' }
+  return { id: row.id_registrasi, status: row.status as 'confirmed' | 'attend' | 'absence' }
+}
+
+type Ok = { ok: true }
+type Err = { ok: false; error: string }
+type Result = Ok | Err
+
+const NASIONAL_TICKET_PATHS = [
+  '/dashboard/v2/kota/alk',
+  '/dashboard/v2/kota/alk/tiket-nasional',
+] as const
+
+async function requireNasionalAlk() {
+  const pengurusId = (await cookies()).get('pengurus_id')?.value
+  if (!pengurusId) return null
+  const pengurus = await db.pengurus.findUnique({
+    where: { id_pengurus: Number(pengurusId) },
+    select: { username: true, divisi: true },
+  })
+  if (!pengurus || pengurus.divisi !== 'alk' || !isNasionalAdmin(pengurus.username)) {
+    return null
+  }
+  setActor({ type: 'pengurus', id: Number(pengurusId), label: pengurus.username })
+  return pengurus
+}
+
+function revalidateNasionalTickets() {
+  for (const p of NASIONAL_TICKET_PATHS) revalidatePath(p)
+}
+
+export type TiketNasionalPending = {
+  id_registrasi: number
+  id_peserta: number
+  id_event: number
+  nama: string
+  usercode: string
+  level: string
+  kotaNama: string
+  eventName: string
+  tglDisplay: string
+}
+
+export async function listPendingTiketNasional(): Promise<TiketNasionalPending[]> {
+  const nasional = await requireNasionalAlk()
+  if (!nasional) return []
+  const rows = await db.registrasi.findMany({
+    where: {
+      status: 'pending',
+      event: { wwtype: 'nasional' },
+    },
+    orderBy: { id_registrasi: 'desc' },
+    select: {
+      id_registrasi: true,
+      id_peserta: true,
+      id_event: true,
+      peserta: {
+        select: { nama: true, usercode: true, userlevel: true, kotalevelup: true },
+      },
+      event: {
+        select: { nama_event: true, tglevent: true },
+      },
+    },
+  })
+  if (rows.length === 0) return []
+  const kotaIds = [
+    ...new Set(
+      rows
+        .map((r) => Number(r.peserta?.kotalevelup))
+        .filter((n) => Number.isFinite(n) && n > 0),
+    ),
+  ]
+  const cabangs =
+    kotaIds.length > 0
+      ? await db.cabang.findMany({
+          where: { id_cabang: { in: kotaIds } },
+          select: { id_cabang: true, namacabang: true },
+        })
+      : []
+  const kotaMap = new Map(cabangs.map((c) => [String(c.id_cabang), c.namacabang]))
+
+  return rows.map((r) => {
+    const tgl = r.event?.tglevent
+    const kota = r.peserta?.kotalevelup ?? ''
+    return {
+      id_registrasi: r.id_registrasi,
+      id_peserta: r.id_peserta,
+      id_event: r.id_event,
+      nama: r.peserta?.nama ?? '',
+      usercode: r.peserta?.usercode ?? '',
+      level: USERLEVEL_LABEL[r.peserta?.userlevel ?? ''] ?? r.peserta?.userlevel ?? '—',
+      kotaNama: kotaMap.get(kota) ?? (kota ? `Kota #${kota}` : '—'),
+      eventName: r.event?.nama_event ?? '',
+      tglDisplay: tgl
+        ? tgl.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            timeZone: 'UTC',
+          })
+        : '',
+    }
+  })
+}
+
+export async function countPendingTiketNasional(): Promise<number> {
+  const nasional = await requireNasionalAlk()
+  if (!nasional) return 0
+  return db.registrasi.count({
+    where: { status: 'pending', event: { wwtype: 'nasional' } },
+  })
+}
+
+export async function approveTiketNasional(idRegistrasi: number): Promise<Result> {
+  const nasional = await requireNasionalAlk()
+  if (!nasional) return { ok: false, error: 'Akses ditolak' }
+  const row = await db.registrasi.findUnique({
+    where: { id_registrasi: idRegistrasi },
+    select: {
+      id_registrasi: true,
+      status: true,
+      id_peserta: true,
+      id_event: true,
+      event: { select: { wwtype: true, nama_event: true } },
+      peserta: { select: { nama: true } },
+    },
+  })
+  if (!row || row.status !== 'pending') return { ok: false, error: 'Pengajuan tidak ditemukan' }
+  if (!needsNasionalTicketApproval(row.event?.wwtype)) {
+    return { ok: false, error: 'Bukan event nasional' }
+  }
+
+  await db.registrasi.update({
+    where: { id_registrasi: idRegistrasi },
+    data: { status: 'confirmed' },
+  })
+
+  void notifyTelegram(
+    formatTelegramMessage({
+      action: 'Tiket Disetujui',
+      eventName: row.event?.nama_event ?? '',
+      fields: {
+        Peserta: row.peserta?.nama ?? row.id_peserta,
+        ID: row.id_event,
+      },
+      layout: 'peserta',
+    }),
+    { buttons: [{ text: '📋 Detail Event', url: eventDetailLink(row.id_event) }] },
+  )
+
+  revalidateNasionalTickets()
+  revalidatePath(`/join/${row.id_event}`)
+  revalidatePath(`/dashboard/tiket/${idRegistrasi}`)
+  return { ok: true }
+}
+
+export async function rejectTiketNasional(idRegistrasi: number): Promise<Result> {
+  const nasional = await requireNasionalAlk()
+  if (!nasional) return { ok: false, error: 'Akses ditolak' }
+  const row = await db.registrasi.findUnique({
+    where: { id_registrasi: idRegistrasi },
+    select: {
+      id_registrasi: true,
+      status: true,
+      id_event: true,
+      event: { select: { wwtype: true } },
+    },
+  })
+  if (!row || row.status !== 'pending') return { ok: false, error: 'Pengajuan tidak ditemukan' }
+  if (!needsNasionalTicketApproval(row.event?.wwtype)) {
+    return { ok: false, error: 'Bukan event nasional' }
+  }
+
+  await db.registrasi.update({
+    where: { id_registrasi: idRegistrasi },
+    data: { status: 'cancelled' },
+  })
+  revalidateNasionalTickets()
+  revalidatePath(`/join/${row.id_event}`)
+  return { ok: true }
 }
 
 export async function getRegistrasiDetail(idRegistrasi: number) {
