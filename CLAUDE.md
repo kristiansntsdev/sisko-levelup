@@ -91,6 +91,7 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-10-30]
+- Sekretariat v2 Detail Event: tombol **Generate QR Join** → sheet QR (`/join` Offline / `/absen` Online) + Salin link + Unduh PNG + Bagikan WA (buat ditempel di flyer setelah event dibuat)
 - `/daftar`: Nomor WA + LevelUP Kota opsional (label `(opsional)`); Tamu bisa skip — `completeRegistration` tidak wajibkan keduanya
 - `/login`: tombol Masuk dengan Google dipindah ke atas email/password (di dalam kartu) supaya terlihat tanpa scroll
 

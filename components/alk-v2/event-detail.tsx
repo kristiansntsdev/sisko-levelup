@@ -1,12 +1,21 @@
 'use client'
 
-import { Fragment, useMemo, useState, useTransition, type ReactNode } from 'react'
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+  type ReactNode,
+} from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import QRCode from 'qrcode'
 import { ajukanEvent, type EventDetailFull } from '@/lib/actions/event'
 import type { ReimburseData } from '@/lib/actions/reimburse'
 import { isEventFullyApproved } from '@/lib/event-approval'
 import { NASIONAL_KHUSUS_VALUE } from '@/lib/event-cabang'
+import { eventEntryPath, isOnlineEvent } from '@/lib/event-link'
 import { hadirPenuh, parseLocalDate, sesiWajibIds } from '@/lib/event-sesi'
 import { FlyerQaSummary } from '@/components/kota/flyer-qa-summary'
 import { BeritaAcaraQaSummary } from '@/components/kota/berita-acara-qa-summary'
@@ -21,6 +30,10 @@ import {
   Icon,
   Note,
   Pill,
+  Qr,
+  Sheet,
+  SheetHead,
+  Toast,
   TopBar,
   type PillTone,
 } from './ui'
@@ -309,6 +322,120 @@ function AjukanButton({ eventId, already }: { eventId: number; already: boolean 
   )
 }
 
+function JoinQrSheet({
+  open,
+  onClose,
+  eventId,
+  nama,
+  jenisevent,
+}: {
+  open: boolean
+  onClose: () => void
+  eventId: number
+  nama: string
+  jenisevent: string
+}) {
+  const [origin, setOrigin] = useState('')
+  const [toast, setToast] = useState<string | null>(null)
+  const online = isOnlineEvent(jenisevent)
+  const joinUrl = origin ? `${origin}${eventEntryPath(eventId, jenisevent)}` : ''
+
+  useEffect(() => {
+    setOrigin(window.location.origin)
+  }, [])
+
+  function flash(msg: string) {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2000)
+  }
+
+  async function copyLink() {
+    if (!joinUrl) return
+    try {
+      await navigator.clipboard.writeText(joinUrl)
+      flash('Link disalin')
+    } catch {
+      flash('Gagal menyalin')
+    }
+  }
+
+  async function downloadPng() {
+    if (!joinUrl) return
+    try {
+      const dataUrl = await QRCode.toDataURL(joinUrl, {
+        width: 512,
+        margin: 2,
+        errorCorrectionLevel: 'M',
+        color: { dark: '#0f172a', light: '#ffffff' },
+      })
+      const a = document.createElement('a')
+      a.href = dataUrl
+      a.download = `qr-event-${eventId}.png`
+      a.click()
+      flash('QR diunduh')
+    } catch {
+      flash('Gagal unduh QR')
+    }
+  }
+
+  return (
+    <>
+      <Sheet open={open} onClose={onClose}>
+        <SheetHead
+          title="QR Join Event"
+          sub={
+            online
+              ? 'Peserta scan → daftar + absen langsung (Online)'
+              : 'Peserta scan → ambil tiket event (Offline)'
+          }
+        />
+        <p className="text-[13px] font-semibold text-[#3b1417] truncate mb-3">{nama}</p>
+        {joinUrl ? (
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-[220px] rounded-2xl bg-white p-3 ring-1 ring-[#efe3cc] shadow-sm">
+              <Qr text={joinUrl} />
+            </div>
+            <p className="text-[11px] font-mono text-slate-500 break-all text-center px-1">{joinUrl}</p>
+            <p className="text-[12px] text-slate-500 text-center">
+              Unduh PNG buat ditempel di flyer, atau salin link.
+            </p>
+            <div className="grid grid-cols-2 gap-2.5 w-full mt-1">
+              <button
+                type="button"
+                onClick={copyLink}
+                className="py-3 rounded-xl bg-[#f8f0dd] text-[#96792a] ring-1 ring-[#ecdcb3] font-bold text-[14px] flex items-center justify-center gap-2"
+              >
+                <Icon name="link" className="w-4 h-4" />
+                Salin
+              </button>
+              <button
+                type="button"
+                onClick={downloadPng}
+                className={`py-3 rounded-xl ${BTN_RED} flex items-center justify-center gap-2`}
+              >
+                <Icon name="down" className="w-4 h-4" />
+                Unduh PNG
+              </button>
+            </div>
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(`${nama}\n${joinUrl}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 rounded-xl bg-white text-slate-700 ring-1 ring-slate-200 font-bold text-[14px] flex items-center justify-center gap-2"
+            >
+              <Icon name="whatsapp" className="w-4 h-4" />
+              Bagikan WA
+            </a>
+          </div>
+        ) : (
+          <p className="text-[13px] text-slate-400 text-center py-8">Menyiapkan QR…</p>
+        )}
+      </Sheet>
+      <Toast msg={toast} />
+    </>
+  )
+}
+
 export function EventDetailV2Client({
   event,
   reimburse,
@@ -324,6 +451,7 @@ export function EventDetailV2Client({
   const [regPage, setRegPage] = useState(0)
   const [absenPage, setAbsenPage] = useState(0)
   const [sesiFilter, setSesiFilter] = useState<number | 'all'>('all')
+  const [showJoinQr, setShowJoinQr] = useState(false)
 
   const status = lifecycleOf(event)
   const { d, m } = monDay(event.tglRaw)
@@ -494,7 +622,7 @@ export function EventDetailV2Client({
                   href={SCAN_HREF}
                   className="w-full py-3 rounded-xl bg-[#f8f0dd] text-[#96792a] ring-1 ring-[#ecdcb3] font-bold text-[14px] flex items-center justify-center gap-2"
                 >
-                  <Icon name="qr" className="w-5 h-5" />
+                  <Icon name="scan" className="w-5 h-5" />
                   Buka Scanner
                 </Link>
               </>
@@ -528,6 +656,14 @@ export function EventDetailV2Client({
                 )}
               </>
             )}
+            <button
+              type="button"
+              onClick={() => setShowJoinQr(true)}
+              className="w-full py-3 rounded-xl bg-white text-[#3b1417] ring-1 ring-slate-200 font-bold text-[14px] flex items-center justify-center gap-2"
+            >
+              <Icon name="qr" className="w-5 h-5" />
+              Generate QR Join
+            </button>
           </div>
         </div>
 
@@ -739,6 +875,14 @@ export function EventDetailV2Client({
           </>
         )}
       </div>
+
+      <JoinQrSheet
+        open={showJoinQr}
+        onClose={() => setShowJoinQr(false)}
+        eventId={event.id_event}
+        nama={event.nama_event}
+        jenisevent={event.jenisevent}
+      />
     </section>
   )
 }
