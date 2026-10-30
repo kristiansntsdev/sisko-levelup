@@ -106,9 +106,8 @@ export async function completeRegistration(data: {
 
   const nama = data.nama.trim()
   const nowa = data.nowa.trim()
+  // ponytail: Tamu boleh skip WA + kota; Squad later forces kota via joinSquad
   if (!nama) return { error: 'Nama wajib diisi.' }
-  if (!nowa) return { error: 'Nomor WA wajib diisi.' }
-  if (!data.kotalevelup) return { error: 'Pilih LevelUP kota kamu.' }
 
   const created = await db.peserta.create({
     data: {
@@ -126,7 +125,7 @@ export async function completeRegistration(data: {
       tgllahir: '',
       tempatlahir: '',
       nowa,
-      kotalevelup: data.kotalevelup,
+      kotalevelup: data.kotalevelup.trim(),
       gereja: data.gereja,
       email,
       password: '',

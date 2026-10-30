@@ -5,7 +5,7 @@ import { getEventsByKotalevelup, type EventListItem } from '@/lib/actions/event'
 import { EventThumb } from '@/components/pwa/ui'
 import { Brush, Crown, CtaButtons, Dot, Heart, LIFT, LOGO, MK, PRESS, Ring, Scribble, Smiley, Strip, Tape, Torn, ZineFooter, ZineHeader, ZinePage, torn } from '@/components/landing/zine'
 
-const PREVIEW_N = 6
+const PREVIEW_N = 10
 
 /** Copy from levelupgen.com */
 const TAGLINE = 'Building a Throne for God, Through the Restoration of the Tabernacle of David.'

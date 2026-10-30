@@ -90,6 +90,10 @@ scripts/monitoring-sheet.gs           # Apps Script: paste ke spreadsheet, sync 
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-10-30]
+- `/daftar`: Nomor WA + LevelUP Kota opsional (label `(opsional)`); Tamu bisa skip — `completeRegistration` tidak wajibkan keduanya
+- `/login`: tombol Masuk dengan Google dipindah ke atas email/password (di dalam kartu) supaya terlihat tanpa scroll
+
 ## Recent Updates [2026-10-28]
 - Detail Event list registrasi + presensi: 3 baris (nama[+kota] / gereja / email[+sesi]); `AbsenRow` + query peserta include gereja (v2 + legacy)
 - Event nasional (`wwtype=nasional`): Get Ticket → `registrasi.status=pending` sampai Sekretariat Nasional Approve → `confirmed` (Tolak → `cancelled`, bisa ajukan ulang). CTA Ajukan Tiket / Menunggu Approval; antrian `/dashboard/v2/kota/alk/tiket-nasional` + todo beranda nasional; scan/absen ditolak kalau belum approved; Online nasional tidak auto-redirect `/absen` (pakai join dulu)

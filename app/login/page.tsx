@@ -106,8 +106,21 @@ function LoginForm() {
         >
           <h2 className="font-extrabold text-[22px] text-[#3b1417]">Masuk</h2>
           <p className="text-[13.5px] text-slate-500 mt-1 mb-5">
-            Email + password (peserta atau pengurus), atau masuk dengan Google
+            Masuk dengan Google, atau email + password (peserta / pengurus)
           </p>
+          <button
+            type="button"
+            onClick={() => signIn('google', { callbackUrl })}
+            className="w-full py-3.5 rounded-2xl bg-white ring-1 ring-slate-200 font-semibold text-slate-700 flex items-center justify-center gap-2 active:bg-slate-50"
+          >
+            <GoogleIcon />
+            Masuk dengan Google
+          </button>
+          <div className="flex items-center gap-3 my-5 text-[12px] text-slate-400">
+            <span className="flex-1 h-px bg-slate-200" />
+            atau email
+            <span className="flex-1 h-px bg-slate-200" />
+          </div>
           <div className="space-y-4">
             <Field label="Email">
               <span className={LOGIN_BOX}>
@@ -159,19 +172,6 @@ function LoginForm() {
           </button>
         </form>
 
-        <div className="flex items-center gap-3 mt-7 text-[12px] text-slate-400">
-          <span className="flex-1 h-px bg-slate-200" />
-          Anggota LevelUP
-          <span className="flex-1 h-px bg-slate-200" />
-        </div>
-        <button
-          type="button"
-          onClick={() => signIn('google', { callbackUrl })}
-          className="mt-4 w-full py-3 rounded-2xl bg-white ring-1 ring-slate-200 font-semibold text-slate-700 flex items-center justify-center gap-2 active:bg-slate-50"
-        >
-          <GoogleIcon />
-          Masuk dengan Google
-        </button>
         <p className="text-center text-[13px] text-slate-500 mt-5">
           Belum terdaftar anggota?{' '}
           <Link href="/daftar" className="font-semibold text-[#c9232c]">

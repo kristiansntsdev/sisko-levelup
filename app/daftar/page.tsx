@@ -150,7 +150,7 @@ function KotaPicker({
 
   return (
     <>
-      <Field label="LevelUP Kota">
+      <Field label="LevelUP Kota (opsional)">
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -346,14 +346,6 @@ function DaftarFormInner() {
       setError('Nama wajib diisi.')
       return
     }
-    if (!nowa.trim()) {
-      setError('Nomor WA wajib diisi.')
-      return
-    }
-    if (!kotalevelup) {
-      setError('Pilih LevelUP kota kamu.')
-      return
-    }
 
     setError('')
     setLoading(true)
@@ -479,7 +471,7 @@ function DaftarFormInner() {
           <Field label="Nama lengkap">
             <input className={FLD} autoComplete="name" placeholder="Nama lengkap" value={nama} onChange={(e) => setNama(e.target.value)} />
           </Field>
-          <Field label="Nomor WA">
+          <Field label="Nomor WA (opsional)">
             <input className={FLD} type="tel" inputMode="tel" autoComplete="tel" placeholder="08123456789" value={nowa} onChange={(e) => setNowa(e.target.value)} />
           </Field>
         </SectionCard>
