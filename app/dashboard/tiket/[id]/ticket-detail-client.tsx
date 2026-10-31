@@ -97,7 +97,10 @@ export function TicketDetailClient({
             <span className="absolute left-5 right-5 top-1/2 border-t-2 border-dashed border-[#ecdcb3]" />
           </div>
           <div className="px-5 pt-2 pb-6 text-center">
-            <div className="relative w-[230px] mx-auto p-2.5">
+            <div
+              className="relative w-[230px] mx-auto p-2.5 bg-white rounded-xl"
+              style={{ colorScheme: 'only light', forcedColorAdjust: 'none' }}
+            >
               <span className="absolute top-0 left-0 w-7 h-7 border-t-4 border-l-4 border-[#b1953a] rounded-tl-xl" />
               <span className="absolute top-0 right-0 w-7 h-7 border-t-4 border-r-4 border-[#b1953a] rounded-tr-xl" />
               <span className="absolute bottom-0 left-0 w-7 h-7 border-b-4 border-l-4 border-[#b1953a] rounded-bl-xl" />

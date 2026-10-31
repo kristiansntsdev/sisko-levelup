@@ -116,15 +116,30 @@ export function Logo({ className = 'h-9 w-auto' }: { className?: string }) {
   return <Image src={LOGO} alt="LevelUP — The Jeremiah Generation" width={623} height={243} className={className} />
 }
 
+// PNG not SVG: qrcode SVG draws modules as stroke; OS/browser dark mode remaps fill≠stroke → QR hilang.
 export function Qr({ text, className = '' }: { text: string; className?: string }) {
-  const [svg, setSvg] = useState('')
+  const [src, setSrc] = useState('')
   useEffect(() => {
     let live = true
-    QRCode.toString(text, { type: 'svg', margin: 0, errorCorrectionLevel: 'M', color: { dark: '#0f172a', light: '#ffffff' } })
-      .then((s) => { if (live) setSvg(s) })
+    QRCode.toDataURL(text, {
+      margin: 1,
+      width: 512,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#000000', light: '#ffffff' },
+    }).then((url) => { if (live) setSrc(url) })
     return () => { live = false }
   }, [text])
-  return <div className={`aspect-square [&_svg]:w-full [&_svg]:h-auto [&_svg]:block ${className}`} dangerouslySetInnerHTML={{ __html: svg }} />
+  return (
+    <div
+      className={`aspect-square bg-white ${className}`}
+      style={{ colorScheme: 'only light', forcedColorAdjust: 'none' }}
+    >
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element -- data-URL QR; raster survives dark mode
+        <img src={src} alt="" className="w-full h-auto block" />
+      ) : null}
+    </div>
+  )
 }
 
 export function Pill({ tone, children }: { tone: PillTone; children: ReactNode }) {

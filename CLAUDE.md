@@ -90,6 +90,9 @@ scripts/monitoring-sheet.gs           # Apps Script: paste ke spreadsheet, sync 
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-10-31]
+- QR tiket/join: `Qr` ganti SVG→PNG data-URL + `color-scheme: only light` — SVG stroke modules hilang di OS/browser dark mode
+
 ## Recent Updates [2026-10-30]
 - Sekretariat v2 Detail Event: tombol **Generate QR Join** → sheet QR (`/join` Offline / `/absen` Online) + Salin link + Unduh PNG + Bagikan WA (buat ditempel di flyer setelah event dibuat)
 - `/daftar`: Nomor WA + LevelUP Kota opsional (label `(opsional)`); Tamu bisa skip — `completeRegistration` tidak wajibkan keduanya
