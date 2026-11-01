@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { InstallApp } from '@/components/install-app'
-import { getEventsByKotalevelup, type EventListItem } from '@/lib/actions/event'
+import { getPublicEvents, type EventListItem } from '@/lib/actions/event'
 import { EventThumb } from '@/components/pwa/ui'
 import { Brush, Crown, CtaButtons, Dot, Heart, LIFT, LOGO, MK, PRESS, Ring, Scribble, Smiley, Strip, Tape, Torn, ZineFooter, ZineHeader, ZinePage, torn } from '@/components/landing/zine'
 
@@ -110,7 +110,7 @@ function Polaroid({ e, i }: { e: EventListItem; i: number }) {
 }
 
 export default async function LandingPage() {
-  const { events } = await getEventsByKotalevelup('all', 1)
+  const { events } = await getPublicEvents()
   const open = events.filter((e) => e.regState === 'OPEN')
   const preview = (open.length ? open : events).slice(0, PREVIEW_N)
 

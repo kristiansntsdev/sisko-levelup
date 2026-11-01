@@ -182,7 +182,7 @@ export default function EventsPage() {
       </div>
 
       <Sheet open={kotaOpen} onClose={() => setKotaOpen(false)}>
-        <SheetHead title="Pilih LevelUP Kota" sub="Event nasional selalu tampil di semua kota" />
+        <SheetHead title="Pilih LevelUP Kota" sub="Event dari pusat selalu tampil di semua kota" />
         <div className="space-y-2">
           {([['all', 'Semua Kota'], ...cabangs.map((c): [string, string] => [c.id, c.nama])] as [string, string][]).map(
             ([id, nama]) => {

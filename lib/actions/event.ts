@@ -1,6 +1,7 @@
 'use server'
 import { cookies } from 'next/headers'
 import { put } from '@vercel/blob'
+import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { setActor } from '@/lib/request-context'
 import { revalidatePath, unstable_cache } from 'next/cache'
@@ -123,9 +124,36 @@ function fmtEventRange(start: Date, end: Date) {
   return `${a} - ${fmtEventDay(end)}`
 }
 
+/** Event wwtype=nasional hanya untuk Core ke atas (Core, PIC, LevelUP Pusat). */
+const NASIONAL_MIN_USERLEVEL = 3
+
+async function viewerSeesNasional() {
+  const idPeserta = (await auth())?.user?.idPeserta
+  if (!idPeserta) return false
+  const peserta = await db.peserta.findUnique({
+    where: { id_peserta: idPeserta },
+    select: { userlevel: true },
+  })
+  return Number(peserta?.userlevel) >= NASIONAL_MIN_USERLEVEL
+}
+
+/** List peserta: level dibaca dari sesi di server, bukan parameter yang bisa dipalsukan client. */
 export async function getEventsByKotalevelup(
   kotalevelup: string,
   page: number,
+): Promise<{ events: EventListItem[]; total: number }> {
+  return listEvents(kotalevelup, page, await viewerSeesNasional())
+}
+
+/** Landing publik: tanpa sesi, jadi event nasional tidak pernah ikut. */
+export async function getPublicEvents(): Promise<{ events: EventListItem[]; total: number }> {
+  return listEvents('all', 1, false)
+}
+
+async function listEvents(
+  kotalevelup: string,
+  page: number,
+  includeNasional: boolean,
 ): Promise<{ events: EventListItem[]; total: number }> {
   const PAGE_SIZE = 10
   const today = (await import('@/lib/wib')).wibToday()
@@ -133,9 +161,11 @@ export async function getEventsByKotalevelup(
     kotalevelup === 'all'
       ? {}
       : { OR: [{ id_cabang: kotalevelup }, { id_cabang: NASIONAL_EVENT_CABANG }] }
+  // wwtype, bukan id_cabang: We Worship Online juga cabang 0 tapi terbuka untuk semua
   const where = {
     ...cabangWhere,
     tgleventselesai: { gte: today },
+    ...(includeNasional ? {} : { wwtype: { not: 'nasional' as const } }),
   }
   const [rows, total, cabangs] = await Promise.all([
     db.event.findMany({

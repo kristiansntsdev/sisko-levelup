@@ -94,6 +94,7 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-11-01]
+- Event `wwtype=nasional` hanya tampil untuk Core ke atas (`userlevel` ≥ 3): landing `/` selalu menyembunyikan (`getPublicEvents`), `/events` cek level dari sesi di server (`getEventsByKotalevelup`). Filter pakai `wwtype`, bukan `id_cabang=0`, karena We Worship Online juga cabang 0 dan terbuka untuk semua. Link langsung `/join/{id}` tetap bisa dibuka (belum diubah)
 - MemberCard baru dari desain `LevelUP ID Card.html` (dark + panel krem + aksen `#F8B801`), pindah ke `components/pwa/member-card.tsx` supaya font Anton/Space Mono tidak ikut preload di semua halaman yang import `ui.tsx`. Dipakai `/dashboard`, `/dashboard/kartu`, `/daftar`; prototype tetap kartu lama
 - Isi kartu: nama depan + sisa nama (ukuran mengecil sesuai panjang), `LevelUP Kota`, tgl lahir (`parseDob`: ISO atau d/m/yyyy), `ID – {usercode}`, stempel tier. Gereja, tempat lahir, Status Aktif tidak lagi di kartu (tetap di tabel `/dashboard/kartu`). Barcode dekoratif, tidak bisa di-scan
 - Teks kecil panel sengaja lebih besar dari file desain: canvas tampil ~35% di HP, ukuran asli 10-14px jadi 3.5-5px
