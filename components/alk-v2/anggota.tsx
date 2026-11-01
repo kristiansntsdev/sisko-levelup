@@ -9,8 +9,8 @@ import {
 } from '@/lib/actions/pengurus-kota'
 import { USERLEVEL_LABEL } from '@/lib/pwa-member'
 import { ALK_BASE, divisiToRole } from './paths'
-import { ANTON, BTN, BTN_SHELL, ERROR, IconButton, MONO, PANEL, PaperHeader, PaperMain, PRESS, Strip } from '@/components/pwa/paper-ui'
-import { SearchBox } from './list-tools'
+import { ANTON, BTN, BTN_SHELL, ERROR, IconButton, LABEL, MONO, PANEL, PaperHeader, PaperMain, PRESS, Strip } from '@/components/pwa/paper-ui'
+import { PAGE_SIZE_EVENT, Pager, SearchBox } from './list-tools'
 import { Empty, FLD, Field, FieldGroup, Icon, Note, PersonChip, Pill, Seg, SectionCard, Sheet, SheetHead, Toast, type PillTone } from './ui'
 
 const LEVEL_TONE: Record<string, PillTone> = {
@@ -22,6 +22,34 @@ const LEVEL_TONE: Record<string, PillTone> = {
   '5': 'sky',
 }
 
+type LevelFilter = 'all' | keyof typeof USERLEVEL_LABEL
+
+const LEVEL_FILTERS: { key: LevelFilter; label: string }[] = [
+  { key: 'all', label: 'Semua' },
+  ...(Object.entries(USERLEVEL_LABEL) as [keyof typeof USERLEVEL_LABEL, string][]).map(([key, label]) => ({ key, label })),
+]
+
+function LevelChipRow({ active, onChange }: { active: LevelFilter; onChange: (k: LevelFilter) => void }) {
+  return (
+    <div className="flex gap-2 overflow-x-auto -mx-5 px-5 py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {LEVEL_FILTERS.map((f) => {
+        const on = f.key === active
+        return (
+          <button
+            key={f.key}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onChange(f.key)}
+            className={`${LABEL} shrink-0 h-9 px-3.5 rounded-full text-[10.5px] font-bold ${PRESS} ${on ? 'bg-[#161616] text-[#ffd83d]' : 'bg-[#fffdf7] text-[#161616]'}`}
+          >
+            {f.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function PesertaListClient({
   peserta,
   namaCabang,
@@ -30,16 +58,34 @@ export function PesertaListClient({
   namaCabang: string
 }) {
   const [q, setQ] = useState('')
+  const [level, setLevel] = useState<LevelFilter>('all')
+  const [page, setPage] = useState(0)
   const needle = q.trim().toLowerCase()
-  const list = peserta.filter(
-    (p) => !needle || `${p.nama} ${p.email} ${p.usercode}`.toLowerCase().includes(needle),
-  )
+  const filtered = peserta.filter((p) => {
+    if (level !== 'all' && p.userlevel !== level) return false
+    return !needle || `${p.nama} ${p.email} ${p.usercode}`.toLowerCase().includes(needle)
+  })
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE_EVENT))
+  const pageClamped = Math.min(page, totalPages - 1)
+  const list = filtered.slice(pageClamped * PAGE_SIZE_EVENT, (pageClamped + 1) * PAGE_SIZE_EVENT)
+
+  function setQClamped(v: string) {
+    setQ(v)
+    setPage(0)
+  }
+  function setLevelClamped(v: LevelFilter) {
+    setLevel(v)
+    setPage(0)
+  }
 
   return (
     <PaperMain>
       <PaperHeader sticker={`${namaCabang} · ${peserta.length} anggota`} title="LevelUP Kota" />
       <div className="px-5 mt-5 pb-4">
-        <SearchBox value={q} onChange={setQ} placeholder="Cari nama atau email" />
+        <SearchBox value={q} onChange={setQClamped} placeholder="Cari nama atau email" />
+        <div className="mt-3">
+          <LevelChipRow active={level} onChange={setLevelClamped} />
+        </div>
         <div className="mt-4 space-y-2.5">
           {list.length ? (
             list.map((p) => (
@@ -56,6 +102,7 @@ export function PesertaListClient({
             <Empty>Tidak ada anggota yang cocok</Empty>
           )}
         </div>
+        <Pager page={pageClamped} totalPages={totalPages} onChange={setPage} />
       </div>
     </PaperMain>
   )
