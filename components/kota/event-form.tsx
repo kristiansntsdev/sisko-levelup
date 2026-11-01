@@ -12,6 +12,9 @@ import {
   type NasionalEventScope,
 } from '@/lib/event-cabang'
 import { parseLocalDate, type EventSesiInput } from '@/lib/event-sesi'
+import { ensureGoogleMaps } from '@/lib/google-maps'
+import { lokasiNeedsSesi, parseLatLng, type EventLokasiInput } from '@/lib/event-lokasi'
+import { LokasiPinMap } from '@/components/kota/lokasi-pin-map'
 import { ANTON, BTN, ERROR, IconButton, LABEL, MONO, PaperHeader, PaperMain, Strip } from '@/components/pwa/paper-ui'
 import {
   FLD,
@@ -36,6 +39,19 @@ function newSesiRow(defaults?: Partial<EventSesiInput>): SesiFormRow {
   }
 }
 
+type LokasiFormRow = EventLokasiInput & { _key: string }
+
+function newLokasiRow(defaults?: Partial<EventLokasiInput>): LokasiFormRow {
+  return {
+    _key: crypto.randomUUID(),
+    id_lokasi: defaults?.id_lokasi,
+    nama: defaults?.nama ?? '',
+    alamat: defaults?.alamat ?? '',
+    longlat: defaults?.longlat ?? '',
+    radius: defaults?.radius ?? 500,
+  }
+}
+
 const TARGET_OPTIONS = ['Umum', 'Volunteer', 'Squad', 'Core', 'PIC', 'LevelUP Pusat']
 const TARGET_VALUES: Record<string, string> = {
   Umum: '0', Volunteer: '1', Squad: '2', Core: '3', PIC: '4', 'LevelUP Pusat': '5',
@@ -51,58 +67,6 @@ const TARGET_PENGURUS_LABELS: Record<string, string> = Object.fromEntries(
 )
 
 const JENIS_OPTIONS = ['Offline', 'Online']
-
-const GMAPS_SCRIPT_ID = 'gmaps-script'
-// Shared across remounts — stale script.onload on an unmounted form was the grey-box race.
-let gmapsReady: Promise<void> | null = null
-
-function ensureGoogleMaps(apiKey: string): Promise<void> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((window as any).google?.maps?.importLibrary) return Promise.resolve()
-  if (gmapsReady) return gmapsReady
-
-  gmapsReady = new Promise<void>((resolve, reject) => {
-    const settle = () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((window as any).google?.maps?.importLibrary) {
-        resolve()
-        return
-      }
-      // loading=async: onload can fire before importLibrary is attached
-      const t0 = Date.now()
-      const id = setInterval(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if ((window as any).google?.maps?.importLibrary) {
-          clearInterval(id)
-          resolve()
-        } else if (Date.now() - t0 > 15_000) {
-          clearInterval(id)
-          gmapsReady = null
-          reject(new Error('Google Maps load timeout'))
-        }
-      }, 50)
-    }
-
-    const existing = document.getElementById(GMAPS_SCRIPT_ID)
-    if (existing) {
-      settle()
-      return
-    }
-    const script = document.createElement('script')
-    script.id = GMAPS_SCRIPT_ID
-    // loading=async = Google bootstrap; constructors only after importLibrary
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`
-    script.async = true
-    script.onload = settle
-    script.onerror = () => {
-      gmapsReady = null
-      reject(new Error('Google Maps script failed'))
-    }
-    document.head.appendChild(script)
-  })
-
-  return gmapsReady
-}
 
 const WWTYPE_OPTIONS_BASE: { value: event_wwtype; label: string }[] = [
   { value: 'bulanan', label: 'Bulanan' },
@@ -215,6 +179,20 @@ export function EventForm({
       : [],
   )
 
+  const [lokasi, setLokasi] = useState<LokasiFormRow[]>(() =>
+    isNasional
+      ? (event?.lokasi ?? []).map((l) =>
+          newLokasiRow({
+            id_lokasi: l.id_lokasi,
+            nama: l.nama,
+            alamat: l.alamat,
+            longlat: l.longlat,
+            radius: l.radius,
+          }),
+        )
+      : [],
+  )
+
   const [form, setForm] = useState<FormState>({
     nama_event: event?.nama_event ?? '',
     jenisevent: event?.jenisevent ?? 'Offline',
@@ -256,6 +234,11 @@ export function EventForm({
   setAlamatRef.current = (s: string) => setForm((prev) => ({ ...prev, alamatevent: s }))
 
   const isOnline = form.jenisevent === 'Online'
+  const lockedLokasiOf = (idSesi: number): string => {
+    const lokId = event?.sesi.find((x) => x.id_sesi === idSesi)?.id_lokasi
+    return lokId == null ? '' : (event?.lokasi.find((l) => l.id_lokasi === lokId)?.nama ?? '')
+  }
+  const showLokasi = isNasional && form.wwtype === 'nasional' && !isOnline
 
   function initMap() {
     if (!mapRef.current || mapsReadyRef.current) return
@@ -371,6 +354,14 @@ export function EventForm({
     setError('')
     if (!form.nama_event.trim()) return setError('Nama event wajib diisi.')
     if (!form.tglevent) return setError('Tanggal event wajib diisi.')
+    const lokasiRows = showLokasi ? lokasi.filter((l) => l.nama.trim()) : []
+    for (const l of lokasiRows) {
+      if (!parseLatLng(l.longlat)) return setError(`Lokasi "${l.nama.trim()}" belum punya titik peta.`)
+      if (!(Number(l.radius) > 0)) return setError(`Lokasi "${l.nama.trim()}" butuh radius lebih dari 0.`)
+    }
+    if (lokasiNeedsSesi(lokasiRows.length, sesi.filter((x) => x.nama.trim()).length)) {
+      return setError('Event dengan 2 lokasi atau lebih butuh minimal 1 sesi absen.')
+    }
 
     startTransition(async () => {
       try {
@@ -401,6 +392,10 @@ export function EventForm({
                     jam_mulai: normalizeJam24(rest.jam_mulai),
                     jam_selesai: normalizeJam24(rest.jam_selesai),
                   })),
+                lokasi: lokasiRows.map(({ _key: _, ...rest }) => ({
+                  ...rest,
+                  radius: Number(rest.radius) || 0,
+                })),
               }
             : {}),
         }
@@ -664,6 +659,11 @@ export function EventForm({
                       ×
                     </button>
                   </div>
+                  {row.id_sesi != null && lockedLokasiOf(row.id_sesi) && (
+                    <p className={`text-[11.5px] font-bold ${v2 ? 'text-[#c21f24]' : 'text-accent'}`}>
+                      Terkunci di {lockedLokasiOf(row.id_sesi)}
+                    </p>
+                  )}
                   <input
                     type="text"
                     placeholder="Nama sesi"
@@ -850,6 +850,106 @@ export function EventForm({
           </>
         )}
       </FormSection>
+
+      {showLokasi && (
+        <FormSection
+          v2={v2}
+          icon="pin"
+          tint="red"
+          title="Lokasi Scan"
+          sub="Beberapa lokasi untuk satu event"
+        >
+          <p className={`text-[12px] -mt-1 ${v2 ? 'text-[#44403c]' : 'text-muted'}`}>
+            Kosong = pakai titik utama. Lokasi dipilih di scanner per sesi; satu sesi hanya bisa di-scan di satu lokasi.
+          </p>
+          {lokasi.length === 0 ? (
+            <p className={`text-[13px] text-center py-2 ${v2 ? 'text-[#57534e]' : 'text-muted'}`}>
+              Belum ada lokasi tambahan.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {lokasi.map((row, idx) => {
+                const patch = (next: Partial<EventLokasiInput>) =>
+                  setLokasi((prev) => prev.map((l) => (l._key === row._key ? { ...l, ...next } : l)))
+                return (
+                  <div
+                    key={row._key}
+                    className={
+                      v2
+                        ? 'rounded-[10px] border-2 border-dotted border-[#161616]/25 p-3 space-y-2.5'
+                        : 'border border-border rounded-[12px] p-3 flex flex-col gap-2.5 bg-bg'
+                    }
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={`text-[12px] font-semibold ${v2 ? `${ANTON} text-[15px] tracking-[.02em] text-[#161616]` : 'text-muted'}`}>
+                        Lokasi {idx + 1}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setLokasi((prev) => prev.filter((l) => l._key !== row._key))}
+                        className={`text-[18px] leading-none ${v2 ? 'text-[#c21f24]' : 'text-muted hover:text-red'}`}
+                        aria-label="Hapus lokasi"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Nama lokasi (mis. Gereja Surabaya)"
+                      value={row.nama}
+                      onChange={(e) => patch({ nama: e.target.value })}
+                      className={inputCls}
+                    />
+                    <LokasiPinMap
+                      apiKey={mapsApiKey}
+                      longlat={row.longlat}
+                      alamat={row.alamat}
+                      onChange={patch}
+                      inputCls={inputCls}
+                      mapCls={
+                        v2
+                          ? 'w-full h-[200px] rounded-[10px] overflow-hidden ring-1 ring-[#161616]/15 bg-[#efe8da]/50'
+                          : 'w-full h-[200px] rounded-[12px] overflow-hidden border border-border bg-subtle'
+                      }
+                    />
+                    <FormField v2={v2} label="Radius Absen (meter)">
+                      <input
+                        type="number"
+                        min={1}
+                        value={row.radius}
+                        onChange={(e) => patch({ radius: parseInt(e.target.value, 10) || 0 })}
+                        className={inputCls}
+                      />
+                    </FormField>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() =>
+              setLokasi((prev) => [
+                ...prev,
+                prev.length === 0
+                  ? newLokasiRow({
+                      alamat: form.alamatevent,
+                      longlat: latLng ? `${latLng.lat},${latLng.lng}` : '',
+                      radius: parseInt(form.radius, 10) || 500,
+                    })
+                  : newLokasiRow(),
+              ])
+            }
+            className={
+              v2
+                ? `${ANTON} w-full py-2.5 rounded-sm ring-2 ring-inset ring-[#161616] text-[15px] tracking-[.03em] text-[#161616] transition active:scale-[.98]`
+                : 'w-full py-2.5 rounded-input border border-dashed border-border text-[13px] font-semibold text-fg2 hover:border-accent hover:text-accent transition-colors'
+            }
+          >
+            + Tambah lokasi
+          </button>
+        </FormSection>
+      )}
 
       <FormSection
         v2={v2}

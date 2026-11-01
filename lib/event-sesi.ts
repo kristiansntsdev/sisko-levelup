@@ -18,6 +18,8 @@ export type EventSesiRow = {
   jam_selesai: string
   wajib: boolean
   urutan: number
+  /** Lokasi scan yang mengunci sesi ini (terisi saat scan pertama). */
+  id_lokasi: number | null
 }
 
 /** Sesi IDs that count toward "hadir lengkap". */
@@ -93,6 +95,7 @@ export function toEventSesiRow(r: {
   jam_selesai: string
   wajib: boolean
   urutan: number
+  id_lokasi: number | null
 }): EventSesiRow {
   return {
     id_sesi: r.id_sesi,
@@ -103,5 +106,6 @@ export function toEventSesiRow(r: {
     jam_selesai: r.jam_selesai,
     wajib: r.wajib,
     urutan: r.urutan,
+    id_lokasi: r.id_lokasi,
   }
 }

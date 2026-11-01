@@ -30,12 +30,14 @@ export type Event_sesiAvgAggregateOutputType = {
   id_sesi: number | null
   id_event: number | null
   urutan: number | null
+  id_lokasi: number | null
 }
 
 export type Event_sesiSumAggregateOutputType = {
   id_sesi: number | null
   id_event: number | null
   urutan: number | null
+  id_lokasi: number | null
 }
 
 export type Event_sesiMinAggregateOutputType = {
@@ -47,6 +49,7 @@ export type Event_sesiMinAggregateOutputType = {
   jam_selesai: string | null
   wajib: boolean | null
   urutan: number | null
+  id_lokasi: number | null
 }
 
 export type Event_sesiMaxAggregateOutputType = {
@@ -58,6 +61,7 @@ export type Event_sesiMaxAggregateOutputType = {
   jam_selesai: string | null
   wajib: boolean | null
   urutan: number | null
+  id_lokasi: number | null
 }
 
 export type Event_sesiCountAggregateOutputType = {
@@ -69,6 +73,7 @@ export type Event_sesiCountAggregateOutputType = {
   jam_selesai: number
   wajib: number
   urutan: number
+  id_lokasi: number
   _all: number
 }
 
@@ -77,12 +82,14 @@ export type Event_sesiAvgAggregateInputType = {
   id_sesi?: true
   id_event?: true
   urutan?: true
+  id_lokasi?: true
 }
 
 export type Event_sesiSumAggregateInputType = {
   id_sesi?: true
   id_event?: true
   urutan?: true
+  id_lokasi?: true
 }
 
 export type Event_sesiMinAggregateInputType = {
@@ -94,6 +101,7 @@ export type Event_sesiMinAggregateInputType = {
   jam_selesai?: true
   wajib?: true
   urutan?: true
+  id_lokasi?: true
 }
 
 export type Event_sesiMaxAggregateInputType = {
@@ -105,6 +113,7 @@ export type Event_sesiMaxAggregateInputType = {
   jam_selesai?: true
   wajib?: true
   urutan?: true
+  id_lokasi?: true
 }
 
 export type Event_sesiCountAggregateInputType = {
@@ -116,6 +125,7 @@ export type Event_sesiCountAggregateInputType = {
   jam_selesai?: true
   wajib?: true
   urutan?: true
+  id_lokasi?: true
   _all?: true
 }
 
@@ -214,6 +224,7 @@ export type Event_sesiGroupByOutputType = {
   jam_selesai: string
   wajib: boolean
   urutan: number
+  id_lokasi: number | null
   _count: Event_sesiCountAggregateOutputType | null
   _avg: Event_sesiAvgAggregateOutputType | null
   _sum: Event_sesiSumAggregateOutputType | null
@@ -248,7 +259,9 @@ export type event_sesiWhereInput = {
   jam_selesai?: Prisma.StringFilter<"event_sesi"> | string
   wajib?: Prisma.BoolFilter<"event_sesi"> | boolean
   urutan?: Prisma.IntFilter<"event_sesi"> | number
+  id_lokasi?: Prisma.IntNullableFilter<"event_sesi"> | number | null
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.eventWhereInput>
+  lokasi?: Prisma.XOR<Prisma.Event_lokasiNullableScalarRelationFilter, Prisma.event_lokasiWhereInput> | null
 }
 
 export type event_sesiOrderByWithRelationInput = {
@@ -260,7 +273,9 @@ export type event_sesiOrderByWithRelationInput = {
   jam_selesai?: Prisma.SortOrder
   wajib?: Prisma.SortOrder
   urutan?: Prisma.SortOrder
+  id_lokasi?: Prisma.SortOrderInput | Prisma.SortOrder
   event?: Prisma.eventOrderByWithRelationInput
+  lokasi?: Prisma.event_lokasiOrderByWithRelationInput
   _relevance?: Prisma.event_sesiOrderByRelevanceInput
 }
 
@@ -276,7 +291,9 @@ export type event_sesiWhereUniqueInput = Prisma.AtLeast<{
   jam_selesai?: Prisma.StringFilter<"event_sesi"> | string
   wajib?: Prisma.BoolFilter<"event_sesi"> | boolean
   urutan?: Prisma.IntFilter<"event_sesi"> | number
+  id_lokasi?: Prisma.IntNullableFilter<"event_sesi"> | number | null
   event?: Prisma.XOR<Prisma.EventScalarRelationFilter, Prisma.eventWhereInput>
+  lokasi?: Prisma.XOR<Prisma.Event_lokasiNullableScalarRelationFilter, Prisma.event_lokasiWhereInput> | null
 }, "id_sesi">
 
 export type event_sesiOrderByWithAggregationInput = {
@@ -288,6 +305,7 @@ export type event_sesiOrderByWithAggregationInput = {
   jam_selesai?: Prisma.SortOrder
   wajib?: Prisma.SortOrder
   urutan?: Prisma.SortOrder
+  id_lokasi?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.event_sesiCountOrderByAggregateInput
   _avg?: Prisma.event_sesiAvgOrderByAggregateInput
   _max?: Prisma.event_sesiMaxOrderByAggregateInput
@@ -307,6 +325,7 @@ export type event_sesiScalarWhereWithAggregatesInput = {
   jam_selesai?: Prisma.StringWithAggregatesFilter<"event_sesi"> | string
   wajib?: Prisma.BoolWithAggregatesFilter<"event_sesi"> | boolean
   urutan?: Prisma.IntWithAggregatesFilter<"event_sesi"> | number
+  id_lokasi?: Prisma.IntNullableWithAggregatesFilter<"event_sesi"> | number | null
 }
 
 export type event_sesiCreateInput = {
@@ -317,6 +336,7 @@ export type event_sesiCreateInput = {
   wajib?: boolean
   urutan?: number
   event: Prisma.eventCreateNestedOneWithoutEvent_sesiInput
+  lokasi?: Prisma.event_lokasiCreateNestedOneWithoutEvent_sesiInput
 }
 
 export type event_sesiUncheckedCreateInput = {
@@ -328,6 +348,7 @@ export type event_sesiUncheckedCreateInput = {
   jam_selesai?: string
   wajib?: boolean
   urutan?: number
+  id_lokasi?: number | null
 }
 
 export type event_sesiUpdateInput = {
@@ -338,6 +359,7 @@ export type event_sesiUpdateInput = {
   wajib?: Prisma.BoolFieldUpdateOperationsInput | boolean
   urutan?: Prisma.IntFieldUpdateOperationsInput | number
   event?: Prisma.eventUpdateOneRequiredWithoutEvent_sesiNestedInput
+  lokasi?: Prisma.event_lokasiUpdateOneWithoutEvent_sesiNestedInput
 }
 
 export type event_sesiUncheckedUpdateInput = {
@@ -349,6 +371,7 @@ export type event_sesiUncheckedUpdateInput = {
   jam_selesai?: Prisma.StringFieldUpdateOperationsInput | string
   wajib?: Prisma.BoolFieldUpdateOperationsInput | boolean
   urutan?: Prisma.IntFieldUpdateOperationsInput | number
+  id_lokasi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type event_sesiCreateManyInput = {
@@ -360,6 +383,7 @@ export type event_sesiCreateManyInput = {
   jam_selesai?: string
   wajib?: boolean
   urutan?: number
+  id_lokasi?: number | null
 }
 
 export type event_sesiUpdateManyMutationInput = {
@@ -380,6 +404,7 @@ export type event_sesiUncheckedUpdateManyInput = {
   jam_selesai?: Prisma.StringFieldUpdateOperationsInput | string
   wajib?: Prisma.BoolFieldUpdateOperationsInput | boolean
   urutan?: Prisma.IntFieldUpdateOperationsInput | number
+  id_lokasi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type Event_sesiListRelationFilter = {
@@ -407,12 +432,14 @@ export type event_sesiCountOrderByAggregateInput = {
   jam_selesai?: Prisma.SortOrder
   wajib?: Prisma.SortOrder
   urutan?: Prisma.SortOrder
+  id_lokasi?: Prisma.SortOrder
 }
 
 export type event_sesiAvgOrderByAggregateInput = {
   id_sesi?: Prisma.SortOrder
   id_event?: Prisma.SortOrder
   urutan?: Prisma.SortOrder
+  id_lokasi?: Prisma.SortOrder
 }
 
 export type event_sesiMaxOrderByAggregateInput = {
@@ -424,6 +451,7 @@ export type event_sesiMaxOrderByAggregateInput = {
   jam_selesai?: Prisma.SortOrder
   wajib?: Prisma.SortOrder
   urutan?: Prisma.SortOrder
+  id_lokasi?: Prisma.SortOrder
 }
 
 export type event_sesiMinOrderByAggregateInput = {
@@ -435,12 +463,14 @@ export type event_sesiMinOrderByAggregateInput = {
   jam_selesai?: Prisma.SortOrder
   wajib?: Prisma.SortOrder
   urutan?: Prisma.SortOrder
+  id_lokasi?: Prisma.SortOrder
 }
 
 export type event_sesiSumOrderByAggregateInput = {
   id_sesi?: Prisma.SortOrder
   id_event?: Prisma.SortOrder
   urutan?: Prisma.SortOrder
+  id_lokasi?: Prisma.SortOrder
 }
 
 export type event_sesiCreateNestedManyWithoutEventInput = {
@@ -489,6 +519,48 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
+export type event_sesiCreateNestedManyWithoutLokasiInput = {
+  create?: Prisma.XOR<Prisma.event_sesiCreateWithoutLokasiInput, Prisma.event_sesiUncheckedCreateWithoutLokasiInput> | Prisma.event_sesiCreateWithoutLokasiInput[] | Prisma.event_sesiUncheckedCreateWithoutLokasiInput[]
+  connectOrCreate?: Prisma.event_sesiCreateOrConnectWithoutLokasiInput | Prisma.event_sesiCreateOrConnectWithoutLokasiInput[]
+  createMany?: Prisma.event_sesiCreateManyLokasiInputEnvelope
+  connect?: Prisma.event_sesiWhereUniqueInput | Prisma.event_sesiWhereUniqueInput[]
+}
+
+export type event_sesiUncheckedCreateNestedManyWithoutLokasiInput = {
+  create?: Prisma.XOR<Prisma.event_sesiCreateWithoutLokasiInput, Prisma.event_sesiUncheckedCreateWithoutLokasiInput> | Prisma.event_sesiCreateWithoutLokasiInput[] | Prisma.event_sesiUncheckedCreateWithoutLokasiInput[]
+  connectOrCreate?: Prisma.event_sesiCreateOrConnectWithoutLokasiInput | Prisma.event_sesiCreateOrConnectWithoutLokasiInput[]
+  createMany?: Prisma.event_sesiCreateManyLokasiInputEnvelope
+  connect?: Prisma.event_sesiWhereUniqueInput | Prisma.event_sesiWhereUniqueInput[]
+}
+
+export type event_sesiUpdateManyWithoutLokasiNestedInput = {
+  create?: Prisma.XOR<Prisma.event_sesiCreateWithoutLokasiInput, Prisma.event_sesiUncheckedCreateWithoutLokasiInput> | Prisma.event_sesiCreateWithoutLokasiInput[] | Prisma.event_sesiUncheckedCreateWithoutLokasiInput[]
+  connectOrCreate?: Prisma.event_sesiCreateOrConnectWithoutLokasiInput | Prisma.event_sesiCreateOrConnectWithoutLokasiInput[]
+  upsert?: Prisma.event_sesiUpsertWithWhereUniqueWithoutLokasiInput | Prisma.event_sesiUpsertWithWhereUniqueWithoutLokasiInput[]
+  createMany?: Prisma.event_sesiCreateManyLokasiInputEnvelope
+  set?: Prisma.event_sesiWhereUniqueInput | Prisma.event_sesiWhereUniqueInput[]
+  disconnect?: Prisma.event_sesiWhereUniqueInput | Prisma.event_sesiWhereUniqueInput[]
+  delete?: Prisma.event_sesiWhereUniqueInput | Prisma.event_sesiWhereUniqueInput[]
+  connect?: Prisma.event_sesiWhereUniqueInput | Prisma.event_sesiWhereUniqueInput[]
+  update?: Prisma.event_sesiUpdateWithWhereUniqueWithoutLokasiInput | Prisma.event_sesiUpdateWithWhereUniqueWithoutLokasiInput[]
+  updateMany?: Prisma.event_sesiUpdateManyWithWhereWithoutLokasiInput | Prisma.event_sesiUpdateManyWithWhereWithoutLokasiInput[]
+  deleteMany?: Prisma.event_sesiScalarWhereInput | Prisma.event_sesiScalarWhereInput[]
+}
+
+export type event_sesiUncheckedUpdateManyWithoutLokasiNestedInput = {
+  create?: Prisma.XOR<Prisma.event_sesiCreateWithoutLokasiInput, Prisma.event_sesiUncheckedCreateWithoutLokasiInput> | Prisma.event_sesiCreateWithoutLokasiInput[] | Prisma.event_sesiUncheckedCreateWithoutLokasiInput[]
+  connectOrCreate?: Prisma.event_sesiCreateOrConnectWithoutLokasiInput | Prisma.event_sesiCreateOrConnectWithoutLokasiInput[]
+  upsert?: Prisma.event_sesiUpsertWithWhereUniqueWithoutLokasiInput | Prisma.event_sesiUpsertWithWhereUniqueWithoutLokasiInput[]
+  createMany?: Prisma.event_sesiCreateManyLokasiInputEnvelope
+  set?: Prisma.event_sesiWhereUniqueInput | Prisma.event_sesiWhereUniqueInput[]
+  disconnect?: Prisma.event_sesiWhereUniqueInput | Prisma.event_sesiWhereUniqueInput[]
+  delete?: Prisma.event_sesiWhereUniqueInput | Prisma.event_sesiWhereUniqueInput[]
+  connect?: Prisma.event_sesiWhereUniqueInput | Prisma.event_sesiWhereUniqueInput[]
+  update?: Prisma.event_sesiUpdateWithWhereUniqueWithoutLokasiInput | Prisma.event_sesiUpdateWithWhereUniqueWithoutLokasiInput[]
+  updateMany?: Prisma.event_sesiUpdateManyWithWhereWithoutLokasiInput | Prisma.event_sesiUpdateManyWithWhereWithoutLokasiInput[]
+  deleteMany?: Prisma.event_sesiScalarWhereInput | Prisma.event_sesiScalarWhereInput[]
+}
+
 export type event_sesiCreateWithoutEventInput = {
   nama: string
   tanggal: Date | string
@@ -496,6 +568,7 @@ export type event_sesiCreateWithoutEventInput = {
   jam_selesai?: string
   wajib?: boolean
   urutan?: number
+  lokasi?: Prisma.event_lokasiCreateNestedOneWithoutEvent_sesiInput
 }
 
 export type event_sesiUncheckedCreateWithoutEventInput = {
@@ -506,6 +579,7 @@ export type event_sesiUncheckedCreateWithoutEventInput = {
   jam_selesai?: string
   wajib?: boolean
   urutan?: number
+  id_lokasi?: number | null
 }
 
 export type event_sesiCreateOrConnectWithoutEventInput = {
@@ -546,6 +620,54 @@ export type event_sesiScalarWhereInput = {
   jam_selesai?: Prisma.StringFilter<"event_sesi"> | string
   wajib?: Prisma.BoolFilter<"event_sesi"> | boolean
   urutan?: Prisma.IntFilter<"event_sesi"> | number
+  id_lokasi?: Prisma.IntNullableFilter<"event_sesi"> | number | null
+}
+
+export type event_sesiCreateWithoutLokasiInput = {
+  nama: string
+  tanggal: Date | string
+  jam_mulai?: string
+  jam_selesai?: string
+  wajib?: boolean
+  urutan?: number
+  event: Prisma.eventCreateNestedOneWithoutEvent_sesiInput
+}
+
+export type event_sesiUncheckedCreateWithoutLokasiInput = {
+  id_sesi?: number
+  id_event: number
+  nama: string
+  tanggal: Date | string
+  jam_mulai?: string
+  jam_selesai?: string
+  wajib?: boolean
+  urutan?: number
+}
+
+export type event_sesiCreateOrConnectWithoutLokasiInput = {
+  where: Prisma.event_sesiWhereUniqueInput
+  create: Prisma.XOR<Prisma.event_sesiCreateWithoutLokasiInput, Prisma.event_sesiUncheckedCreateWithoutLokasiInput>
+}
+
+export type event_sesiCreateManyLokasiInputEnvelope = {
+  data: Prisma.event_sesiCreateManyLokasiInput | Prisma.event_sesiCreateManyLokasiInput[]
+  skipDuplicates?: boolean
+}
+
+export type event_sesiUpsertWithWhereUniqueWithoutLokasiInput = {
+  where: Prisma.event_sesiWhereUniqueInput
+  update: Prisma.XOR<Prisma.event_sesiUpdateWithoutLokasiInput, Prisma.event_sesiUncheckedUpdateWithoutLokasiInput>
+  create: Prisma.XOR<Prisma.event_sesiCreateWithoutLokasiInput, Prisma.event_sesiUncheckedCreateWithoutLokasiInput>
+}
+
+export type event_sesiUpdateWithWhereUniqueWithoutLokasiInput = {
+  where: Prisma.event_sesiWhereUniqueInput
+  data: Prisma.XOR<Prisma.event_sesiUpdateWithoutLokasiInput, Prisma.event_sesiUncheckedUpdateWithoutLokasiInput>
+}
+
+export type event_sesiUpdateManyWithWhereWithoutLokasiInput = {
+  where: Prisma.event_sesiScalarWhereInput
+  data: Prisma.XOR<Prisma.event_sesiUpdateManyMutationInput, Prisma.event_sesiUncheckedUpdateManyWithoutLokasiInput>
 }
 
 export type event_sesiCreateManyEventInput = {
@@ -556,6 +678,7 @@ export type event_sesiCreateManyEventInput = {
   jam_selesai?: string
   wajib?: boolean
   urutan?: number
+  id_lokasi?: number | null
 }
 
 export type event_sesiUpdateWithoutEventInput = {
@@ -565,6 +688,7 @@ export type event_sesiUpdateWithoutEventInput = {
   jam_selesai?: Prisma.StringFieldUpdateOperationsInput | string
   wajib?: Prisma.BoolFieldUpdateOperationsInput | boolean
   urutan?: Prisma.IntFieldUpdateOperationsInput | number
+  lokasi?: Prisma.event_lokasiUpdateOneWithoutEvent_sesiNestedInput
 }
 
 export type event_sesiUncheckedUpdateWithoutEventInput = {
@@ -575,10 +699,55 @@ export type event_sesiUncheckedUpdateWithoutEventInput = {
   jam_selesai?: Prisma.StringFieldUpdateOperationsInput | string
   wajib?: Prisma.BoolFieldUpdateOperationsInput | boolean
   urutan?: Prisma.IntFieldUpdateOperationsInput | number
+  id_lokasi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type event_sesiUncheckedUpdateManyWithoutEventInput = {
   id_sesi?: Prisma.IntFieldUpdateOperationsInput | number
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  tanggal?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  jam_mulai?: Prisma.StringFieldUpdateOperationsInput | string
+  jam_selesai?: Prisma.StringFieldUpdateOperationsInput | string
+  wajib?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  urutan?: Prisma.IntFieldUpdateOperationsInput | number
+  id_lokasi?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+}
+
+export type event_sesiCreateManyLokasiInput = {
+  id_sesi?: number
+  id_event: number
+  nama: string
+  tanggal: Date | string
+  jam_mulai?: string
+  jam_selesai?: string
+  wajib?: boolean
+  urutan?: number
+}
+
+export type event_sesiUpdateWithoutLokasiInput = {
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  tanggal?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  jam_mulai?: Prisma.StringFieldUpdateOperationsInput | string
+  jam_selesai?: Prisma.StringFieldUpdateOperationsInput | string
+  wajib?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  urutan?: Prisma.IntFieldUpdateOperationsInput | number
+  event?: Prisma.eventUpdateOneRequiredWithoutEvent_sesiNestedInput
+}
+
+export type event_sesiUncheckedUpdateWithoutLokasiInput = {
+  id_sesi?: Prisma.IntFieldUpdateOperationsInput | number
+  id_event?: Prisma.IntFieldUpdateOperationsInput | number
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  tanggal?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  jam_mulai?: Prisma.StringFieldUpdateOperationsInput | string
+  jam_selesai?: Prisma.StringFieldUpdateOperationsInput | string
+  wajib?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  urutan?: Prisma.IntFieldUpdateOperationsInput | number
+}
+
+export type event_sesiUncheckedUpdateManyWithoutLokasiInput = {
+  id_sesi?: Prisma.IntFieldUpdateOperationsInput | number
+  id_event?: Prisma.IntFieldUpdateOperationsInput | number
   nama?: Prisma.StringFieldUpdateOperationsInput | string
   tanggal?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   jam_mulai?: Prisma.StringFieldUpdateOperationsInput | string
@@ -598,7 +767,9 @@ export type event_sesiSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   jam_selesai?: boolean
   wajib?: boolean
   urutan?: boolean
+  id_lokasi?: boolean
   event?: boolean | Prisma.eventDefaultArgs<ExtArgs>
+  lokasi?: boolean | Prisma.event_sesi$lokasiArgs<ExtArgs>
 }, ExtArgs["result"]["event_sesi"]>
 
 
@@ -612,17 +783,20 @@ export type event_sesiSelectScalar = {
   jam_selesai?: boolean
   wajib?: boolean
   urutan?: boolean
+  id_lokasi?: boolean
 }
 
-export type event_sesiOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_sesi" | "id_event" | "nama" | "tanggal" | "jam_mulai" | "jam_selesai" | "wajib" | "urutan", ExtArgs["result"]["event_sesi"]>
+export type event_sesiOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_sesi" | "id_event" | "nama" | "tanggal" | "jam_mulai" | "jam_selesai" | "wajib" | "urutan" | "id_lokasi", ExtArgs["result"]["event_sesi"]>
 export type event_sesiInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   event?: boolean | Prisma.eventDefaultArgs<ExtArgs>
+  lokasi?: boolean | Prisma.event_sesi$lokasiArgs<ExtArgs>
 }
 
 export type $event_sesiPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "event_sesi"
   objects: {
     event: Prisma.$eventPayload<ExtArgs>
+    lokasi: Prisma.$event_lokasiPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id_sesi: number
@@ -633,6 +807,7 @@ export type $event_sesiPayload<ExtArgs extends runtime.Types.Extensions.Internal
     jam_selesai: string
     wajib: boolean
     urutan: number
+    id_lokasi: number | null
   }, ExtArgs["result"]["event_sesi"]>
   composites: {}
 }
@@ -974,6 +1149,7 @@ readonly fields: event_sesiFieldRefs;
 export interface Prisma__event_sesiClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   event<T extends Prisma.eventDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.eventDefaultArgs<ExtArgs>>): Prisma.Prisma__eventClient<runtime.Types.Result.GetResult<Prisma.$eventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  lokasi<T extends Prisma.event_sesi$lokasiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.event_sesi$lokasiArgs<ExtArgs>>): Prisma.Prisma__event_lokasiClient<runtime.Types.Result.GetResult<Prisma.$event_lokasiPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1011,6 +1187,7 @@ export interface event_sesiFieldRefs {
   readonly jam_selesai: Prisma.FieldRef<"event_sesi", 'String'>
   readonly wajib: Prisma.FieldRef<"event_sesi", 'Boolean'>
   readonly urutan: Prisma.FieldRef<"event_sesi", 'Int'>
+  readonly id_lokasi: Prisma.FieldRef<"event_sesi", 'Int'>
 }
     
 
@@ -1356,6 +1533,25 @@ export type event_sesiDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many event_sesis to delete.
    */
   limit?: number
+}
+
+/**
+ * event_sesi.lokasi
+ */
+export type event_sesi$lokasiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the event_lokasi
+   */
+  select?: Prisma.event_lokasiSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the event_lokasi
+   */
+  omit?: Prisma.event_lokasiOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.event_lokasiInclude<ExtArgs> | null
+  where?: Prisma.event_lokasiWhereInput
 }
 
 /**

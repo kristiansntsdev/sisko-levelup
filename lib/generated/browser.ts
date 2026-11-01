@@ -68,6 +68,11 @@ export type event = Prisma.eventModel
  */
 export type event_sesi = Prisma.event_sesiModel
 /**
+ * Model event_lokasi
+ * 
+ */
+export type event_lokasi = Prisma.event_lokasiModel
+/**
  * Model feedback
  * 
  */

@@ -5,7 +5,7 @@ import { db } from '@/lib/db'
 import { setActor } from '@/lib/request-context'
 import { revalidatePath } from 'next/cache'
 import { eventDateTime, isOnlineAbsenOpen } from '@/lib/event-absen-window'
-import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
+import { NASIONAL_EVENT_CABANG, isNasionalAdmin } from '@/lib/event-cabang'
 import { absenDuplicateWhere } from '@/lib/event-sesi'
 import {
   canAbsenNasionalTicket,
@@ -92,7 +92,7 @@ export async function absenOnlineSelf(idRegistrasi: number): Promise<
 
 /** Scanner (/alk/scanner) belum punya halaman gate sendiri — ini satu-satunya
  *  titik yang tahu pengurus mana yang scan, jadi dicek di sini juga. */
-async function requireAlkPengurusForScan(): Promise<{ id: number; label: string | null } | null> {
+async function requireAlkPengurusForScan(): Promise<{ id: number; label: string | null; username: string } | null> {
   const pengurusId = (await cookies()).get('pengurus_id')?.value
   if (!pengurusId) return null
   const pengurus = await db.pengurus.findUnique({
@@ -100,12 +100,19 @@ async function requireAlkPengurusForScan(): Promise<{ id: number; label: string 
     select: { divisi: true, username: true },
   })
   if (!pengurus || pengurus.divisi !== 'alk') return null
-  return { id: Number(pengurusId), label: pengurus.username }
+  return { id: Number(pengurusId), label: pengurus.username, username: pengurus.username }
+}
+
+class LokasiConflict extends Error {
+  constructor(public lokasi: string) {
+    super('lokasi_conflict')
+  }
 }
 
 export async function createAbsen(
   payload: QRPayload,
   idSesi?: number | null,
+  idLokasi?: number | null,
 ): Promise<
   | { success: true; nama: string; gereja: string }
   | {
@@ -117,7 +124,13 @@ export async function createAbsen(
         | 'sesi_invalid'
         | 'not_approved'
         | 'unauthorized'
+        | 'nasional_only'
+        | 'lokasi_required'
+        | 'lokasi_invalid'
+        | 'lokasi_conflict'
         | 'error'
+      /** Nama lokasi yang sudah mengunci sesi (reason lokasi_conflict). */
+      lokasi?: string
     }
 > {
   const pengurus = await requireAlkPengurusForScan()
@@ -132,12 +145,24 @@ export async function createAbsen(
   const idEventStr = String(payload.ev)
 
   try {
-    const sesiRows = await db.event_sesi.findMany({
-      where: { id_event: idEvent },
-      select: { id_sesi: true },
-    })
+    const [sesiRows, lokasiRows, gate] = await Promise.all([
+      db.event_sesi.findMany({
+        where: { id_event: idEvent },
+        select: { id_sesi: true, id_lokasi: true },
+      }),
+      db.event_lokasi.findMany({
+        where: { id_event: idEvent },
+        select: { id_lokasi: true, nama: true },
+      }),
+      db.event.findUnique({ where: { id_event: idEvent }, select: { wwtype: true } }),
+    ])
+    // Event nasional hanya boleh di-scan Sekretariat Nasional.
+    if (needsNasionalTicketApproval(gate?.wwtype) && !isNasionalAdmin(pengurus.username)) {
+      return { success: false, reason: 'nasional_only' }
+    }
     const hasSesi = sesiRows.length > 0
     let resolvedSesi: number | null = null
+    let resolvedLokasi: number | null = null
 
     if (hasSesi) {
       if (idSesi == null) return { success: false, reason: 'sesi_required' }
@@ -145,6 +170,29 @@ export async function createAbsen(
         return { success: false, reason: 'sesi_invalid' }
       }
       resolvedSesi = idSesi
+
+      // Multi-lokasi: operator memilih lokasi per sesi; satu sesi hanya satu lokasi.
+      if (lokasiRows.length > 0) {
+        if (idLokasi == null) return { success: false, reason: 'lokasi_required' }
+        if (!lokasiRows.some((l) => l.id_lokasi === idLokasi)) {
+          return { success: false, reason: 'lokasi_invalid' }
+        }
+        const locked = sesiRows.find((x) => x.id_sesi === idSesi)?.id_lokasi
+        if (locked != null && locked !== idLokasi) {
+          return {
+            success: false,
+            reason: 'lokasi_conflict',
+            lokasi: lokasiRows.find((l) => l.id_lokasi === locked)?.nama ?? '',
+          }
+        }
+        resolvedLokasi = idLokasi
+      }
+    } else if (lokasiRows.length > 0) {
+      // Lokasi tanpa sesi tidak ada yang dikunci; tetap wajib pilih lokasi yang sah.
+      if (idLokasi == null) return { success: false, reason: 'lokasi_required' }
+      if (!lokasiRows.some((l) => l.id_lokasi === idLokasi)) {
+        return { success: false, reason: 'lokasi_invalid' }
+      }
     }
 
     const existing = await db.absen.findFirst({
@@ -176,6 +224,29 @@ export async function createAbsen(
 
     // Absen row first (Presensi source of truth), then flip registrasi status.
     await db.$transaction(async (tx) => {
+      // Kunci sesi ke lokasi pada scan pertama. Update bersyarat (id_lokasi IS NULL)
+      // supaya dua perangkat yang scan bersamaan tidak sama-sama menang.
+      if (resolvedSesi != null && resolvedLokasi != null) {
+        const claimed = await tx.event_sesi.updateMany({
+          where: { id_sesi: resolvedSesi, id_lokasi: null },
+          data: { id_lokasi: resolvedLokasi },
+        })
+        if (claimed.count === 0) {
+          const row = await tx.event_sesi.findUnique({
+            where: { id_sesi: resolvedSesi },
+            select: { id_lokasi: true },
+          })
+          if (row?.id_lokasi !== resolvedLokasi) {
+            const other = row?.id_lokasi != null
+              ? await tx.event_lokasi.findUnique({
+                  where: { id_lokasi: row.id_lokasi },
+                  select: { nama: true },
+                })
+              : null
+            throw new LokasiConflict(other?.nama ?? '')
+          }
+        }
+      }
       await tx.absen.create({
         data: {
           id_peserta: idPesertaStr,
@@ -238,6 +309,9 @@ export async function createAbsen(
 
     return { success: true, nama: peserta?.nama ?? '', gereja: peserta?.gereja ?? '' }
   } catch (err) {
+    if (err instanceof LokasiConflict) {
+      return { success: false, reason: 'lokasi_conflict', lokasi: err.lokasi }
+    }
     console.error('[createAbsen]', err)
     return { success: false, reason: 'error' }
   }

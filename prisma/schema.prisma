@@ -107,6 +107,7 @@ model event {
   created_at         DateTime?    @default(now()) @db.DateTime(0)
   registrasi         registrasi[]
   event_sesi         event_sesi[]
+  event_lokasi       event_lokasi[]
 }
 
 model event_sesi {
@@ -118,9 +119,26 @@ model event_sesi {
   jam_selesai String   @default("") @db.VarChar(8)
   wajib       Boolean  @default(true)
   urutan      Int      @default(0)
+  id_lokasi   Int?
   event       event    @relation(fields: [id_event], references: [id_event], onDelete: Cascade, map: "event_sesi_event_fk")
+  lokasi      event_lokasi? @relation(fields: [id_lokasi], references: [id_lokasi], onDelete: SetNull, map: "event_sesi_lokasi_fk")
 
   @@index([id_event], map: "idx_event_sesi_event")
+  @@index([id_lokasi], map: "idx_event_sesi_lokasi")
+}
+
+model event_lokasi {
+  id_lokasi  Int          @id @default(autoincrement())
+  id_event   Int
+  nama       String       @db.VarChar(255)
+  alamat     String       @default("") @db.VarChar(500)
+  longlat    String       @default("") @db.VarChar(64)
+  radius     Int          @default(0)
+  urutan     Int          @default(0)
+  event      event        @relation(fields: [id_event], references: [id_event], onDelete: Cascade, map: "event_lokasi_event_fk")
+  event_sesi event_sesi[]
+
+  @@index([id_event], map: "idx_event_lokasi_event")
 }
 
 model feedback {

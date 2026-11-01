@@ -1,11 +1,12 @@
 'use client'
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { createAbsen, getPesertaPreview, getRecentAbsenForEvent, type RecentAbsenRow } from '@/lib/actions/absen'
-import { getEventLocation, getEventSesi } from '@/lib/actions/event'
+import { getEventLocation, getEventLokasi, getEventSesi } from '@/lib/actions/event'
+import { parseLatLng, type EventLokasiRow } from '@/lib/event-lokasi'
 import type { EventSesiRow } from '@/lib/event-sesi'
 import { decodeQR, type QRPayload } from '@/lib/qr'
 import { ANTON, BTN, BTN_OUTLINE, BTN_SHELL, ERROR, LABEL, MONO, PANEL, PaperHeader, PaperMain, PRESS, ROWS, SectionHead, Strip } from '@/components/pwa/paper-ui'
-import { DateBlock, Empty, FLD, Field, Icon, PersonChip, Sheet, SheetHead, Toast } from './ui'
+import { DateBlock, Empty, FLD, Field, FieldGroup, Icon, PersonChip, Sheet, SheetHead, Toast } from './ui'
 
 export type ScanEvent = {
   id_event: number
@@ -141,6 +142,9 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
   const [pickOpen, setPickOpen] = useState(false)
   const [sesiList, setSesiList] = useState<EventSesiRow[]>([])
   const [sesiId, setSesiId] = useState<number | null>(null)
+  const [lokasiList, setLokasiList] = useState<EventLokasiRow[]>([])
+  const [lokasiPick, setLokasiPick] = useState<number | null>(null)
+  const [lokasiReady, setLokasiReady] = useState(false)
   const [recent, setRecent] = useState<RecentAbsenRow[]>([])
   const [hadir, setHadir] = useState(e?.hadir ?? 0)
 
@@ -167,14 +171,25 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
     eventId: 0,
     sesiId: null as number | null,
     hasSesi: false,
+    lokasiId: null as number | null,
+    hasLokasi: false,
+    lokasiNama: '',
     loc: 'idle' as LocStatus,
   })
+
+  // Lokasi scan: sesi yang sudah terkunci memaksa lokasinya; selain itu pakai pilihan operator.
+  const lockedLokasiId = sesiList.find((x) => x.id_sesi === sesiId)?.id_lokasi ?? null
+  const lokasiId = lockedLokasiId ?? lokasiPick
+  const activeLokasi = lokasiList.find((l) => l.id_lokasi === lokasiId) ?? null
 
   fsRef.current = fullscreen
   ctxRef.current = {
     eventId: e?.id_event ?? 0,
     sesiId,
     hasSesi: sesiList.length > 0,
+    lokasiId,
+    hasLokasi: lokasiList.length > 0,
+    lokasiNama: activeLokasi?.nama ?? '',
     loc,
   }
 
@@ -203,6 +218,14 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
     let stop = false
     setHadir(e.hadir)
     resetScan()
+    setLokasiReady(false)
+    setLokasiList([])
+    setLokasiPick(null)
+    void getEventLokasi(e.id_event).then((rows) => {
+      if (stop) return
+      setLokasiList(rows)
+      setLokasiReady(true)
+    })
     void getEventSesi(e.id_event).then((rows) => {
       if (stop) return
       setSesiList(rows)
@@ -241,42 +264,56 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
     }
   }, [fullscreen])
 
-  // Geolocation
+  // Geolocation — titik lokasi terpilih (multi-lokasi) atau titik utama event
+  const activeLokasiId = activeLokasi?.id_lokasi ?? null
   useEffect(() => {
-    if (!e || e.jenisevent === 'Online' || !('geolocation' in navigator)) {
+    if (!e || e.jenisevent === 'Online' || !('geolocation' in navigator) || !lokasiReady) {
       setLoc('idle')
       return
     }
-    let evLat = 0
-    let evLon = 0
-    let evRadius = e.radius
-    setLoc('checking')
-    void getEventLocation(e.id_event).then((locRow) => {
-      if (!locRow?.longlatevent || locRow.radius <= 0) {
-        setLoc('idle')
-        return
-      }
-      const parts = locRow.longlatevent.split(',').map(Number)
-      if (parts.length < 2 || parts.some(isNaN)) {
-        setLoc('idle')
-        return
-      }
-      ;[evLat, evLon] = parts
-      evRadius = locRow.radius
+    let stop = false
+    const watch = (lat: number, lon: number, radius: number) => {
+      setLoc('checking')
+      setLocDist(null)
       watchIdRef.current = navigator.geolocation.watchPosition(
         (pos) => {
-          const dist = haversineM(pos.coords.latitude, pos.coords.longitude, evLat, evLon)
+          const dist = haversineM(pos.coords.latitude, pos.coords.longitude, lat, lon)
           setLocDist(Math.round(dist))
-          setLoc(dist <= evRadius ? 'inside' : 'outside')
+          setLoc(dist <= radius ? 'inside' : 'outside')
         },
         () => setLoc('unavailable'),
         { enableHighAccuracy: true, timeout: 10000 },
       )
-    })
-    return () => {
-      if (watchIdRef.current !== -1) navigator.geolocation.clearWatch(watchIdRef.current)
     }
-  }, [e])
+
+    if (lokasiList.length > 0) {
+      // Belum pilih lokasi: belum ada yang dicek.
+      const pt = activeLokasi ? parseLatLng(activeLokasi.longlat) : null
+      if (!activeLokasi || !pt || activeLokasi.radius <= 0) {
+        setLoc('idle')
+        return
+      }
+      watch(pt.lat, pt.lng, activeLokasi.radius)
+    } else {
+      setLoc('checking')
+      void getEventLocation(e.id_event).then((locRow) => {
+        if (stop) return
+        const pt = parseLatLng(locRow?.longlatevent)
+        if (!locRow || !pt || locRow.radius <= 0) {
+          setLoc('idle')
+          return
+        }
+        watch(pt.lat, pt.lng, locRow.radius)
+      })
+    }
+    return () => {
+      stop = true
+      if (watchIdRef.current !== -1) navigator.geolocation.clearWatch(watchIdRef.current)
+      watchIdRef.current = -1
+    }
+    // activeLokasi is derived from (lokasiList, activeLokasiId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [e, lokasiReady, lokasiList, activeLokasiId])
 
   useEffect(() => () => {
     stopCamera()
@@ -317,6 +354,17 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
     }, FLASH_MS)
   }, [])
 
+  const lockSesiLocal = useCallback((sid: number, lid: number) => {
+    setSesiList((rows) => rows.map((x) => (x.id_sesi === sid && x.id_lokasi == null ? { ...x, id_lokasi: lid } : x)))
+  }, [])
+
+  const reloadSesi = useCallback(async () => {
+    const id = ctxRef.current.eventId
+    if (!id) return
+    const rows = await getEventSesi(id)
+    setSesiList(rows)
+  }, [])
+
   const absenFromQr = useCallback(
     async (raw: string): Promise<'stop' | 'continue'> => {
       const payload = decodeQR(raw)
@@ -328,7 +376,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
         setError('QR tidak valid.')
         return 'stop'
       }
-      const { eventId: evId, sesiId: sid, hasSesi, loc: locNow } = ctxRef.current
+      const { eventId: evId, sesiId: sid, hasSesi, lokasiId: lid, hasLokasi, loc: locNow } = ctxRef.current
       if (payload.ev !== String(evId)) {
         const msg = `QR ini untuk event lain (event #${payload.ev}), bukan event #${evId}.`
         if (fsRef.current) {
@@ -344,12 +392,17 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
           showFlash({ ok: false, title: 'Pilih sesi absen dulu' })
           return 'continue'
         }
+        if (hasLokasi && lid == null) {
+          showFlash({ ok: false, title: 'Pilih lokasi scan dulu' })
+          return 'continue'
+        }
         if (locNow === 'outside') {
           showFlash({ ok: false, title: 'Di luar lokasi event' })
           return 'continue'
         }
-        const res = await createAbsen(payload, hasSesi ? sid : null)
+        const res = await createAbsen(payload, hasSesi ? sid : null, hasLokasi ? lid : null)
         if (res.success) {
+          if (hasLokasi && sid != null && lid != null) lockSesiLocal(sid, lid)
           setHadir((n) => n + 1)
           void refreshRecent(evId, true)
           showFlash({
@@ -368,8 +421,19 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                 ? 'Tiket belum di-approve'
                 : res.reason === 'unauthorized'
                   ? 'Login habis'
-                  : 'Gagal absen'
-        showFlash({ ok: false, title: errTitle })
+                  : res.reason === 'nasional_only'
+                    ? 'Khusus Sekretariat Nasional'
+                    : res.reason === 'lokasi_required' || res.reason === 'lokasi_invalid'
+                      ? 'Pilih lokasi scan dulu'
+                      : res.reason === 'lokasi_conflict'
+                        ? 'Sesi dipakai di lokasi lain'
+                        : 'Gagal absen'
+        if (res.reason === 'lokasi_conflict') void reloadSesi()
+        showFlash({
+          ok: false,
+          title: errTitle,
+          sub: res.reason === 'lokasi_conflict' && res.lokasi ? res.lokasi : undefined,
+        })
         return 'continue'
       }
 
@@ -382,7 +446,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
       })
       return 'stop'
     },
-    [refreshRecent, showFlash],
+    [refreshRecent, showFlash, lockSesiLocal, reloadSesi],
   )
 
   const onQr = useCallback(
@@ -488,13 +552,22 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
       setError('Pilih sesi absen dulu.')
       return
     }
+    if (lokasiList.length > 0 && lokasiId == null) {
+      setError('Pilih lokasi scan dulu.')
+      return
+    }
     if (loc === 'outside') {
       setError('Anda diluar lokasi event, tidak bisa absen.')
       return
     }
     startConfirm(async () => {
-      const res = await createAbsen(preview.payload, sesiList.length > 0 ? sesiId : null)
+      const res = await createAbsen(
+        preview.payload,
+        sesiList.length > 0 ? sesiId : null,
+        lokasiList.length > 0 ? lokasiId : null,
+      )
       if (res.success) {
+        if (lokasiList.length > 0 && sesiId != null && lokasiId != null) lockSesiLocal(sesiId, lokasiId)
         setDone(res.nama || preview.nama)
         setPreview(null)
         setHadir((n) => n + 1)
@@ -510,6 +583,12 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
       else if (res.reason === 'not_approved') {
         setError('Event nasional: tiket belum di-approve Sekretariat Nasional.')
       } else if (res.reason === 'unauthorized') setError('Sesi login habis, login ulang.')
+      else if (res.reason === 'nasional_only') setError('Event nasional hanya bisa di-scan Sekretariat Nasional.')
+      else if (res.reason === 'lokasi_required' || res.reason === 'lokasi_invalid') setError('Pilih lokasi scan dulu.')
+      else if (res.reason === 'lokasi_conflict') {
+        setError(`Sesi ini sudah di-scan di ${res.lokasi || 'lokasi lain'}. Satu sesi hanya bisa di satu lokasi.`)
+        void reloadSesi()
+      }
       else setError('Gagal menyimpan absen. Coba lagi.')
     })
   }
@@ -525,6 +604,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
   const { d, m } = monDay(e.tglMs)
   const selectedSesi = sesiList.find((s) => s.id_sesi === sesiId) ?? null
   const online = e.jenisevent === 'Online'
+  const radiusNow = activeLokasi?.radius ?? e.radius
 
   const cameraOverlays = (
     <>
@@ -607,6 +687,41 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                   </Field>
                 )}
 
+                {lokasiList.length > 0 && (
+                  <FieldGroup label="Lokasi scan">
+                    <div className="flex flex-wrap gap-2">
+                      {lokasiList.map((l) => {
+                        const on = l.id_lokasi === lokasiId
+                        const blocked = lockedLokasiId != null && l.id_lokasi !== lockedLokasiId
+                        return (
+                          <button
+                            key={l.id_lokasi}
+                            type="button"
+                            disabled={blocked}
+                            aria-pressed={on}
+                            onClick={() => {
+                              setLokasiPick(l.id_lokasi)
+                              resetScan()
+                            }}
+                            className={`${LABEL} h-9 px-3.5 rounded-full text-[10.5px] font-bold ${PRESS} disabled:opacity-35 ${
+                              on ? 'bg-[#161616] text-[#ffd83d]' : 'bg-[#fffdf7] text-[#161616] ring-1 ring-[#161616]/20'
+                            }`}
+                          >
+                            {l.nama}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <p className="mt-1.5 text-[11px] font-bold text-[#44403c]">
+                      {lockedLokasiId != null
+                        ? `Sesi ${selectedSesi?.nama ?? ''} terkunci di ${activeLokasi?.nama ?? 'lokasi ini'}`
+                        : lokasiId == null
+                          ? 'Pilih lokasi tempat Anda scan sekarang'
+                          : 'Sesi terkunci ke lokasi ini setelah scan pertama'}
+                    </p>
+                  </FieldGroup>
+                )}
+
                 <p
                   className={`flex items-center gap-1.5 text-[11px] font-bold ${
                     online ? 'text-[#44403c]' : loc === 'outside' ? 'text-[#c21f24]' : 'text-[#161616]'
@@ -616,13 +731,15 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                   {online
                     ? 'Event online — tanpa cek lokasi'
                     : loc === 'outside'
-                      ? `Di luar radius${locDist != null ? ` (${locDist} m)` : ''} — batas ${e.radius} m`
+                      ? `Di luar radius${locDist != null ? ` (${locDist} m)` : ''} — batas ${radiusNow} m`
                       : loc === 'inside' && locDist != null
-                        ? `Dalam radius event (${locDist} m dari titik, batas ${e.radius} m)`
+                        ? `Dalam radius event (${locDist} m dari titik, batas ${radiusNow} m)`
                         : loc === 'checking'
                           ? 'Mengecek lokasi…'
-                          : e.radius > 0
-                            ? `Radius event ${e.radius} m`
+                          : lokasiList.length > 0 && !activeLokasi
+                            ? 'Pilih lokasi scan'
+                            : radiusNow > 0
+                            ? `Radius ${activeLokasi ? activeLokasi.nama : 'event'} ${radiusNow} m`
                             : 'Lokasi tidak dikonfigurasi'}
                 </p>
 
@@ -657,7 +774,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                       <button
                         type="button"
                         onClick={confirm}
-                        disabled={confirming || (sesiList.length > 0 && sesiId == null) || loc === 'outside'}
+                        disabled={confirming || (sesiList.length > 0 && sesiId == null) || (lokasiList.length > 0 && lokasiId == null) || loc === 'outside'}
                         className={BTN}
                       >
                         <Strip className="text-[16px]">{confirming ? 'Menyimpan…' : 'Absen Peserta'}</Strip>
@@ -801,6 +918,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                 <p className="text-[11px] text-white/70">
                   <span className="text-[#ffd83d] font-bold">{hadir} hadir</span>
                   {selectedSesi ? ` · ${selectedSesi.nama}` : ''}
+                  {activeLokasi ? ` · ${activeLokasi.nama}` : ''}
                 </p>
               </div>
               <button
@@ -842,6 +960,26 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                 <p className={`${ANTON} text-[18px] leading-none tracking-[.01em]`}>Absen live</p>
                 <p className="text-[11px] text-white/60 truncate mt-1">{recent.length} terbaru</p>
               </div>
+              {lokasiList.length > 0 && (
+                <select
+                  value={lokasiId ?? ''}
+                  onChange={(ev) => setLokasiPick(Number(ev.target.value) || null)}
+                  className="max-w-[40%] rounded-xl bg-white/10 text-[12px] font-semibold px-2.5 py-2 outline-none ring-1 ring-white/15"
+                  aria-label="Lokasi scan"
+                >
+                  <option value="" className="text-slate-900">Pilih lokasi…</option>
+                  {lokasiList.map((l) => (
+                    <option
+                      key={l.id_lokasi}
+                      value={l.id_lokasi}
+                      disabled={lockedLokasiId != null && l.id_lokasi !== lockedLokasiId}
+                      className="text-slate-900"
+                    >
+                      {l.nama}
+                    </option>
+                  ))}
+                </select>
+              )}
               {sesiList.length > 0 && (
                 <select
                   value={sesiId ?? ''}
