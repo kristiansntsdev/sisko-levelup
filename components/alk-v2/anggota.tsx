@@ -117,13 +117,22 @@ export function AnggotaListClient({
 }) {
   const router = useRouter()
   const [q, setQ] = useState('')
+  const [page, setPage] = useState(0)
   const [edit, setEdit] = useState<PengurusKotaRow | null>(null)
   const needle = q.trim().toLowerCase()
-  const list = members.filter(
+  const filtered = members.filter(
     (m) =>
       !needle ||
       `${m.nama} ${m.username} ${divisiToRole(m.divisi)}`.toLowerCase().includes(needle),
   )
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE_EVENT))
+  const pageClamped = Math.min(page, totalPages - 1)
+  const list = filtered.slice(pageClamped * PAGE_SIZE_EVENT, (pageClamped + 1) * PAGE_SIZE_EVENT)
+
+  function setQClamped(v: string) {
+    setQ(v)
+    setPage(0)
+  }
 
   return (
     <PaperMain>
@@ -140,7 +149,7 @@ export function AnggotaListClient({
         }
       />
       <div className="px-5 mt-5 pb-4">
-        <SearchBox value={q} onChange={setQ} placeholder="Cari nama atau email" />
+        <SearchBox value={q} onChange={setQClamped} placeholder="Cari nama atau email" />
         <div className="mt-4 space-y-2.5">
           {list.length ? (
             list.map((m) => (
@@ -160,6 +169,7 @@ export function AnggotaListClient({
             <Empty>Tidak ada pengurus yang cocok</Empty>
           )}
         </div>
+        <Pager page={pageClamped} totalPages={totalPages} onChange={setPage} />
       </div>
       {edit && <MemberEditSheet m={edit} onClose={() => setEdit(null)} />}
     </PaperMain>
