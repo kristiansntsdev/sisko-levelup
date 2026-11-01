@@ -2,20 +2,8 @@
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { logoutPengurus } from '@/app/admin/actions'
-import {
-  ALK_BASE,
-  Avatar,
-  CARD,
-  Hero,
-  Icon,
-  LIFT,
-  Pill,
-  Row,
-  Sheet,
-  SheetHead,
-  TintIcon,
-  Toast,
-} from './ui'
+import { BTN, MONO, PANEL, PaperHeader, PaperMain, PRESS, ROWS, Strip, ANTON } from '@/components/pwa/paper-ui'
+import { ALK_BASE, BlackStrip, Icon, Row, Sheet, SheetHead, SoonTag, Toast } from './ui'
 
 export function LainnyaClient({
   nama,
@@ -39,83 +27,46 @@ export function LainnyaClient({
   }
 
   return (
-    <section>
-      <Hero className="pt-6 md:pt-4 pb-24 rounded-b-[32px]">
-        <div className="flex items-center gap-4">
-          <span className="w-16 h-16 shrink-0 rounded-full overflow-hidden ring-4 ring-white/30">
-            <Avatar g="L" />
-          </span>
-          <div className="min-w-0">
-            <p className="font-extrabold text-lg truncate">{namaCabang}</p>
-            <p className="text-[13px] text-white/80 truncate">Sekretariat · {nama}</p>
-          </div>
-        </div>
-      </Hero>
-      <div className="px-5 -mt-16 relative space-y-4 pb-4">
-        <div className={`${LIFT} divide-y divide-slate-100 overflow-hidden`}>
-          <Row
-            icon="box"
-            title="Nama PIC"
-            sub="Alokasi stok & klaim"
-            right={<Pill tone="gold">Segera</Pill>}
-            onClick={() => flash('Alokasi stok & klaim')}
-          />
-          <Row
-            icon="receipt"
-            title="ALK"
-            sub="Status dana per kegiatan"
-            right={<Pill tone="gold">Segera</Pill>}
-            onClick={() => flash('Status dana per kegiatan')}
-          />
+    <PaperMain>
+      <PaperHeader sticker={`Sekretariat · ${nama}`} title={namaCabang} />
+      <div className="px-5 mt-5 space-y-4 pb-4">
+        <div className={`${PANEL} ${ROWS} overflow-hidden`}>
+          <Row icon="box" title="Nama PIC" sub="Alokasi stok & klaim" right={<SoonTag />} onClick={() => flash('Alokasi stok & klaim')} />
+          <Row icon="receipt" tint="gold" title="ALK" sub="Status dana per kegiatan" right={<SoonTag />} onClick={() => flash('Status dana per kegiatan')} />
           <Row icon="link" title="VOL" sub="Pendaftaran anggota baru" onClick={() => setRegOpen(true)} />
-          <Row
-            icon="chat"
-            title="Pengaduan ke Pusat"
-            sub="Laporkan kendala ke admin pusat"
-            right={<Pill tone="gold">Segera</Pill>}
-            onClick={() => flash('Pengaduan ke Pusat')}
-          />
+          <Row icon="chat" tint="gold" title="Pengaduan ke Pusat" sub="Laporkan kendala ke admin pusat" right={<SoonTag />} onClick={() => flash('Pengaduan ke Pusat')} />
         </div>
-        <button
-          type="button"
-          onClick={() => router.push('/dashboard')}
-          className={`w-full flex items-center gap-3 p-4 ${CARD} text-left`}
-        >
-          <TintIcon name="card" tint="red" />
-          <span className="flex-1">
-            <span className="block font-bold text-[15px] text-[#3b1417]">Beralih ke Kartu Saya</span>
-            <span className="block text-[12px] text-slate-500">Kartu anggota &amp; tiket pribadi</span>
-          </span>
-          <Icon name="chevron" className="w-5 h-5 text-slate-300" sw={2} />
-        </button>
+        <BlackStrip icon="card" title="Beralih ke Kartu Saya" sub="Kartu anggota & tiket pribadi" onClick={() => router.push('/dashboard')} />
         <button
           type="button"
           disabled={pending}
           onClick={() => startLogout(async () => { await logoutPengurus() })}
-          className={`w-full py-3.5 ${CARD} text-rose-600 font-semibold flex items-center justify-center gap-2 disabled:opacity-50`}
+          className={`w-full px-4 py-3 flex items-center gap-3 text-left disabled:opacity-50 ${PANEL} ${PRESS}`}
         >
-          <Icon name="logout" className="w-5 h-5" sw={2} />
-          Keluar dari akun pengurus
+          <span className="w-9 h-9 shrink-0 rounded-[10px] -rotate-3 ring-2 ring-[#c21f24] text-[#c21f24] flex items-center justify-center">
+            <Icon name="logout" className="w-[18px] h-[18px]" />
+          </span>
+          <span className={`${ANTON} flex-1 text-[16px] tracking-[.02em] text-[#c21f24]`}>Keluar dari akun pengurus</span>
         </button>
-        <p className="text-center text-[11px] text-slate-400">LevelUP Sekretariat · {username}</p>
+        <p className={`${MONO} text-center text-[11px] text-[#57534e] break-words`}>LevelUP Sekretariat · {username}</p>
       </div>
 
       <Sheet open={regOpen} onClose={() => setRegOpen(false)}>
         <SheetHead title="Link Pendaftaran" sub="Bagikan ke calon anggota baru" />
-        <p className="text-[13px] text-slate-600 break-all bg-slate-50 rounded-xl p-3 ring-1 ring-slate-200">{regLink || `${ALK_BASE}`}</p>
+        <p className={`${MONO} text-[12.5px] text-[#161616] break-all rounded-[10px] border-2 border-dotted border-[#161616]/25 p-3`}>{regLink || `${ALK_BASE}`}</p>
         <button
           type="button"
-          className="mt-4 w-full py-3 rounded-2xl bg-[#c9232c] text-white font-bold"
+          className={`mt-4 ${BTN}`}
           onClick={() => {
             void navigator.clipboard?.writeText(regLink)
             setRegOpen(false)
             flash('Link disalin')
           }}
         >
-          Salin Link
+          <Strip>Salin Link</Strip>
         </button>
       </Sheet>
       <Toast msg={soon ? (soon.startsWith('Link') ? soon : `Fitur belum tersedia: ${soon}`) : null} />
-    </section>
+    </PaperMain>
   )
 }

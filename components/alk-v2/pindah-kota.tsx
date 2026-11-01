@@ -6,21 +6,8 @@ import {
   rejectPindahKota,
   type PindahKotaPending,
 } from '@/lib/actions/pindah-kota'
-import {
-  ALK_BASE,
-  Avatar,
-  CARD,
-  FLD,
-  Hero,
-  LIFT,
-  Note,
-  Sheet,
-  SheetHead,
-  TintIcon,
-  Toast,
-  TopBar,
-  fCard,
-} from './ui'
+import { ANTON, BTN, ERROR, IconButton, MONO, PANEL, PaperHeader, PaperMain, Strip } from '@/components/pwa/paper-ui'
+import { ALK_BASE, Decide, Empty, FLD, Field, Note, PersonChip, Sheet, SheetHead, Toast } from './ui'
 
 export function PindahKotaV2Client({ items }: { items: PindahKotaPending[] }) {
   const router = useRouter()
@@ -84,62 +71,41 @@ export function PindahKotaV2Client({ items }: { items: PindahKotaPending[] }) {
   }
 
   return (
-    <section>
-      <Hero className="pt-4 md:pt-2 pb-20 rounded-b-[32px]" decor="-right-6 top-14 w-40">
-        <TopBar title="Pindah LevelUP Kota" back={() => router.push(ALK_BASE)} />
-        <p className="text-center text-sm text-white/80 mt-2">
-          {list.length} menunggu approval nasional
-        </p>
-      </Hero>
-      <div className="px-5 -mt-12 relative space-y-3 pb-4">
+    <PaperMain>
+      <PaperHeader
+        sticker={`${list.length} menunggu approval nasional`}
+        title="Pindah LevelUP Kota"
+        leading={<IconButton icon="chevronLeft" label="Kembali" onClick={() => router.push(ALK_BASE)} className="-rotate-3" />}
+      />
+      <div className="px-5 mt-5 space-y-3 pb-4">
         {error && !rejectTarget ? (
-          <p className="text-[13px] text-[#c9232c] font-semibold px-1">{error}</p>
+          <p role="alert" className={`${ERROR} px-1`}>{error}</p>
         ) : null}
         {list.length === 0 ? (
-          <div className={`${LIFT} px-4 py-10 text-center`}>
-            <TintIcon name="check" tint="gold" size="w-12 h-12 mx-auto rounded-2xl" icon="w-6 h-6" />
-            <p className="text-[13.5px] text-slate-500 mt-3">Tidak ada pengajuan.</p>
-          </div>
+          <Empty>Tidak ada pengajuan.</Empty>
         ) : (
-          list.map((u, i) => (
-            <div key={u.id_pindah} className={`${i === 0 ? LIFT : CARD} p-3.5 space-y-3`}>
+          list.map((u) => (
+            <div key={u.id_pindah} className={`p-3.5 space-y-3 ${PANEL}`}>
               <div className="flex items-center gap-3">
-                <span className="w-11 h-11 rounded-full overflow-hidden shrink-0">
-                  <Avatar g="L" />
-                </span>
+                <PersonChip />
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-[14.5px] text-[#3b1417] truncate">{u.nama}</p>
-                  <p className={`text-[12px] text-[#96792a] font-semibold ${fCard} tracking-wider`}>
-                    {u.usercode}
-                  </p>
+                  <p className={`${ANTON} text-[16px] leading-tight tracking-[.02em] truncate`}>{u.nama}</p>
+                  <p className={`${MONO} mt-0.5 text-[10.5px] font-bold text-[#44403c]`}>{u.usercode}</p>
                 </div>
               </div>
-              <p className="text-[13px] text-slate-600 leading-snug">
-                <span className="font-semibold text-[#3b1417]">{u.dariNama}</span>
+              <p className={`${MONO} text-[12px] leading-snug font-bold`}>
+                {u.dariNama}
                 {' → '}
-                <span className="font-semibold text-[#c9232c]">{u.keNama}</span>
+                <span className="text-[#c21f24]">{u.keNama}</span>
               </p>
-              {u.catatan ? (
-                <p className="text-[12px] text-slate-500">Catatan: {u.catatan}</p>
-              ) : null}
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  disabled={pending && busyId === u.id_pindah}
-                  onClick={() => handleApprove(u)}
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white text-[13px] font-bold disabled:opacity-50"
-                >
-                  {pending && busyId === u.id_pindah ? '...' : 'Approve'}
-                </button>
-                <button
-                  type="button"
-                  disabled={pending && busyId === u.id_pindah}
-                  onClick={() => openReject(u)}
-                  className="flex-1 py-2.5 rounded-xl bg-[#c9232c] text-white text-[13px] font-bold disabled:opacity-50"
-                >
-                  Tolak
-                </button>
-              </div>
+              {u.catatan ? <p className={`${MONO} text-[11px] text-[#44403c] break-words`}>Catatan: {u.catatan}</p> : null}
+              <Decide
+                approve={pending && busyId === u.id_pindah ? '...' : 'Approve'}
+                reject="Tolak"
+                disabled={pending && busyId === u.id_pindah}
+                onApprove={() => handleApprove(u)}
+                onReject={() => openReject(u)}
+              />
             </div>
           ))
         )}
@@ -161,8 +127,7 @@ export function PindahKotaV2Client({ items }: { items: PindahKotaPending[] }) {
           title="Tolak pengajuan"
           sub={rejectTarget ? `${rejectTarget.nama} → ${rejectTarget.keNama}` : undefined}
         />
-        <label className="flex flex-col gap-1.5">
-          <span className="text-[13px] font-bold text-[#3b1417]">Alasan</span>
+        <Field label="Alasan">
           <textarea
             value={alasan}
             onChange={(e) => setAlasan(e.target.value)}
@@ -170,18 +135,13 @@ export function PindahKotaV2Client({ items }: { items: PindahKotaPending[] }) {
             placeholder="Alasan penolakan…"
             className={`${FLD} resize-none`}
           />
-        </label>
-        {error ? <p className="mt-2 text-[13px] text-[#c9232c] font-semibold">{error}</p> : null}
-        <button
-          type="button"
-          disabled={pending}
-          onClick={handleReject}
-          className="mt-4 w-full py-3.5 rounded-2xl bg-[#c9232c] text-white font-bold disabled:opacity-50"
-        >
-          {pending ? '...' : 'Tolak pengajuan'}
+        </Field>
+        {error ? <p role="alert" className={`${ERROR} mt-2`}>{error}</p> : null}
+        <button type="button" disabled={pending} onClick={handleReject} className={`mt-4 ${BTN}`}>
+          <Strip>{pending ? '...' : 'Tolak pengajuan'}</Strip>
         </button>
       </Sheet>
       <Toast msg={toast} />
-    </section>
+    </PaperMain>
   )
 }

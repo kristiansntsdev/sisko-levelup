@@ -7,25 +7,9 @@ import {
   type PengurusKotaRow,
 } from '@/lib/actions/pengurus-kota'
 import { ALK_BASE, divisiToRole } from './paths'
-import {
-  Avatar,
-  BTN_RED,
-  CARD,
-  Empty,
-  FLD,
-  Field,
-  Hero,
-  Icon,
-  LIFT,
-  PageHero,
-  Seg,
-  SectionCard,
-  Sheet,
-  SheetHead,
-  Toast,
-  TopBar,
-  Note,
-} from './ui'
+import { ANTON, BTN, BTN_SHELL, ERROR, IconButton, MONO, PANEL, PaperHeader, PaperMain, PRESS, Strip } from '@/components/pwa/paper-ui'
+import { SearchBox } from './list-tools'
+import { Empty, FLD, Field, FieldGroup, Icon, Note, PersonChip, Pill, Seg, SectionCard, Sheet, SheetHead, Toast } from './ui'
 
 export function AnggotaListClient({
   members,
@@ -45,47 +29,34 @@ export function AnggotaListClient({
   )
 
   return (
-    <section>
-      <PageHero
+    <PaperMain>
+      <PaperHeader
+        sticker={`${namaCabang} · ${members.length} pengurus`}
         title="LevelUP Kota"
-        sub={`${namaCabang} · ${members.length} pengurus`}
-        action={{ label: 'Tambah', onClick: () => router.push(`${ALK_BASE}/anggota/baru`) }}
-        pb="pb-20"
+        action={
+          <button type="button" onClick={() => router.push(`${ALK_BASE}/anggota/baru`)} className={`shrink-0 rotate-2 ${BTN_SHELL}`}>
+            <Strip className="px-4 py-2 text-[16px]">
+              <Icon name="plus" className="w-4 h-4" sw={2.4} />
+              Tambah
+            </Strip>
+          </button>
+        }
       />
-      <div className="px-5 -mt-12 relative pb-4">
-        <label className={`flex items-center gap-2.5 ${LIFT} px-4 py-3.5`}>
-          <Icon name="search" className="w-5 h-5 text-slate-400" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            type="search"
-            placeholder="Cari nama atau email"
-            enterKeyHint="search"
-            className="flex-1 min-w-0 outline-none text-[15px] bg-transparent"
-          />
-        </label>
+      <div className="px-5 mt-5 pb-4">
+        <SearchBox value={q} onChange={setQ} placeholder="Cari nama atau email" />
         <div className="mt-4 space-y-2.5">
           {list.length ? (
             list.map((m) => (
-              <button
-                key={m.id_pengurus}
-                type="button"
-                onClick={() => setEdit(m)}
-                className={`w-full flex items-center gap-3 ${CARD} p-3 text-left active:scale-[.99] transition`}
-              >
-                <span className="w-11 h-11 shrink-0 rounded-full overflow-hidden">
-                  <Avatar g="L" />
-                </span>
+              <button key={m.id_pengurus} type="button" onClick={() => setEdit(m)} className={`w-full flex items-center gap-3 p-3 text-left ${PANEL} ${PRESS}`}>
+                <PersonChip />
                 <span className="flex-1 min-w-0">
-                  <span className="block font-bold text-[14px] text-[#3b1417] truncate">
+                  <span className={`${ANTON} block text-[16px] leading-tight tracking-[.02em] truncate`}>
                     {m.nama}
-                    {m.me && <span className="text-[11px] font-semibold text-[#96792a]"> · Kamu</span>}
+                    {m.me && <span className="text-[#c21f24]"> · Kamu</span>}
                   </span>
-                  <span className="block text-[12px] text-slate-500 truncate">{m.username}</span>
+                  <span className={`${MONO} block mt-0.5 text-[11px] text-[#44403c] truncate`}>{m.username}</span>
                 </span>
-                <span className="shrink-0 text-[11px] font-semibold text-slate-500 bg-slate-50 px-2 py-1 rounded-full ring-1 ring-slate-200">
-                  {divisiToRole(m.divisi)}
-                </span>
+                <Pill tone="gold">{divisiToRole(m.divisi)}</Pill>
               </button>
             ))
           ) : (
@@ -94,7 +65,7 @@ export function AnggotaListClient({
         </div>
       </div>
       {edit && <MemberEditSheet m={edit} onClose={() => setEdit(null)} />}
-    </section>
+    </PaperMain>
   )
 }
 
@@ -129,7 +100,7 @@ function MemberEditSheet({ m, onClose }: { m: PengurusKotaRow; onClose: () => vo
       <Sheet open onClose={onClose}>
         <SheetHead title={m.nama} sub="Ubah email / peran login" />
         <div className="space-y-4">
-          <Field label="Peran">
+          <FieldGroup label="Peran">
             <Seg
               options={[
                 ['Admin LK', 'Admin LK'],
@@ -138,7 +109,7 @@ function MemberEditSheet({ m, onClose }: { m: PengurusKotaRow; onClose: () => vo
               value={role}
               onChange={(v) => setRole(v as 'Admin LK' | 'BRIM')}
             />
-          </Field>
+          </FieldGroup>
           <Field label="Email">
             <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" className={FLD} />
           </Field>
@@ -148,12 +119,12 @@ function MemberEditSheet({ m, onClose }: { m: PengurusKotaRow; onClose: () => vo
               type="text"
               readOnly
               disabled
-              className={`${FLD} disabled:opacity-70 disabled:cursor-not-allowed`}
+              className={FLD}
             />
           </Field>
-          {error && <p className="text-[13px] text-rose-600">{error}</p>}
-          <button type="button" disabled={pending} onClick={save} className={`w-full py-3.5 ${BTN_RED}`}>
-            Simpan
+          {error && <p role="alert" className={ERROR}>{error}</p>}
+          <button type="button" disabled={pending} onClick={save} className={BTN}>
+            <Strip>Simpan</Strip>
           </button>
         </div>
       </Sheet>
@@ -197,13 +168,15 @@ export function AnggotaBaruClient() {
   }
 
   return (
-    <section>
-      <Hero className="pt-4 md:pt-2 pb-16">
-        <TopBar title="Tambah Pengurus" back={() => router.push(`${ALK_BASE}/anggota`)} />
-      </Hero>
-      <form onSubmit={submit} className="px-5 -mt-10 relative space-y-4 pb-8">
+    <PaperMain>
+      <PaperHeader
+        sticker="Sekretariat"
+        title="Tambah Pengurus"
+        leading={<IconButton icon="chevronLeft" label="Kembali" onClick={() => router.push(`${ALK_BASE}/anggota`)} className="-rotate-3" />}
+      />
+      <form onSubmit={submit} className="px-5 mt-5 space-y-5 pb-8">
         <SectionCard lift icon="userPlus" tint="red" title="Pengurus" sub="Langsung bisa login — tanpa approval pusat">
-          <Field label="Peran">
+          <FieldGroup label="Peran">
             <Seg
               options={[
                 ['Admin LK', 'Admin LK'],
@@ -212,11 +185,11 @@ export function AnggotaBaruClient() {
               value={f.role}
               onChange={(role) => setF({ ...f, role: role as 'Admin LK' | 'BRIM' })}
             />
-          </Field>
+          </FieldGroup>
           <Field label="Nama">
             <input value={f.name} onChange={set('name')} className={FLD} placeholder="Nama lengkap" maxLength={255} />
           </Field>
-          <Field label="Jenis Kelamin">
+          <FieldGroup label="Jenis Kelamin">
             <Seg
               options={[
                 ['L', 'Laki-laki'],
@@ -225,7 +198,7 @@ export function AnggotaBaruClient() {
               value={f.g}
               onChange={(g) => setF({ ...f, g: g as 'L' | 'P' })}
             />
-          </Field>
+          </FieldGroup>
         </SectionCard>
         <SectionCard icon="shield" tint="gold" title="Login" sub="Email + password untuk masuk Sekretariat">
           <Field label="Email">
@@ -236,12 +209,14 @@ export function AnggotaBaruClient() {
           </Field>
         </SectionCard>
         <Note>Peserta tidak ditambah di sini — mereka daftar lewat PWA lalu Join Squad.</Note>
-        {error && <p className="text-[13px] text-rose-600">{error}</p>}
-        <button disabled={!valid || pending} type="submit" className={`w-full py-3.5 flex items-center justify-center gap-2 ${BTN_RED}`}>
-          <Icon name="check" className="w-[18px] h-[18px]" />
-          Simpan Pengurus
+        {error && <p role="alert" className={ERROR}>{error}</p>}
+        <button disabled={!valid || pending} type="submit" className={BTN}>
+          <Strip>
+            <Icon name="check" className="w-[18px] h-[18px]" sw={2.6} />
+            Simpan Pengurus
+          </Strip>
         </button>
       </form>
-    </section>
+    </PaperMain>
   )
 }

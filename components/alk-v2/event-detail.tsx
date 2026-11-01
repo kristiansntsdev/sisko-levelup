@@ -20,13 +20,25 @@ import { hadirPenuh, parseLocalDate, sesiWajibIds } from '@/lib/event-sesi'
 import { FlyerQaSummary } from '@/components/kota/flyer-qa-summary'
 import { BeritaAcaraQaSummary } from '@/components/kota/berita-acara-qa-summary'
 import {
+  ANTON,
+  BTN,
+  BTN_OUTLINE,
+  BTN_SHELL,
+  ERROR,
+  IconButton,
+  LABEL,
+  LIFTED,
+  MONO,
+  PANEL,
+  PaperMain,
+  PRESS,
+  StickerLabel,
+  Strip,
+} from '@/components/pwa/paper-ui'
+import {
   ALK_BASE,
   ALK_EVENT_BASE,
-  BTN_RED,
-  CARD,
   DateBlock,
-  fCard,
-  Hero,
   Icon,
   Note,
   Pill,
@@ -34,12 +46,10 @@ import {
   Sheet,
   SheetHead,
   Toast,
-  TopBar,
   type PillTone,
 } from './ui'
 
 const PAGE_SIZE = 10
-const SCAN_HREF = `${ALK_BASE}/scan`
 
 const TARGET_LABELS: Record<string, string> = {
   '0': 'Umum',
@@ -149,17 +159,24 @@ function lifecycleOf(event: EventDetailFull): Lifecycle {
   return 'draft'
 }
 
-function ListCard({ title, pill, children }: { title: string; pill: string; children: ReactNode }) {
+const PERSON_ROWS = 'divide-y-2 divide-dotted divide-[#161616]/15'
+const PERSON_NO = `${MONO} text-[11px] text-[#57534e] w-5 text-right shrink-0`
+const PERSON_NAME = `${ANTON} text-[15px] leading-tight tracking-[.02em]`
+const PERSON_SUB = `${MONO} text-[10.5px] text-[#44403c] truncate mt-0.5`
+const sesiChip = (on: boolean) =>
+  `${MONO} text-[10.5px] font-bold px-2.5 py-1 rounded-full ${PRESS} ${on ? 'bg-[#161616] text-[#ffd83d]' : 'ring-1 ring-[#161616]/25 text-[#161616]'}`
+
+function ListCard({ title, pill, tone = 'gold', children }: { title: string; pill: string; tone?: PillTone; children: ReactNode }) {
   return (
-    <div className={`${CARD} overflow-hidden`}>
-      <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-2">
-        <p className="text-[14px] font-bold text-[#3b1417]">{title}</p>
-        <span className="text-[11px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full ring-1 ring-slate-200">
-          {pill}
+    <section aria-label={title} className={`${PANEL} overflow-hidden`}>
+      <div className="px-4 py-3 border-b-2 border-dotted border-[#161616]/25 flex items-center justify-between gap-2">
+        <h2 className={`${ANTON} text-[20px] leading-none tracking-[.01em]`}>{title}</h2>
+        <span className="shrink-0">
+          <Pill tone={tone}>{pill}</Pill>
         </span>
       </div>
       {children}
-    </div>
+    </section>
   )
 }
 
@@ -174,25 +191,16 @@ function ListPager({
 }) {
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   if (pages <= 1) return null
+  const btn = `${LABEL} text-[10.5px] font-bold px-3 py-1.5 rounded-full ring-1 ring-[#161616]/25 disabled:opacity-40 ${PRESS}`
   return (
-    <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-100">
-      <button
-        type="button"
-        onClick={() => onPage(page - 1)}
-        disabled={page === 0}
-        className="text-[13px] px-3 py-1 rounded-lg ring-1 ring-slate-200 disabled:opacity-40"
-      >
+    <div className="flex items-center justify-between px-4 py-2.5 border-t-2 border-dotted border-[#161616]/20">
+      <button type="button" onClick={() => onPage(page - 1)} disabled={page === 0} className={btn}>
         ← Prev
       </button>
-      <span className="text-[12px] text-slate-500">
+      <span className={`${MONO} text-[11px] font-bold text-[#44403c]`}>
         {page + 1} / {pages}
       </span>
-      <button
-        type="button"
-        onClick={() => onPage(page + 1)}
-        disabled={page >= pages - 1}
-        className="text-[13px] px-3 py-1 rounded-lg ring-1 ring-slate-200 disabled:opacity-40"
-      >
+      <button type="button" onClick={() => onPage(page + 1)} disabled={page >= pages - 1} className={btn}>
         Next →
       </button>
     </div>
@@ -203,22 +211,20 @@ function Stepper({ status }: { status: Lifecycle }) {
   const at = STEP_AT[status]
   const rejected = status === 'rejected'
   return (
-    <div className="flex items-start">
+    <ol aria-label="Status event" className="flex items-start">
       {STEPS.map((s, i) => {
         const done = i < at
         const cur = i === at
         return (
           <Fragment key={s}>
-            <div className="flex flex-col items-center w-12 shrink-0">
+            <li aria-current={cur ? 'step' : undefined} className="flex flex-col items-center w-12 shrink-0">
               <span
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold ${
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${ANTON} text-[15px] ${
                   done
-                    ? 'bg-[#c3a54d] text-white'
+                    ? 'bg-[#ffd83d] text-[#161616]'
                     : cur
-                      ? rejected
-                        ? 'bg-rose-500 text-white ring-4 ring-rose-100'
-                        : 'bg-[#c9232c] text-white ring-4 ring-[#fbeceb]'
-                      : 'bg-slate-100 text-slate-400'
+                      ? 'bg-[#e02a2f] text-white outline-2 outline-offset-2 outline-[#e02a2f]'
+                      : 'border-2 border-dotted border-[#161616]/40 text-[#57534e]'
                 }`}
               >
                 {done ? (
@@ -229,27 +235,17 @@ function Stepper({ status }: { status: Lifecycle }) {
                   i + 1
                 )}
               </span>
-              <span
-                className={`text-[10.5px] mt-1.5 font-semibold ${
-                  done
-                    ? 'text-[#96792a]'
-                    : cur
-                      ? rejected
-                        ? 'text-rose-600'
-                        : 'text-[#c9232c]'
-                      : 'text-slate-400'
-                }`}
-              >
+              <span className={`${ANTON} text-[11px] tracking-[.02em] mt-2 ${cur ? 'text-[#c21f24]' : done ? 'text-[#161616]' : 'text-[#57534e]'}`}>
                 {cur && rejected ? 'Ditolak' : s}
               </span>
-            </div>
+            </li>
             {i < STEPS.length - 1 && (
-              <span className={`flex-1 h-0.5 mt-3.5 ${done ? 'bg-[#c3a54d]' : 'bg-slate-200'}`} />
+              <li aria-hidden className={`flex-1 mt-[15px] border-t-2 ${done ? 'border-[#161616]' : 'border-dotted border-[#161616]/35'}`} />
             )}
           </Fragment>
         )
       })}
-    </div>
+    </ol>
   )
 }
 
@@ -272,15 +268,12 @@ function DanaRow({
           : null
 
   return (
-    <Link
-      href={`${eventBasePath}/${eventId}/dana`}
-      className={`w-full ${CARD} px-4 py-3.5 flex items-center justify-between gap-3 active:scale-[.99] transition`}
-    >
-      <span className="text-[13.5px] font-semibold text-slate-800">Pengajuan Support Dana</span>
+    <Link href={`${eventBasePath}/${eventId}/dana`} className={`w-full px-4 py-3.5 flex items-center justify-between gap-3 ${PANEL} ${PRESS}`}>
+      <span className={`${ANTON} text-[16px] tracking-[.02em]`}>Pengajuan Support Dana</span>
       {status ? (
         <Pill tone={status.tone}>{status.label}</Pill>
       ) : (
-        <span className="text-[12.5px] font-semibold text-[#c9232c]">Ajukan →</span>
+        <span className={`${LABEL} shrink-0 text-[10.5px] font-bold text-[#c21f24]`}>Ajukan →</span>
       )}
     </Link>
   )
@@ -293,7 +286,7 @@ function AjukanButton({ eventId, already }: { eventId: number; already: boolean 
   const [pending, startTransition] = useTransition()
 
   if (diajukan) {
-    return <p className="text-[13px] font-semibold text-emerald-700 text-center py-1">Sudah diajukan</p>
+    return <p className={`${MONO} text-[12px] font-bold text-center py-1`}>Sudah diajukan</p>
   }
 
   return (
@@ -313,11 +306,11 @@ function AjukanButton({ eventId, already }: { eventId: number; already: boolean 
             router.refresh()
           })
         }}
-        className={`w-full py-3.5 ${BTN_RED} disabled:opacity-60`}
+        className={BTN}
       >
-        {pending ? 'Mengajukan...' : 'Ajukan'}
+        <Strip>{pending ? 'Mengajukan...' : 'Ajukan'}</Strip>
       </button>
-      {msg && <p className="text-[12px] text-rose-600">{msg}</p>}
+      {msg && <p role="alert" className={ERROR}>{msg}</p>}
     </div>
   )
 }
@@ -389,21 +382,21 @@ function JoinQrSheet({
               : 'Peserta scan → ambil tiket event (Offline)'
           }
         />
-        <p className="text-[13px] font-semibold text-[#3b1417] truncate mb-3">{nama}</p>
+        <p className={`${ANTON} text-[17px] tracking-[.01em] text-[#161616] truncate mb-3`}>{nama}</p>
         {joinUrl ? (
           <div className="flex flex-col items-center gap-3">
-            <div className="w-[220px] rounded-2xl bg-white p-3 ring-1 ring-[#efe3cc] shadow-sm">
+            <div className="w-[220px] rounded-2xl bg-white p-3 ring-1 ring-[#161616]/15 shadow-sm">
               <Qr text={joinUrl} />
             </div>
-            <p className="text-[11px] font-mono text-slate-500 break-all text-center px-1">{joinUrl}</p>
-            <p className="text-[12px] text-slate-500 text-center">
+            <p className={`${MONO} text-[11px] text-[#57534e] break-all text-center px-1`}>{joinUrl}</p>
+            <p className={`${MONO} text-[11.5px] text-[#44403c] text-center`}>
               Unduh PNG buat ditempel di flyer, atau salin link.
             </p>
             <div className="grid grid-cols-2 gap-2.5 w-full mt-1">
               <button
                 type="button"
                 onClick={copyLink}
-                className="py-3 rounded-xl bg-[#f8f0dd] text-[#96792a] ring-1 ring-[#ecdcb3] font-bold text-[14px] flex items-center justify-center gap-2"
+                className={BTN_OUTLINE}
               >
                 <Icon name="link" className="w-4 h-4" />
                 Salin
@@ -411,24 +404,26 @@ function JoinQrSheet({
               <button
                 type="button"
                 onClick={downloadPng}
-                className={`py-3 rounded-xl ${BTN_RED} flex items-center justify-center gap-2`}
+                className={BTN}
               >
-                <Icon name="down" className="w-4 h-4" />
-                Unduh PNG
+                <Strip className="text-[16px]">
+                  <Icon name="down" className="w-4 h-4" />
+                  Unduh PNG
+                </Strip>
               </button>
             </div>
             <a
               href={`https://wa.me/?text=${encodeURIComponent(`${nama}\n${joinUrl}`)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-3 rounded-xl bg-white text-slate-700 ring-1 ring-slate-200 font-bold text-[14px] flex items-center justify-center gap-2"
+              className={BTN_OUTLINE}
             >
               <Icon name="whatsapp" className="w-4 h-4" />
               Bagikan WA
             </a>
           </div>
         ) : (
-          <p className="text-[13px] text-slate-400 text-center py-8">Menyiapkan QR…</p>
+          <p className={`${LABEL} text-[11px] text-[#57534e] text-center py-8`}>Menyiapkan QR…</p>
         )}
       </Sheet>
       <Toast msg={toast} />
@@ -460,6 +455,7 @@ export function EventDetailV2Client({
   const totalReg = event.registrasi.length
   const attendees = event.absen.length
   const editHref = `${eventBasePath}/${event.id_event}/edit`
+  const scanHref = `${ALK_BASE}/scanner?eventId=${event.id_event}`
   const showQa = Boolean(event.flyerQa || event.beritaAcaraQa)
   const alreadyDiajukan = Boolean(event.flyerQa?.diajukan || event.beritaAcaraQa?.diajukan)
   const showPeserta =
@@ -544,24 +540,25 @@ export function EventDetailV2Client({
   }
 
   return (
-    <section className="min-h-screen pb-24">
-      <Hero className="pt-4 md:pt-2 pb-16" decor="-right-6 top-16 w-40">
-        <div className="flex items-center gap-1">
-          <div className="flex-1 min-w-0">
-            <TopBar title="Detail Event" back={() => router.push(backUrl)} />
+    <PaperMain>
+      <header className="px-5 pt-4">
+        <div className="flex items-center justify-between gap-3 min-h-11">
+          <div className="flex items-center gap-3 min-w-0">
+            <IconButton icon="chevronLeft" label="Kembali" onClick={() => router.push(backUrl)} className="-rotate-3" />
+            <StickerLabel>Detail Event</StickerLabel>
           </div>
-          <Link
-            href={editHref}
-            className="shrink-0 text-[13px] font-semibold text-white/90 px-2 py-1.5 rounded-lg active:bg-white/10"
-          >
-            Edit
+          <Link href={editHref} className={`shrink-0 rotate-2 ${BTN_SHELL}`}>
+            <Strip tone="ink" className="px-4 py-2 text-[15px]">
+              <Icon name="edit" className="w-4 h-4" sw={2.2} />
+              Edit
+            </Strip>
           </Link>
         </div>
-        <div className="mt-3 flex items-center gap-3.5">
-          <DateBlock d={d} m={m} tone="glass" />
+        <div className="mt-3 flex items-start gap-3.5">
+          <DateBlock d={d} m={m} />
           <div className="min-w-0">
-            <p className="font-extrabold text-[20px] leading-tight">{event.nama_event}</p>
-            <p className="text-[13px] text-white/80 mt-0.5">
+            <h1 className={`${ANTON} text-[30px] leading-[1.06] tracking-[.01em] break-words`}>{event.nama_event}</h1>
+            <p className={`${MONO} text-[11.5px] font-bold text-[#44403c] mt-1.5 leading-snug`}>
               {event.tglDisplay}
               {!sameDates ? ` – ${event.tglSelesaiDisplay}` : ''}
               {event.jamevent
@@ -570,46 +567,41 @@ export function EventDetailV2Client({
             </p>
           </div>
         </div>
-      </Hero>
+      </header>
 
-      <div className="px-5 -mt-10 relative space-y-4">
-        <div className="bg-white rounded-3xl shadow-[0_18px_40px_-14px_rgba(80,20,25,.3)] p-5">
+      <div className="px-5 mt-5 pb-10 space-y-4">
+        <section aria-label="Status" className={`p-4 ${PANEL}`}>
           <Stepper status={status} />
 
           {(status === 'live' || status === 'done') && (
-            <div className="flex items-end justify-between mt-5">
+            <div className="flex items-end justify-between gap-3 mt-5">
               <div>
-                <p
-                  className={`${fCard} font-bold text-[48px] leading-none ${
-                    status === 'live' ? 'text-[#c9232c]' : 'text-[#3b1417]'
-                  }`}
-                >
+                <p className={`${ANTON} text-[52px] leading-none ${status === 'live' ? 'text-[#c21f24]' : 'text-[#161616]'}`}>
                   {hasSesi ? hadirLengkapCount || attendees : attendees}
                 </p>
-                <p className="text-[12px] text-slate-500 mt-1">
+                <p className={`${MONO} text-[11px] text-[#44403c] mt-1.5`}>
                   anggota hadir
                   {hasSesi ? ` · ${hadirLengkapCount} hadir lengkap` : ''}
                 </p>
               </div>
               {status === 'live' ? (
-                <p className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-600">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <p className={`${LABEL} flex items-center gap-1.5 text-[10px] font-bold text-[#c21f24]`}>
+                  <span className="w-2 h-2 rounded-full bg-[#e02a2f] animate-pulse" />
                   Absensi dibuka
                 </p>
               ) : (
-                <p className="text-[12px] font-bold text-slate-400">Kegiatan selesai</p>
+                <p className={`${LABEL} text-[10px] font-bold text-[#57534e]`}>Kegiatan selesai</p>
               )}
             </div>
           )}
 
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 space-y-2.5">
             {status === 'live' && (
-              <Link
-                href={SCAN_HREF}
-                className="w-full py-3 rounded-xl bg-[#c9232c] text-white font-bold text-[14px] flex items-center justify-center gap-2 shadow-[0_8px_20px_-6px_rgba(201,35,44,.6)]"
-              >
-                <Icon name="qr" className="w-5 h-5" />
-                Mulai Absensi
+              <Link href={scanHref} className={BTN}>
+                <Strip>
+                  <Icon name="qr" className="w-5 h-5" />
+                  Mulai Absensi
+                </Strip>
               </Link>
             )}
             {status === 'approved' && (
@@ -618,12 +610,11 @@ export function EventDetailV2Client({
                   Disetujui pusat (ALK + Brim Nasional). Peserta sudah bisa ambil tiket; scan
                   absensi dibuka saat acara.
                 </Note>
-                <Link
-                  href={SCAN_HREF}
-                  className="w-full py-3 rounded-xl bg-[#f8f0dd] text-[#96792a] ring-1 ring-[#ecdcb3] font-bold text-[14px] flex items-center justify-center gap-2"
-                >
-                  <Icon name="scan" className="w-5 h-5" />
-                  Buka Scanner
+                <Link href={scanHref} className={BTN}>
+                  <Strip tone="ink">
+                    <Icon name="scan" className="w-5 h-5" />
+                    Buka Scanner
+                  </Strip>
                 </Link>
               </>
             )}
@@ -638,11 +629,8 @@ export function EventDetailV2Client({
                 <Note tone="rose">
                   <b>Alasan penolakan:</b> {event.notenasional.trim() || '—'}
                 </Note>
-                <Link
-                  href={editHref}
-                  className={`w-full py-3.5 ${BTN_RED} flex items-center justify-center`}
-                >
-                  Ubah &amp; Ajukan Ulang
+                <Link href={editHref} className={BTN}>
+                  <Strip>Ubah &amp; Ajukan Ulang</Strip>
                 </Link>
               </>
             )}
@@ -656,26 +644,19 @@ export function EventDetailV2Client({
                 )}
               </>
             )}
-            <button
-              type="button"
-              onClick={() => setShowJoinQr(true)}
-              className="w-full py-3 rounded-xl bg-white text-[#3b1417] ring-1 ring-slate-200 font-bold text-[14px] flex items-center justify-center gap-2"
-            >
+            <button type="button" onClick={() => setShowJoinQr(true)} className={BTN_OUTLINE}>
               <Icon name="qr" className="w-5 h-5" />
               Generate QR Join
             </button>
           </div>
-        </div>
+        </section>
 
         {event.posterUrl ? (
-          <div className="rounded-2xl overflow-hidden ring-1 ring-slate-100 shadow-sm">
+          <figure className={`relative -mx-1 p-1.5 rounded-[6px] bg-[#fffdf7] -rotate-[.6deg] ${LIFTED}`}>
+            <span aria-hidden className="absolute z-10 -top-2.5 left-1/2 -translate-x-1/2 -rotate-3 w-20 h-5 bg-[#ffd83d]/85" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={event.posterUrl}
-              alt={`Poster ${event.nama_event}`}
-              className="w-full object-cover"
-            />
-          </div>
+            <img src={event.posterUrl} alt={`Poster ${event.nama_event}`} className="w-full h-auto block bg-[#d6d0c4]" />
+          </figure>
         ) : null}
 
         {showQa && (
@@ -692,14 +673,11 @@ export function EventDetailV2Client({
           </div>
         )}
 
-        <ListCard title="Detail Event" pill={EV_STATUS[status][0]}>
+        <ListCard title="Detail Event" pill={EV_STATUS[status][0]} tone={EV_STATUS[status][1]}>
           {info.map(([k, v], i) => (
-            <div
-              key={k}
-              className={`flex gap-3 px-4 py-2.5 ${i ? 'border-t border-slate-100' : ''}`}
-            >
-              <p className="text-[12px] text-slate-400 w-28 shrink-0 pt-0.5">{k}</p>
-              <p className="text-[13px] text-slate-800 flex-1 break-words">{v}</p>
+            <div key={k} className={`flex gap-3 px-4 py-2.5 ${i ? 'border-t-2 border-dotted border-[#161616]/15' : ''}`}>
+              <p className={`${LABEL} text-[9.5px] leading-[18px] text-[#57534e] w-24 shrink-0`}>{k}</p>
+              <p className={`${MONO} text-[12px] font-bold flex-1 min-w-0 break-words`}>{v}</p>
             </div>
           ))}
         </ListCard>
@@ -711,9 +689,9 @@ export function EventDetailV2Client({
         />
 
         {mapSrc && (
-          <div className={`${CARD} overflow-hidden`}>
-            <div className="px-4 py-3 border-b border-slate-100">
-              <p className="text-[14px] font-bold text-[#3b1417]">Lokasi Event</p>
+          <section aria-label="Lokasi Event" className={`${PANEL} overflow-hidden`}>
+            <div className="px-4 py-3 border-b-2 border-dotted border-[#161616]/25">
+              <h2 className={`${ANTON} text-[20px] leading-none tracking-[.01em]`}>Lokasi Event</h2>
             </div>
             <iframe
               src={mapSrc}
@@ -724,40 +702,29 @@ export function EventDetailV2Client({
               referrerPolicy="no-referrer-when-downgrade"
               title="Lokasi Event"
             />
-          </div>
+          </section>
         )}
 
         {showPeserta && (
           <>
             <ListCard title="Konfirmasi Kehadiran" pill={`Total ${totalReg} registrasi`}>
               {totalReg === 0 ? (
-                <p className="px-4 py-8 text-center text-[13px] text-slate-400">
-                  Belum ada peserta.
-                </p>
+                <p className={`${LABEL} px-4 py-8 text-center text-[11px] text-[#57534e]`}>Belum ada peserta.</p>
               ) : (
                 <>
-                  <div className="divide-y divide-slate-100">
+                  <div className={PERSON_ROWS}>
                     {event.registrasi
                       .slice(regPage * PAGE_SIZE, (regPage + 1) * PAGE_SIZE)
                       .map((r, i) => (
-                        <div
-                          key={r.id_registrasi}
-                          className="flex items-center gap-3 px-4 py-2.5"
-                        >
-                          <span className="text-[12px] text-slate-400 w-5 text-right shrink-0">
-                            {regPage * PAGE_SIZE + i + 1}
-                          </span>
+                        <div key={r.id_registrasi} className="flex items-center gap-3 px-4 py-2.5">
+                          <span className={PERSON_NO}>{regPage * PAGE_SIZE + i + 1}</span>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[13.5px] font-semibold text-slate-800 truncate">
+                            <p className={`${PERSON_NAME} truncate`}>
                               {r.nama}
-                              {r.kota ? (
-                                <span className="font-normal text-slate-400"> – {r.kota}</span>
-                              ) : null}
+                              {r.kota ? <span className="text-[#57534e]"> – {r.kota}</span> : null}
                             </p>
-                            {r.gereja ? (
-                              <p className="text-[11.5px] text-slate-400 truncate">{r.gereja}</p>
-                            ) : null}
-                            <p className="text-[11.5px] text-slate-400 truncate">{r.email}</p>
+                            {r.gereja ? <p className={PERSON_SUB}>{r.gereja}</p> : null}
+                            <p className={PERSON_SUB}>{r.email}</p>
                           </div>
                         </div>
                       ))}
@@ -772,55 +739,39 @@ export function EventDetailV2Client({
               pill={hasSesi ? `${filteredAbsen.length} scan` : `${filteredAbsen.length} hadir`}
             >
               {hasSesi && (
-                <div className="px-4 py-3 border-b border-slate-100 space-y-2.5">
+                <div className="px-4 py-3 border-b-2 border-dotted border-[#161616]/20 space-y-2.5">
                   <div className="space-y-1.5">
                     {event.sesi.map((s) => (
-                      <div
-                        key={s.id_sesi}
-                        className="flex items-center justify-between gap-2 text-[12.5px]"
-                      >
-                        <span className="text-slate-800 truncate">
+                      <div key={s.id_sesi} className={`${MONO} flex items-center justify-between gap-2 text-[11.5px]`}>
+                        <span className="min-w-0 font-bold truncate">
                           {s.nama}
-                          <span className="text-slate-400">
+                          <span className="font-normal text-[#57534e]">
                             {' '}
                             · {s.wajib ? 'wajib' : 'opsional'}
                           </span>
                         </span>
-                        <span className="text-slate-500 shrink-0">
-                          {sesiCounts.get(s.id_sesi) ?? 0} hadir
-                        </span>
+                        <span className="text-[#44403c] shrink-0">{sesiCounts.get(s.id_sesi) ?? 0} hadir</span>
                       </div>
                     ))}
                   </div>
-                  <p className="text-[12.5px] font-semibold text-slate-800">
+                  <p className={`${MONO} text-[11.5px] font-bold`}>
                     Hadir lengkap:{' '}
-                    <span className="text-[#c9232c]">
+                    <span className="text-[#c21f24]">
                       {hadirLengkapCount} / {totalReg}
                     </span>
-                    <span className="font-normal text-slate-400"> (semua sesi wajib)</span>
+                    <span className="font-normal text-[#57534e]"> (semua sesi wajib)</span>
                   </p>
                   <div className="flex flex-wrap gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setFilter('all')}
-                      className={`text-[11.5px] px-2.5 py-1 rounded-full ring-1 transition ${
-                        sesiFilter === 'all'
-                          ? 'ring-[#c9232c] bg-[#fbeceb] text-[#c9232c] font-semibold'
-                          : 'ring-slate-200 text-slate-500'
-                      }`}
-                    >
+                    <button type="button" aria-pressed={sesiFilter === 'all'} onClick={() => setFilter('all')} className={sesiChip(sesiFilter === 'all')}>
                       Semua
                     </button>
                     {event.sesi.map((s) => (
                       <button
                         key={s.id_sesi}
                         type="button"
+                        aria-pressed={sesiFilter === s.id_sesi}
                         onClick={() => setFilter(s.id_sesi)}
-                        className={`text-[11.5px] px-2.5 py-1 rounded-full ring-1 transition max-w-[150px] truncate ${
-                          sesiFilter === s.id_sesi
-                            ? 'ring-[#c9232c] bg-[#fbeceb] text-[#c9232c] font-semibold'
-                            : 'ring-slate-200 text-slate-500'
-                        }`}
+                        className={`${sesiChip(sesiFilter === s.id_sesi)} max-w-[150px] truncate`}
                       >
                         {s.nama}
                       </button>
@@ -829,36 +780,24 @@ export function EventDetailV2Client({
                 </div>
               )}
               {filteredAbsen.length === 0 ? (
-                <p className="px-4 py-8 text-center text-[13px] text-slate-400">
-                  Belum ada presensi.
-                </p>
+                <p className={`${LABEL} px-4 py-8 text-center text-[11px] text-[#57534e]`}>Belum ada presensi.</p>
               ) : (
                 <>
-                  <div className="divide-y divide-slate-100">
+                  <div className={PERSON_ROWS}>
                     {filteredAbsen
                       .slice(absenPage * PAGE_SIZE, (absenPage + 1) * PAGE_SIZE)
                       .map((a, i) => (
                         <div key={a.id_absen} className="flex items-center gap-3 px-4 py-2.5">
-                          <span className="text-[12px] text-slate-400 w-5 text-right shrink-0">
-                            {absenPage * PAGE_SIZE + i + 1}
-                          </span>
+                          <span className={PERSON_NO}>{absenPage * PAGE_SIZE + i + 1}</span>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[13.5px] font-semibold text-slate-800 truncate flex items-center gap-1.5">
+                            <p className={`${PERSON_NAME} flex items-center gap-1.5`}>
                               <span className="truncate">{a.nama}</span>
-                              {USERLEVEL_LABEL[a.userlevel] && (
-                                <span className="shrink-0 text-[10px] font-semibold text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded ring-1 ring-slate-200 capitalize">
-                                  {USERLEVEL_LABEL[a.userlevel]}
-                                </span>
-                              )}
+                              {USERLEVEL_LABEL[a.userlevel] && <Pill tone="gold">{USERLEVEL_LABEL[a.userlevel]}</Pill>}
                             </p>
-                            {a.gereja ? (
-                              <p className="text-[11.5px] text-slate-400 truncate">{a.gereja}</p>
-                            ) : null}
-                            <p className="text-[11.5px] text-slate-400 truncate">
-                              {[a.sesiNama, a.email].filter(Boolean).join(' · ')}
-                            </p>
+                            {a.gereja ? <p className={PERSON_SUB}>{a.gereja}</p> : null}
+                            <p className={PERSON_SUB}>{[a.sesiNama, a.email].filter(Boolean).join(' · ')}</p>
                           </div>
-                          <p className="text-[11px] text-slate-400 shrink-0 text-right leading-tight whitespace-pre-line">
+                          <p className={`${MONO} text-[10px] text-[#57534e] shrink-0 text-right leading-tight whitespace-pre-line`}>
                             {fmtTs(a.timestamp).replace(', ', '\n')}
                           </p>
                         </div>
@@ -883,6 +822,6 @@ export function EventDetailV2Client({
         nama={event.nama_event}
         jenisevent={event.jenisevent}
       />
-    </section>
+    </PaperMain>
   )
 }

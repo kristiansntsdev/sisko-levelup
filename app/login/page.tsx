@@ -5,23 +5,29 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { loginEmailPassword } from '@/lib/actions/pwa-auth'
 import {
-  BTN_RED,
-  Chevrons,
-  Field,
-  GoogleIcon,
-  Hero,
-  Icon,
-  Logo,
-  PAGE_BG,
-} from '@/components/pwa/ui'
+  ANTON,
+  BTN,
+  ERROR,
+  LABEL,
+  LogoChip,
+  MONO,
+  PANEL,
+  PaperField,
+  PaperHeader,
+  PaperMain,
+  PRESS,
+  Strip,
+  TAPE,
+} from '@/components/pwa/paper-ui'
+import { GoogleIcon, Icon } from '@/components/pwa/ui'
 
 const LOGIN_INPUT =
-  'w-full min-w-0 bg-transparent px-4 py-3.5 text-[16px] font-semibold outline-none placeholder:font-medium placeholder:text-slate-300 ' +
+  'w-full min-w-0 bg-transparent px-3.5 py-3 text-[16px] font-semibold text-[#161616] outline-none placeholder:font-medium placeholder:text-[#57534e]/70 ' +
   // Chrome autofill paints a blue rect that ignores parent radius — cover + clip via LOGIN_BOX
-  'autofill:shadow-[inset_0_0_0_1000px_#f8fafc] autofill:[-webkit-text-fill-color:#0f172a] ' +
+  'autofill:shadow-[inset_0_0_0_1000px_#f7f3ea] autofill:[-webkit-text-fill-color:#161616] ' +
   'focus:autofill:shadow-[inset_0_0_0_1000px_#fff]'
 const LOGIN_BOX =
-  'flex items-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-200 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-[#c9232c]'
+  'flex items-center overflow-hidden rounded-[10px] bg-[#efe8da]/50 ring-1 ring-[#161616]/15 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-[#161616]'
 
 function LoginForm() {
   const router = useRouter()
@@ -81,48 +87,40 @@ function LoginForm() {
 
   if (auto) {
     return (
-      <main className={`min-h-screen ${PAGE_BG} flex flex-col items-center justify-center gap-4 px-6 font-[family-name:var(--font-proto)]`}>
-        <Link href="/" aria-label="Beranda LevelUP">
-          <Logo className="h-12 w-auto" />
-        </Link>
-        <span className="w-7 h-7 rounded-full border-2 border-slate-200 border-t-[#c9232c] animate-spin" />
-        <p className="text-sm text-slate-500">Mengalihkan ke Google…</p>
-      </main>
+      <PaperMain standalone>
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 px-6">
+          <LogoChip />
+          <span className="w-7 h-7 rounded-full border-2 border-[#161616]/20 border-t-[#e02a2f] animate-spin" />
+          <p className={`${LABEL} text-[11px] text-[#44403c]`}>Mengalihkan ke Google…</p>
+        </div>
+      </PaperMain>
     )
   }
 
   return (
-    <main className={`min-h-screen ${PAGE_BG} pb-safe font-[family-name:var(--font-proto)]`}>
-      <Hero className="pt-16 md:pt-12 pb-28 text-center" decor="-right-8 top-4 w-44">
-        <Chevrons className="-left-12 top-36 w-32 opacity-[.08]" />
-        <Link href="/" aria-label="Beranda LevelUP" className="inline-block">
-          <Logo className="h-[92px] w-auto mx-auto drop-shadow-[0_6px_14px_rgba(60,0,5,.35)]" />
-        </Link>
-      </Hero>
-      <div className="px-5 -mt-16 relative max-w-[430px] mx-auto">
-        <form
-          onSubmit={onSubmit}
-          className="bg-white rounded-3xl shadow-[0_18px_40px_-14px_rgba(80,20,25,.3)] p-6"
-        >
-          <h2 className="font-extrabold text-[22px] text-[#3b1417]">Masuk</h2>
-          <p className="text-[13.5px] text-slate-500 mt-1 mb-5">
-            Masuk dengan Google, atau email + password (peserta / pengurus)
-          </p>
+    <PaperMain standalone>
+      <PaperHeader title="Masuk" leading={<LogoChip />}>
+        <p className={`${MONO} mt-1 text-[12px] leading-relaxed text-[#44403c]`}>Masuk dengan Google, atau email + password (peserta / pengurus)</p>
+      </PaperHeader>
+
+      <div className="px-5 mt-5 pb-[max(env(safe-area-inset-bottom),32px)]">
+        <form onSubmit={onSubmit} className={`relative p-5 ${PANEL}`}>
+          <span aria-hidden className={`${TAPE} -left-4 -top-1`} />
           <button
             type="button"
             onClick={() => signIn('google', { callbackUrl })}
-            className="w-full py-3.5 rounded-2xl bg-white ring-1 ring-slate-200 font-semibold text-slate-700 flex items-center justify-center gap-2 active:bg-slate-50"
+            className={`${ANTON} w-full py-3 rounded-sm ring-2 ring-[#161616] bg-white text-[17px] tracking-[.03em] flex items-center justify-center gap-2.5 ${PRESS}`}
           >
             <GoogleIcon />
             Masuk dengan Google
           </button>
-          <div className="flex items-center gap-3 my-5 text-[12px] text-slate-400">
-            <span className="flex-1 h-px bg-slate-200" />
+          <div className={`${LABEL} flex items-center gap-3 my-5 text-[10px] font-bold text-[#57534e]`}>
+            <span className="flex-1 border-t-2 border-dotted border-[#161616]/25" />
             atau email
-            <span className="flex-1 h-px bg-slate-200" />
+            <span className="flex-1 border-t-2 border-dotted border-[#161616]/25" />
           </div>
           <div className="space-y-4">
-            <Field label="Email">
+            <PaperField label="Email">
               <span className={LOGIN_BOX}>
                 <input
                   type="email"
@@ -134,8 +132,8 @@ function LoginForm() {
                   className={LOGIN_INPUT}
                 />
               </span>
-            </Field>
-            <Field label="Password">
+            </PaperField>
+            <PaperField label="Password">
               <span className={LOGIN_BOX}>
                 <input
                   type={show ? 'text' : 'password'}
@@ -149,43 +147,40 @@ function LoginForm() {
                   type="button"
                   onClick={() => setShow(!show)}
                   aria-label={show ? 'Sembunyikan password' : 'Tampilkan password'}
-                  className="shrink-0 w-11 h-11 mr-1 flex items-center justify-center rounded-full text-slate-400 active:bg-slate-100"
+                  className="shrink-0 w-11 h-11 mr-1 flex items-center justify-center rounded-full text-[#44403c]"
                 >
                   <Icon name={show ? 'eyeOff' : 'eye'} className="w-5 h-5" />
                 </button>
               </span>
-            </Field>
+            </PaperField>
           </div>
           <div className="flex justify-end mt-2">
-            <button
-              type="button"
-              onClick={() => setSoon(true)}
-              className="text-[12.5px] font-semibold text-[#c9232c] py-1"
-            >
+            <button type="button" onClick={() => setSoon(true)} className={`${MONO} text-[11.5px] font-bold text-[#c21f24] py-1 underline underline-offset-4 decoration-dotted`}>
               Lupa password?
             </button>
           </div>
-          {error && <p className="text-sm text-[#c9232c] font-medium mt-2">{error}</p>}
-          {soon && <p className="text-[12.5px] text-slate-500 mt-2">Reset password segera tersedia.</p>}
-          <button type="submit" disabled={!valid || loading} className={`mt-3 w-full py-3.5 ${BTN_RED}`}>
-            {loading ? 'Masuk…' : 'Masuk'}
+          {error && (
+            <p role="alert" className={`${ERROR} mt-2`}>
+              {error}
+            </p>
+          )}
+          {soon && <p className={`${MONO} text-[11.5px] text-[#44403c] mt-2`}>Reset password segera tersedia.</p>}
+          <button type="submit" disabled={!valid || loading} className={`mt-4 ${BTN}`}>
+            <Strip>{loading ? 'Masuk…' : 'Masuk'}</Strip>
           </button>
         </form>
 
-        <p className="text-center text-[13px] text-slate-500 mt-5">
+        <p className={`${MONO} text-center text-[12px] text-[#44403c] mt-6`}>
           Belum terdaftar anggota?{' '}
-          <Link href="/daftar" className="font-semibold text-[#c9232c]">
+          <Link href="/daftar" className="font-bold text-[#c21f24] underline underline-offset-4 decoration-dotted">
             Pendaftaran Anggota
           </Link>
         </p>
-        <Link
-          href="/"
-          className="mt-6 w-full text-center text-sm text-slate-400 block"
-        >
+        <Link href="/" className={`${MONO} mt-5 block text-center text-[12px] font-bold text-[#44403c]`}>
           ← Kembali
         </Link>
       </div>
-    </main>
+    </PaperMain>
   )
 }
 

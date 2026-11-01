@@ -37,7 +37,6 @@ app/
 components/landing/zine.tsx           # Design system landing (kertas lecek, torn, Strip, Tape, doodle, ZineHeader/Footer) dipakai / + /about
   login/page.tsx                      # PWA login: email+password (peserta lalu pengurus) + Google
   daftar/page.tsx                     # Pendaftaran v2 Gen Z (intro → form live MemberCard → kartu jadi); Google baru → completeRegistration
-  daftar/layout.tsx                   # Permanent Marker (--font-marker) khusus /daftar
   dashboard/layout.tsx                # MemberShell bottom nav (skip /dashboard/kota + /dashboard/v2/kota)
   dashboard/page.tsx                  # Beranda PWA warna landing (kertas, hitam, merah, kuning) + font kartu: MemberCard, level, menu, tiket
   dashboard/kartu/                    # Detail Kartu Anggota: MemberCard + data anggota
@@ -60,7 +59,7 @@ lib/actions/pengurus-kota.ts          # list/create/update pengurus per kota (An
 lib/actions/pwa-auth.ts               # loginEmailPassword, completeRegistration, dual session
 lib/pengurus-session.ts               # pengurus cookie helpers; alk dest → /dashboard/v2/kota/alk
 lib/pwa-member.ts                     # tier labels + MemberCardData
-components/alk-v2/                    # Sekretariat v2 shell + screens (PWA look, real data); event-approve = Approval Event; event-detail = Detail Event
+components/alk-v2/                    # Sekretariat v2 shell + screens (gaya kertas, real data); event-approve = Approval Event; event-detail = Detail Event
   dashboard/v2/kota/alk/event/[id]/   # Detail Event v2 (EventDetailV2Client, proto KEventScreen)
   dashboard/v2/kota/alk/event/[id]/approve/ # Nasional: approve/reject event (v2 UI)
 components/pwa/                       # LevelUP PWA UI kit + MemberShell (PlainBar/Panel/Qr)
@@ -109,7 +108,14 @@ task.md                               # Blocked: approval sampai core
 - Perubahan Data `/dashboard/profil/edit` ikut gaya kertas (`PaperField` + `PAPER_INPUT`, font 16px supaya iOS tidak zoom saat fokus). Error pengajuan pindah kota kini tampil di dalam sheet; label Jenis kelamin bukan `<label>` lagi (dulu tap teksnya memilih Laki-laki)
 - Ganti foto profil di `/dashboard/profil`: browser kecilkan dulu (`lib/shrink-photo.ts`, maks 1600px, buang EXIF/GPS), server ubah ke WebP (`lib/profile-photo.ts`, sharp, maks 800px, q80; WebP dipilih karena AVIF butuh iOS 16+), simpan ke Blob `peserta/foto/` (`lib/actions/peserta-foto.ts`), foto lama dihapus. `peserta.foto` kini URL Blob; nilai lama berupa nama file tetap diabaikan. Pratinjau memakai `MemberCard` asli. Picker memakai label native, bukan `input.click()` (iOS lama mengabaikan klik skrip)
 - Detail Kartu `/dashboard/kartu` ikut gaya kertas; tgl lahir tampil seperti di kartu (27 Agustus 1998), bukan ISO. Semua halaman anggota kini kertas, jadi `MemberShell` selalu memberi latar kertas (admin kota tetap tidak lewat shell)
-- Bottom nav `shell.tsx` hitam + kuning + tombol tiket merah di semua tab anggota; `/login` dan `/daftar` masih gaya lama
+- Sekretariat v2 (`components/alk-v2/*`, `/dashboard/v2/kota/alk`) didesain ulang layar per layar ke gaya kertas: `PaperMain` + `PaperHeader`, Anton + Space Mono (default font shell = mono), tanpa header gelap (versi `Hero` hitam ditolak, terlalu gelap). `Hero`/`PageHero`/`TopBar`/`BTN_RED`/`CARD`/`LIFT`/`Avatar` sudah dihapus; pakai `PANEL`, `Strip`, `PersonChip`, `Decide` (Approve strip hitam, Reject garis merah), `FieldGroup` + `Seg` (bukan `Field` karena tap label memilih tombol pertama). Logika tidak berubah
+- `AlkShell` menimpa token lama lewat `PAPER_VARS` (`--accent`, `--surface`, dst) supaya `DanaClient` + ringkasan QA flyer/berita acara (dipakai bersama admin lama) ikut palet hanya di Sekretariat; tampilannya tetap sederhana. Warna status QA hijau/kuning/merah sengaja tidak ditimpa
+- Form event `components/kota/event-form.tsx`: cabang `variant="v2"` saja; DOM varian legacy identik dengan sebelum perubahan
+- Fix: Detail Event "Mulai Absensi"/"Buka Scanner" dulu ke `/scan` (404), kini `/scanner?eventId={id}`
+- Scan fullscreen tetap gelap (mode kamera) dan popup hasil tetap hijau/merah supaya terbaca sekilas di pintu masuk
+- Catatan: Approval Member tidak menampilkan pesan kalau `approveSquad` gagal; scan memakai `BarcodeDetector` tanpa fallback (belum diubah)
+- `/login` dan `/daftar` ikut gaya kertas (`PaperMain standalone`, logo di chip merah `LogoChip`); font Permanent Marker di `/daftar` dihapus, sekarang hanya landing yang memakainya
+- Bottom nav `shell.tsx` hitam + kuning + tombol tiket merah di semua tab anggota
 - Catatan: tab Riwayat dan Riwayat di My Tickets memakai `getRegistrasiByPeserta` yang hanya mengambil event bulan ini, jadi riwayat bulan lalu tidak tampil (belum diubah)
 
 ## Recent Updates [2026-10-31]

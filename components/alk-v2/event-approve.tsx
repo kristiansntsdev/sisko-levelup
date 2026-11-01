@@ -8,7 +8,8 @@ import {
   rejectEventAlkNasional,
   rejectEventBrimNasional,
 } from '@/lib/actions/event'
-import { ALK_BASE, CARD, FLD, Note, Pill, PlainBar } from './ui'
+import { ANTON, BackBar, ERROR, LIFTED, MONO, PANEL, PaperMain, Poster } from '@/components/pwa/paper-ui'
+import { ALK_BASE, Decide, FLD, Field, Note, Pill } from './ui'
 
 export type ApproveEventData = {
   id_event: number
@@ -83,58 +84,50 @@ export function EventApproveV2Client({
   }
 
   return (
-    <section className="min-h-screen pb-10">
-      <PlainBar title="Approval Event" back={goBack} />
+    <PaperMain>
+      <BackBar title="Approval Event" onBack={goBack} />
 
-      <div className="px-5 pt-5 space-y-5">
-        <div className={`${CARD} overflow-hidden`}>
-          <div className="px-4 pt-4 pb-3">
-            <p className="text-[17px] font-extrabold text-[#3b1417] leading-snug">
-              {event.nama_event}
-            </p>
-            <p className="text-[13px] text-slate-500 mt-1">{event.tglDisplay}</p>
-            <div className="flex flex-wrap gap-1.5 mt-2.5">
-              <Pill tone={event.approvenasional === '1' ? 'green' : 'amber'}>
-                {event.approvenasional === '1' ? 'Approval ALK' : 'Belum ALK'}
-              </Pill>
-              <Pill tone={event.approvebrimnas === '1' ? 'green' : 'amber'}>
-                {event.approvebrimnas === '1' ? 'Approval Brim' : 'Belum Brim'}
-              </Pill>
-            </div>
+      <div className="px-5 pt-5 pb-10 space-y-5">
+        <div>
+          <h1 className={`${ANTON} text-[34px] leading-[1.05] tracking-[.01em] break-words`}>{event.nama_event}</h1>
+          <p className={`${MONO} text-[12px] font-bold text-[#44403c] mt-1.5`}>{event.tglDisplay}</p>
+          <div className="flex flex-wrap gap-1.5 mt-2.5">
+            <Pill tone={event.approvenasional === '1' ? 'green' : 'amber'}>
+              {event.approvenasional === '1' ? 'Approval ALK' : 'Belum ALK'}
+            </Pill>
+            <Pill tone={event.approvebrimnas === '1' ? 'green' : 'amber'}>
+              {event.approvebrimnas === '1' ? 'Approval Brim' : 'Belum Brim'}
+            </Pill>
           </div>
-          {event.posterUrl ? (
-            <div className="border-t border-slate-100">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={event.posterUrl}
-                alt={`Flyer ${event.nama_event}`}
-                className="w-full object-cover"
-              />
-            </div>
-          ) : (
-            <div className="w-full aspect-[3/4] bg-[#faf7f2] flex items-center justify-center border-t border-slate-100">
-              <p className="text-[13px] text-slate-400">Belum ada flyer</p>
-            </div>
-          )}
         </div>
+
+        {event.posterUrl ? (
+          <figure className={`relative -mx-1 p-1.5 rounded-[6px] bg-[#fffdf7] -rotate-[.6deg] ${LIFTED}`}>
+            <span aria-hidden className="absolute z-10 -top-2.5 left-1/2 -translate-x-1/2 -rotate-3 w-20 h-5 bg-[#ffd83d]/85" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={event.posterUrl} alt={`Flyer ${event.nama_event}`} className="w-full h-auto block bg-[#d6d0c4]" />
+          </figure>
+        ) : (
+          <div className={`relative ${PANEL} overflow-hidden`}>
+            <Poster src="" className="w-full aspect-[16/9]" />
+            <p className={`${MONO} py-3 text-center text-[12px] text-[#57534e]`}>Belum ada flyer</p>
+          </div>
+        )}
 
         {notes ? (
           <Note tone="gold">
             <b>Catatan nasional</b>
-            <p className="mt-1 whitespace-pre-wrap">{notes}</p>
+            <p className="mt-1 whitespace-pre-wrap break-words">{notes}</p>
           </Note>
         ) : null}
 
         {alreadyApproved ? (
-          <div className="rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 px-4 py-3.5 text-center">
-            <p className="text-[14px] font-bold text-emerald-700">
-              {role === 'alk' ? 'Sudah disetujui ALK Nasional' : 'Sudah disetujui Brim Nasional'}
-            </p>
-          </div>
+          <p className={`${ANTON} rounded-[14px] bg-[#ffd83d] px-4 py-3.5 text-center text-[17px] tracking-[.02em]`}>
+            {role === 'alk' ? 'Sudah disetujui ALK Nasional' : 'Sudah disetujui Brim Nasional'}
+          </p>
         ) : (
-          <>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-[13px] font-bold text-[#3b1417]">Alasan Reject</span>
+          <div className={`p-4 space-y-4 ${PANEL}`}>
+            <Field label="Alasan Reject">
               <textarea
                 value={alasan}
                 onChange={(e) => setAlasan(e.target.value)}
@@ -142,33 +135,20 @@ export function EventApproveV2Client({
                 placeholder="Isi jika reject…"
                 className={`${FLD} resize-none`}
               />
-            </label>
+            </Field>
 
-            {error ? (
-              <p className="text-[13px] text-[#c9232c] font-semibold">{error}</p>
-            ) : null}
+            {error ? <p role="alert" className={ERROR}>{error}</p> : null}
 
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={handleApprove}
-                disabled={pending}
-                className="flex-1 py-3.5 rounded-2xl bg-emerald-600 text-white font-bold text-[15px] shadow-[0_8px_20px_-8px_rgba(5,150,105,.55)] active:scale-[.99] transition disabled:opacity-50"
-              >
-                {pending && action === 'approve' ? '…' : 'Approve'}
-              </button>
-              <button
-                type="button"
-                onClick={handleReject}
-                disabled={pending}
-                className="flex-1 py-3.5 rounded-2xl bg-[#c9232c] text-white font-bold text-[15px] shadow-[0_8px_20px_-8px_rgba(201,35,44,.55)] active:scale-[.99] transition disabled:opacity-50"
-              >
-                {pending && action === 'reject' ? '…' : 'Reject'}
-              </button>
-            </div>
-          </>
+            <Decide
+              approve={pending && action === 'approve' ? '…' : 'Approve'}
+              reject={pending && action === 'reject' ? '…' : 'Reject'}
+              disabled={pending}
+              onApprove={handleApprove}
+              onReject={handleReject}
+            />
+          </div>
         )}
       </div>
-    </section>
+    </PaperMain>
   )
 }

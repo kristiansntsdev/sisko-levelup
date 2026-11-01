@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { paper, torn } from '@/components/landing/paper'
@@ -15,11 +16,14 @@ export const PRESS = 'active:scale-[.98] transition'
 export const LIFTED = 'shadow-[0_14px_24px_-10px_rgba(40,30,10,.5)]'
 export const PANEL = `rounded-[14px] bg-[#fffdf7] text-[#161616] ${LIFTED}`
 export const TAPE = 'absolute w-[64px] h-[18px] -rotate-38 bg-[#ffd83d]/85'
+/** Mirrored tape for panels with an icon in their top-left corner. */
+export const TAPE_RIGHT = 'absolute -right-4 -top-1 w-[64px] h-[18px] rotate-38 bg-[#ffd83d]/85'
 export const TORN_EDGE = { clipPath: torn(6, 4, 'lr', 2) }
 // The torn clip-path sits on the inner Strip so it can't cut off the shadow or focus outline set here.
 export const BTN_SHELL = `rounded-sm drop-shadow-[0_5px_8px_rgba(40,30,10,.28)] disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#161616] ${PRESS}`
 export const BTN = `block w-full ${BTN_SHELL}`
 export const ROWS = 'divide-y-2 divide-dotted divide-[#161616]/20'
+export const BTN_OUTLINE = `${ANTON} flex items-center justify-center gap-2 w-full py-3 rounded-sm ring-2 ring-inset ring-[#161616] text-[#161616] text-[16px] tracking-[.03em] disabled:opacity-50 ${PRESS}`
 /** Event registration state: list card stub and detail page stamp. */
 export const REG_TONE = {
   OPEN: 'bg-[#e02a2f] text-white',
@@ -165,6 +169,59 @@ export function PaperField({ label, locked = false, children }: { label: string;
   )
 }
 
+export const ERROR = `${MONO} text-[12px] font-bold text-[#c21f24]`
+
+/** White logo on a torn red chip, as on the landing page: it can't be read directly on paper. */
+export function LogoChip() {
+  return (
+    <Link href="/" aria-label="Beranda LevelUP" className="relative block shrink-0 -rotate-3 drop-shadow-[0_5px_8px_rgba(40,30,10,.28)]">
+      <span className="block bg-[#e02a2f] px-3 py-2" style={{ clipPath: torn(3, 4, 'tblr', 8) }}>
+        <Image src={LOGO} alt="" width={623} height={243} priority className="h-8 w-auto" />
+      </span>
+      <span aria-hidden className="absolute -top-2 left-1/2 -translate-x-1/2 rotate-2 w-12 h-3.5 bg-[#ffd83d]/85" />
+    </Link>
+  )
+}
+
+export function PaperSection({
+  icon,
+  chip,
+  title,
+  sub,
+  taped = false,
+  children,
+}: {
+  icon: IconName
+  chip: string
+  title: string
+  sub: string
+  taped?: boolean
+  children: ReactNode
+}) {
+  return (
+    <section aria-label={title} className={`relative px-4 pt-4 pb-5 ${PANEL}`}>
+      {taped && <span aria-hidden className={`${TAPE} -left-4 -top-1`} />}
+      <div className="flex items-center gap-3 pb-3 mb-4 border-b-2 border-dotted border-[#161616]/25">
+        <Chip name={icon} className={chip} />
+        <div className="min-w-0">
+          <h2 className={`${ANTON} text-[22px] leading-none tracking-[.01em]`}>{title}</h2>
+          <p className={`${MONO} mt-1 text-[11px] text-[#57534e]`}>{sub}</p>
+        </div>
+      </div>
+      <div className="space-y-4">{children}</div>
+    </section>
+  )
+}
+
+export function PaperNote({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex gap-3 rounded-[14px] border-2 border-dotted border-[#161616]/30 p-3.5">
+      <Icon name="alert" className="w-5 h-5 shrink-0 text-[#c21f24]" />
+      <p className={`${MONO} text-[11.5px] leading-relaxed text-[#44403c]`}>{children}</p>
+    </div>
+  )
+}
+
 export function StickerLabel({ children }: { children: ReactNode }) {
   return (
     <p className={`${LABEL} inline-block -rotate-2 bg-[#161616] text-[#fbf6ec] text-[10.5px] font-bold px-3 py-1.5`} style={TORN_EDGE}>
@@ -215,7 +272,7 @@ export function PaperHeader({
         </div>
         {action}
       </div>
-      <div className="mt-1 flex items-start gap-2">
+      <div className="mt-2 flex items-start gap-2">
         {/* Own row and shrink-to-fit, so long names and titles stay on one line down to 360px screens */}
         <h1 className={`${ANTON} min-w-0 truncate text-[#161616] leading-[1.1] tracking-[.01em]`} style={{ fontSize: fit(title, 280, 44) }}>
           {title}
@@ -227,12 +284,13 @@ export function PaperHeader({
   )
 }
 
-export function SectionHead({ title, action }: { title: string; action?: { href: string; label: string } }) {
+export function SectionHead({ title, count, action }: { title: string; count?: number; action?: { href: string; label: string } }) {
   return (
     <div className="flex items-end justify-between gap-3 mb-3">
       <h2 className={`${ANTON} flex items-center gap-2 text-[#161616] text-[26px] leading-none tracking-[.01em]`}>
         {title}
         <Sparkle size={15} fill={RED} />
+        {count != null && <span className={`${MONO} text-[13px] font-bold tracking-normal text-[#57534e]`}>{count}</span>}
       </h2>
       {action && (
         <Link href={action.href} className={`${LABEL} text-[11px] font-bold text-[#161616] underline underline-offset-4 decoration-dotted`}>

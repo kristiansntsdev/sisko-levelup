@@ -12,14 +12,12 @@ import {
   type NasionalEventScope,
 } from '@/lib/event-cabang'
 import { parseLocalDate, type EventSesiInput } from '@/lib/event-sesi'
+import { ANTON, BTN, ERROR, IconButton, LABEL, MONO, PaperHeader, PaperMain, Strip } from '@/components/pwa/paper-ui'
 import {
-  BTN_RED,
   FLD,
   Field,
-  Hero,
   Note,
   SectionCard,
-  TopBar,
   type IconName,
   type Tint,
 } from '@/components/alk-v2/ui'
@@ -462,8 +460,8 @@ export function EventForm({
               onClick={() => setNasionalScope(opt.value)}
               className={
                 v2
-                  ? `w-full text-left px-3.5 py-3 rounded-xl ring-1 transition ${
-                      active ? 'ring-2 ring-[#c9232c] bg-[#fbeceb]/60' : 'ring-slate-200 bg-white'
+                  ? `w-full text-left px-3.5 py-3 rounded-[10px] transition ${
+                      active ? 'ring-2 ring-[#161616] bg-[#ffd83d]/25' : 'ring-1 ring-[#161616]/15 bg-white'
                     }`
                   : `text-left px-3.5 py-3 rounded-[12px] border-[1.5px] transition-colors ${
                       active ? 'border-accent bg-accent-light' : 'border-border bg-surface'
@@ -472,12 +470,12 @@ export function EventForm({
             >
               <p
                 className={`text-[14px] font-semibold ${
-                  active ? (v2 ? 'text-[#c9232c]' : 'text-accent-dark') : v2 ? 'text-slate-800' : 'text-fg'
+                  active ? (v2 ? 'text-[#161616]' : 'text-accent-dark') : v2 ? 'text-[#161616]' : 'text-fg'
                 }`}
               >
                 {opt.label}
               </p>
-              <p className={`text-[12px] mt-0.5 ${v2 ? 'text-slate-500' : 'text-muted'}`}>{opt.hint}</p>
+              <p className={`text-[12px] mt-0.5 ${v2 ? 'text-[#44403c]' : 'text-muted'}`}>{opt.hint}</p>
             </button>
           )
         })}
@@ -635,11 +633,11 @@ export function EventForm({
           title="Sesi Absen"
           sub="Absensi per sesi (Sekretariat)"
         >
-          <p className={`text-[12px] -mt-1 ${v2 ? 'text-slate-500' : 'text-muted'}`}>
+          <p className={`text-[12px] -mt-1 ${v2 ? 'text-[#44403c]' : 'text-muted'}`}>
             Opsional. Kosong = absen sekali per event. Toggle wajib off untuk sesi paralel.
           </p>
           {sesi.length === 0 ? (
-            <p className={`text-[13px] text-center py-2 ${v2 ? 'text-slate-400' : 'text-muted'}`}>
+            <p className={`text-[13px] text-center py-2 ${v2 ? 'text-[#57534e]' : 'text-muted'}`}>
               Belum ada sesi.
             </p>
           ) : (
@@ -649,18 +647,18 @@ export function EventForm({
                   key={row._key}
                   className={
                     v2
-                      ? 'rounded-xl ring-1 ring-slate-200 bg-slate-50/60 p-3 space-y-2.5'
+                      ? 'rounded-[10px] border-2 border-dotted border-[#161616]/25 p-3 space-y-2.5'
                       : 'border border-border rounded-[12px] p-3 flex flex-col gap-2.5 bg-bg'
                   }
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className={`text-[12px] font-semibold ${v2 ? 'text-slate-500' : 'text-muted'}`}>
+                    <p className={`text-[12px] font-semibold ${v2 ? `${ANTON} text-[15px] tracking-[.02em] text-[#161616]` : 'text-muted'}`}>
                       Sesi {idx + 1}
                     </p>
                     <button
                       type="button"
                       onClick={() => setSesi((prev) => prev.filter((s) => s._key !== row._key))}
-                      className={`text-[18px] leading-none ${v2 ? 'text-slate-400 hover:text-rose-600' : 'text-muted hover:text-red'}`}
+                      className={`text-[18px] leading-none ${v2 ? 'text-[#c21f24]' : 'text-muted hover:text-red'}`}
                       aria-label="Hapus sesi"
                     >
                       ×
@@ -736,7 +734,7 @@ export function EventForm({
                     />
                   </div>
                   <label
-                    className={`flex items-center gap-2 text-[13px] cursor-pointer select-none ${v2 ? 'text-slate-700' : 'text-fg'}`}
+                    className={`flex items-center gap-2 text-[13px] cursor-pointer select-none ${v2 ? 'text-[#161616]' : 'text-fg'}`}
                   >
                     <input
                       type="checkbox"
@@ -748,7 +746,7 @@ export function EventForm({
                           ),
                         )
                       }
-                      className={`size-4 ${v2 ? 'accent-[#c9232c]' : 'accent-[var(--accent)]'}`}
+                      className={`size-4 ${v2 ? 'accent-[#e02a2f]' : 'accent-[var(--accent)]'}`}
                     />
                     Wajib (hitung kehadiran lengkap)
                   </label>
@@ -766,7 +764,7 @@ export function EventForm({
             }
             className={
               v2
-                ? 'w-full py-2.5 rounded-xl border border-dashed border-slate-300 text-[13px] font-semibold text-slate-600 hover:border-[#c9232c] hover:text-[#c9232c] transition'
+                ? `${ANTON} w-full py-2.5 rounded-sm ring-2 ring-inset ring-[#161616] text-[15px] tracking-[.03em] text-[#161616] transition active:scale-[.98]`
                 : 'w-full py-2.5 rounded-input border border-dashed border-border text-[13px] font-semibold text-fg2 hover:border-accent hover:text-accent transition-colors'
             }
           >
@@ -797,21 +795,21 @@ export function EventForm({
         {!isOnline && (
           <>
             <div>
-              <p className={`text-[12px] font-semibold mb-1.5 ${v2 ? 'text-slate-600' : 'text-muted font-medium'}`}>
+              <p className={`text-[12px] font-semibold mb-1.5 ${v2 ? 'text-[#44403c]' : 'text-muted font-medium'}`}>
                 Peta — klik atau drag pin untuk set lokasi
               </p>
               <div
                 ref={mapRef}
                 className={
                   v2
-                    ? 'w-full h-[260px] rounded-xl overflow-hidden ring-1 ring-slate-200 bg-slate-100'
+                    ? 'w-full h-[260px] rounded-[10px] overflow-hidden ring-1 ring-[#161616]/15 bg-[#efe8da]/50'
                     : 'w-full rounded-[12px] overflow-hidden border border-border'
                 }
                 style={v2 ? undefined : { height: '260px', background: 'var(--subtle)' }}
               >
                 {!mapsApiKey && (
                   <div className="w-full h-full flex items-center justify-center">
-                    <p className={`text-[13px] ${v2 ? 'text-slate-400' : 'text-muted'}`}>
+                    <p className={`text-[13px] ${v2 ? 'text-[#57534e]' : 'text-muted'}`}>
                       Maps API tidak tersedia.
                     </p>
                   </div>
@@ -825,14 +823,14 @@ export function EventForm({
                   key={k}
                   className={
                     v2
-                      ? 'px-3 py-2.5 bg-slate-50 rounded-xl ring-1 ring-slate-200'
+                      ? 'px-3 py-2.5 rounded-[10px] border-2 border-dotted border-[#161616]/25'
                       : 'px-3 py-2.5 bg-bg border border-border rounded-input'
                   }
                 >
-                  <p className={`text-[10px] ${v2 ? 'text-slate-400' : 'text-muted mb-0.5'}`}>
+                  <p className={`text-[10px] ${v2 ? 'text-[#57534e]' : 'text-muted mb-0.5'}`}>
                     {k === 'lat' ? 'Latitude' : 'Longitude'}
                   </p>
-                  <p className={`text-[13px] font-mono ${v2 ? 'text-slate-800' : 'text-fg'}`}>
+                  <p className={`text-[13px] font-mono ${v2 ? `${MONO} text-[#161616]` : 'text-fg'}`}>
                     {latLng ? latLng[k].toFixed(7) : '—'}
                   </p>
                 </div>
@@ -890,9 +888,9 @@ export function EventForm({
         <FormField v2={v2} label={mode === 'edit' ? 'Upload ulang poster' : 'Flyer Event'}>
           {form.wwtype === 'jfe' && jfeTemplate && (
             <div
-              className={`mb-3 overflow-hidden ${v2 ? 'rounded-xl ring-1 ring-slate-200' : 'rounded-[12px] border border-border'}`}
+              className={`mb-3 overflow-hidden ${v2 ? 'rounded-[10px] ring-1 ring-[#161616]/15' : 'rounded-[12px] border border-border'}`}
             >
-              <p className={`px-3 py-2 text-[12px] ${v2 ? 'text-slate-500' : 'text-muted'}`}>
+              <p className={`px-3 py-2 text-[12px] ${v2 ? 'text-[#44403c]' : 'text-muted'}`}>
                 Flyer pusat WW JFE / WFE. Sesuaikan hanya: foto pembicara, tanggal, tempat, tema, logo
                 kota.
               </p>
@@ -901,7 +899,7 @@ export function EventForm({
             </div>
           )}
           {form.wwtype === 'jfe' && !jfeTemplate && form.tglevent && (
-            <p className={`text-[12px] mb-2 ${v2 ? 'text-slate-500' : 'text-muted'}`}>
+            <p className={`text-[12px] mb-2 ${v2 ? 'text-[#44403c]' : 'text-muted'}`}>
               Belum ada flyer pusat Brim untuk bulan tanggal ini.
             </p>
           )}
@@ -926,7 +924,7 @@ export function EventForm({
             }}
             className={
               v2
-                ? 'text-[13px] text-slate-700 file:mr-3 file:px-3 file:py-1.5 file:rounded-full file:border-0 file:bg-[#c9232c] file:text-white file:text-[13px] file:font-semibold'
+                ? 'text-[12px] text-[#44403c] max-w-full file:mr-3 file:px-3 file:py-1.5 file:rounded-full file:border-0 file:bg-[#161616] file:text-[#ffd83d] file:text-[12px] file:font-bold'
                 : 'text-[13px] text-fg file:mr-3 file:px-3 file:py-1.5 file:rounded-full file:border-0 file:bg-accent file:text-white file:text-[13px] file:font-medium'
             }
           />
@@ -935,7 +933,7 @@ export function EventForm({
             <img
               src={flyerPreview || event!.posterUrl}
               alt="Preview flyer"
-              className={`mt-2 w-full object-cover ${v2 ? 'rounded-xl ring-1 ring-slate-200' : 'rounded-[12px] border border-border'}`}
+              className={`mt-2 w-full object-cover ${v2 ? 'rounded-[10px] ring-1 ring-[#161616]/15' : 'rounded-[12px] border border-border'}`}
             />
           )}
         </FormField>
@@ -945,7 +943,7 @@ export function EventForm({
         <div
           className={
             v2
-              ? 'px-4 py-3 rounded-xl bg-rose-50 text-[13px] text-rose-700 font-medium'
+              ? `${ERROR} px-4 py-3 rounded-[10px] bg-[#e02a2f]/10`
               : 'px-4 py-3 bg-red-light rounded-[12px]'
           }
         >
@@ -964,28 +962,27 @@ export function EventForm({
         disabled={isPending}
         className={
           v2
-            ? `w-full py-4 text-[16px] ${BTN_RED}`
+            ? BTN
             : 'w-full py-4 bg-accent text-white rounded-btn text-[16px] font-semibold disabled:opacity-60 transition-opacity'
         }
       >
-        {submitLabel}
+        {v2 ? <Strip className="py-3.5 text-[20px]">{submitLabel}</Strip> : submitLabel}
       </button>
     </>
   )
 
   if (v2) {
     return (
-      <section className="pb-10">
-        <Hero className="pt-4 md:pt-2 pb-20" decor="-right-6 top-10 w-40">
-          <TopBar title={title} back={() => router.push(backUrl)} />
-          <p className="text-center text-[13px] text-white/80 mt-1">
-            Sekretariat · {mode === 'create' ? 'buat event baru' : 'ubah data event'}
-          </p>
-        </Hero>
-        <form onSubmit={handleSubmit} className="px-5 -mt-12 relative space-y-4">
+      <PaperMain>
+        <PaperHeader
+          sticker={`Sekretariat · ${mode === 'create' ? 'buat event baru' : 'ubah data event'}`}
+          title={title}
+          leading={<IconButton icon="chevronLeft" label="Kembali" onClick={() => router.push(backUrl)} className="-rotate-3" />}
+        />
+        <form onSubmit={handleSubmit} className="px-5 mt-5 pb-10 space-y-5">
           {formBody}
         </form>
-      </section>
+      </PaperMain>
     )
   }
 
@@ -1055,7 +1052,7 @@ function FormField({
     if (group) {
       return (
         <div>
-          <p className="text-[12px] font-semibold text-slate-600 mb-1.5">{label}</p>
+          <p className={`${LABEL} text-[10px] font-bold text-[#44403c] mb-1.5`}>{label}</p>
           {children}
         </div>
       )
@@ -1087,10 +1084,8 @@ function ToggleChip({
       onClick={onClick}
       className={
         v2
-          ? `px-3 py-1.5 rounded-full text-[13px] font-semibold ring-1 transition ${
-              active
-                ? 'bg-[#c9232c] text-white ring-[#c9232c]'
-                : 'bg-slate-50 text-slate-600 ring-slate-200'
+          ? `${MONO} px-3 py-1.5 rounded-full text-[11.5px] font-bold transition ${
+              active ? 'bg-[#161616] text-[#ffd83d]' : 'bg-[#efe8da]/70 text-[#161616]'
             }`
           : `px-3 py-1.5 rounded-full text-[13px] font-medium border transition-colors ${
               active

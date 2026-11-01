@@ -9,54 +9,46 @@ import { createRegistrasi, updatePesertaProfile } from '@/lib/actions/registrasi
 import { completeRegistration } from '@/lib/actions/pwa-auth'
 import { getPesertaById } from '@/lib/actions/peserta'
 import { LEVEL_STEPS, memberCardFromPeserta, type MemberCardData } from '@/lib/pwa-member'
-import { MemberCard } from '@/components/pwa/member-card'
+import { fit, MemberCard } from '@/components/pwa/member-card'
 import {
-  BTN_RED,
-  Field,
-  FLD,
-  GoogleIcon,
-  Hero,
-  Icon,
-  Logo,
-  PAGE_BG,
-  PanelLabel,
-  Sheet,
-  SheetHead,
-  TintIcon,
-  type IconName,
-} from '@/components/pwa/ui'
-import { Note, Row, SectionCard } from '@/components/alk-v2/ui'
+  ANTON,
+  BTN,
+  Chip,
+  ERROR,
+  IconButton,
+  LABEL,
+  LogoChip,
+  MONO,
+  PANEL,
+  PAPER_INPUT,
+  PaperField,
+  PaperMain,
+  PaperNote,
+  PaperSection,
+  ROWS,
+  StickerLabel,
+  Strip,
+  TAPE,
+  TORN_EDGE,
+} from '@/components/pwa/paper-ui'
+import { GoogleIcon, Icon, Sheet, SheetHead, type IconName } from '@/components/pwa/ui'
 
-const MK = 'font-[family-name:var(--font-marker)]'
-const BOX = 'bg-white rounded-3xl shadow-[0_18px_40px_-14px_rgba(80,20,25,.3)]'
 const STEPS = ['Login Google', 'Isi data', 'Kartu jadi']
 const LEVEL_ICON: IconName[] = ['user', 'userPlus', 'users', 'sparkle']
 const BLANK_CARD: MemberCardData = { no: 'LUP-••••', name: 'Namamu di sini', gender: 'L', pob: '—', dob: '—', church: '—', city: '—', tier: 'TAMU' }
+const SUBLABEL = `${LABEL} text-[9.5px] font-bold text-[#57534e]`
 
-function Screen({ children }: { children: ReactNode }) {
-  return (
-    <section className={`min-h-screen ${PAGE_BG} pb-safe font-[family-name:var(--font-proto)] text-slate-800`}>
-      <div className="max-w-[430px] mx-auto">{children}</div>
-    </section>
-  )
+function TopRow({ children }: { children: ReactNode }) {
+  return <div className="flex items-center gap-3 min-h-11">{children}</div>
 }
 
-function TopBar({ back, children }: { back?: () => void; children: ReactNode }) {
-  return (
-    <div className="relative flex items-center justify-center h-11">
-      {back && (
-        <button type="button" onClick={back} aria-label="Kembali" className="absolute left-0 w-10 h-10 -ml-2 flex items-center justify-center rounded-full active:bg-white/10">
-          <Icon name="back" className="w-6 h-6" sw={2.2} />
-        </button>
-      )}
-      {children}
-    </div>
-  )
+function BackButton({ onClick }: { onClick: () => void }) {
+  return <IconButton icon="back" label="Kembali" onClick={onClick} className="-rotate-3" />
 }
 
 function Sticker({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <span className={`inline-block ${MK} uppercase leading-none whitespace-nowrap bg-[#ffd83d] text-[#161616] px-2.5 py-1.5 shadow-[0_6px_14px_-6px_rgba(40,10,10,.55)] ${className}`}>
+    <span className={`inline-block ${ANTON} leading-none whitespace-nowrap tracking-[.03em] bg-[#ffd83d] text-[#161616] px-3 py-1.5 ${className}`} style={TORN_EDGE}>
       {children}
     </span>
   )
@@ -67,10 +59,10 @@ function Progress({ at }: { at: number }) {
     <div className="mt-3" role="progressbar" aria-label="Langkah pendaftaran" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={at + 1}>
       <div className="grid grid-cols-3 gap-1.5">
         {STEPS.map((s, i) => (
-          <span key={s} className={`h-1.5 rounded-full ${i <= at ? 'bg-[#ffd83d]' : 'bg-white/25'}`} />
+          <span key={s} className={`h-1.5 rounded-full ${i <= at ? 'bg-[#e02a2f]' : 'bg-[#161616]/15'}`} />
         ))}
       </div>
-      <p className="mt-2 text-[11.5px] font-semibold text-white/80">
+      <p className={`${MONO} mt-2 text-[11px] font-bold text-[#44403c]`}>
         Langkah {at + 1} dari {STEPS.length} · {STEPS[at]}
       </p>
     </div>
@@ -79,10 +71,10 @@ function Progress({ at }: { at: number }) {
 
 function Headline({ sticker, title, sub }: { sticker: string; title: ReactNode; sub: ReactNode }) {
   return (
-    <div className="mt-6 text-center">
-      <Sticker className="-rotate-3 text-[13px]">{sticker}</Sticker>
-      <h1 className={`${MK} mt-3 text-[clamp(2.4rem,12vw,3.25rem)] leading-[.95] uppercase break-words`}>{title}</h1>
-      <p className="mt-3 text-[14px] leading-relaxed text-white/85 max-w-[310px] mx-auto">{sub}</p>
+    <div className="mt-5">
+      <Sticker className="-rotate-2 text-[14px]">{sticker}</Sticker>
+      <h1 className={`${ANTON} mt-3 text-[#161616] text-[52px] leading-[1.03] tracking-[.01em] break-words`}>{title}</h1>
+      <p className={`${MONO} mt-2 text-[12.5px] leading-relaxed text-[#44403c]`}>{sub}</p>
     </div>
   )
 }
@@ -91,7 +83,7 @@ function CardPreview({ card, tag }: { card: MemberCardData; tag: string }) {
   return (
     <div className="relative -rotate-2">
       <MemberCard m={card} />
-      <Sticker className="absolute -top-5 right-4 rotate-6 text-[11px]">{tag}</Sticker>
+      <Sticker className="absolute -top-5 right-4 rotate-6 text-[12px]">{tag}</Sticker>
     </div>
   )
 }
@@ -101,29 +93,38 @@ function LevelPath({ tag }: { tag: string }) {
     <ol aria-label="Jalur level anggota" className="mt-2 flex items-start pt-7">
       {LEVEL_STEPS.map(([, label], i) => (
         <Fragment key={label}>
-          <li className="relative w-14 shrink-0 flex flex-col items-center gap-1.5">
-            {i === 0 && <Sticker className="absolute -top-7 left-0 -rotate-6 text-[10px] px-2 py-1">{tag}</Sticker>}
-            <span
-              className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                i === 0 ? 'bg-[#c9232c] text-white ring-4 ring-[#fbeceb]' : 'bg-[#f8f0dd] text-[#96792a] ring-1 ring-[#ecdcb3]'
-              }`}
-            >
+          <li className="relative w-[60px] shrink-0 flex flex-col items-center gap-1.5">
+            {i === 0 && <Sticker className="absolute -top-7 left-0 -rotate-6 text-[11px] px-2 py-1">{tag}</Sticker>}
+            <span className={`w-10 h-10 rounded-full flex items-center justify-center ${i === 0 ? 'bg-[#e02a2f] text-white outline-2 outline-offset-2 outline-[#e02a2f]' : 'bg-[#161616]/[.07] text-[#161616]'}`}>
               <Icon name={LEVEL_ICON[i]} className="w-5 h-5" />
             </span>
-            <span className={`text-[11.5px] font-bold ${i === 0 ? 'text-[#c9232c]' : 'text-[#96792a]'}`}>{label}</span>
+            <span className={`${ANTON} mt-0.5 text-[12.5px] tracking-[.03em] ${i === 0 ? 'text-[#161616]' : 'text-[#57534e]'}`}>{label}</span>
           </li>
-          {i < LEVEL_STEPS.length - 1 && <li aria-hidden className="flex-1 mt-5 border-t-2 border-dashed border-[#e7d9b8]" />}
+          {i < LEVEL_STEPS.length - 1 && <li aria-hidden className="flex-1 mt-5 border-t-2 border-dotted border-[#161616]/30" />}
         </Fragment>
       ))}
     </ol>
   )
 }
 
+function NextRow({ icon, chip, title, sub, onClick }: { icon: IconName; chip: string; title: string; sub: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="w-full flex items-center gap-3 py-3 text-left">
+      <Chip name={icon} className={chip} />
+      <span className="flex-1 min-w-0">
+        <span className={`${ANTON} block text-[16px] leading-tight tracking-[.02em]`}>{title}</span>
+        <span className={`${MONO} block mt-0.5 text-[11px] text-[#44403c]`}>{sub}</span>
+      </span>
+      <Icon name="chevron" className="w-5 h-5 shrink-0" sw={2} />
+    </button>
+  )
+}
+
 function Loading() {
   return (
-    <main className={`min-h-screen ${PAGE_BG} flex items-center justify-center`}>
-      <p className="text-sm text-slate-500">Memuat...</p>
-    </main>
+    <PaperMain standalone>
+      <p className={`${LABEL} m-auto text-[12px] text-[#57534e]`}>Memuat...</p>
+    </PaperMain>
   )
 }
 
@@ -150,17 +151,13 @@ function KotaPicker({
 
   return (
     <>
-      <Field label="LevelUP Kota (opsional)">
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className={`${FLD} flex items-center gap-2 text-left ${selected ? 'text-slate-900' : 'text-slate-400'}`}
-        >
-          <Icon name="pin" className={`w-[18px] h-[18px] shrink-0 ${selected ? 'text-[#c9232c]' : 'text-slate-400'}`} />
-          <span className="flex-1 min-w-0 truncate font-medium">{selected?.nama ?? 'Cari LevelUP kota...'}</span>
-          <Icon name="search" className="w-4 h-4 text-slate-400 shrink-0" />
+      <PaperField label="LevelUP Kota (opsional)">
+        <button type="button" onClick={() => setOpen(true)} className={`${PAPER_INPUT} flex items-center gap-2 text-left ${selected ? '' : 'text-[#57534e]'}`}>
+          <Icon name="pin" className={`w-[18px] h-[18px] shrink-0 ${selected ? 'text-[#c21f24]' : ''}`} />
+          <span className="flex-1 min-w-0 truncate">{selected?.nama ?? 'Cari LevelUP kota...'}</span>
+          <Icon name="search" className="w-4 h-4 shrink-0" />
         </button>
-      </Field>
+      </PaperField>
       <Sheet
         open={open}
         onClose={() => {
@@ -169,23 +166,23 @@ function KotaPicker({
         }}
       >
         <SheetHead title="Pilih LevelUP Kota" sub="Ketik nama kota buat nyari lebih cepet" />
-        <label className="flex items-center gap-2.5 rounded-full bg-slate-50 ring-1 ring-slate-200 px-4 py-3 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#c9232c] transition">
-          <Icon name="search" className="w-5 h-5 text-[#c9232c]" />
+        <label className="flex items-center gap-2.5 rounded-full bg-[#efe8da]/50 ring-1 ring-[#161616]/15 px-4 py-3 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#161616] transition">
+          <Icon name="search" className="w-5 h-5 shrink-0 text-[#c21f24]" sw={2.2} />
           <input
             type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Cari kota..."
             autoFocus
-            className="flex-1 min-w-0 bg-transparent outline-none text-[16px] placeholder:text-slate-400"
+            className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-[#161616] placeholder:text-[#57534e]/75"
           />
           {q && (
-            <button type="button" onClick={() => setQ('')} aria-label="Hapus pencarian" className="text-slate-400 active:text-slate-600">
+            <button type="button" onClick={() => setQ('')} aria-label="Hapus pencarian" className="text-[#57534e]">
               <Icon name="x" className="w-5 h-5" />
             </button>
           )}
         </label>
-        <div className="mt-3 space-y-2 max-h-[50vh] overflow-y-auto -mx-1 px-1">
+        <div className="mt-3 space-y-2 max-h-[50vh] overflow-y-auto -mx-1 px-1 py-0.5">
           {shown.length ? (
             shown.map((c) => {
               const on = c.id === value
@@ -194,18 +191,16 @@ function KotaPicker({
                   key={c.id}
                   type="button"
                   onClick={() => pick(c.id)}
-                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-left transition ${
-                    on ? 'ring-2 ring-[#c9232c] bg-[#fbeceb]/60' : 'ring-1 ring-[#efe3cc] bg-white'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-left transition ${on ? 'ring-2 ring-[#161616] bg-[#ffd83d]/25' : 'ring-1 ring-[#161616]/15 bg-white'}`}
                 >
-                  <TintIcon name="pin" tint={on ? 'red' : 'gold'} size="w-9 h-9 rounded-xl" icon="w-[18px] h-[18px]" />
-                  <span className={`flex-1 min-w-0 font-bold text-[14.5px] truncate ${on ? 'text-[#c9232c]' : 'text-[#3b1417]'}`}>{c.nama}</span>
-                  {on && <Icon name="check" className="w-5 h-5 text-[#c9232c] shrink-0" sw={2.6} />}
+                  <Chip name="pin" className={on ? 'bg-[#ffd83d] text-[#161616]' : 'bg-[#161616]/[.07] text-[#161616]'} />
+                  <span className="flex-1 min-w-0 font-bold text-[14.5px] text-[#161616] truncate">{c.nama}</span>
+                  {on && <Icon name="check" className="w-5 h-5 text-[#161616] shrink-0" sw={2.6} />}
                 </button>
               )
             })
           ) : (
-            <p className="text-center text-[13px] text-slate-400 py-8">Gak ketemu “{q.trim()}”</p>
+            <p className={`${MONO} text-center text-[12px] text-[#57534e] py-8`}>Gak ketemu “{q.trim()}”</p>
           )}
         </div>
       </Sheet>
@@ -221,11 +216,12 @@ function DaftarIntro() {
     ['card', 'Kartu anggota langsung jadi', 'Mulai sebagai Tamu, terus naik level bareng LevelUP kotamu.'],
   ]
   return (
-    <Screen>
-      <Hero className="pt-3 pb-32" decor="-right-10 top-16 w-44">
-        <TopBar back={() => (window.history.length > 1 ? router.back() : router.push('/'))}>
-          <Logo className="h-7 w-auto" />
-        </TopBar>
+    <PaperMain standalone>
+      <header className="px-5 pt-4">
+        <TopRow>
+          <BackButton onClick={() => (window.history.length > 1 ? router.back() : router.push('/'))} />
+          <LogoChip />
+        </TopRow>
         <Progress at={0} />
         <Headline
           sticker="Gratis · cuma 1 menit"
@@ -233,54 +229,51 @@ function DaftarIntro() {
             <>
               Gabung
               <br />
-              Level <span className="inline-block text-[#ffd83d] text-[1.2em] -rotate-6">UP</span>
+              Level <span className="inline-block text-[#e02a2f] text-[1.2em] -rotate-6">UP</span>
             </>
           }
           sub="Jadi bagian dari The Jeremiah Generation — anak muda yang jalan bareng di kotamu."
         />
-      </Hero>
-      <div className="px-5 -mt-24 relative space-y-6">
+      </header>
+      <div className="px-5 mt-7 space-y-6 pb-[max(env(safe-area-inset-bottom),32px)]">
         <CardPreview card={BLANK_CARD} tag="kartumu nunggu nih" />
-        <div className={`${BOX} p-6`}>
-          <h2 className="font-extrabold text-[19px] text-[#3b1417]">Gampang, 3 langkah doang</h2>
+        <section aria-label="Cara daftar" className={`relative p-5 ${PANEL}`}>
+          <span aria-hidden className={`${TAPE} -left-4 -top-1`} />
+          <h2 className={`${ANTON} text-[24px] leading-none tracking-[.01em]`}>Gampang, 3 langkah doang</h2>
           <ol className="mt-5 space-y-4">
             {steps.map(([icon, t, d], n) => (
               <li key={t} className="flex gap-3">
-                <span className="relative">
-                  <TintIcon name={icon} tint={n === 0 ? 'red' : 'gold'} />
-                  <span className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-[#3b1417] text-[#ffd83d] text-[10.5px] font-bold flex items-center justify-center">
-                    {n + 1}
-                  </span>
+                <span className="relative shrink-0">
+                  <Chip name={icon} className={n === 0 ? 'bg-[#e02a2f] text-white' : 'bg-[#ffd83d] text-[#161616]'} />
+                  <span className={`${ANTON} absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-[#161616] text-[#ffd83d] text-[11px] flex items-center justify-center`}>{n + 1}</span>
                 </span>
                 <span className="min-w-0">
-                  <span className="block font-bold text-[14.5px] text-[#3b1417]">{t}</span>
-                  <span className="block text-[12.5px] text-slate-500 mt-0.5">{d}</span>
+                  <span className={`${ANTON} block text-[16px] leading-tight tracking-[.02em]`}>{t}</span>
+                  <span className={`${MONO} block text-[11.5px] leading-snug text-[#44403c] mt-1`}>{d}</span>
                 </span>
               </li>
             ))}
           </ol>
-          <div className="h-px bg-[#f1e7d6] my-5" />
-          <PanelLabel>Jalur level kamu</PanelLabel>
+          <div className="my-5 border-t-2 border-dotted border-[#161616]/25" />
+          <p className={SUBLABEL}>Jalur level kamu</p>
           <LevelPath tag="start" />
-          <button
-            type="button"
-            onClick={() => signIn('google', { callbackUrl: '/daftar?step=form' })}
-            className={`mt-6 w-full py-3.5 flex items-center justify-center gap-2 ${BTN_RED}`}
-          >
-            <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-              <GoogleIcon className="w-4 h-4" />
-            </span>
-            Gas, daftar pakai Google
+          <button type="button" onClick={() => signIn('google', { callbackUrl: '/daftar?step=form' })} className={`mt-6 ${BTN}`}>
+            <Strip>
+              <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                <GoogleIcon className="w-4 h-4" />
+              </span>
+              Gas, daftar pakai Google
+            </Strip>
           </button>
-        </div>
-        <p className="text-center text-[13px] text-slate-500">
+        </section>
+        <p className={`${MONO} text-center text-[12px] text-[#44403c]`}>
           Udah punya akun?{' '}
-          <Link href="/login" className="font-semibold text-[#c9232c]">
+          <Link href="/login" className="font-bold text-[#c21f24] underline underline-offset-4 decoration-dotted">
             Masuk
           </Link>
         </p>
       </div>
-    </Screen>
+    </PaperMain>
   )
 }
 
@@ -401,11 +394,11 @@ function DaftarFormInner() {
   if (done) {
     const first = nama.trim().split(/\s+/)[0] || 'teman'
     return (
-      <Screen>
-        <Hero className="pt-3 pb-32" decor="-right-10 top-16 w-44">
-          <TopBar>
-            <Logo className="h-7 w-auto" />
-          </TopBar>
+      <PaperMain standalone>
+        <header className="px-5 pt-4">
+          <TopRow>
+            <LogoChip />
+          </TopRow>
           <Progress at={2} />
           <Headline
             sticker="Resmi gabung!"
@@ -413,91 +406,94 @@ function DaftarFormInner() {
               <>
                 Welcome,
                 <br />
-                <span className="text-[#ffd83d]">{first}!</span>
+                <span className="text-[#e02a2f]" style={{ fontSize: fit(`${first}!`, 330, 52) }}>
+                  {first}!
+                </span>
               </>
             }
-            sub={<>Kartu anggotamu udah jadi. Sekarang kamu bagian dari <b className="text-white">{city || 'LevelUP'}</b>.</>}
+            sub={<>Kartu anggotamu udah jadi. Sekarang kamu bagian dari <b className="text-[#161616]">{city || 'LevelUP'}</b>.</>}
           />
-        </Hero>
-        <div className="px-5 -mt-24 relative space-y-6">
+        </header>
+        <div className="px-5 mt-7 space-y-6 pb-[max(env(safe-area-inset-bottom),32px)]">
           <div className="motion-safe:animate-[proto-pop_.4s_ease]">
             <CardPreview card={card} tag="new member" />
           </div>
-          <div className={`${BOX} p-5`}>
-            <PanelLabel>Level kamu</PanelLabel>
+          <section aria-label="Level dan langkah berikutnya" className={`p-5 ${PANEL}`}>
+            <p className={SUBLABEL}>Level kamu</p>
             <LevelPath tag="kamu di sini" />
-            <div className="h-px bg-[#f1e7d6] my-4" />
-            <PanelLabel>Next up</PanelLabel>
-            <div className="-mx-4 mt-1 divide-y divide-slate-100">
+            <div className="my-4 border-t-2 border-dotted border-[#161616]/25" />
+            <p className={SUBLABEL}>Next up</p>
+            <div className={`mt-1 ${ROWS}`}>
               {eventId ? (
-                <Row icon="ticket" title="Tiketmu udah aman" sub="Cek QR-nya di menu Tiket" onClick={() => router.push('/dashboard/tiket')} />
+                <NextRow icon="ticket" chip="bg-[#e02a2f] text-white" title="Tiketmu udah aman" sub="Cek QR-nya di menu Tiket" onClick={() => router.push('/dashboard/tiket')} />
               ) : (
-                <Row icon="ticket" title="Cari event di kotamu" sub="Ambil tiket, dateng, scan QR" onClick={() => router.push('/events')} />
+                <NextRow icon="ticket" chip="bg-[#e02a2f] text-white" title="Cari event di kotamu" sub="Ambil tiket, dateng, scan QR" onClick={() => router.push('/events')} />
               )}
-              <Row icon="userPlus" tint="gold" title="Naik ke Volunteer" sub="Tinggal klik Join Volunteer di Beranda" onClick={() => router.push('/dashboard')} />
+              <NextRow icon="userPlus" chip="bg-[#ffd83d] text-[#161616]" title="Naik ke Volunteer" sub="Tinggal klik Join Volunteer di Beranda" onClick={() => router.push('/dashboard')} />
             </div>
-          </div>
-          <button type="button" onClick={() => router.push('/dashboard')} className={`w-full py-3.5 ${BTN_RED}`}>
-            Masuk ke Beranda
+          </section>
+          <button type="button" onClick={() => router.push('/dashboard')} className={BTN}>
+            <Strip>Masuk ke Beranda</Strip>
           </button>
         </div>
-      </Screen>
+      </PaperMain>
     )
   }
 
   return (
-    <Screen>
-      <Hero className="pt-3 pb-32" decor="-right-10 top-16 w-44">
-        <TopBar back={() => router.push(eventId ? `/join/${eventId}` : '/login')}>
-          <h2 className="font-bold text-[17px]">Isi Data Diri</h2>
-        </TopBar>
+    <PaperMain standalone>
+      <header className="px-5 pt-4">
+        <TopRow>
+          <BackButton onClick={() => router.push(eventId ? `/join/${eventId}` : '/login')} />
+          <StickerLabel>Isi Data Diri</StickerLabel>
+        </TopRow>
         <Progress at={1} />
         <Headline sticker="Hampir kelar" title="Kenalan dulu, yuk!" sub="Kartumu ke-update langsung pas kamu ngetik." />
-      </Hero>
-      <form onSubmit={handleSubmit} noValidate className="px-5 -mt-24 relative space-y-5">
+      </header>
+      <form onSubmit={handleSubmit} noValidate className="px-5 mt-7 space-y-5 pb-[max(env(safe-area-inset-bottom),32px)]">
         <CardPreview card={card} tag="live preview" />
-        <SectionCard lift icon="user" tint="red" title="Tentang kamu" sub="Nama & WA buat info event">
+        <PaperSection taped icon="user" chip="bg-[#e02a2f] text-white" title="Tentang kamu" sub="Nama & WA buat info event">
           {session?.user?.email && (
-            <div className="flex items-center gap-3 rounded-2xl bg-[#faf7f2] ring-1 ring-[#efe3cc] p-3">
+            <div className="flex items-center gap-3 rounded-[10px] border-2 border-dotted border-[#161616]/25 p-3">
               <GoogleIcon className="w-5 h-5 shrink-0" />
               <span className="min-w-0">
-                <span className="block text-[11px] font-bold tracking-[.12em] uppercase text-[#96792a]">Akun Google</span>
-                <span className="block text-[13.5px] font-semibold text-slate-800 truncate">{session.user.email}</span>
+                <span className={`${SUBLABEL} block`}>Akun Google</span>
+                <span className={`${MONO} block text-[12.5px] font-bold break-words`}>{session.user.email}</span>
               </span>
             </div>
           )}
-          <Field label="Nama lengkap">
-            <input className={FLD} autoComplete="name" placeholder="Nama lengkap" value={nama} onChange={(e) => setNama(e.target.value)} />
-          </Field>
-          <Field label="Nomor WA (opsional)">
-            <input className={FLD} type="tel" inputMode="tel" autoComplete="tel" placeholder="08123456789" value={nowa} onChange={(e) => setNowa(e.target.value)} />
-          </Field>
-        </SectionCard>
-        <SectionCard icon="pin" tint="gold" title="Komunitasmu" sub="Biar nyambung sama LevelUP kotamu">
+          <PaperField label="Nama lengkap">
+            <input className={PAPER_INPUT} autoComplete="name" placeholder="Nama lengkap" value={nama} onChange={(e) => setNama(e.target.value)} />
+          </PaperField>
+          <PaperField label="Nomor WA (opsional)">
+            <input className={PAPER_INPUT} type="tel" inputMode="tel" autoComplete="tel" placeholder="08123456789" value={nowa} onChange={(e) => setNowa(e.target.value)} />
+          </PaperField>
+        </PaperSection>
+        <PaperSection icon="pin" chip="bg-[#ffd83d] text-[#161616]" title="Komunitasmu" sub="Biar nyambung sama LevelUP kotamu">
           <KotaPicker cabangs={cabangs} value={kotalevelup} onChange={setKotalevelup} />
-          <Field label="Gereja">
-            <input className={FLD} placeholder="Nama gereja" value={gereja} onChange={(e) => setGereja(e.target.value)} />
-          </Field>
-          <Field label="Sekolah / Kampus / Tempat Kerja">
-            <input className={FLD} placeholder="cth: SMAN 1 Ngawi, UNIPMA, PT Maju Jaya" value={sekolah} onChange={(e) => setSekolah(e.target.value)} />
-          </Field>
-          <p className="-mt-2 text-[12px] text-slate-500">Boleh nama lengkap atau singkatan — tipenya kedeteksi otomatis.</p>
-        </SectionCard>
+          <PaperField label="Gereja">
+            <input className={PAPER_INPUT} placeholder="Nama gereja" value={gereja} onChange={(e) => setGereja(e.target.value)} />
+          </PaperField>
+          <PaperField label="Sekolah / Kampus / Tempat Kerja">
+            <input className={`${PAPER_INPUT} placeholder:text-[13px]`} placeholder="cth: SMAN 1 Ngawi, UNIPMA, PT Maju Jaya" value={sekolah} onChange={(e) => setSekolah(e.target.value)} />
+          </PaperField>
+          <p className={`${MONO} -mt-2 text-[11px] leading-snug text-[#44403c]`}>Boleh nama lengkap atau singkatan — tipenya kedeteksi otomatis.</p>
+        </PaperSection>
         {needsReg && (
-          <Note>
+          <PaperNote>
             Kamu mulai sebagai <b>Tamu</b>. Abis ini tinggal <b>Join Volunteer</b> di Beranda, terus ajukan <b>Squad</b> ke LevelUP kotamu.
-          </Note>
+          </PaperNote>
         )}
         {error && (
-          <p role="alert" className="px-4 py-3 rounded-xl bg-rose-50 ring-1 ring-rose-200 text-[13px] text-rose-700 font-medium">
+          <p role="alert" className={`${ERROR} rounded-[10px] bg-[#e02a2f]/10 px-4 py-3`}>
             {error}
           </p>
         )}
-        <button type="submit" disabled={loading} className={`w-full py-3.5 ${BTN_RED}`}>
-          {loading ? 'Lagi nyetak kartumu…' : eventId ? 'Daftar & ambil tiket' : needsReg ? 'Gas, bikin kartuku' : 'Simpan'}
+        <button type="submit" disabled={loading} className={BTN}>
+          <Strip>{loading ? 'Lagi nyetak kartumu…' : eventId ? 'Daftar & ambil tiket' : needsReg ? 'Gas, bikin kartuku' : 'Simpan'}</Strip>
         </button>
       </form>
-    </Screen>
+    </PaperMain>
   )
 }
 

@@ -4,20 +4,8 @@ import { createAbsen, getPesertaPreview, getRecentAbsenForEvent, type RecentAbse
 import { getEventLocation, getEventSesi } from '@/lib/actions/event'
 import type { EventSesiRow } from '@/lib/event-sesi'
 import { decodeQR, type QRPayload } from '@/lib/qr'
-import {
-  Avatar,
-  CARD,
-  DateBlock,
-  Empty,
-  FLD,
-  Field,
-  Hero,
-  Icon,
-  PageHero,
-  Sheet,
-  SheetHead,
-  Toast,
-} from './ui'
+import { ANTON, BTN, BTN_OUTLINE, BTN_SHELL, ERROR, LABEL, MONO, PANEL, PaperHeader, PaperMain, PRESS, ROWS, SectionHead, Strip } from '@/components/pwa/paper-ui'
+import { DateBlock, Empty, FLD, Field, Icon, PersonChip, Sheet, SheetHead, Toast } from './ui'
 
 export type ScanEvent = {
   id_event: number
@@ -87,8 +75,8 @@ function EventPickSheet({
   return (
     <>
       <SheetHead title="Pilih Event" sub="Cari nama, nomor, atau tanggal" />
-      <label className={`flex items-center gap-2.5 ${CARD} px-3.5 py-3 mb-3`}>
-        <Icon name="search" className="w-5 h-5 text-slate-400" />
+      <label className="flex items-center gap-2.5 rounded-full bg-[#efe8da]/50 ring-1 ring-[#161616]/15 px-4 py-3 mb-3 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#161616] transition">
+        <Icon name="search" className="w-5 h-5 shrink-0 text-[#c21f24]" sw={2.2} />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -96,10 +84,10 @@ function EventPickSheet({
           placeholder="Cari event..."
           enterKeyHint="search"
           autoFocus
-          className="flex-1 min-w-0 outline-none text-[15px] bg-transparent"
+          className="flex-1 min-w-0 outline-none text-[16px] text-[#161616] bg-transparent placeholder:text-[#57534e]/75"
         />
       </label>
-      <div className="space-y-2 max-h-[50vh] overflow-y-auto">
+      <div className="space-y-2 max-h-[50vh] overflow-y-auto px-0.5 py-0.5">
         {list.length === 0 && <Empty>Tidak ada event cocok</Empty>}
         {list.map((x) => {
           const on = x.id_event === value
@@ -113,19 +101,17 @@ function EventPickSheet({
                 onClose()
               }}
               className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-left transition ${
-                on ? 'ring-2 ring-[#c9232c] bg-[#fbeceb]/60' : 'ring-1 ring-[#efe3cc] bg-white'
+                on ? 'ring-2 ring-[#161616] bg-[#ffd83d]/25' : 'ring-1 ring-[#161616]/15 bg-white'
               }`}
             >
               <DateBlock d={d} m={m} tone="red" />
               <span className="flex-1 min-w-0">
-                <span className={`block font-bold text-[14.5px] truncate ${on ? 'text-[#c9232c]' : 'text-[#3b1417]'}`}>
-                  {x.nama_event}
-                </span>
-                <span className="block text-[12px] text-slate-500 truncate">
+                <span className={`${ANTON} block text-[16px] tracking-[.01em] text-[#161616] truncate`}>{x.nama_event}</span>
+                <span className={`${MONO} block text-[11px] text-[#44403c] truncate mt-0.5`}>
                   #{x.id_event} · {x.jamevent}–{x.jamselesaievent}
                 </span>
               </span>
-              {on && <Icon name="check" className="w-5 h-5 text-[#c9232c]" sw={2.6} />}
+              {on && <Icon name="check" className="w-5 h-5 shrink-0 text-[#161616]" sw={2.6} />}
             </button>
           )
         })}
@@ -137,10 +123,10 @@ function EventPickSheet({
 function CamCorners() {
   return (
     <>
-      <span className="pointer-events-none absolute top-4 left-4 w-9 h-9 border-t-4 border-l-4 border-[#e6cd7e] rounded-tl-xl" />
-      <span className="pointer-events-none absolute top-4 right-4 w-9 h-9 border-t-4 border-r-4 border-[#e6cd7e] rounded-tr-xl" />
-      <span className="pointer-events-none absolute bottom-4 left-4 w-9 h-9 border-b-4 border-l-4 border-[#e6cd7e] rounded-bl-xl" />
-      <span className="pointer-events-none absolute bottom-4 right-4 w-9 h-9 border-b-4 border-r-4 border-[#e6cd7e] rounded-br-xl" />
+      <span className="pointer-events-none absolute top-4 left-4 w-9 h-9 border-t-4 border-l-4 border-[#ffd83d] rounded-tl-xl" />
+      <span className="pointer-events-none absolute top-4 right-4 w-9 h-9 border-t-4 border-r-4 border-[#ffd83d] rounded-tr-xl" />
+      <span className="pointer-events-none absolute bottom-4 left-4 w-9 h-9 border-b-4 border-l-4 border-[#ffd83d] rounded-bl-xl" />
+      <span className="pointer-events-none absolute bottom-4 right-4 w-9 h-9 border-b-4 border-r-4 border-[#ffd83d] rounded-br-xl" />
     </>
   )
 }
@@ -529,7 +515,11 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
   }
 
   if (!e) {
-    return <section><PageHero title="Scan Absensi" sub="Belum ada event yang bisa diabsen" /></section>
+    return (
+      <PaperMain>
+        <PaperHeader sticker="Belum ada event yang bisa diabsen" title="Scan Absensi" />
+      </PaperMain>
+    )
   }
 
   const { d, m } = monDay(e.tglMs)
@@ -540,14 +530,10 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
     <>
       {cam === 'off' && !fullscreen && (
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 text-white/80">
-          <Icon name="camera" className="w-10 h-10 text-[#e6cd7e]" />
-          <p className="text-[13px] mt-3">Scan QR di tiket peserta</p>
-          <button
-            type="button"
-            onClick={() => void startCamera()}
-            className="mt-4 px-5 py-2.5 rounded-full bg-[#c9232c] text-white font-bold text-[14px]"
-          >
-            Nyalakan Kamera
+          <Icon name="camera" className="w-10 h-10 text-[#ffd83d]" />
+          <p className="text-[12px] mt-3">Scan QR di tiket peserta</p>
+          <button type="button" onClick={() => void startCamera()} className={`mt-4 ${BTN_SHELL}`}>
+            <Strip className="px-6 py-2.5 text-[17px]">Nyalakan Kamera</Strip>
           </button>
         </div>
       )}
@@ -558,23 +544,19 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
       )}
       {(cam === 'error' || cam === 'unsupported') && (
         <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
-          <p className="text-[13px] text-rose-200">
+          <p className="text-[12px] text-white/90">
             {cam === 'unsupported'
               ? 'Browser tidak mendukung scan QR. Gunakan Chrome atau Safari terbaru.'
               : error}
           </p>
-          <button
-            type="button"
-            onClick={() => void startCamera()}
-            className="mt-4 px-5 py-2.5 rounded-full bg-[#c9232c] text-white font-bold text-[14px]"
-          >
-            Coba Lagi
+          <button type="button" onClick={() => void startCamera()} className={`mt-4 ${BTN_SHELL}`}>
+            <Strip className="px-6 py-2.5 text-[17px]">Coba Lagi</Strip>
           </button>
         </div>
       )}
       {cam === 'on' && (
         <div className="absolute inset-0 flex items-end justify-center pb-6 pointer-events-none">
-          <div className="absolute left-[12%] right-[12%] top-[40%] h-0.5 bg-linear-to-r from-transparent via-[#e6cd7e] to-transparent shadow-[0_0_12px_#e6cd7e]" />
+          <div className="absolute left-[12%] right-[12%] top-[40%] h-0.5 bg-linear-to-r from-transparent via-[#ffd83d] to-transparent shadow-[0_0_12px_#ffd83d]" />
           <p className="relative text-[12px] text-white/60">Arahkan kamera ke QR Code tiket</p>
         </div>
       )}
@@ -583,18 +565,15 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
   )
 
   return (
-    <section>
+    <PaperMain>
       {!fullscreen && (
         <>
-          <Hero className="pt-6 md:pt-4 pb-36 text-center" decor="-left-6 top-10 w-40">
-            <h2 className="font-extrabold text-[22px]">Scan Absensi</h2>
-            <p className="text-[13px] text-white/90 mt-2 font-semibold">
-              {e.nama_event} · <span className="text-[#f1dc9a]">{hadir} hadir</span>
-            </p>
-          </Hero>
+          <PaperHeader sticker={`${hadir} hadir`} title="Scan Absensi">
+            <p className={`${MONO} mt-1 text-[12px] font-bold text-[#44403c] truncate`}>{e.nama_event}</p>
+          </PaperHeader>
 
-          <div className="px-5 -mt-28 relative space-y-4 pb-4">
-            <div className="bg-white rounded-3xl shadow-[0_18px_40px_-14px_rgba(80,20,25,.35)] p-4">
+          <div className="px-5 mt-5 space-y-4 pb-4">
+            <div className={`p-4 ${PANEL}`}>
               <div className="space-y-3">
                 <Field label="Event">
                   <button
@@ -605,7 +584,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                     <span className="flex-1 truncate">
                       #{e.id_event} · {e.nama_event} ({+d} {m.charAt(0) + m.slice(1).toLowerCase()})
                     </span>
-                    <Icon name="chevron" className="w-5 h-5 text-slate-400 shrink-0" sw={2} />
+                    <Icon name="chevron" className="w-5 h-5 text-[#161616] shrink-0" sw={2} />
                   </button>
                 </Field>
 
@@ -629,11 +608,11 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                 )}
 
                 <p
-                  className={`flex items-center gap-1.5 text-[12px] font-semibold ${
-                    online ? 'text-slate-500' : loc === 'outside' ? 'text-rose-600' : 'text-emerald-600'
+                  className={`flex items-center gap-1.5 text-[11px] font-bold ${
+                    online ? 'text-[#44403c]' : loc === 'outside' ? 'text-[#c21f24]' : 'text-[#161616]'
                   }`}
                 >
-                  <Icon name={online ? 'monitor' : 'pin'} className="w-4 h-4" />
+                  <Icon name={online ? 'monitor' : 'pin'} className="w-4 h-4 shrink-0" />
                   {online
                     ? 'Event online — tanpa cek lokasi'
                     : loc === 'outside'
@@ -648,22 +627,22 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                 </p>
 
                 {preview ? (
-                  <div className="rounded-2xl ring-1 ring-slate-200 p-4 space-y-3">
+                  <div className="rounded-[14px] border-2 border-dotted border-[#161616]/30 p-4 space-y-3">
                     <div>
-                      <p className="text-[11px] text-slate-400 uppercase tracking-wider">Peserta ditemukan</p>
-                      <p className="text-[18px] font-bold text-slate-800">{preview.nama}</p>
-                      {preview.gereja && <p className="text-[13px] text-slate-500">{preview.gereja}</p>}
+                      <p className={`${LABEL} text-[9.5px] text-[#57534e]`}>Peserta ditemukan</p>
+                      <p className={`${ANTON} mt-1 text-[26px] leading-[1.08] tracking-[.01em] break-words`}>{preview.nama}</p>
+                      {preview.gereja && <p className="text-[12px] text-[#44403c] mt-1">{preview.gereja}</p>}
                     </div>
-                    <p className="flex items-center gap-1.5 text-[12px] text-emerald-600 font-semibold">
-                      <Icon name="check" className="w-4 h-4" sw={2.6} />
+                    <p className="flex items-center gap-1.5 text-[11.5px] font-bold">
+                      <Icon name="check" className="w-4 h-4 shrink-0 text-[#c21f24]" sw={2.8} />
                       Event #{e.id_event} sesuai
                     </p>
                     {selectedSesi && (
-                      <p className="text-[12.5px] text-slate-500">
-                        Sesi: <b className="text-slate-800">{selectedSesi.nama}</b>
+                      <p className="text-[12px] text-[#44403c]">
+                        Sesi: <b className="text-[#161616]">{selectedSesi.nama}</b>
                       </p>
                     )}
-                    {error && <p className="text-[13px] text-rose-600 font-semibold">{error}</p>}
+                    {error && <p role="alert" className={ERROR}>{error}</p>}
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
@@ -671,7 +650,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                           resetScan()
                           void startCamera()
                         }}
-                        className="py-3 rounded-xl ring-1 ring-slate-200 text-slate-700 font-bold text-[14px]"
+                        className={BTN_OUTLINE}
                       >
                         Scan Ulang
                       </button>
@@ -679,15 +658,15 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                         type="button"
                         onClick={confirm}
                         disabled={confirming || (sesiList.length > 0 && sesiId == null) || loc === 'outside'}
-                        className="py-3 rounded-xl bg-[#c9232c] text-white font-bold text-[14px] disabled:opacity-50"
+                        className={BTN}
                       >
-                        {confirming ? 'Menyimpan…' : 'Absen Peserta'}
+                        <Strip className="text-[16px]">{confirming ? 'Menyimpan…' : 'Absen Peserta'}</Strip>
                       </button>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-[#1a0d0f]">
+                    <div className="relative aspect-[4/3] w-full rounded-[14px] overflow-hidden bg-[#161616]">
                       <video
                         ref={videoRef}
                         className={`absolute inset-0 w-full h-full object-cover ${cam === 'on' ? '' : 'opacity-0'}`}
@@ -698,7 +677,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                       {cameraOverlays}
                     </div>
                     {error && cam !== 'error' && (
-                      <p className="rounded-xl bg-rose-50 ring-1 ring-rose-200 px-3 py-2.5 text-[13px] text-rose-700 font-medium">
+                      <p role="alert" className={`${ERROR} rounded-[10px] bg-[#e02a2f]/10 px-3 py-2.5`}>
                         {error}
                       </p>
                     )}
@@ -710,7 +689,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                             stopCamera()
                             setCam('off')
                           }}
-                          className="px-4 py-2 rounded-full ring-1 ring-slate-200 bg-white text-[13px] font-semibold text-slate-600"
+                          className={`${LABEL} px-4 py-2 rounded-full ring-1 ring-[#161616]/25 text-[11px] font-bold ${PRESS}`}
                         >
                           Stop Kamera
                         </button>
@@ -722,20 +701,22 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                 <button
                   type="button"
                   onClick={openFullscreen}
-                  className="w-full py-3.5 rounded-2xl bg-[#c9232c] text-white font-bold text-[15px] inline-flex items-center justify-center gap-2"
+                  className={BTN}
                 >
-                  <Icon name="scan" className="w-5 h-5" sw={2} />
-                  Fullscreen Scan
+                  <Strip>
+                    <Icon name="scan" className="w-5 h-5" sw={2} />
+                    Fullscreen Scan
+                  </Strip>
                 </button>
               </div>
             </div>
 
             {done && (
-              <div className="rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 p-4 flex items-center gap-3">
-                <span className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center">
+              <div role="status" className="rounded-[14px] bg-[#ffd83d] p-4 flex items-center gap-3">
+                <span className="w-10 h-10 shrink-0 rounded-[10px] -rotate-3 bg-[#161616] text-[#ffd83d] flex items-center justify-center">
                   <Icon name="check" className="w-6 h-6" sw={2.4} />
                 </span>
-                <p className="text-[13.5px] text-emerald-800">
+                <p className="text-[12.5px] min-w-0 break-words">
                   <b>{done}</b>
                   <br />
                   tercatat hadir{selectedSesi ? ` · ${selectedSesi.nama}` : ''}
@@ -753,10 +734,9 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                       setSesiId(s.id_sesi)
                       resetScan()
                     }}
-                    className={`shrink-0 rounded-xl px-3 py-2 text-[12px] ring-1 ${
-                      s.id_sesi === sesiId
-                        ? 'bg-[#fbeceb] ring-[#f3d3d3] text-[#c9232c]'
-                        : 'bg-white ring-slate-200 text-slate-600'
+                    aria-pressed={s.id_sesi === sesiId}
+                    className={`${LABEL} shrink-0 h-9 px-3.5 rounded-full text-[10.5px] font-bold ${PRESS} ${
+                      s.id_sesi === sesiId ? 'bg-[#161616] text-[#ffd83d]' : 'bg-[#fffdf7] text-[#161616]'
                     }`}
                   >
                     {s.nama}
@@ -766,23 +746,21 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
             )}
 
             <div>
-              <p className="font-bold text-[#3b1417] mb-2 px-1">Baru saja tercatat</p>
+              <SectionHead title="Baru Saja Tercatat" />
               {recent.length ? (
-                <div className={`${CARD} divide-y divide-slate-100`}>
+                <div className={`${PANEL} ${ROWS}`}>
                   {recent.map((a) => (
                     <div key={a.id_absen} className="flex items-center gap-3 px-4 py-3">
-                      <span className="w-10 h-10 rounded-full overflow-hidden shrink-0">
-                        <Avatar g={a.gender} />
-                      </span>
+                      <PersonChip />
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-[14px] text-slate-800 truncate">{a.nama}</p>
-                        <p className="text-[12px] text-slate-500 truncate">
+                        <p className={`${ANTON} text-[16px] leading-tight tracking-[.02em] truncate`}>{a.nama}</p>
+                        <p className="text-[11px] text-[#44403c] truncate mt-0.5">
                           {a.gereja}
                           {a.id_sesi != null ? ` · ${sesiList.find((s) => s.id_sesi === a.id_sesi)?.nama ?? ''}` : ''}
                         </p>
                       </div>
-                      <span className="text-[12px] font-semibold text-slate-400">{a.time}</span>
-                      <Icon name="check" className="w-5 h-5 text-emerald-500" sw={2.4} />
+                      <span className="text-[11px] font-bold text-[#57534e]">{a.time}</span>
+                      <Icon name="check" className="w-5 h-5 shrink-0 text-[#c21f24]" sw={2.6} />
                     </div>
                   ))}
                 </div>
@@ -795,7 +773,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
       )}
 
       {fullscreen && (
-        <div className="fixed inset-0 z-[60] flex flex-col md:flex-row bg-[#0f0809] text-white">
+        <div className="fixed inset-0 z-[60] flex flex-col md:flex-row bg-[#161616] text-white">
           {/* Camera — left / top */}
           <div className="relative flex-1 min-h-0 min-w-0 bg-black">
             <video
@@ -808,14 +786,10 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
             {cameraOverlays}
             {cam === 'off' && (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 text-white/80">
-                <Icon name="camera" className="w-12 h-12 text-[#e6cd7e]" />
-                <p className="text-[14px] mt-3">Scan QR di tiket peserta</p>
-                <button
-                  type="button"
-                  onClick={() => void startCamera()}
-                  className="mt-4 px-5 py-2.5 rounded-full bg-[#c9232c] text-white font-bold text-[14px]"
-                >
-                  Nyalakan Kamera
+                <Icon name="camera" className="w-12 h-12 text-[#ffd83d]" />
+                <p className="text-[13px] mt-3">Scan QR di tiket peserta</p>
+                <button type="button" onClick={() => void startCamera()} className={`mt-4 ${BTN_SHELL}`}>
+                  <Strip className="px-6 py-2.5 text-[17px]">Nyalakan Kamera</Strip>
                 </button>
               </div>
             )}
@@ -823,9 +797,9 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
             {/* Top bar over camera */}
             <div className="absolute top-0 inset-x-0 z-10 flex items-start justify-between gap-3 p-3 pt-[max(0.75rem,env(safe-area-inset-top))] pointer-events-none">
               <div className="pointer-events-auto min-w-0 rounded-2xl bg-black/55 backdrop-blur px-3.5 py-2.5 ring-1 ring-white/10">
-                <p className="font-bold text-[14px] truncate">{e.nama_event}</p>
-                <p className="text-[12px] text-white/70">
-                  <span className="text-[#f1dc9a] font-semibold">{hadir} hadir</span>
+                <p className={`${ANTON} text-[16px] tracking-[.01em] truncate`}>{e.nama_event}</p>
+                <p className="text-[11px] text-white/70">
+                  <span className="text-[#ffd83d] font-bold">{hadir} hadir</span>
                   {selectedSesi ? ` · ${selectedSesi.nama}` : ''}
                 </p>
               </div>
@@ -839,7 +813,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
               </button>
             </div>
 
-            {/* Success / error flash — 1 detik */}
+            {/* Success / error flash — 1 detik. Green and red on purpose, off-palette: read at a glance at the door. */}
             {flash && (
               <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/35 pointer-events-none">
                 <div
@@ -854,7 +828,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
                   >
                     <Icon name={flash.ok ? 'check' : 'alert'} className="w-8 h-8" sw={2.4} />
                   </span>
-                  <p className="font-extrabold text-[22px] leading-tight">{flash.title}</p>
+                  <p className={`${ANTON} text-[28px] leading-tight tracking-[.01em]`}>{flash.title}</p>
                   {flash.sub && <p className="mt-2 text-[15px] font-semibold text-white/90 truncate">{flash.sub}</p>}
                 </div>
               </div>
@@ -862,11 +836,11 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
           </div>
 
           {/* Live list — right / bottom */}
-          <aside className="shrink-0 flex flex-col h-[38%] md:h-full md:w-[min(400px,42vw)] bg-[#161012] border-t md:border-t-0 md:border-l border-white/10">
+          <aside className="shrink-0 flex flex-col h-[38%] md:h-full md:w-[min(400px,42vw)] bg-[#161616] border-t md:border-t-0 md:border-l border-white/10">
             <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <p className="font-extrabold text-[15px]">Absen live</p>
-                <p className="text-[12px] text-white/50 truncate">{recent.length} terbaru</p>
+                <p className={`${ANTON} text-[18px] leading-none tracking-[.01em]`}>Absen live</p>
+                <p className="text-[11px] text-white/60 truncate mt-1">{recent.length} terbaru</p>
               </div>
               {sesiList.length > 0 && (
                 <select
@@ -884,24 +858,22 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto">
               {recent.length === 0 ? (
-                <p className="px-4 py-8 text-center text-[13px] text-white/40">Belum ada presensi</p>
+                <p className={`${LABEL} px-4 py-8 text-center text-[11px] text-white/50`}>Belum ada presensi</p>
               ) : (
                 <ul className="divide-y divide-white/10">
                   {recent.map((a) => (
                     <li key={a.id_absen} className="flex items-center gap-3 px-4 py-3">
-                      <span className="w-10 h-10 rounded-full overflow-hidden shrink-0 ring-1 ring-white/10">
-                        <Avatar g={a.gender} />
-                      </span>
+                      <PersonChip />
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-[14px] truncate">{a.nama}</p>
-                        <p className="text-[12px] text-white/45 truncate">
+                        <p className={`${ANTON} text-[16px] leading-tight tracking-[.02em] truncate`}>{a.nama}</p>
+                        <p className="text-[11px] text-white/55 truncate mt-0.5">
                           {a.gereja}
                           {a.id_sesi != null
                             ? ` · ${sesiList.find((s) => s.id_sesi === a.id_sesi)?.nama ?? ''}`
                             : ''}
                         </p>
                       </div>
-                      <span className="text-[12px] font-semibold text-white/40 tabular-nums">{a.time}</span>
+                      <span className="text-[11px] font-bold text-white/50 tabular-nums">{a.time}</span>
                       <Icon name="check" className="w-5 h-5 text-emerald-400 shrink-0" sw={2.4} />
                     </li>
                   ))}
@@ -921,6 +893,6 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
         />
       </Sheet>
       <Toast msg={toast} />
-    </section>
+    </PaperMain>
   )
 }

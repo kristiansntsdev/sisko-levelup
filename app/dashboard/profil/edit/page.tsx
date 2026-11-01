@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useTransition, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useState, useTransition, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { getPesertaById, getMemberCardForPeserta } from '@/lib/actions/peserta'
@@ -23,54 +23,24 @@ import {
   ANTON,
   BTN,
   Chip,
+  ERROR,
   IconButton,
   LABEL,
   MONO,
-  PANEL,
   PAPER_INPUT,
   PAPER_INPUT_LOCKED,
   PaperField,
   PaperHeader,
   PaperMain,
+  PaperNote,
+  PaperSection,
   PRESS,
   Strip,
-  TAPE,
 } from '@/components/pwa/paper-ui'
-import { Icon, Sheet, SheetHead, type IconName } from '@/components/pwa/ui'
+import { Icon, Sheet, SheetHead } from '@/components/pwa/ui'
 
 const BTN_LINE = `${ANTON} flex-1 py-2.5 rounded-sm ring-2 text-[15px] tracking-[.03em] disabled:opacity-50 ${PRESS}`
 const STAMP = `${MONO} shrink-0 -rotate-6 rounded-[4px] px-2 py-1 text-[9.5px] font-bold uppercase`
-const ERROR = `${MONO} text-[12px] font-bold text-[#c21f24]`
-
-function Section({
-  icon,
-  chip,
-  title,
-  sub,
-  taped = false,
-  children,
-}: {
-  icon: IconName
-  chip: string
-  title: string
-  sub: string
-  taped?: boolean
-  children: ReactNode
-}) {
-  return (
-    <section aria-label={title} className={`relative px-4 pt-4 pb-5 ${PANEL}`}>
-      {taped && <span aria-hidden className={`${TAPE} -left-4 -top-1`} />}
-      <div className="flex items-center gap-3 pb-3 mb-4 border-b-2 border-dotted border-[#161616]/25">
-        <Chip name={icon} className={chip} />
-        <div className="min-w-0">
-          <h2 className={`${ANTON} text-[22px] leading-none tracking-[.01em]`}>{title}</h2>
-          <p className={`${MONO} mt-1 text-[11px] text-[#57534e]`}>{sub}</p>
-        </div>
-      </div>
-      <div className="space-y-4">{children}</div>
-    </section>
-  )
-}
 
 function WilayahSelect({
   label,
@@ -339,7 +309,7 @@ export default function ProfilEditPage() {
       </PaperHeader>
 
       <form onSubmit={handleSubmit} noValidate className="px-5 mt-5 space-y-5 pb-6">
-        <Section taped icon="user" chip="bg-[#e02a2f] text-white" title="Identitas" sub="Nama, kelamin, lahir, dan WA">
+        <PaperSection taped icon="user" chip="bg-[#e02a2f] text-white" title="Identitas" sub="Nama, kelamin, lahir, dan WA">
           <PaperField label="Email" locked>
             <input className={PAPER_INPUT_LOCKED} value={email} disabled readOnly />
           </PaperField>
@@ -385,9 +355,9 @@ export default function ProfilEditPage() {
               onChange={(e) => setNowa(e.target.value)}
             />
           </PaperField>
-        </Section>
+        </PaperSection>
 
-        <Section icon="pin" chip="bg-[#ffd83d] text-[#161616]" title="Alamat" sub="Wilayah sesuai data BPS">
+        <PaperSection icon="pin" chip="bg-[#ffd83d] text-[#161616]" title="Alamat" sub="Wilayah sesuai data BPS">
           <WilayahSelect label="Provinsi" placeholder="Pilih provinsi…" value={provinsi} options={provinsiOpts} onChange={(id) => void onProvinsi(id)} />
           <WilayahSelect
             label="Kabupaten / Kota"
@@ -409,9 +379,9 @@ export default function ProfilEditPage() {
           <PaperField label="Alamat lengkap">
             <textarea className={`${PAPER_INPUT} min-h-[88px] resize-y`} placeholder="Jalan, RT/RW, nomor rumah…" value={alamat} onChange={(e) => setAlamat(e.target.value)} />
           </PaperField>
-        </Section>
+        </PaperSection>
 
-        <Section icon="church" chip="bg-[#161616] text-[#ffd83d]" title="Komunitas" sub="LevelUP Kota via pengajuan">
+        <PaperSection icon="church" chip="bg-[#161616] text-[#ffd83d]" title="Komunitas" sub="LevelUP Kota via pengajuan">
           <PaperField label="LevelUP Kota" locked>
             <input className={PAPER_INPUT_LOCKED} value={kotaName} disabled readOnly />
           </PaperField>
@@ -465,25 +435,20 @@ export default function ProfilEditPage() {
             <input className={PAPER_INPUT} placeholder="Nama gereja" value={gereja} onChange={(e) => setGereja(e.target.value)} />
           </PaperField>
           <PaperField label="Sekolah / Kampus / Tempat Kerja">
-            <input className={PAPER_INPUT} placeholder="cth: SMAN 1 Ngawi, UNIPMA, PT Maju Jaya" value={sekolah} onChange={(e) => setSekolah(e.target.value)} />
+            <input className={`${PAPER_INPUT} placeholder:text-[13px]`} placeholder="cth: SMAN 1 Ngawi, UNIPMA, PT Maju Jaya" value={sekolah} onChange={(e) => setSekolah(e.target.value)} />
           </PaperField>
-        </Section>
+        </PaperSection>
 
-        <Section icon="sparkle" chip="bg-[#ffd83d] text-[#161616]" title="Pendidikan" sub="Opsional">
+        <PaperSection icon="sparkle" chip="bg-[#ffd83d] text-[#161616]" title="Pendidikan" sub="Opsional">
           <PaperField label="Pendidikan terakhir">
             <input className={PAPER_INPUT} placeholder="cth: SMA, S1, D3" value={pendidikan} onChange={(e) => setPendidikan(e.target.value)} />
           </PaperField>
           <PaperField label="Jurusan">
             <input className={PAPER_INPUT} placeholder="cth: Teknik Informatika" value={jurusan} onChange={(e) => setJurusan(e.target.value)} />
           </PaperField>
-        </Section>
+        </PaperSection>
 
-        <div className="flex gap-3 rounded-[14px] border-2 border-dotted border-[#161616]/30 p-3.5">
-          <Icon name="alert" className="w-5 h-5 shrink-0 text-[#c21f24]" />
-          <p className={`${MONO} text-[11.5px] leading-relaxed text-[#44403c]`}>
-            Perubahan data langsung tersimpan ke kartu anggota. Email terkunci. LevelUP Kota berubah setelah Sekretariat Nasional menyetujui pengajuanmu.
-          </p>
-        </div>
+        <PaperNote>Perubahan data langsung tersimpan ke kartu anggota. Email terkunci. LevelUP Kota berubah setelah Sekretariat Nasional menyetujui pengajuanmu.</PaperNote>
 
         {error && (
           <p role="alert" className={`${ERROR} rounded-[10px] bg-[#e02a2f]/10 px-4 py-3`}>

@@ -6,18 +6,8 @@ import {
   rejectTiketNasional,
   type TiketNasionalPending,
 } from '@/lib/actions/registrasi'
-import {
-  ALK_BASE,
-  Avatar,
-  CARD,
-  Hero,
-  LIFT,
-  Note,
-  TintIcon,
-  Toast,
-  TopBar,
-  fCard,
-} from './ui'
+import { ANTON, ERROR, IconButton, MONO, PANEL, PaperHeader, PaperMain } from '@/components/pwa/paper-ui'
+import { ALK_BASE, Decide, Empty, Note, PersonChip, Toast } from './ui'
 
 export function TiketNasionalV2Client({ items }: { items: TiketNasionalPending[] }) {
   const router = useRouter()
@@ -67,61 +57,44 @@ export function TiketNasionalV2Client({ items }: { items: TiketNasionalPending[]
   }
 
   return (
-    <section>
-      <Hero className="pt-4 md:pt-2 pb-20 rounded-b-[32px]" decor="-right-6 top-14 w-40">
-        <TopBar title="Tiket Event Nasional" back={() => router.push(ALK_BASE)} />
-        <p className="text-center text-sm text-white/80 mt-2">
-          {list.length} menunggu approval nasional
-        </p>
-      </Hero>
-      <div className="px-5 -mt-12 relative space-y-3 pb-4">
+    <PaperMain>
+      <PaperHeader
+        sticker={`${list.length} menunggu approval nasional`}
+        title="Tiket Event Nasional"
+        leading={<IconButton icon="chevronLeft" label="Kembali" onClick={() => router.push(ALK_BASE)} className="-rotate-3" />}
+      />
+      <div className="px-5 mt-5 space-y-3 pb-4">
         {error ? (
-          <p className="text-[13px] text-[#c9232c] font-semibold px-1">{error}</p>
+          <p role="alert" className={`${ERROR} px-1`}>{error}</p>
         ) : null}
         {list.length === 0 ? (
-          <div className={`${LIFT} px-4 py-10 text-center`}>
-            <TintIcon name="check" tint="gold" size="w-12 h-12 mx-auto rounded-2xl" icon="w-6 h-6" />
-            <p className="text-[13.5px] text-slate-500 mt-3">Tidak ada pengajuan.</p>
-          </div>
+          <Empty>Tidak ada pengajuan.</Empty>
         ) : (
-          list.map((u, i) => (
-            <div key={u.id_registrasi} className={`${i === 0 ? LIFT : CARD} p-3.5 space-y-3`}>
+          list.map((u) => (
+            <div key={u.id_registrasi} className={`p-3.5 space-y-3 ${PANEL}`}>
               <div className="flex items-center gap-3">
-                <span className="w-11 h-11 rounded-full overflow-hidden shrink-0">
-                  <Avatar g="L" />
-                </span>
+                <PersonChip />
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-[14.5px] text-[#3b1417] truncate">{u.nama}</p>
-                  <p className={`text-[12px] text-[#96792a] font-semibold ${fCard} tracking-wider`}>
+                  <p className={`${ANTON} text-[16px] leading-tight tracking-[.02em] truncate`}>{u.nama}</p>
+                  <p className={`${MONO} mt-0.5 text-[10.5px] font-bold text-[#44403c]`}>
                     {u.usercode} · {u.level}
                   </p>
                 </div>
               </div>
-              <div className="text-[13px] text-slate-600 leading-snug space-y-0.5">
-                <p className="font-semibold text-[#3b1417]">{u.eventName}</p>
-                <p>
+              <div className={`${MONO} text-[12px] leading-snug space-y-0.5`}>
+                <p className="font-bold">{u.eventName}</p>
+                <p className="text-[#44403c]">
                   {u.tglDisplay}
                   {u.kotaNama !== '—' ? ` · ${u.kotaNama}` : ''}
                 </p>
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  disabled={pending && busyId === u.id_registrasi}
-                  onClick={() => handleApprove(u)}
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white text-[13px] font-bold disabled:opacity-50"
-                >
-                  {pending && busyId === u.id_registrasi ? '...' : 'Approve'}
-                </button>
-                <button
-                  type="button"
-                  disabled={pending && busyId === u.id_registrasi}
-                  onClick={() => handleReject(u)}
-                  className="flex-1 py-2.5 rounded-xl bg-[#c9232c] text-white text-[13px] font-bold disabled:opacity-50"
-                >
-                  Tolak
-                </button>
-              </div>
+              <Decide
+                approve={pending && busyId === u.id_registrasi ? '...' : 'Approve'}
+                reject="Tolak"
+                disabled={pending && busyId === u.id_registrasi}
+                onApprove={() => handleApprove(u)}
+                onReject={() => handleReject(u)}
+              />
             </div>
           ))
         )}
@@ -131,6 +104,6 @@ export function TiketNasionalV2Client({ items }: { items: TiketNasionalPending[]
         </Note>
       </div>
       <Toast msg={toast} />
-    </section>
+    </PaperMain>
   )
 }

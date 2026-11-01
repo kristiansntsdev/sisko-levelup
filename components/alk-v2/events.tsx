@@ -4,15 +4,15 @@ import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import type { EventDashboard } from '@/lib/actions/event'
 import { NASIONAL_EVENT_CABANG, NASIONAL_KHUSUS_VALUE } from '@/lib/event-cabang'
+import { ANTON, BTN_SHELL, LABEL, MONO, PANEL, PaperHeader, PaperMain, PRESS, SectionHead, Strip } from '@/components/pwa/paper-ui'
 import { PAGE_SIZE_EVENT, Pager, SearchBox } from './list-tools'
 import {
   ALK_EVENT_BASE,
-  CARD,
   DateBlock,
   Empty,
   FLD,
-  H3,
-  PageHero,
+  Field,
+  Icon,
   Pill,
   StatTriple,
   type PillTone,
@@ -87,22 +87,19 @@ function ChipRow<T extends string>({
   onChange: (k: T) => void
 }) {
   return (
-    <div className="flex gap-2 overflow-x-auto -mx-1 px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex gap-2 overflow-x-auto -mx-5 px-5 py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {tabs.map((t) => {
         const on = t.key === active
         return (
           <button
             key={t.key}
             type="button"
+            aria-pressed={on}
             onClick={() => onChange(t.key)}
-            className={`shrink-0 px-3 py-1.5 rounded-full text-[12.5px] font-semibold ring-1 transition ${
-              on
-                ? 'bg-[#c9232c] text-white ring-[#c9232c]'
-                : 'bg-white text-slate-600 ring-slate-200'
-            }`}
+            className={`${LABEL} shrink-0 h-9 px-3.5 rounded-full text-[10.5px] font-bold ${PRESS} ${on ? 'bg-[#161616] text-[#ffd83d]' : 'bg-[#fffdf7] text-[#161616]'}`}
           >
             {t.label}
-            {t.count != null && <span className={on ? ' text-white/80' : ' text-slate-400'}> · {t.count}</span>}
+            {t.count != null && <span className={on ? ' text-[#fbf6ec]' : ' text-[#c21f24]'}> {t.count}</span>}
           </button>
         )
       })}
@@ -124,10 +121,9 @@ function SortBar({
     return (
       <button
         type="button"
+        aria-pressed={on}
         onClick={() => onChange(key, dir)}
-        className={`px-2.5 py-1.5 rounded-lg text-[12px] font-semibold ring-1 transition ${
-          on ? 'bg-[#3b1417] text-white ring-[#3b1417]' : 'bg-white text-slate-600 ring-slate-200'
-        }`}
+        className={`${MONO} px-2.5 py-1.5 rounded-[8px] text-[11px] font-bold ${PRESS} ${on ? 'bg-[#161616] text-[#ffd83d]' : 'bg-[#fffdf7] text-[#161616]'}`}
       >
         {label}
       </button>
@@ -135,7 +131,7 @@ function SortBar({
   }
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">Sort</span>
+      <span className={`${LABEL} text-[10px] font-bold text-[#44403c] mr-1`}>Sort</span>
       {btn('tgl', 'asc', 'Tgl ↑')}
       {btn('tgl', 'desc', 'Tgl ↓')}
       {btn('nama', 'asc', 'Nama A–Z')}
@@ -150,21 +146,18 @@ function EventItem({ e }: { e: EventDashboard }) {
   const ww =
     e.wwtype === 'jfe' ? 'JFE' : e.wwtype === 'nasional' ? 'Nasional' : e.wwtype === 'bulanan' ? 'Bulanan' : ''
   return (
-    <Link
-      href={`${ALK_EVENT_BASE}/${e.id_event}`}
-      className={`w-full ${CARD} p-3.5 flex items-center gap-3.5 text-left active:scale-[.99] transition`}
-    >
+    <Link href={`${ALK_EVENT_BASE}/${e.id_event}`} className={`w-full p-3.5 flex items-center gap-3.5 text-left ${PANEL} ${PRESS}`}>
       <DateBlock d={d} m={m} tone={st.bucket === 'done' ? 'slate' : st.label === 'Berlangsung' ? 'solid' : 'red'} />
       <div className="min-w-0 flex-1">
-        <p className="font-bold text-[14px] text-[#3b1417] truncate">{e.nama_event}</p>
-        <p className="text-[12px] text-slate-500 truncate mt-0.5">
+        <p className={`${ANTON} text-[18px] leading-[1.12] tracking-[.01em] line-clamp-2`}>{e.nama_event}</p>
+        <p className={`${MONO} text-[11px] text-[#44403c] truncate mt-1`}>
           {e.jamevent} · {e.cabangName}
           {e.alamatevent ? ` · ${e.alamatevent}` : ''}
         </p>
-        <div className="mt-1.5 flex flex-wrap gap-1.5">
+        <div className="mt-2 flex flex-wrap gap-1.5">
           <Pill tone={st.tone}>{st.label}</Pill>
           {e.jenisevent && <Pill tone="gold">{e.jenisevent}</Pill>}
-          {ww && <Pill tone="slate">{ww}</Pill>}
+          {ww && <Pill tone="gold">{ww}</Pill>}
         </div>
       </div>
     </Link>
@@ -268,19 +261,25 @@ export function EventsListClient({
   }, [cabangs, events])
 
   return (
-    <section>
-      <PageHero
+    <PaperMain>
+      <PaperHeader
+        sticker={isNasional ? 'Semua kota · jadwal & absensi' : 'Jadwal, absensi & sesi kegiatan'}
         title="Pengajuan Event"
-        sub={isNasional ? 'Semua kota · jadwal & absensi' : 'Jadwal, absensi & sesi kegiatan'}
-        action={{ label: 'Buat Event', onClick: () => router.push(`${ALK_EVENT_BASE}/new`) }}
-        pb="pb-20"
+        action={
+          <button type="button" onClick={() => router.push(`${ALK_EVENT_BASE}/new`)} className={`shrink-0 rotate-2 ${BTN_SHELL}`}>
+            <Strip className="px-3.5 py-2 text-[15px] whitespace-nowrap">
+              <Icon name="plus" className="w-4 h-4" sw={2.4} />
+              Buat Event
+            </Strip>
+          </button>
+        }
       />
-      <div className="px-5 -mt-12 relative pb-4 space-y-3">
+      <div className="px-5 mt-5 pb-4 space-y-3">
         <StatTriple
           items={[
-            [terjadwal, 'Terjadwal', 'text-[#c9232c]'],
-            [review, 'Belum approve', 'text-amber-500'],
-            [doneAll, 'Selesai', 'text-slate-400'],
+            [terjadwal, 'Terjadwal', 'text-[#c21f24]'],
+            [review, 'Belum approve', 'text-[#161616]'],
+            [doneAll, 'Selesai', 'text-[#57534e]'],
           ]}
         />
         <SearchBox
@@ -310,31 +309,26 @@ export function EventsListClient({
           }}
         />
 
-        <div className="grid grid-cols-1 gap-2">
-          <label className="block">
-            <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-              LevelUP Kota
-            </span>
-            <select
-              value={kota}
-              onChange={(e) => {
-                setKota(e.target.value)
-                resetPages()
-              }}
-              className={FLD}
-            >
-              <option value="all">Semua kota</option>
-              <option value={NASIONAL_EVENT_CABANG}>Nasional</option>
-              {kotaOptions
-                .filter((c) => c.id !== NASIONAL_EVENT_CABANG)
-                .map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nama}
-                  </option>
-                ))}
-            </select>
-          </label>
-        </div>
+        <Field label="LevelUP Kota">
+          <select
+            value={kota}
+            onChange={(e) => {
+              setKota(e.target.value)
+              resetPages()
+            }}
+            className={FLD}
+          >
+            <option value="all">Semua kota</option>
+            <option value={NASIONAL_EVENT_CABANG}>Nasional</option>
+            {kotaOptions
+              .filter((c) => c.id !== NASIONAL_EVENT_CABANG)
+              .map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nama}
+                </option>
+              ))}
+          </select>
+        </Field>
 
         <SortBar
           sortKey={sortKey}
@@ -346,22 +340,16 @@ export function EventsListClient({
           }}
         />
 
-        <div>
-          <h3 className={`${H3} mb-3`}>
-            Berlangsung &amp; Mendatang
-            <span className="text-[13px] font-semibold text-slate-400"> · {open.length}</span>
-          </h3>
+        <div className="pt-3">
+          <SectionHead title="Berlangsung & Mendatang" count={open.length} />
           <div className="space-y-3">
             {pagedOpen.length ? pagedOpen.map((e) => <EventItem key={e.id_event} e={e} />) : <Empty>Belum ada kegiatan</Empty>}
           </div>
           <Pager page={openPage} totalPages={openPages} onChange={setOpenPage} />
         </div>
         {(done.length > 0 || q || scope !== 'all' || ww !== 'all' || kota !== 'all') && (
-          <div>
-            <h3 className={`${H3} mb-3`}>
-              Selesai
-              <span className="text-[13px] font-semibold text-slate-400"> · {done.length}</span>
-            </h3>
+          <div className="pt-3">
+            <SectionHead title="Selesai" count={done.length} />
             <div className="space-y-3">
               {pagedDone.length ? pagedDone.map((e) => <EventItem key={e.id_event} e={e} />) : <Empty>Tidak ada yang cocok</Empty>}
             </div>
@@ -369,6 +357,6 @@ export function EventsListClient({
           </div>
         )}
       </div>
-    </section>
+    </PaperMain>
   )
 }
