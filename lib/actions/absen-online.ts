@@ -3,7 +3,7 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { setActor } from '@/lib/request-context'
 import { revalidatePath } from 'next/cache'
-import { createAbsen } from '@/lib/actions/absen'
+import { recordAbsen } from '@/lib/absen-record'
 import { createRegistrasi } from '@/lib/actions/registrasi'
 import { upsertJobsPlace } from '@/lib/actions/jobs-place'
 import {
@@ -200,9 +200,11 @@ export async function onlineCheckin(
       idSesi = picked
     }
 
-    const res = await createAbsen(
+    const res = await recordAbsen(
       { p: String(idPeserta), e: session.user?.email ?? '', ev: String(idEvent) },
       idSesi,
+      null,
+      { scannerUsername: null },
     )
     if (res.success || res.reason === 'already_scanned') {
       try {
