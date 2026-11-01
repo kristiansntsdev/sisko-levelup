@@ -140,6 +140,43 @@ export async function POST(req: NextRequest) {
     await db.$executeRawUnsafe(`ALTER TABLE absen ADD KEY idx_absen_sesi (id_sesi)`)
   }
 
+  const lokasiTables = await db.$queryRaw<{ TABLE_NAME: string }[]>`
+    SELECT TABLE_NAME FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'event_lokasi'
+  `
+  const addedEventLokasi = lokasiTables.length === 0
+  if (addedEventLokasi) {
+    await db.$executeRawUnsafe(`
+      CREATE TABLE event_lokasi (
+        id_lokasi INT NOT NULL AUTO_INCREMENT,
+        id_event INT NOT NULL,
+        nama VARCHAR(255) NOT NULL,
+        alamat VARCHAR(500) NOT NULL DEFAULT '',
+        longlat VARCHAR(64) NOT NULL DEFAULT '',
+        radius INT NOT NULL DEFAULT 0,
+        urutan INT NOT NULL DEFAULT 0,
+        PRIMARY KEY (id_lokasi),
+        KEY idx_event_lokasi_event (id_event),
+        CONSTRAINT event_lokasi_event_fk FOREIGN KEY (id_event) REFERENCES event (id_event) ON DELETE CASCADE
+      )
+    `)
+  }
+
+  const sesiLokasiCols = await db.$queryRaw<{ COLUMN_NAME: string }[]>`
+    SELECT COLUMN_NAME FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'event_sesi'
+      AND COLUMN_NAME = 'id_lokasi'
+  `
+  const addedSesiIdLokasi = sesiLokasiCols.length === 0
+  if (addedSesiIdLokasi) {
+    await db.$executeRawUnsafe(`ALTER TABLE event_sesi ADD COLUMN id_lokasi INT NULL`)
+    await db.$executeRawUnsafe(`ALTER TABLE event_sesi ADD KEY idx_event_sesi_lokasi (id_lokasi)`)
+    await db.$executeRawUnsafe(
+      `ALTER TABLE event_sesi ADD CONSTRAINT event_sesi_lokasi_fk FOREIGN KEY (id_lokasi) REFERENCES event_lokasi (id_lokasi) ON DELETE SET NULL`,
+    )
+  }
+
   const wwtypeCols = await db.$queryRaw<{ COLUMN_TYPE: string }[]>`
     SELECT COLUMN_TYPE FROM information_schema.COLUMNS
     WHERE TABLE_SCHEMA = DATABASE()
@@ -240,6 +277,8 @@ export async function POST(req: NextRequest) {
     addedWfeSerentak,
     addedEventSesi,
     addedAbsenIdSesi,
+    addedEventLokasi,
+    addedSesiIdLokasi,
     addedWwtypeNasional,
     wwtypeBackfill,
     addedAppLog,

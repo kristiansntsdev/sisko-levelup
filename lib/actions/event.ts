@@ -54,6 +54,13 @@ import {
   type EventSesiInput,
   type EventSesiRow,
 } from '@/lib/event-sesi'
+import {
+  lokasiNeedsSesi,
+  parseLatLng,
+  toEventLokasiRow,
+  type EventLokasiInput,
+  type EventLokasiRow,
+} from '@/lib/event-lokasi'
 
 export type EventSummary = {
   id_event: number
@@ -376,6 +383,7 @@ export type EventDetailFull = {
   registrasi: RegistrasiRow[]
   absen: AbsenRow[]
   sesi: EventSesiRow[]
+  lokasi: EventLokasiRow[]
 }
 
 export async function getEventDetail(id: number): Promise<EventDetailFull | null> {
@@ -398,6 +406,9 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
       },
       event_sesi: {
         orderBy: [{ urutan: 'asc' }, { id_sesi: 'asc' }],
+      },
+      event_lokasi: {
+        orderBy: [{ urutan: 'asc' }, { id_lokasi: 'asc' }],
       },
     },
   })
@@ -465,6 +476,7 @@ export async function getEventDetail(id: number): Promise<EventDetailFull | null
     flyerQa: parseFlyerQa(event.flyer_qa),
     beritaAcaraQa: parseBeritaAcaraQa(event.berita_acara_qa),
     sesi: event.event_sesi.map(toEventSesiRow),
+    lokasi: event.event_lokasi.map(toEventLokasiRow),
     registrasi: event.registrasi.map((r) => ({
       id_registrasi: r.id_registrasi,
       id_peserta: r.id_peserta,
@@ -498,6 +510,78 @@ export async function getEventSesi(idEvent: number): Promise<EventSesiRow[]> {
     orderBy: [{ urutan: 'asc' }, { id_sesi: 'asc' }],
   })
   return rows.map(toEventSesiRow)
+}
+
+export async function getEventLokasi(idEvent: number): Promise<EventLokasiRow[]> {
+  const rows = await db.event_lokasi.findMany({
+    where: { id_event: idEvent },
+    orderBy: [{ urutan: 'asc' }, { id_lokasi: 'asc' }],
+  })
+  return rows.map(toEventLokasiRow)
+}
+
+/**
+ * Validasi + normalisasi lokasi scan sebelum ada yang ditulis.
+ * Hanya event nasional non-Online yang punya lokasi; selain itu selalu kosong.
+ */
+function normalizeLokasi(
+  wwtype: string,
+  jenisevent: string,
+  lokasi: EventLokasiInput[] | undefined,
+  sesi: EventSesiInput[] | undefined,
+): EventLokasiInput[] {
+  if (wwtype !== 'nasional' || jenisevent === 'Online') return []
+  const rows = (lokasi ?? [])
+    .map((l) => ({
+      id_lokasi: l.id_lokasi,
+      nama: l.nama.trim(),
+      alamat: l.alamat.trim(),
+      longlat: l.longlat.trim(),
+      radius: Math.max(0, Math.round(Number(l.radius) || 0)),
+    }))
+    .filter((l) => l.nama)
+  for (const l of rows) {
+    if (!parseLatLng(l.longlat)) throw new Error(`Lokasi "${l.nama}" belum punya titik peta.`)
+    if (l.radius <= 0) throw new Error(`Lokasi "${l.nama}" butuh radius lebih dari 0.`)
+  }
+  const sesiCount = (sesi ?? []).filter((x) => x.nama.trim()).length
+  if (lokasiNeedsSesi(rows.length, sesiCount)) {
+    throw new Error('Event dengan 2 lokasi atau lebih butuh minimal 1 sesi absen.')
+  }
+  return rows
+}
+
+/** Sync lokasi scan. Blocks delete if a sesi is already locked to it. */
+async function syncEventLokasi(idEvent: number, lokasi: EventLokasiInput[]): Promise<void> {
+  const existing = await db.event_lokasi.findMany({
+    where: { id_event: idEvent },
+    select: { id_lokasi: true },
+  })
+  const keepIds = new Set(lokasi.map((l) => l.id_lokasi).filter((id): id is number => id != null))
+  const toDelete = existing.filter((e) => !keepIds.has(e.id_lokasi)).map((e) => e.id_lokasi)
+
+  if (toDelete.length > 0) {
+    const locked = await db.event_sesi.findFirst({
+      where: { id_lokasi: { in: toDelete } },
+      select: { id_sesi: true },
+    })
+    if (locked) throw new Error('Tidak bisa hapus lokasi yang sudah dipakai scan')
+    await db.event_lokasi.deleteMany({ where: { id_lokasi: { in: toDelete } } })
+  }
+
+  for (let i = 0; i < lokasi.length; i++) {
+    const l = lokasi[i]
+    const data = { nama: l.nama, alamat: l.alamat, longlat: l.longlat, radius: l.radius, urutan: i }
+    if (l.id_lokasi != null) {
+      const updated = await db.event_lokasi.updateMany({
+        where: { id_lokasi: l.id_lokasi, id_event: idEvent },
+        data,
+      })
+      if (updated.count === 0) await db.event_lokasi.create({ data: { id_event: idEvent, ...data } })
+    } else {
+      await db.event_lokasi.create({ data: { id_event: idEvent, ...data } })
+    }
+  }
 }
 
 /** Sync sesi list for a nasional event. Blocks delete if sesi already has absen. */
@@ -636,6 +720,8 @@ export type EventFormPayload = {
   khusus: string
   /** Sekretariat only; ignored for kota. */
   sesi?: EventSesiInput[]
+  /** Sekretariat nasional only (wwtype nasional, non-Online). */
+  lokasi?: EventLokasiInput[]
 }
 
 const FLYER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
@@ -682,6 +768,7 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
 
   const wwtype =
     payload.wwtype === 'nasional' && !isNasionalPengurus ? 'bulanan' : payload.wwtype
+  const lokasi = normalizeLokasi(wwtype, payload.jenisevent, payload.lokasi, payload.sesi)
 
   const imageUrl = flyer && flyer.size > 0 ? await uploadEventFlyer(flyer) : ''
 
@@ -729,6 +816,7 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
 
   if (idCabang === NASIONAL_EVENT_CABANG && payload.sesi) {
     await syncEventSesi(id, payload.sesi)
+    await syncEventLokasi(id, lokasi)
   }
 
   revalidatePath('/dashboard/kota/alk')
@@ -827,6 +915,9 @@ export async function updateEvent(
 
   const wwtype =
     payload.wwtype === 'nasional' && !isNasional ? 'bulanan' : payload.wwtype
+  const lokasi = isNasional
+    ? normalizeLokasi(wwtype, payload.jenisevent, payload.lokasi, payload.sesi)
+    : []
 
   const newFlyer = flyer && flyer.size > 0
   const imageUrl = newFlyer
@@ -866,6 +957,7 @@ export async function updateEvent(
 
   if (isNasional && payload.sesi) {
     await syncEventSesi(id, payload.sesi)
+    await syncEventLokasi(id, lokasi)
   }
 
   revalidatePath('/dashboard/kota/alk')

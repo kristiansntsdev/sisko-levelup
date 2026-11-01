@@ -220,6 +220,14 @@ export function ScannerClient({ backUrl = '/alk' }: { backUrl?: string }) {
         setConfirmError('Sesi tidak valid. Pilih ulang sesi.')
       } else if (result.reason === 'invalid_payload') {
         setConfirmError('QR tidak lengkap. Minta peserta buka ulang tiketnya.')
+      } else if (result.reason === 'nasional_only') {
+        setConfirmError('Event nasional hanya bisa di-scan Sekretariat Nasional.')
+      } else if (
+        result.reason === 'lokasi_required' ||
+        result.reason === 'lokasi_invalid' ||
+        result.reason === 'lokasi_conflict'
+      ) {
+        setConfirmError('Event multi-lokasi: scan dari Sekretariat v2.')
       } else if (result.reason === 'unauthorized') {
         setConfirmError('Sesi login habis, silakan login ulang.')
         router.push('/admin')

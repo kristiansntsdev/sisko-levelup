@@ -61,6 +61,7 @@ export const ModelName = {
   dokumentasikelaswp: 'dokumentasikelaswp',
   event: 'event',
   event_sesi: 'event_sesi',
+  event_lokasi: 'event_lokasi',
   feedback: 'feedback',
   gereja: 'gereja',
   kelaswp: 'kelaswp',
@@ -246,10 +247,24 @@ export const Event_sesiScalarFieldEnum = {
   jam_mulai: 'jam_mulai',
   jam_selesai: 'jam_selesai',
   wajib: 'wajib',
-  urutan: 'urutan'
+  urutan: 'urutan',
+  id_lokasi: 'id_lokasi'
 } as const
 
 export type Event_sesiScalarFieldEnum = (typeof Event_sesiScalarFieldEnum)[keyof typeof Event_sesiScalarFieldEnum]
+
+
+export const Event_lokasiScalarFieldEnum = {
+  id_lokasi: 'id_lokasi',
+  id_event: 'id_event',
+  nama: 'nama',
+  alamat: 'alamat',
+  longlat: 'longlat',
+  radius: 'radius',
+  urutan: 'urutan'
+} as const
+
+export type Event_lokasiScalarFieldEnum = (typeof Event_lokasiScalarFieldEnum)[keyof typeof Event_lokasiScalarFieldEnum]
 
 
 export const FeedbackScalarFieldEnum = {
@@ -831,6 +846,15 @@ export const event_sesiOrderByRelevanceFieldEnum = {
 } as const
 
 export type event_sesiOrderByRelevanceFieldEnum = (typeof event_sesiOrderByRelevanceFieldEnum)[keyof typeof event_sesiOrderByRelevanceFieldEnum]
+
+
+export const event_lokasiOrderByRelevanceFieldEnum = {
+  nama: 'nama',
+  alamat: 'alamat',
+  longlat: 'longlat'
+} as const
+
+export type event_lokasiOrderByRelevanceFieldEnum = (typeof event_lokasiOrderByRelevanceFieldEnum)[keyof typeof event_lokasiOrderByRelevanceFieldEnum]
 
 
 export const feedbackOrderByRelevanceFieldEnum = {

@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.9.1
- * Query Engine version: e922089b7d7502aff4249d5da3420f6fa55fc6ad
+ * Prisma Client JS version: 7.8.0
+ * Query Engine version: 3c6e192761c0362d496ed980de936e2f3cebcd3a
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.9.1",
-  engine: "e922089b7d7502aff4249d5da3420f6fa55fc6ad"
+  client: "7.8.0",
+  engine: "3c6e192761c0362d496ed980de936e2f3cebcd3a"
 }
 
 /**
@@ -156,19 +156,6 @@ export type Subset<T, U> = {
 };
 
 /**
- * Resolved type of the argument passed to the `PrismaClient` constructor.
- *
- * When called without a narrower options type (the common case), this resolves
- * to `PrismaClientOptions` directly, which produces a clear TypeScript error
- * message (`not assignable to parameter of type 'PrismaClientOptions'`) when
- * the argument is missing or incomplete. When the user supplies a narrower
- * options type (e.g. via a literal), it falls back to `Subset` to keep
- * filtering out unknown properties.
- */
-export type PrismaClientConstructorArgs<Options extends PrismaClientOptions> =
-  [PrismaClientOptions] extends [Options] ? PrismaClientOptions : Subset<Options, PrismaClientOptions>;
-
-/**
  * SelectSubset
  * @desc From `T` pick properties that exist in `U`. Simple version of Intersection.
  * Additionally, it validates, if both select and include are present. If the case, it errors.
@@ -200,7 +187,7 @@ type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
 export type XOR<T, U> =
   T extends object ?
   U extends object ?
-    ((Without<T, U> & U) | (Without<U, T> & T)) & object
+    (Without<T, U> & U) | (Without<U, T> & T)
   : U : T
 
 
@@ -407,6 +394,7 @@ export const ModelName = {
   dokumentasikelaswp: 'dokumentasikelaswp',
   event: 'event',
   event_sesi: 'event_sesi',
+  event_lokasi: 'event_lokasi',
   feedback: 'feedback',
   gereja: 'gereja',
   kelaswp: 'kelaswp',
@@ -458,7 +446,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "event_lokasi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1119,6 +1107,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.event_sesiCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.Event_sesiCountAggregateOutputType> | number
+        }
+      }
+    }
+    event_lokasi: {
+      payload: Prisma.$event_lokasiPayload<ExtArgs>
+      fields: Prisma.event_lokasiFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.event_lokasiFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_lokasiPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.event_lokasiFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_lokasiPayload>
+        }
+        findFirst: {
+          args: Prisma.event_lokasiFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_lokasiPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.event_lokasiFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_lokasiPayload>
+        }
+        findMany: {
+          args: Prisma.event_lokasiFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_lokasiPayload>[]
+        }
+        create: {
+          args: Prisma.event_lokasiCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_lokasiPayload>
+        }
+        createMany: {
+          args: Prisma.event_lokasiCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.event_lokasiDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_lokasiPayload>
+        }
+        update: {
+          args: Prisma.event_lokasiUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_lokasiPayload>
+        }
+        deleteMany: {
+          args: Prisma.event_lokasiDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.event_lokasiUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.event_lokasiUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$event_lokasiPayload>
+        }
+        aggregate: {
+          args: Prisma.Event_lokasiAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEvent_lokasi>
+        }
+        groupBy: {
+          args: Prisma.event_lokasiGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Event_lokasiGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.event_lokasiCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Event_lokasiCountAggregateOutputType> | number
         }
       }
     }
@@ -3668,10 +3722,24 @@ export const Event_sesiScalarFieldEnum = {
   jam_mulai: 'jam_mulai',
   jam_selesai: 'jam_selesai',
   wajib: 'wajib',
-  urutan: 'urutan'
+  urutan: 'urutan',
+  id_lokasi: 'id_lokasi'
 } as const
 
 export type Event_sesiScalarFieldEnum = (typeof Event_sesiScalarFieldEnum)[keyof typeof Event_sesiScalarFieldEnum]
+
+
+export const Event_lokasiScalarFieldEnum = {
+  id_lokasi: 'id_lokasi',
+  id_event: 'id_event',
+  nama: 'nama',
+  alamat: 'alamat',
+  longlat: 'longlat',
+  radius: 'radius',
+  urutan: 'urutan'
+} as const
+
+export type Event_lokasiScalarFieldEnum = (typeof Event_lokasiScalarFieldEnum)[keyof typeof Event_lokasiScalarFieldEnum]
 
 
 export const FeedbackScalarFieldEnum = {
@@ -4255,6 +4323,15 @@ export const event_sesiOrderByRelevanceFieldEnum = {
 export type event_sesiOrderByRelevanceFieldEnum = (typeof event_sesiOrderByRelevanceFieldEnum)[keyof typeof event_sesiOrderByRelevanceFieldEnum]
 
 
+export const event_lokasiOrderByRelevanceFieldEnum = {
+  nama: 'nama',
+  alamat: 'alamat',
+  longlat: 'longlat'
+} as const
+
+export type event_lokasiOrderByRelevanceFieldEnum = (typeof event_lokasiOrderByRelevanceFieldEnum)[keyof typeof event_lokasiOrderByRelevanceFieldEnum]
+
+
 export const feedbackOrderByRelevanceFieldEnum = {
   id_kelas: 'id_kelas',
   feedback: 'feedback'
@@ -4721,10 +4798,19 @@ export type BatchPayload = {
 export const defineExtension = runtime.Extensions.defineExtension as unknown as runtime.Types.Extensions.ExtendsHook<"define", TypeMapCb, runtime.Types.Extensions.DefaultArgs>
 export type DefaultPrismaClient = PrismaClient
 export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
-/**
- * Options common to all variants of `PrismaClientOptions`, regardless of whether you connect to your database through a driver adapter or through Prisma Accelerate.
- */
-export interface PrismaClientBaseOptions {
+export type PrismaClientOptions = ({
+  /**
+   * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-pg`.
+   */
+  adapter: runtime.SqlDriverAdapterFactory
+  accelerateUrl?: never
+} | {
+  /**
+   * Prisma Accelerate URL allowing the client to connect through Accelerate instead of a direct database.
+   */
+  accelerateUrl: string
+  adapter?: never
+}) & {
   /**
    * @default "colorless"
    */
@@ -4811,56 +4897,6 @@ export interface PrismaClientBaseOptions {
    */
   queryPlanCacheMaxSize?: number
 }
-
-/**
- * `PrismaClient` options for connecting to your database through Prisma Accelerate instead of a driver adapter.
- * 
- * Learn more: https://pris.ly/d/accelerate
- */
-export interface PrismaClientOptionsWithAccelerateUrl extends PrismaClientBaseOptions {
-  /**
-   * The Prisma Accelerate connection URL. Use this option to connect to your database through Prisma Accelerate instead of using a driver adapter to connect directly.
-   * 
-   * Learn more: https://pris.ly/d/accelerate
-   */
-  accelerateUrl: string
-  adapter?: never
-}
-
-/**
- * `PrismaClient` options for connecting to your database through a driver adapter. This is the common case in Prisma 7.
- * 
- * Learn more: https://pris.ly/d/driver-adapters
- */
-export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions {
-  /**
-   * A driver adapter that PrismaClient uses to connect to your database, such as the ones provided by `@prisma/adapter-pg`, `@prisma/adapter-libsql`, `@prisma/adapter-planetscale`, etc.
-   * 
-   * A driver adapter is **required** unless you connect to your database through Prisma Accelerate (in which case use `accelerateUrl` instead).
-   * 
-   * Learn more: https://pris.ly/d/driver-adapters
-   * 
-   * @example
-   * ```ts
-   * import { PrismaPg } from '@prisma/adapter-pg'
-   * import { PrismaClient } from './generated/prisma/client'
-   * 
-   * const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
-   * const prisma = new PrismaClient({ adapter })
-   * ```
-   */
-  adapter: runtime.SqlDriverAdapterFactory
-  accelerateUrl?: never
-}
-
-/**
- * Options passed to the `PrismaClient` constructor.
- * 
- * A driver adapter (or, alternatively, a Prisma Accelerate URL) is **required**. See {@link PrismaClientOptionsWithAdapter} and {@link PrismaClientOptionsWithAccelerateUrl} for the two variants. All other properties live in {@link PrismaClientBaseOptions} and are optional.
- * 
- * Learn more about driver adapters: https://pris.ly/d/driver-adapters
- */
-export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   sequelizeMeta?: Prisma.SequelizeMetaOmit
   absen?: Prisma.absenOmit
@@ -4872,6 +4908,7 @@ export type GlobalOmitConfig = {
   dokumentasikelaswp?: Prisma.dokumentasikelaswpOmit
   event?: Prisma.eventOmit
   event_sesi?: Prisma.event_sesiOmit
+  event_lokasi?: Prisma.event_lokasiOmit
   feedback?: Prisma.feedbackOmit
   gereja?: Prisma.gerejaOmit
   kelaswp?: Prisma.kelaswpOmit

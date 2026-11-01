@@ -516,6 +516,9 @@ export function EventDetailV2Client({
     ['Jenis Event', event.jenisevent || '—'],
     ['Tipe', scope ? `${ww} · ${scope}` : ww || '—'],
     ['Alamat', event.alamatevent || '—'],
+    ...(event.lokasi.length > 0
+      ? ([['Lokasi Scan', event.lokasi.map((l) => `${l.nama} (${l.radius} m)`).join(' · ')]] as [string, string][])
+      : []),
     [
       'Tanggal',
       sameDates ? event.tglDisplay : `${event.tglDisplay} – ${event.tglSelesaiDisplay}`,
@@ -748,6 +751,9 @@ export function EventDetailV2Client({
                           <span className="font-normal text-[#57534e]">
                             {' '}
                             · {s.wajib ? 'wajib' : 'opsional'}
+                            {s.id_lokasi != null
+                              ? ` · @ ${event.lokasi.find((l) => l.id_lokasi === s.id_lokasi)?.nama ?? 'lokasi'}`
+                              : ''}
                           </span>
                         </span>
                         <span className="text-[#44403c] shrink-0">{sesiCounts.get(s.id_sesi) ?? 0} hadir</span>

@@ -76,6 +76,9 @@ components/pwa/paper-ui.tsx           # Kit gaya kertas halaman anggota (warna l
 lib/actions/upgrade.ts                # joinVolunteer, joinSquad, approveSquad
 lib/actions/wfe-serentak.ts           # kampanye flyer pusat JFE (range bulan)
 lib/event-sesi.ts                     # multi-sesi absen: wajib, hadirPenuh, dup key
+lib/event-lokasi.ts                   # multi-lokasi scan event nasional: tipe, parseLatLng, lokasiNeedsSesi
+lib/google-maps.ts                    # ensureGoogleMaps (loader bersama form event + pin lokasi)
+components/kota/lokasi-pin-map.tsx    # alamat + peta pin untuk satu lokasi scan
 lib/event-approval.ts                 # append notenasional (ALK/Brim prefixes)
 lib/event-poster.ts                    # resolveEventPosterUrl: posterevent then image_url
 lib/event-link.ts                     # eventEntryPath: Online -> /absen/{id}, Offline -> /join/{id}
@@ -94,6 +97,10 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-11-01]
+- Multi-lokasi scan event nasional (`wwtype=nasional`, non-Online): tabel `event_lokasi` + `event_sesi.id_lokasi`. Form Sekretariat punya section **Lokasi Scan** (nama, alamat+pin, radius); kosong = pakai titik utama. Di Scan operator memilih lokasi; sesi **terkunci ke lokasi pada scan sukses pertama** (update bersyarat `id_lokasi IS NULL` di transaksi absen), scan lokasi lain → `lokasi_conflict`. Memilih lokasi saja tidak mengunci. 2+ lokasi wajib punya minimal 1 sesi. Hapus lokasi yang sudah mengunci sesi ditolak
+- `createAbsen` event nasional hanya untuk `isNasionalAdmin` (`nasional_only`); kota ALK ditolak. Cek radius GPS tetap di browser (pakai titik lokasi terpilih), server hanya menegakkan kunci + aturan Sekretariat. Scanner legacy `/alk/scanner` tidak punya UI lokasi
+- Migrasi: jalankan `POST /api/internal/prod-migrate` (CREATE TABLE `event_lokasi`, ADD `event_sesi.id_lokasi`)
+- Catatan: `createAbsen` juga dipanggil `absenOnlineSelf`/`onlineCheckin` (peserta) tapi mensyaratkan cookie pengurus ALK, jadi absen online mandiri kemungkinan gagal (belum diubah, sudah jadi task terpisah)
 - Event `wwtype=nasional` hanya tampil untuk Core ke atas (`userlevel` ≥ 3): landing `/` selalu menyembunyikan (`getPublicEvents`), `/events` cek level dari sesi di server (`getEventsByKotalevelup`). Filter pakai `wwtype`, bukan `id_cabang=0`, karena We Worship Online juga cabang 0 dan terbuka untuk semua. Link langsung `/join/{id}` tetap bisa dibuka (belum diubah)
 - MemberCard baru dari desain `LevelUP ID Card.html` (dark + panel krem + aksen `#F8B801`), pindah ke `components/pwa/member-card.tsx` supaya font Anton/Space Mono tidak ikut preload di semua halaman yang import `ui.tsx`. Dipakai `/dashboard`, `/dashboard/kartu`, `/daftar`; prototype tetap kartu lama
 - Isi kartu: nama depan + sisa nama (ukuran mengecil sesuai panjang), `LevelUP Kota`, tgl lahir (`parseDob`: ISO atau d/m/yyyy), `ID – {usercode}`, stempel tier. Gereja, tempat lahir, Status Aktif tidak lagi di kartu (tetap di tabel `/dashboard/kartu`). Barcode dekoratif, tidak bisa di-scan
