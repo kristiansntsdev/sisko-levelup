@@ -39,9 +39,9 @@ components/landing/zine.tsx           # Design system landing (kertas lecek, tor
   daftar/page.tsx                     # Pendaftaran v2 Gen Z (intro → form live MemberCard → kartu jadi); Google baru → completeRegistration
   daftar/layout.tsx                   # Permanent Marker (--font-marker) khusus /daftar
   dashboard/layout.tsx                # MemberShell bottom nav (skip /dashboard/kota + /dashboard/v2/kota)
-  dashboard/page.tsx                  # Beranda PWA: MemberCard, level, tiket, ModeSwitch
-  dashboard/kartu/                    # Detail Kartu Anggota
-  dashboard/tiket/                    # My Tickets (TicketRow) + [id] QR detail proto
+  dashboard/page.tsx                  # Beranda PWA warna landing (kertas, hitam, merah, kuning) + font kartu: MemberCard, level, menu, tiket
+  dashboard/kartu/                    # Detail Kartu Anggota: MemberCard + data anggota
+  dashboard/tiket/                    # My Tickets (TicketCard) + [id] detail tiket + QR
   dashboard/riwayat/                  # Milestone stub dari registrasi
   dashboard/kesaksian/                # Kesaksian UI stub
   dashboard/profil/                   # Profil + masuk pengurus sheet
@@ -64,6 +64,10 @@ components/alk-v2/                    # Sekretariat v2 shell + screens (PWA look
   dashboard/v2/kota/alk/event/[id]/   # Detail Event v2 (EventDetailV2Client, proto KEventScreen)
   dashboard/v2/kota/alk/event/[id]/approve/ # Nasional: approve/reject event (v2 UI)
 components/pwa/                       # LevelUP PWA UI kit + MemberShell (PlainBar/Panel/Qr)
+components/pwa/member-card.tsx        # MemberCard: desain ID Card Gen Z (canvas 1005x650 di-zoom ke lebar container; Anton + Space Mono)
+components/pwa/profile-photo.tsx      # ProfilePhotoPicker: pilih, pratinjau di kartu asli, simpan
+lib/actions/peserta-foto.ts           # updateFotoPeserta: WebP ke Blob, update peserta.foto, hapus foto lama
+components/pwa/paper-ui.tsx           # Kit gaya kertas halaman anggota (warna landing + font kartu); latar kertas dari MemberShell
   dashboard/kota/alk/approval/page.tsx # List approval squad dari table upgrade
   dashboard/kota/alk/event/[id]/approve/ # Sekretariat: approve/reject event
   dashboard/kota/alk/event/[id]/dana/   # ALK Kota: form pengajuan support dana (per event)
@@ -89,6 +93,24 @@ app/api/internal/monitoring-sheet/    # GET ?year= (Bearer MONITORING_SHEET_SECR
 scripts/monitoring-sheet.gs           # Apps Script: paste ke spreadsheet, sync tab per tahun tiap 5 menit
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-11-01]
+- MemberCard baru dari desain `LevelUP ID Card.html` (dark + panel krem + aksen `#F8B801`), pindah ke `components/pwa/member-card.tsx` supaya font Anton/Space Mono tidak ikut preload di semua halaman yang import `ui.tsx`. Dipakai `/dashboard`, `/dashboard/kartu`, `/daftar`; prototype tetap kartu lama
+- Isi kartu: nama depan + sisa nama (ukuran mengecil sesuai panjang), `LevelUP Kota`, tgl lahir (`parseDob`: ISO atau d/m/yyyy), `ID – {usercode}`, stempel tier. Gereja, tempat lahir, Status Aktif tidak lagi di kartu (tetap di tabel `/dashboard/kartu`). Barcode dekoratif, tidak bisa di-scan
+- Teks kecil panel sengaja lebih besar dari file desain: canvas tampil ~35% di HP, ukuran asli 10-14px jadi 3.5-5px
+- Beranda `/dashboard` didesain ulang dengan warna landing: kertas lecek `#efe8da` (`paper()`), panel `#fffdf7`, hitam `#161616`, merah `#e02a2f`, kuning `#ffd83d`; font Anton + Space Mono (`ID_FONTS` dari `member-card.tsx`). Versi serba gelap ditolak user karena terlalu gelap. Kartu tetap desain gelapnya. Menu yang belum aktif = kotak titik-titik + label SOON. Fitur dan copy tidak berubah
+- Pita hitam tipis di belakang status bar iOS (teks status bar selalu putih, tidak terbaca di atas kertas)
+- `paper`/`torn` pindah ke `components/landing/paper.ts` (tetap di-export ulang dari `zine.tsx`) supaya halaman lain tidak ikut memuat font Permanent Marker
+- Riwayat, Kesaksian, Profil ikut gaya Beranda lewat `components/pwa/paper-ui.tsx`. Riwayat: timeline + stempel `ticketState` (Hadir/Tidak hadir/Terdaftar), bukan status mentah. Profil: nilai ditumpuk di bawah label supaya email panjang tidak terpotong
+- `/events` + `/join/[id]` ikut gaya kertas (`PaperMain standalone`, di luar MemberShell). Kartu event = tiket dengan stub OPEN/FULL/CLOSED (`REG_TONE`). Flyer View Event tetap tinggi alami, tidak di-crop, dibingkai seperti foto ditempel selotip
+- Catatan: "Eligible to Register" di View Event selalu tampil dan `createRegistrasi` tidak mengecek target role, jadi event "Terbuka untuk Core" tetap bisa diambil Tamu (belum diubah)
+- Detail tiket `/dashboard/tiket/[id]` ikut gaya kertas (`ticket-detail-client.tsx` + `absen-event-button.tsx`). QR sengaja tetap lurus di atas putih solid, tanpa rotasi atau tekstur; `Qr` tidak diubah. `ticket-view.tsx` tidak dipakai di mana pun (kode lama)
+- List `/dashboard/tiket` ikut gaya kertas; kartu tiket Beranda, Events, dan My Tickets kini satu `TicketCard` di `paper-ui.tsx`
+- Perubahan Data `/dashboard/profil/edit` ikut gaya kertas (`PaperField` + `PAPER_INPUT`, font 16px supaya iOS tidak zoom saat fokus). Error pengajuan pindah kota kini tampil di dalam sheet; label Jenis kelamin bukan `<label>` lagi (dulu tap teksnya memilih Laki-laki)
+- Ganti foto profil di `/dashboard/profil`: browser kecilkan dulu (`lib/shrink-photo.ts`, maks 1600px, buang EXIF/GPS), server ubah ke WebP (`lib/profile-photo.ts`, sharp, maks 800px, q80; WebP dipilih karena AVIF butuh iOS 16+), simpan ke Blob `peserta/foto/` (`lib/actions/peserta-foto.ts`), foto lama dihapus. `peserta.foto` kini URL Blob; nilai lama berupa nama file tetap diabaikan. Pratinjau memakai `MemberCard` asli. Picker memakai label native, bukan `input.click()` (iOS lama mengabaikan klik skrip)
+- Detail Kartu `/dashboard/kartu` ikut gaya kertas; tgl lahir tampil seperti di kartu (27 Agustus 1998), bukan ISO. Semua halaman anggota kini kertas, jadi `MemberShell` selalu memberi latar kertas (admin kota tetap tidak lewat shell)
+- Bottom nav `shell.tsx` hitam + kuning + tombol tiket merah di semua tab anggota; `/login` dan `/daftar` masih gaya lama
+- Catatan: tab Riwayat dan Riwayat di My Tickets memakai `getRegistrasiByPeserta` yang hanya mengambil event bulan ini, jadi riwayat bulan lalu tidak tampil (belum diubah)
 
 ## Recent Updates [2026-10-31]
 - QR tiket/join: `Qr` ganti SVG→PNG data-URL + `color-scheme: only light` — SVG stroke modules hilang di OS/browser dark mode

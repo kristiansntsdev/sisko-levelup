@@ -3,8 +3,10 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { getMemberCardForPeserta, getPesertaById } from '@/lib/actions/peserta'
-import { USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
-import { Hero, Icon, MemberCard, PAGE_BG, Pill } from '@/components/pwa/ui'
+import { parseDob, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
+import { MemberCard } from '@/components/pwa/member-card'
+import { IconButton, InfoRow, LABEL, PANEL, PaperHeader, PaperMain, ROWS } from '@/components/pwa/paper-ui'
+import type { IconName } from '@/components/pwa/ui'
 
 export default function KartuPage() {
   const router = useRouter()
@@ -35,52 +37,41 @@ export default function KartuPage() {
 
   if (loading || !card) {
     return (
-      <main className={`min-h-screen ${PAGE_BG} flex items-center justify-center`}>
-        <p className="text-sm text-slate-500">Memuat...</p>
-      </main>
+      <PaperMain>
+        <p className={`${LABEL} py-10 text-center text-[12px] text-[#57534e]`}>Memuat...</p>
+      </PaperMain>
     )
   }
 
-  const rows: [string, string][] = [
-    ['No. Anggota', card.no],
-    ['Nama', card.name],
-    ['Level', USERLEVEL_LABEL[level] ?? 'Tamu'],
-    ['LevelUP Kota', card.city],
-    ['Gereja', card.church],
-    ['Email', email || '—'],
-    ['No. WA', nowa || '—'],
-    ['Tempat, Tgl Lahir', [card.pob, card.dob].filter((v) => v && v !== '—').join(', ') || '—'],
+  const birth = parseDob(card.dob)?.long ?? card.dob
+  const rows: [IconName, string, string][] = [
+    ['card', 'No. Anggota', card.no],
+    ['user', 'Nama', card.name],
+    ['shield', 'Level', USERLEVEL_LABEL[level] ?? 'Tamu'],
+    ['pin', 'LevelUP Kota', card.city],
+    ['church', 'Gereja', card.church],
+    ['mail', 'Email', email || '—'],
+    ['phone', 'No. WA', nowa || '—'],
+    ['cake', 'Tempat, Tgl Lahir', [card.pob, birth].filter((v) => v && v !== '—').join(', ') || '—'],
   ]
 
   return (
-    <main>
-      <Hero className="pt-4 pb-16 rounded-b-[32px]">
-        <div className="relative flex items-center h-11">
-          <button
-            type="button"
-            onClick={() => router.push('/dashboard')}
-            aria-label="Kembali"
-            className="w-10 h-10 -ml-2 flex items-center justify-center rounded-full active:bg-white/10"
-          >
-            <Icon name="back" className="w-6 h-6" sw={2.2} />
-          </button>
-          <h2 className="absolute left-1/2 -translate-x-1/2 font-bold text-[17px]">Detail Kartu Anggota</h2>
-        </div>
-        <div className="mt-3 flex justify-center">
-          <Pill tone="green">Status Aktif</Pill>
-        </div>
-      </Hero>
-      <div className="px-5 -mt-10 space-y-5 pb-8">
+    <PaperMain>
+      <PaperHeader
+        sticker="Status Aktif"
+        title="Detail Kartu Anggota"
+        leading={<IconButton icon="back" label="Kembali" onClick={() => router.push('/dashboard')} className="-rotate-3" />}
+      />
+      <div className="px-5 mt-4 space-y-5 pb-8">
         <MemberCard m={card} />
-        <div className="bg-white rounded-2xl ring-1 ring-slate-100 divide-y divide-slate-100">
-          {rows.map(([k, v]) => (
-            <div key={k} className="px-4 py-3 flex justify-between gap-3">
-              <span className="text-[12.5px] text-slate-500 shrink-0">{k}</span>
-              <span className="text-[13.5px] font-semibold text-[#3b1417] text-right break-words">{v}</span>
-            </div>
+        <section aria-label="Data anggota" className={`px-4 ${ROWS} ${PANEL}`}>
+          {rows.map(([icon, k, v]) => (
+            <InfoRow key={k} icon={icon} label={k}>
+              {v}
+            </InfoRow>
           ))}
-        </div>
+        </section>
       </div>
-    </main>
+    </PaperMain>
   )
 }

@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useTransition, type FormEvent } from 'react'
+import { useEffect, useState, useTransition, type FormEvent, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { getPesertaById, getMemberCardForPeserta } from '@/lib/actions/peserta'
@@ -20,19 +20,86 @@ import {
   type WilayahOption,
 } from '@/lib/actions/wilayah'
 import {
-  BTN_RED,
-  FLD,
-  Field,
-  Hero,
-  Icon,
-  Pill,
-  Sheet,
-  SheetHead,
-  TintIcon,
-} from '@/components/pwa/ui'
-import { Note, SectionCard, Seg, TopBar } from '@/components/alk-v2/ui'
+  ANTON,
+  BTN,
+  Chip,
+  IconButton,
+  LABEL,
+  MONO,
+  PANEL,
+  PAPER_INPUT,
+  PAPER_INPUT_LOCKED,
+  PaperField,
+  PaperHeader,
+  PaperMain,
+  PRESS,
+  Strip,
+  TAPE,
+} from '@/components/pwa/paper-ui'
+import { Icon, Sheet, SheetHead, type IconName } from '@/components/pwa/ui'
 
-const FLD_LOCKED = `${FLD} opacity-60 cursor-not-allowed bg-slate-100 focus:bg-slate-100 focus:ring-1 focus:ring-slate-200`
+const BTN_LINE = `${ANTON} flex-1 py-2.5 rounded-sm ring-2 text-[15px] tracking-[.03em] disabled:opacity-50 ${PRESS}`
+const STAMP = `${MONO} shrink-0 -rotate-6 rounded-[4px] px-2 py-1 text-[9.5px] font-bold uppercase`
+const ERROR = `${MONO} text-[12px] font-bold text-[#c21f24]`
+
+function Section({
+  icon,
+  chip,
+  title,
+  sub,
+  taped = false,
+  children,
+}: {
+  icon: IconName
+  chip: string
+  title: string
+  sub: string
+  taped?: boolean
+  children: ReactNode
+}) {
+  return (
+    <section aria-label={title} className={`relative px-4 pt-4 pb-5 ${PANEL}`}>
+      {taped && <span aria-hidden className={`${TAPE} -left-4 -top-1`} />}
+      <div className="flex items-center gap-3 pb-3 mb-4 border-b-2 border-dotted border-[#161616]/25">
+        <Chip name={icon} className={chip} />
+        <div className="min-w-0">
+          <h2 className={`${ANTON} text-[22px] leading-none tracking-[.01em]`}>{title}</h2>
+          <p className={`${MONO} mt-1 text-[11px] text-[#57534e]`}>{sub}</p>
+        </div>
+      </div>
+      <div className="space-y-4">{children}</div>
+    </section>
+  )
+}
+
+function WilayahSelect({
+  label,
+  placeholder,
+  value,
+  options,
+  disabled,
+  onChange,
+}: {
+  label: string
+  placeholder: string
+  value: string
+  options: WilayahOption[]
+  disabled?: boolean
+  onChange: (id: string) => void
+}) {
+  return (
+    <PaperField label={label}>
+      <select className={`${PAPER_INPUT} ${value ? '' : 'text-[#57534e]'}`} value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)}>
+        <option value="">{placeholder}</option>
+        {options.map((o) => (
+          <option key={o.id} value={o.id} className="text-[#161616]">
+            {o.nama}
+          </option>
+        ))}
+      </select>
+    </PaperField>
+  )
+}
 
 function toDateInput(raw: string): string {
   const s = raw.trim()
@@ -256,64 +323,60 @@ export default function ProfilEditPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <main className="px-5 py-10 text-center text-sm text-slate-500">
-        Memuat data…
-      </main>
+      <PaperMain>
+        <p className={`${LABEL} px-5 py-10 text-center text-[12px] text-[#57534e]`}>Memuat data…</p>
+      </PaperMain>
     )
   }
 
   return (
-    <main>
-      <Hero className="pt-3 pb-16 rounded-b-[32px]">
-        <TopBar title="Perubahan Data" back={() => router.push('/dashboard/profil')} />
-        <p className="text-[13px] text-white/80 mt-2 px-0.5">
-          Email terkunci. LevelUP Kota lewat pengajuan ke Sekretariat Nasional.
-        </p>
-      </Hero>
+    <PaperMain>
+      <PaperHeader
+        title="Perubahan Data"
+        leading={<IconButton icon="chevronLeft" label="Kembali" onClick={() => router.push('/dashboard/profil')} className="-rotate-3" />}
+      >
+        <p className={`${MONO} mt-1 text-[12px] leading-relaxed text-[#44403c]`}>Email terkunci. LevelUP Kota lewat pengajuan ke Sekretariat Nasional.</p>
+      </PaperHeader>
 
-      <form onSubmit={handleSubmit} noValidate className="px-5 -mt-8 relative z-10 space-y-4 pb-6">
-        <SectionCard lift icon="user" tint="red" title="Identitas" sub="Nama, kelamin, lahir, dan WA">
-          <Field label="Email">
-            <input className={FLD_LOCKED} value={email} disabled readOnly />
-          </Field>
-          <Field label="Nama lengkap">
+      <form onSubmit={handleSubmit} noValidate className="px-5 mt-5 space-y-5 pb-6">
+        <Section taped icon="user" chip="bg-[#e02a2f] text-white" title="Identitas" sub="Nama, kelamin, lahir, dan WA">
+          <PaperField label="Email" locked>
+            <input className={PAPER_INPUT_LOCKED} value={email} disabled readOnly />
+          </PaperField>
+          <PaperField label="Nama lengkap">
+            <input className={PAPER_INPUT} autoComplete="name" placeholder="Nama lengkap" value={nama} onChange={(e) => setNama(e.target.value)} />
+          </PaperField>
+          {/* Not a PaperField: a <label> around buttons would make tapping its text select the first option. */}
+          <div role="group" aria-label="Jenis kelamin">
+            <p className={`${LABEL} mb-1.5 text-[10px] font-bold text-[#44403c]`}>Jenis kelamin</p>
+            <div className="grid grid-cols-2 gap-1 p-1 rounded-full bg-[#efe8da]/70">
+              {(
+                [
+                  ['L', 'Laki-laki'],
+                  ['P', 'Perempuan'],
+                ] as const
+              ).map(([v, t]) => (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={gender === v}
+                  onClick={() => setGender(v)}
+                  className={`${LABEL} py-2.5 rounded-full text-[11px] font-bold transition ${gender === v ? 'bg-[#161616] text-[#ffd83d]' : 'text-[#161616]'}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+          <PaperField label="Tempat lahir">
+            <input className={PAPER_INPUT} placeholder="Kota / kabupaten lahir" value={tempatlahir} onChange={(e) => setTempatlahir(e.target.value)} />
+          </PaperField>
+          <PaperField label="Tanggal lahir">
+            <input className={PAPER_INPUT} type="date" value={tgllahir} onChange={(e) => setTgllahir(e.target.value)} />
+          </PaperField>
+          <PaperField label="Nomor WA">
             <input
-              className={FLD}
-              autoComplete="name"
-              placeholder="Nama lengkap"
-              value={nama}
-              onChange={(e) => setNama(e.target.value)}
-            />
-          </Field>
-          <Field label="Jenis kelamin">
-            <Seg
-              options={[
-                ['L', 'Laki-laki'],
-                ['P', 'Perempuan'],
-              ]}
-              value={gender}
-              onChange={(v) => setGender(v === 'P' ? 'P' : 'L')}
-            />
-          </Field>
-          <Field label="Tempat lahir">
-            <input
-              className={FLD}
-              placeholder="Kota / kabupaten lahir"
-              value={tempatlahir}
-              onChange={(e) => setTempatlahir(e.target.value)}
-            />
-          </Field>
-          <Field label="Tanggal lahir">
-            <input
-              className={FLD}
-              type="date"
-              value={tgllahir}
-              onChange={(e) => setTgllahir(e.target.value)}
-            />
-          </Field>
-          <Field label="Nomor WA">
-            <input
-              className={FLD}
+              className={PAPER_INPUT}
               type="tel"
               inputMode="tel"
               autoComplete="tel"
@@ -321,200 +384,115 @@ export default function ProfilEditPage() {
               value={nowa}
               onChange={(e) => setNowa(e.target.value)}
             />
-          </Field>
-        </SectionCard>
+          </PaperField>
+        </Section>
 
-        <SectionCard icon="pin" tint="gold" title="Alamat" sub="Wilayah sesuai data BPS">
-          <Field label="Provinsi">
-            <select
-              className={`${FLD} ${provinsi ? '' : 'text-slate-400'}`}
-              value={provinsi}
-              onChange={(e) => void onProvinsi(e.target.value)}
-            >
-              <option value="">Pilih provinsi…</option>
-              {provinsiOpts.map((o) => (
-                <option key={o.id} value={o.id} className="text-slate-900">
-                  {o.nama}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Kabupaten / Kota">
-            <select
-              className={`${FLD} ${kabupaten ? '' : 'text-slate-400'}`}
-              value={kabupaten}
-              disabled={!provinsi}
-              onChange={(e) => void onKabupaten(e.target.value)}
-            >
-              <option value="">Pilih kabupaten…</option>
-              {kabupatenOpts.map((o) => (
-                <option key={o.id} value={o.id} className="text-slate-900">
-                  {o.nama}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Kecamatan">
-            <select
-              className={`${FLD} ${kecamatan ? '' : 'text-slate-400'}`}
-              value={kecamatan}
-              disabled={!kabupaten}
-              onChange={(e) => void onKecamatan(e.target.value)}
-            >
-              <option value="">Pilih kecamatan…</option>
-              {kecamatanOpts.map((o) => (
-                <option key={o.id} value={o.id} className="text-slate-900">
-                  {o.nama}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Desa / Kelurahan">
-            <select
-              className={`${FLD} ${desa ? '' : 'text-slate-400'}`}
-              value={desa}
-              disabled={!kecamatan}
-              onChange={(e) => setDesa(e.target.value)}
-            >
-              <option value="">Pilih desa…</option>
-              {desaOpts.map((o) => (
-                <option key={o.id} value={o.id} className="text-slate-900">
-                  {o.nama}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Alamat lengkap">
-            <textarea
-              className={`${FLD} min-h-[88px] resize-y`}
-              placeholder="Jalan, RT/RW, nomor rumah…"
-              value={alamat}
-              onChange={(e) => setAlamat(e.target.value)}
-            />
-          </Field>
-        </SectionCard>
+        <Section icon="pin" chip="bg-[#ffd83d] text-[#161616]" title="Alamat" sub="Wilayah sesuai data BPS">
+          <WilayahSelect label="Provinsi" placeholder="Pilih provinsi…" value={provinsi} options={provinsiOpts} onChange={(id) => void onProvinsi(id)} />
+          <WilayahSelect
+            label="Kabupaten / Kota"
+            placeholder="Pilih kabupaten…"
+            value={kabupaten}
+            options={kabupatenOpts}
+            disabled={!provinsi}
+            onChange={(id) => void onKabupaten(id)}
+          />
+          <WilayahSelect
+            label="Kecamatan"
+            placeholder="Pilih kecamatan…"
+            value={kecamatan}
+            options={kecamatanOpts}
+            disabled={!kabupaten}
+            onChange={(id) => void onKecamatan(id)}
+          />
+          <WilayahSelect label="Desa / Kelurahan" placeholder="Pilih desa…" value={desa} options={desaOpts} disabled={!kecamatan} onChange={setDesa} />
+          <PaperField label="Alamat lengkap">
+            <textarea className={`${PAPER_INPUT} min-h-[88px] resize-y`} placeholder="Jalan, RT/RW, nomor rumah…" value={alamat} onChange={(e) => setAlamat(e.target.value)} />
+          </PaperField>
+        </Section>
 
-        <SectionCard icon="church" tint="red" title="Komunitas" sub="LevelUP Kota via pengajuan">
-          <Field label="LevelUP Kota">
-            <input className={FLD_LOCKED} value={kotaName} disabled readOnly />
-          </Field>
+        <Section icon="church" chip="bg-[#161616] text-[#ffd83d]" title="Komunitas" sub="LevelUP Kota via pengajuan">
+          <PaperField label="LevelUP Kota" locked>
+            <input className={PAPER_INPUT_LOCKED} value={kotaName} disabled readOnly />
+          </PaperField>
 
           {pindah?.status === '' ? (
-            <div className="rounded-xl bg-amber-50 ring-1 ring-amber-200 px-3.5 py-3 space-y-2">
-              <div className="flex items-start gap-2">
-                <Pill tone="amber">Pending</Pill>
-                <p className="text-[13px] text-amber-900 leading-snug flex-1">
+            <div className="rounded-[10px] border-2 border-dotted border-[#161616]/40 px-3.5 py-3 space-y-2.5">
+              <div className="flex items-start gap-2.5">
+                <span className={`${STAMP} bg-[#ffd83d] text-[#161616]`}>Pending</span>
+                <p className={`${MONO} flex-1 text-[12px] leading-snug`}>
                   Menunggu approval Sekretariat Nasional → <b>{pindah.keNama}</b>
                 </p>
               </div>
-              {pindah.catatan ? (
-                <p className="text-[12px] text-slate-600">Catatan: {pindah.catatan}</p>
-              ) : null}
+              {pindah.catatan ? <p className={`${MONO} text-[11px] text-[#44403c]`}>Catatan: {pindah.catatan}</p> : null}
               <div className="flex gap-2 pt-1">
-                <button
-                  type="button"
-                  disabled={pindahPending}
-                  onClick={openAjukanSheet}
-                  className="flex-1 py-2.5 rounded-xl bg-white ring-1 ring-slate-200 text-[13px] font-bold text-[#3b1417] disabled:opacity-50"
-                >
+                <button type="button" disabled={pindahPending} onClick={openAjukanSheet} className={`${BTN_LINE} ring-[#161616]`}>
                   Ubah tujuan
                 </button>
-                <button
-                  type="button"
-                  disabled={pindahPending}
-                  onClick={handleBatalPindah}
-                  className="flex-1 py-2.5 rounded-xl bg-white ring-1 ring-rose-200 text-[13px] font-bold text-rose-600 disabled:opacity-50"
-                >
+                <button type="button" disabled={pindahPending} onClick={handleBatalPindah} className={`${BTN_LINE} ring-[#c21f24] text-[#c21f24]`}>
                   Batalkan
                 </button>
               </div>
             </div>
           ) : pindah?.status === '0' ? (
-            <div className="rounded-xl bg-rose-50 ring-1 ring-rose-200 px-3.5 py-3 space-y-2">
-              <div className="flex items-start gap-2">
-                <Pill tone="red">Ditolak</Pill>
-                <p className="text-[13px] text-rose-800 leading-snug flex-1">
+            <div className="rounded-[10px] border-2 border-dotted border-[#c21f24]/60 px-3.5 py-3 space-y-2.5">
+              <div className="flex items-start gap-2.5">
+                <span className={`${STAMP} bg-[#e02a2f] text-white`}>Ditolak</span>
+                <p className={`${MONO} flex-1 text-[12px] leading-snug`}>
                   Pengajuan ke <b>{pindah.keNama}</b> ditolak.
                 </p>
               </div>
-              {pindah.notenasional ? (
-                <p className="text-[12px] text-rose-700">Alasan: {pindah.notenasional}</p>
-              ) : null}
-              <button
-                type="button"
-                disabled={pindahPending}
-                onClick={openAjukanSheet}
-                className={`w-full py-2.5 text-[13px] ${BTN_RED}`}
-              >
-                Ajukan ulang
+              {pindah.notenasional ? <p className={`${MONO} text-[11px] text-[#c21f24]`}>Alasan: {pindah.notenasional}</p> : null}
+              <button type="button" disabled={pindahPending} onClick={openAjukanSheet} className={BTN}>
+                <Strip className="py-2.5 text-[16px]">Ajukan ulang</Strip>
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              disabled={pindahPending}
-              onClick={openAjukanSheet}
-              className="w-full py-3 rounded-xl bg-[#fbeceb] ring-1 ring-[#f3d3d3] text-[#c9232c] text-[13.5px] font-bold disabled:opacity-50"
-            >
-              Ajukan perubahan LevelUP Kota
+            <button type="button" disabled={pindahPending} onClick={openAjukanSheet} className={BTN}>
+              <Strip tone="ink" className="py-2.5 text-[16px]">
+                Ajukan perubahan LevelUP Kota
+              </Strip>
             </button>
           )}
 
-          {pindahError ? (
-            <p role="alert" className="text-[12.5px] text-rose-600 font-medium">
+          {pindahError && !kotaSheetOpen ? (
+            <p role="alert" className={ERROR}>
               {pindahError}
             </p>
           ) : null}
 
-          <Field label="Gereja">
-            <input
-              className={FLD}
-              placeholder="Nama gereja"
-              value={gereja}
-              onChange={(e) => setGereja(e.target.value)}
-            />
-          </Field>
-          <Field label="Sekolah / Kampus / Tempat Kerja">
-            <input
-              className={FLD}
-              placeholder="cth: SMAN 1 Ngawi, UNIPMA, PT Maju Jaya"
-              value={sekolah}
-              onChange={(e) => setSekolah(e.target.value)}
-            />
-          </Field>
-        </SectionCard>
+          <PaperField label="Gereja">
+            <input className={PAPER_INPUT} placeholder="Nama gereja" value={gereja} onChange={(e) => setGereja(e.target.value)} />
+          </PaperField>
+          <PaperField label="Sekolah / Kampus / Tempat Kerja">
+            <input className={PAPER_INPUT} placeholder="cth: SMAN 1 Ngawi, UNIPMA, PT Maju Jaya" value={sekolah} onChange={(e) => setSekolah(e.target.value)} />
+          </PaperField>
+        </Section>
 
-        <SectionCard icon="sparkle" tint="gold" title="Pendidikan" sub="Opsional">
-          <Field label="Pendidikan terakhir">
-            <input
-              className={FLD}
-              placeholder="cth: SMA, S1, D3"
-              value={pendidikan}
-              onChange={(e) => setPendidikan(e.target.value)}
-            />
-          </Field>
-          <Field label="Jurusan">
-            <input
-              className={FLD}
-              placeholder="cth: Teknik Informatika"
-              value={jurusan}
-              onChange={(e) => setJurusan(e.target.value)}
-            />
-          </Field>
-        </SectionCard>
+        <Section icon="sparkle" chip="bg-[#ffd83d] text-[#161616]" title="Pendidikan" sub="Opsional">
+          <PaperField label="Pendidikan terakhir">
+            <input className={PAPER_INPUT} placeholder="cth: SMA, S1, D3" value={pendidikan} onChange={(e) => setPendidikan(e.target.value)} />
+          </PaperField>
+          <PaperField label="Jurusan">
+            <input className={PAPER_INPUT} placeholder="cth: Teknik Informatika" value={jurusan} onChange={(e) => setJurusan(e.target.value)} />
+          </PaperField>
+        </Section>
 
-        <Note>
-          Perubahan data langsung tersimpan ke kartu anggota. Email terkunci. LevelUP Kota berubah setelah Sekretariat Nasional menyetujui pengajuanmu.
-        </Note>
+        <div className="flex gap-3 rounded-[14px] border-2 border-dotted border-[#161616]/30 p-3.5">
+          <Icon name="alert" className="w-5 h-5 shrink-0 text-[#c21f24]" />
+          <p className={`${MONO} text-[11.5px] leading-relaxed text-[#44403c]`}>
+            Perubahan data langsung tersimpan ke kartu anggota. Email terkunci. LevelUP Kota berubah setelah Sekretariat Nasional menyetujui pengajuanmu.
+          </p>
+        </div>
 
         {error && (
-          <p role="alert" className="px-4 py-3 rounded-xl bg-rose-50 ring-1 ring-rose-200 text-[13px] text-rose-700 font-medium">
+          <p role="alert" className={`${ERROR} rounded-[10px] bg-[#e02a2f]/10 px-4 py-3`}>
             {error}
           </p>
         )}
 
-        <button type="submit" disabled={saving} className={`w-full py-3.5 ${BTN_RED}`}>
-          {saving ? 'Menyimpan…' : 'Simpan'}
+        <button type="submit" disabled={saving} className={BTN}>
+          <Strip>{saving ? 'Menyimpan…' : 'Simpan'}</Strip>
         </button>
       </form>
 
@@ -525,51 +503,38 @@ export default function ProfilEditPage() {
           setKotaQ('')
         }}
       >
-        <SheetHead
-          title="Pilih LevelUP Kota tujuan"
-          sub="Pengajuan ditinjau Sekretariat Nasional"
-        />
-        <Field label="Alasan (opsional)">
-          <textarea
-            className={`${FLD} min-h-[72px] resize-y`}
-            placeholder="Kenapa mau pindah kota?"
-            value={pindahCatatan}
-            onChange={(e) => setPindahCatatan(e.target.value)}
-          />
-        </Field>
-        <label className="mt-3 flex items-center gap-2.5 rounded-full bg-slate-50 ring-1 ring-slate-200 px-4 py-3 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#c9232c] transition">
-          <Icon name="search" className="w-5 h-5 text-[#c9232c]" />
+        <SheetHead title="Pilih LevelUP Kota tujuan" sub="Pengajuan ditinjau Sekretariat Nasional" />
+        <PaperField label="Alasan (opsional)">
+          <textarea className={`${PAPER_INPUT} min-h-[72px] resize-y`} placeholder="Kenapa mau pindah kota?" value={pindahCatatan} onChange={(e) => setPindahCatatan(e.target.value)} />
+        </PaperField>
+        <label className="mt-3 flex items-center gap-2.5 rounded-full bg-[#efe8da]/50 ring-1 ring-[#161616]/15 px-4 py-3 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#161616] transition">
+          <Icon name="search" className="w-5 h-5 shrink-0 text-[#c21f24]" sw={2.2} />
           <input
             type="search"
             value={kotaQ}
             onChange={(e) => setKotaQ(e.target.value)}
             placeholder="Cari kota..."
             autoFocus
-            className="flex-1 min-w-0 bg-transparent outline-none text-[16px] placeholder:text-slate-400"
+            className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-[#161616] placeholder:text-[#57534e]/75"
           />
           {kotaQ ? (
-            <button
-              type="button"
-              onClick={() => setKotaQ('')}
-              aria-label="Hapus pencarian"
-              className="text-slate-400 active:text-slate-600"
-            >
+            <button type="button" onClick={() => setKotaQ('')} aria-label="Hapus pencarian" className="text-[#57534e]">
               <Icon name="x" className="w-5 h-5" />
             </button>
           ) : null}
         </label>
-        <div className="mt-3 space-y-2 max-h-[45vh] overflow-y-auto -mx-1 px-1">
+        {/* The form behind this sheet is covered, so a failed request has to be reported here. */}
+        {pindahError ? (
+          <p role="alert" className={`${ERROR} mt-3`}>
+            {pindahError}
+          </p>
+        ) : null}
+        <div className="mt-3 space-y-2 max-h-[45vh] overflow-y-auto -mx-1 px-1 py-0.5">
           {(() => {
             const needle = kotaQ.trim().toLowerCase()
-            const shown = needle
-              ? cabangs.filter((c) => c.nama.toLowerCase().includes(needle))
-              : cabangs
+            const shown = needle ? cabangs.filter((c) => c.nama.toLowerCase().includes(needle)) : cabangs
             if (!shown.length) {
-              return (
-                <p className="text-center text-[13px] text-slate-400 py-8">
-                  Gak ketemu “{kotaQ.trim()}”
-                </p>
-              )
+              return <p className={`${MONO} text-center text-[12px] text-[#57534e] py-8`}>Gak ketemu “{kotaQ.trim()}”</p>
             }
             return shown.map((c) => {
               const on = pindah?.status === '' && pindah.ke_kota === c.id
@@ -580,29 +545,18 @@ export default function ProfilEditPage() {
                   disabled={pindahPending}
                   onClick={() => submitPindah(c.id)}
                   className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-left transition disabled:opacity-50 ${
-                    on ? 'ring-2 ring-[#c9232c] bg-[#fbeceb]/60' : 'ring-1 ring-[#efe3cc] bg-white'
+                    on ? 'ring-2 ring-[#161616] bg-[#ffd83d]/25' : 'ring-1 ring-[#161616]/15 bg-white'
                   }`}
                 >
-                  <TintIcon
-                    name="pin"
-                    tint={on ? 'red' : 'gold'}
-                    size="w-9 h-9 rounded-xl"
-                    icon="w-[18px] h-[18px]"
-                  />
-                  <span
-                    className={`flex-1 min-w-0 font-bold text-[14.5px] truncate ${
-                      on ? 'text-[#c9232c]' : 'text-[#3b1417]'
-                    }`}
-                  >
-                    {c.nama}
-                  </span>
-                  {on ? <Icon name="check" className="w-5 h-5 text-[#c9232c] shrink-0" sw={2.6} /> : null}
+                  <Chip name="pin" className={on ? 'bg-[#ffd83d] text-[#161616]' : 'bg-[#161616]/[.07] text-[#161616]'} />
+                  <span className="flex-1 min-w-0 font-bold text-[14.5px] text-[#161616] truncate">{c.nama}</span>
+                  {on ? <Icon name="check" className="w-5 h-5 text-[#161616] shrink-0" sw={2.6} /> : null}
                 </button>
               )
             })
           })()}
         </div>
       </Sheet>
-    </main>
+    </PaperMain>
   )
 }

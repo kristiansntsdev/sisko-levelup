@@ -9,6 +9,7 @@ import { createRegistrasi, updatePesertaProfile } from '@/lib/actions/registrasi
 import { completeRegistration } from '@/lib/actions/pwa-auth'
 import { getPesertaById } from '@/lib/actions/peserta'
 import { LEVEL_STEPS, memberCardFromPeserta, type MemberCardData } from '@/lib/pwa-member'
+import { MemberCard } from '@/components/pwa/member-card'
 import {
   BTN_RED,
   Field,
@@ -17,7 +18,6 @@ import {
   Hero,
   Icon,
   Logo,
-  MemberCard,
   PAGE_BG,
   PanelLabel,
   Sheet,
@@ -91,7 +91,7 @@ function CardPreview({ card, tag }: { card: MemberCardData; tag: string }) {
   return (
     <div className="relative -rotate-2">
       <MemberCard m={card} />
-      <Sticker className="absolute -top-3 right-4 rotate-6 text-[11px]">{tag}</Sticker>
+      <Sticker className="absolute -top-5 right-4 rotate-6 text-[11px]">{tag}</Sticker>
     </div>
   )
 }
@@ -309,8 +309,6 @@ function DaftarFormInner() {
     name: nama.trim() || BLANK_CARD.name,
     church: gereja.trim() || '—',
     city: city || '—',
-    // ponytail: no photo until upload exists — illustration avatar only
-    photo: undefined,
   }
 
   useEffect(() => {

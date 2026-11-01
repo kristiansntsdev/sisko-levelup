@@ -1,9 +1,8 @@
 'use client'
 import Image from 'next/image'
 import QRCode from 'qrcode'
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { GoogleIcon, HomeIcon, Icon, type IconName } from '@/components/prototype/icons'
-import type { MemberCardData } from '@/lib/pwa-member'
 
 export { GoogleIcon, HomeIcon, Icon }
 export type { IconName }
@@ -44,20 +43,6 @@ const HERO_BG: CSSProperties = {
     'radial-gradient(90% 55% at 100% 0%, rgba(255,220,150,.16), transparent 60%),' +
     'radial-gradient(70% 45% at 0% 100%, rgba(40,0,5,.30), transparent 70%),' +
     'linear-gradient(180deg, #d73640 0%, #b3202a 48%, #8a1620 100%)',
-}
-
-const GOLD_BAND: CSSProperties = {
-  background:
-    'linear-gradient(100deg, transparent 30%, rgba(255,255,255,.35) 45%, transparent 60%),' +
-    'linear-gradient(180deg, #e0c574 0%, #c3a54d 55%, #a98b35 100%)',
-}
-
-const SIM_BODY: CSSProperties = {
-  backgroundColor: '#f4efe5',
-  backgroundImage:
-    'radial-gradient(ellipse 70% 60% at 55% 55%, rgba(255,255,255,.85), transparent 70%),' +
-    `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='18'%3E%3Cg fill='none' stroke='%23b1953a' stroke-width='.5' opacity='.45'%3E%3Cpath d='M0 9 C10 1 30 1 40 9 S70 17 80 9'/%3E%3Cpath d='M0 4 C10 -4 30 -4 40 4 S70 12 80 4'/%3E%3Cpath d='M0 14 C10 6 30 6 40 14 S70 22 80 14'/%3E%3C/g%3E%3C/svg%3E"),` +
-    'linear-gradient(180deg, #e9e0cc 0%, #f8f5ee 30%, #eee6d5 100%)',
 }
 
 export function Chevrons({ className = '' }: { className?: string }) {
@@ -174,95 +159,6 @@ export function Avatar({ g, photo, className = 'w-full h-full' }: { g: string; p
         <path d="M24 38c0-12 7-18 16-18s16 6 16 18c-2-6-7-9-16-9s-14 3-16 9z" fill="#1e1e24" />
       )}
     </svg>
-  )
-}
-
-const CARD_W = 352
-
-function FitCard({ children }: { children: ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [zoom, setZoom] = useState(1)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const ro = new ResizeObserver(() => {
-      if (el.clientWidth) setZoom(el.clientWidth / CARD_W)
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-  return (
-    <div ref={ref} className="w-full">
-      <div style={{ width: CARD_W, zoom }}>{children}</div>
-    </div>
-  )
-}
-
-const CardLabel = ({ children }: { children: ReactNode }) => (
-  <p className="text-[10px] text-slate-500 font-medium mt-1 first:mt-0">{children}</p>
-)
-
-export function MemberCard({ m, onClick }: { m: MemberCardData; onClick?: () => void }) {
-  return (
-    <FitCard>
-      <div
-        onClick={onClick}
-        className={`rounded-2xl overflow-hidden text-slate-900 shadow-[0_18px_40px_-12px_rgba(60,8,12,.6)] select-none ${onClick ? 'cursor-pointer active:scale-[.99] transition' : ''} ${fCard}`}
-      >
-        <div className="relative h-[46px] flex items-center justify-between pl-3 pr-4 border-b-2 border-[#c9232c]" style={GOLD_BAND}>
-          <Logo className="h-[34px] w-auto drop-shadow-[0_1px_1px_rgba(90,15,20,.55)]" />
-          <p className="font-semibold text-[#5a0f14]/85 text-[12px] tracking-[.2em]">MEMBER CARD</p>
-        </div>
-        <div className="relative" style={SIM_BODY}>
-          <div className="flex gap-3 px-4 pt-2">
-            <div className="w-[72px] h-[96px] shrink-0 mt-7 rounded-[44%] overflow-hidden ring-2 ring-white/80 shadow-sm">
-              <Avatar g={m.gender} photo={m.photo} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-[#cf1b25] text-[12px] tracking-[.08em] leading-none">KARTU ANGGOTA</p>
-              <p className="font-bold text-[22px] tracking-[.06em] leading-tight">{m.no}</p>
-              <div className="flex gap-2 mt-1">
-                <div className="flex-1 min-w-0 leading-[1.15] break-words">
-                  <CardLabel>Nama/Name</CardLabel>
-                  <p className="text-[14px] font-bold uppercase">{m.name.replace(/^\S+\.\s/, '')}</p>
-                  <CardLabel>Tempat, Tgl Lahir/Birth</CardLabel>
-                  <p className="text-[12px] font-bold uppercase">
-                    {[m.pob, m.dob].filter((v) => v && v !== '—').join(', ') || '—'}
-                  </p>
-                  <CardLabel>Gereja/Church</CardLabel>
-                  <p className="text-[12px] font-bold uppercase">{m.church}</p>
-                  <CardLabel>Cabang</CardLabel>
-                  <p className="text-[12px] font-bold uppercase">{m.city}</p>
-                </div>
-                <div className="w-[74px] shrink-0 flex flex-col items-center text-center -mt-1">
-                  {/* Tamu / PIC / LevelUP Pusat: no "/ MEMBER" suffix */}
-                  {m.tier === 'TAMU' || m.tier === 'PIC' || m.tier === 'LEVELUP PUSAT' ? (
-                    <p className={`font-bold leading-[1.05] tracking-wide ${m.tier === 'LEVELUP PUSAT' ? 'text-[13px]' : 'text-[22px]'}`}>
-                      {m.tier === 'LEVELUP PUSAT' ? <>LEVELUP<br />PUSAT</> : m.tier}
-                    </p>
-                  ) : m.tier.length > 4 ? (
-                    <p className="text-[15px] font-bold leading-[1.05] tracking-wide">
-                      {m.tier}
-                      <br />/ MEMBER
-                    </p>
-                  ) : (
-                    <p className="text-[22px] font-bold leading-[.95] tracking-wide">
-                      {m.tier} /<br />
-                      MEMBER
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-2 px-4 py-1.5 bg-[#e3d8bf]/60 flex items-center justify-end gap-2 text-[11px] font-[family-name:var(--font-proto)]">
-            <span className="text-slate-600">Status Anggota</span>
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-            <b className="text-[13px]">Aktif</b>
-          </div>
-        </div>
-      </div>
-    </FitCard>
   )
 }
 

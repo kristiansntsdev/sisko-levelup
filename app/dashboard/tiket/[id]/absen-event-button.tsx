@@ -9,6 +9,7 @@ import {
   type OnlineAbsenPhase,
 } from '@/lib/event-absen-window'
 import { useToast } from '@/hooks/use-toast'
+import { BTN, MONO, Strip } from '@/components/pwa/paper-ui'
 
 type Props = {
   idRegistrasi: number
@@ -38,9 +39,7 @@ export function AbsenEventButton({
 
   if (done) {
     return (
-      <p className="rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 text-emerald-700 text-[14px] font-semibold text-center py-3">
-        Absen berhasil tercatat.
-      </p>
+      <p className={`${MONO} rounded-[14px] bg-[#ffd83d] text-[#161616] text-[13px] font-bold text-center py-3`}>Absen berhasil tercatat.</p>
     )
   }
 
@@ -83,21 +82,16 @@ export function AbsenEventButton({
 
   if (!open) {
     return hint ? (
-      <p className="text-[12.5px] text-slate-500 text-center py-2">{hint}</p>
+      <p className={`${MONO} rounded-[14px] border-2 border-dotted border-[#161616]/30 text-[12px] leading-relaxed text-[#44403c] text-center py-3 px-4`}>{hint}</p>
     ) : null
   }
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={handleAbsen}
-        disabled={pending}
-        className="w-full py-3.5 rounded-2xl bg-[#c9232c] text-white font-bold shadow-[0_8px_20px_-6px_rgba(201,35,44,.6)] disabled:opacity-40 active:scale-[.99] transition"
-      >
-        {pending ? 'Menyimpan…' : 'Absen Event'}
+      <button type="button" onClick={handleAbsen} disabled={pending} className={BTN}>
+        <Strip>{pending ? 'Menyimpan…' : 'Absen Event'}</Strip>
       </button>
-      <p className="text-[11.5px] text-slate-400 text-center mt-2">
+      <p className={`${MONO} text-[11px] leading-relaxed text-[#44403c] text-center mt-2`}>
         Event online: absen mandiri dibuka 15 menit sebelum selesai, berlaku sampai akhir bulan.
       </p>
     </div>

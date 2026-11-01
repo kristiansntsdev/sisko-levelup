@@ -5,19 +5,9 @@ import { signOut, useSession } from 'next-auth/react'
 import { getPesertaById, getMemberCardForPeserta } from '@/lib/actions/peserta'
 import { getActiveSessions, loginPengurusFromPwa, logoutPengurusKeepMember } from '@/lib/actions/pwa-auth'
 import { USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
-import {
-  Avatar,
-  BTN_RED,
-  CARD,
-  Field,
-  Hero,
-  Icon,
-  LIFT,
-  Sheet,
-  SheetHead,
-  TintIcon,
-  fCard,
-} from '@/components/pwa/ui'
+import { ANTON, BTN, Chip, InfoRow, LABEL, LIFTED, MONO, PANEL, PaperMain, PRESS, ROWS, StickerLabel, Strip } from '@/components/pwa/paper-ui'
+import { ProfilePhotoPicker } from '@/components/pwa/profile-photo'
+import { Field, Icon, Sheet, SheetHead, type IconName } from '@/components/pwa/ui'
 
 const LOGIN_INPUT =
   'w-full min-w-0 bg-transparent px-4 py-3.5 text-[16px] font-semibold outline-none placeholder:font-medium placeholder:text-slate-300 ' +
@@ -32,7 +22,6 @@ export default function ProfilPage() {
   const [nama, setNama] = useState('')
   const [email, setEmail] = useState('')
   const [level, setLevel] = useState('0')
-  const [gender, setGender] = useState('L')
   const [nowa, setNowa] = useState('')
   const [gereja, setGereja] = useState('')
   const [card, setCard] = useState<MemberCardData | null>(null)
@@ -59,7 +48,6 @@ export default function ProfilPage() {
         setNama(p.nama)
         setEmail(p.email)
         setLevel(p.userlevel)
-        setGender(p.gender === 'P' || p.gender === 'Perempuan' ? 'P' : 'L')
         setNowa(p.nowa)
         setGereja(p.gereja)
       }
@@ -84,7 +72,7 @@ export default function ProfilPage() {
     }
   }
 
-  const infoRows: { icon: 'phone' | 'mail' | 'church' | 'pin' | 'shield'; k: string; v: string }[] = [
+  const infoRows: { icon: IconName; k: string; v: string }[] = [
     { icon: 'phone', k: 'Telepon', v: nowa || '—' },
     { icon: 'mail', k: 'Email', v: email || session?.user?.email || '—' },
     { icon: 'church', k: 'Gereja', v: gereja || '—' },
@@ -92,38 +80,30 @@ export default function ProfilPage() {
     { icon: 'shield', k: 'Level', v: USERLEVEL_LABEL[level] ?? 'Tamu' },
   ]
 
-  const soonMenu: { icon: 'lock' | 'help'; t: string }[] = [
+  const soonMenu: { icon: IconName; t: string }[] = [
     { icon: 'lock', t: 'Privasi & Keamanan' },
     { icon: 'help', t: 'Bantuan' },
   ]
 
   return (
-    <main>
-      <Hero className="pt-6 md:pt-4 pb-20 rounded-b-[32px] text-center">
-        <span className="relative block w-24 h-24 mx-auto">
-          <span className="block w-24 h-24 rounded-full ring-4 ring-white/40 overflow-hidden bg-white/10">
-            <Avatar g={gender} />
-          </span>
-        </span>
-        <p className="font-extrabold text-lg mt-3">{nama || session?.user?.name}</p>
-        <p className="text-sm text-white/80">{card?.city || '—'}</p>
-        {card?.no && (
-          <span className={`inline-block mt-2 ${fCard} font-semibold tracking-wider text-[13px] bg-white/15 ring-1 ring-white/25 px-3 py-1 rounded-full`}>
-            {card.no}
-          </span>
-        )}
-      </Hero>
-
-      <div className="px-5 -mt-12 relative z-10 space-y-4 pb-4">
-        <div className={`${LIFT} divide-y divide-slate-100 text-[14px]`}>
-          {infoRows.map((r) => (
-            <div key={r.k} className="flex items-center gap-3 px-4 py-3.5">
-              <TintIcon name={r.icon} tint="red" size="w-9 h-9 rounded-xl" icon="w-[18px] h-[18px]" />
-              <span className="text-slate-500 flex-1">{r.k}</span>
-              <span className="font-semibold text-right text-slate-800 truncate max-w-[60%]">{r.v}</span>
-            </div>
-          ))}
+    <PaperMain>
+      <header className="px-5 pt-6 flex items-center gap-5">
+        <ProfilePhotoPicker card={card} onSaved={(url) => setCard((c) => (c ? { ...c, photo: url } : c))} />
+        <div className="min-w-0 flex-1">
+          {card?.no && <StickerLabel>ID – {card.no}</StickerLabel>}
+          <h1 className={`${ANTON} mt-2 text-[#161616] text-[30px] leading-[1.08] tracking-[.01em] break-words`}>{nama || session?.user?.name}</h1>
+          <p className={`${ANTON} mt-1 -skew-x-12 origin-bottom-left text-[#c21f24] text-[18px] leading-tight tracking-[.01em]`}>{card?.city || '—'}</p>
         </div>
+      </header>
+
+      <div className="px-5 mt-6 space-y-4 pb-4">
+        <section aria-label="Data anggota" className={`px-4 ${ROWS} ${PANEL}`}>
+          {infoRows.map((r) => (
+            <InfoRow key={r.k} icon={r.icon} label={r.k}>
+              {r.v}
+            </InfoRow>
+          ))}
+        </section>
 
         <button
           type="button"
@@ -131,61 +111,61 @@ export default function ProfilPage() {
             if (pengurusOn && pengurusDest) router.push(pengurusDest)
             else setPengurusSheet(true)
           }}
-          className={`w-full ${CARD} p-4 flex items-center gap-3 text-left active:scale-[.99] transition`}
+          className={`w-full rounded-[14px] bg-[#161616] text-[#fbf6ec] p-4 flex items-center gap-3 text-left ${LIFTED} ${PRESS}`}
         >
-          <TintIcon name="shield" tint="gold" />
+          <Chip name="shield" className="bg-[#ffd83d] text-[#161616]" />
           <span className="flex-1 min-w-0">
-            <span className="block font-bold text-[14px] text-[#3b1417]">
+            <span className={`${ANTON} block text-[18px] leading-tight tracking-[.02em]`}>
               {pengurusOn ? 'Buka Akun Sekretariat' : 'Masuk sebagai Pengurus'}
             </span>
-            <span className="block text-[12px] text-slate-500 truncate">
+            <span className={`${MONO} block text-[11px] text-[#fbf6ec]/75 truncate`}>
               {pengurusOn ? `Pengurus · ${pengurusNama}` : 'Email + password akun pengurus'}
             </span>
           </span>
-          <Icon name="chevron" className="w-5 h-5 text-slate-300" sw={2} />
+          <Icon name="chevron" className="w-5 h-5 shrink-0 text-[#ffd83d]" sw={2} />
         </button>
 
         {pengurusOn && (
           <button
             type="button"
             onClick={() => void logoutPengurusKeepMember()}
-            className="w-full text-left text-[13px] font-semibold text-[#c9232c] bg-[#fbeceb] ring-1 ring-[#f3d3d3] rounded-2xl px-4 py-3"
+            className={`${MONO} w-full text-left text-[12px] font-bold text-[#c21f24] rounded-[14px] border-2 border-dotted border-[#c21f24]/60 px-4 py-3 ${PRESS}`}
           >
             Keluar dari Akun Sekretariat (tetap di Kartu Saya)
           </button>
         )}
 
-        <div className={`${CARD} divide-y divide-slate-100 text-[14px]`}>
+        <section aria-label="Pengaturan" className={`px-4 ${ROWS} ${PANEL}`}>
           <button
             type="button"
             onClick={() => router.push('/dashboard/profil/edit')}
-            className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50"
+            className="w-full flex items-center gap-3 py-3 text-left"
           >
-            <TintIcon name="edit" tint="slate" size="w-9 h-9 rounded-xl" icon="w-[18px] h-[18px]" />
-            <span className="flex-1 font-semibold text-slate-800">Perubahan Data</span>
-            <Icon name="chevron" className="w-5 h-5 text-slate-300" sw={2} />
+            <Chip name="edit" className="bg-[#e02a2f] text-white" />
+            <span className={`${ANTON} flex-1 text-[16px] tracking-[.02em]`}>Perubahan Data</span>
+            <Icon name="chevron" className="w-5 h-5 shrink-0" sw={2} />
           </button>
           {soonMenu.map((m) => (
             <button
               key={m.t}
               type="button"
               onClick={() => setSoon(m.t)}
-              className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50"
+              className="w-full flex items-center gap-3 py-3 text-left"
             >
-              <TintIcon name={m.icon} tint="slate" size="w-9 h-9 rounded-xl" icon="w-[18px] h-[18px]" />
-              <span className="flex-1 font-semibold text-slate-800">{m.t}</span>
-              <Icon name="chevron" className="w-5 h-5 text-slate-300" sw={2} />
+              <Chip name={m.icon} className="bg-[#161616]/[.07]" />
+              <span className={`${ANTON} flex-1 text-[16px] tracking-[.02em]`}>{m.t}</span>
+              <span className={`${LABEL} rotate-6 text-[8.5px] font-bold text-[#c21f24]`}>Soon</span>
             </button>
           ))}
-        </div>
+        </section>
 
         <button
           type="button"
           onClick={() => void signOut({ callbackUrl: pengurusOn && pengurusDest ? pengurusDest : '/login' })}
-          className={`w-full ${CARD} px-4 py-3.5 flex items-center gap-3 text-left active:bg-rose-50`}
+          className={`w-full px-4 py-3 flex items-center gap-3 text-left ${PANEL} ${PRESS}`}
         >
-          <TintIcon name="logout" tint="rose" size="w-9 h-9 rounded-xl" icon="w-[18px] h-[18px]" />
-          <span className="flex-1 font-semibold text-[#c9232c]">Keluar akun anggota</span>
+          <Chip name="logout" className="ring-2 ring-[#c21f24] text-[#c21f24]" />
+          <span className={`${ANTON} flex-1 text-[16px] tracking-[.02em] text-[#c21f24]`}>Keluar akun anggota</span>
         </button>
       </div>
 
@@ -227,22 +207,18 @@ export default function ProfilPage() {
             </Field>
           </div>
           {error && <p className="text-sm text-[#c9232c] mt-2">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading || !pwEmail || pwPass.length < 6}
-            className={`mt-4 w-full py-3.5 ${BTN_RED}`}
-          >
-            {loading ? 'Masuk…' : 'Masuk'}
+          <button type="submit" disabled={loading || !pwEmail || pwPass.length < 6} className={`mt-4 ${BTN}`}>
+            <Strip>{loading ? 'Masuk…' : 'Masuk'}</Strip>
           </button>
         </form>
       </Sheet>
 
       <Sheet open={Boolean(soon)} onClose={() => setSoon(null)}>
         <SheetHead title={soon ?? ''} sub="Segera hadir." />
-        <button type="button" onClick={() => setSoon(null)} className={`w-full py-3.5 ${BTN_RED}`}>
-          Tutup
+        <button type="button" onClick={() => setSoon(null)} className={BTN}>
+          <Strip>Tutup</Strip>
         </button>
       </Sheet>
-    </main>
+    </PaperMain>
   )
 }

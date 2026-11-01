@@ -1,14 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import {
-  GOLD_LINE,
-  PAGE_BG,
-  Pill,
-  PlainBar,
-  Qr,
-  fCard,
-  type PillTone,
-} from '@/components/pwa/ui'
+import { ANTON, BackBar, LABEL, MONO, PANEL, PaperMain, Poster, StateStamp } from '@/components/pwa/paper-ui'
+import { Qr } from '@/components/pwa/ui'
 import { AbsenEventButton } from './absen-event-button'
 
 type AbsenProps = {
@@ -18,11 +11,9 @@ type AbsenProps = {
   alreadyAttended: boolean
 }
 
-const TONE: Record<string, PillTone> = {
-  Terdaftar: 'gold',
-  Hadir: 'green',
-  'Tidak hadir': 'slate',
-}
+const DT = `${LABEL} text-[9.5px] text-[#57534e]`
+const DD = `${MONO} mt-0.5 text-[12.5px] font-bold leading-snug break-words`
+const BRACKET = 'absolute w-7 h-7 border-[#e02a2f]'
 
 export function TicketDetailClient({
   missing,
@@ -50,83 +41,85 @@ export function TicketDetailClient({
   absen: AbsenProps | null
 }) {
   const router = useRouter()
+  const back = () => router.push('/dashboard/tiket')
 
   if (missing) {
     return (
-      <main>
-        <PlainBar title="Ticket" back={() => router.push('/dashboard/tiket')} />
-        <p className="p-6 text-sm text-slate-500">Tiket tidak ditemukan.</p>
-      </main>
+      <PaperMain>
+        <BackBar title="Ticket" onBack={back} />
+        <p className={`${LABEL} m-5 rounded-[14px] border-2 border-dotted border-[#161616]/30 text-center text-[11px] text-[#57534e] py-8 px-5`}>
+          Tiket tidak ditemukan.
+        </p>
+      </PaperMain>
     )
   }
 
   return (
-    <main>
-      <PlainBar title="Ticket" back={() => router.push('/dashboard/tiket')} />
-      <div className="px-4 py-5 space-y-4 pb-8">
-        <div className="bg-white rounded-[24px] shadow-[0_10px_30px_-14px_rgba(15,23,42,.35)] overflow-hidden">
-          {posterUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- full flyer, no cover crop
-            <img src={posterUrl} alt="" className="w-full h-auto block bg-slate-200" />
-          ) : (
-            <div className="w-full aspect-[16/9] bg-linear-to-br from-[#d73640] to-[#8a1620]" />
-          )}
-          <div className={GOLD_LINE} />
-          <div className="px-5 pt-4 pb-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-[11.5px] font-bold tracking-[.14em] uppercase text-[#c9232c]">{category}</p>
-              <Pill tone={TONE[state] ?? 'slate'}>{state}</Pill>
-            </div>
-            <p className="text-[21px] font-extrabold text-[#3b1417] leading-tight mt-1">{namaEvent}</p>
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-3 mt-4 text-[13px]">
-              {rows.map(([k, v]) => (
-                <div key={k}>
-                  <dt className="text-[11.5px] text-slate-400">{k}</dt>
-                  <dd className="font-semibold text-slate-800 mt-0.5">{v}</dd>
-                </div>
-              ))}
-              <div className="col-span-2">
-                <dt className="text-[11.5px] text-slate-400">Lokasi</dt>
-                <dd className="font-semibold text-slate-800 mt-0.5">{alamat || '—'}</dd>
+    <PaperMain>
+      <BackBar title="Ticket" onBack={back} />
+      <div className="px-4 pt-5 pb-8 space-y-4">
+        <div className="relative">
+          <span aria-hidden className="absolute z-10 -top-2.5 left-1/2 -translate-x-1/2 -rotate-3 w-20 h-5 bg-[#ffd83d]/85" />
+          <div className={`overflow-hidden ${PANEL}`}>
+            {posterUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- full flyer, no cover crop
+              <img src={posterUrl} alt="" className="w-full h-auto block bg-[#d6d0c4]" />
+            ) : (
+              <Poster src="" className="w-full aspect-[16/9]" />
+            )}
+            <div className="h-1.5 bg-[#ffd83d]" />
+            <div className="px-5 pt-4 pb-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className={`${LABEL} text-[10.5px] font-bold text-[#c21f24]`}>{category}</p>
+                <StateStamp state={state} />
               </div>
-            </dl>
-          </div>
-          <div className="relative h-6">
-            <span className={`absolute -left-3 top-0 w-6 h-6 rounded-full ${PAGE_BG}`} />
-            <span className={`absolute -right-3 top-0 w-6 h-6 rounded-full ${PAGE_BG}`} />
-            <span className="absolute left-5 right-5 top-1/2 border-t-2 border-dashed border-[#ecdcb3]" />
-          </div>
-          <div className="px-5 pt-2 pb-6 text-center">
-            <div
-              className="relative w-[230px] mx-auto p-2.5 bg-white rounded-xl"
-              style={{ colorScheme: 'only light', forcedColorAdjust: 'none' }}
-            >
-              <span className="absolute top-0 left-0 w-7 h-7 border-t-4 border-l-4 border-[#b1953a] rounded-tl-xl" />
-              <span className="absolute top-0 right-0 w-7 h-7 border-t-4 border-r-4 border-[#b1953a] rounded-tr-xl" />
-              <span className="absolute bottom-0 left-0 w-7 h-7 border-b-4 border-l-4 border-[#b1953a] rounded-bl-xl" />
-              <span className="absolute bottom-0 right-0 w-7 h-7 border-b-4 border-r-4 border-[#b1953a] rounded-br-xl" />
-              <Qr text={qrText} />
+              <h1 className={`${ANTON} mt-2 text-[30px] leading-[1.08] tracking-[.01em] break-words`}>{namaEvent}</h1>
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-3 mt-4">
+                {rows.map(([k, v]) => (
+                  <div key={k} className="min-w-0">
+                    <dt className={DT}>{k}</dt>
+                    <dd className={DD}>{v}</dd>
+                  </div>
+                ))}
+                <div className="col-span-2">
+                  <dt className={DT}>Lokasi</dt>
+                  <dd className={DD}>{alamat || '—'}</dd>
+                </div>
+              </dl>
             </div>
-            <p className={`${fCard} text-[15px] font-bold tracking-[.12em] text-[#3b1417] mt-3`}>{ticketCode}</p>
-            <p className="text-[12px] text-slate-500 leading-relaxed mt-2">
-              Tunjukkan QR ini kepada panitia saat absen.
-              <br />
-              Jangan bagikan kepada orang lain.
-            </p>
+            <div aria-hidden className="relative h-6">
+              <span className="absolute -left-3 top-0 w-6 h-6 rounded-full bg-[#efe8da]" />
+              <span className="absolute -right-3 top-0 w-6 h-6 rounded-full bg-[#efe8da]" />
+              <span className="absolute left-5 right-5 top-1/2 border-t-2 border-dashed border-[#161616]/30" />
+            </div>
+            <div className="px-5 pt-2 pb-6 text-center">
+              {/* Must stay scannable: straight, on solid white. Keep the page's tilt and texture away from it. */}
+              <div className="relative w-[230px] mx-auto p-2.5 bg-white rounded-xl" style={{ colorScheme: 'only light', forcedColorAdjust: 'none' }}>
+                <span className={`${BRACKET} top-0 left-0 border-t-4 border-l-4 rounded-tl-xl`} />
+                <span className={`${BRACKET} top-0 right-0 border-t-4 border-r-4 rounded-tr-xl`} />
+                <span className={`${BRACKET} bottom-0 left-0 border-b-4 border-l-4 rounded-bl-xl`} />
+                <span className={`${BRACKET} bottom-0 right-0 border-b-4 border-r-4 rounded-br-xl`} />
+                <Qr text={qrText} />
+              </div>
+              <p className={`${MONO} mt-3 text-[15px] font-bold tracking-[.12em]`}>{ticketCode}</p>
+              <p className={`${MONO} mt-2 text-[11.5px] leading-relaxed text-[#44403c]`}>
+                Tunjukkan QR ini kepada panitia saat absen.
+                <br />
+                Jangan bagikan kepada orang lain.
+              </p>
+            </div>
           </div>
         </div>
 
         {isOnline && absen && (
-          <div className="space-y-2">
-            <AbsenEventButton
-              idRegistrasi={absen.idRegistrasi}
-              tglSelesaiMs={absen.tglSelesaiMs}
-              jamselesaievent={absen.jamselesaievent}
-              alreadyAttended={absen.alreadyAttended}
-            />
-          </div>
+          <AbsenEventButton
+            idRegistrasi={absen.idRegistrasi}
+            tglSelesaiMs={absen.tglSelesaiMs}
+            jamselesaievent={absen.jamselesaievent}
+            alreadyAttended={absen.alreadyAttended}
+          />
         )}
       </div>
-    </main>
+    </PaperMain>
   )
 }

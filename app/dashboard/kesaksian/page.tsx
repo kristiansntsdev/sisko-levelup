@@ -1,6 +1,10 @@
 'use client'
 import { useState } from 'react'
-import { BTN_RED, Field, FLD, PageHero, Sheet, SheetHead, Toast } from '@/components/pwa/ui'
+import { BTN, BTN_SHELL, LABEL, MONO, PANEL, PaperHeader, PaperMain, PaperToast, Strip, TAPE } from '@/components/pwa/paper-ui'
+import { Field, FLD, Icon, Sheet, SheetHead } from '@/components/pwa/ui'
+
+// Ruled note paper, same line color as the landing page's note. Text line height matches the rule spacing.
+const LINED = 'bg-[repeating-linear-gradient(transparent_0_27px,rgba(70,100,170,.16)_27px_28px)] leading-[28px]'
 
 export default function KesaksianPage() {
   const [open, setOpen] = useState(false)
@@ -10,23 +14,32 @@ export default function KesaksianPage() {
   const items: { t: string; when: string }[] = []
 
   return (
-    <main>
-      <PageHero
+    <PaperMain>
+      <PaperHeader
+        sticker="Bagikan cerita berkatmu"
         title="Kesaksian Saya"
-        sub="Bagikan cerita berkatmu"
-        action={{ label: 'Tulis', icon: 'edit', onClick: () => setOpen(true) }}
-        pb="pb-14"
+        action={
+          <button type="button" onClick={() => setOpen(true)} className={`shrink-0 rotate-2 ${BTN_SHELL}`}>
+            <Strip className="px-4 py-2 text-[16px]">
+              <Icon name="edit" className="w-4 h-4" sw={2.2} />
+              Tulis
+            </Strip>
+          </button>
+        }
       />
-      <div className="px-5 -mt-8 relative z-10 space-y-3">
+      <div className="px-5 mt-5 space-y-4">
         {items.length === 0 ? (
-          <p className="bg-white rounded-2xl ring-1 ring-slate-100 text-center text-[13px] text-slate-400 py-10 px-6">
-            Belum ada kesaksian. Cerita berkatmu bisa jadi kekuatan bagi yang lain.
-          </p>
+          <div className={`relative ${PANEL}`}>
+            <span aria-hidden className={`${TAPE} -left-4 -top-1`} />
+            <p className={`${MONO} ${LINED} rounded-[14px] text-[13px] text-[#44403c] px-5 pt-7 pb-[28px]`}>
+              Belum ada kesaksian. Cerita berkatmu bisa jadi kekuatan bagi yang lain.
+            </p>
+          </div>
         ) : (
           items.map((i) => (
-            <div key={i.when} className="bg-white rounded-2xl ring-1 ring-slate-100 p-4">
-              <p className="text-[14px] text-slate-700 leading-relaxed">{i.t}</p>
-              <p className="text-[11px] text-slate-400 mt-2">{i.when}</p>
+            <div key={i.when} className={`rounded-[14px] px-5 pt-7 pb-[28px] ${LINED} ${PANEL}`}>
+              <p className={`${MONO} text-[13px]`}>{i.t}</p>
+              <p className={`${LABEL} text-[9.5px] text-[#57534e]`}>{i.when}</p>
             </div>
           ))
         )}
@@ -51,12 +64,12 @@ export default function KesaksianPage() {
             setToast('Kesaksian tersimpan di perangkat (stub)')
             setTimeout(() => setToast(null), 2400)
           }}
-          className={`mt-4 w-full py-3.5 ${BTN_RED}`}
+          className={`mt-4 ${BTN}`}
         >
-          Kirim
+          <Strip>Kirim</Strip>
         </button>
       </Sheet>
-      <Toast msg={toast} />
-    </main>
+      <PaperToast msg={toast} />
+    </PaperMain>
   )
 }
