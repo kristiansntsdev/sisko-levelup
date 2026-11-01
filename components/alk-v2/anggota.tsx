@@ -13,6 +13,10 @@ import { ANTON, BTN, BTN_SHELL, ERROR, IconButton, LABEL, MONO, PANEL, PaperHead
 import { PAGE_SIZE_EVENT, Pager, SearchBox } from './list-tools'
 import { Empty, FLD, Field, FieldGroup, Icon, Note, PersonChip, Pill, Seg, SectionCard, Sheet, SheetHead, Toast, type PillTone } from './ui'
 
+function toCsvCell(v: string): string {
+  return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v
+}
+
 const LEVEL_TONE: Record<string, PillTone> = {
   '0': 'slate',
   '1': 'gold',
@@ -78,9 +82,33 @@ export function PesertaListClient({
     setPage(0)
   }
 
+  function exportCsv() {
+    const header = ['Nama', 'Gereja', 'Tanggal Lahir']
+    const rows = filtered.map((p) => [p.nama, p.gereja, parseDob(p.tgllahir)?.long ?? p.tgllahir])
+    const csv = [header, ...rows].map((r) => r.map(toCsvCell).join(',')).join('\n')
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `anggota-${namaCabang.trim().toLowerCase().replace(/\s+/g, '-')}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <PaperMain>
-      <PaperHeader sticker={`${namaCabang} · ${peserta.length} anggota`} title="LevelUP Kota" />
+      <PaperHeader
+        sticker={`${namaCabang} · ${peserta.length} anggota`}
+        title="LevelUP Kota"
+        action={
+          <button type="button" onClick={exportCsv} className={`shrink-0 rotate-2 ${BTN_SHELL}`}>
+            <Strip tone="ink" className="px-4 py-2 text-[16px]">
+              <Icon name="receipt" className="w-4 h-4" sw={2.2} />
+              Export CSV
+            </Strip>
+          </button>
+        }
+      />
       <div className="px-5 mt-5 pb-4">
         <SearchBox value={q} onChange={setQClamped} placeholder="Cari nama atau email" />
         <div className="mt-3">
