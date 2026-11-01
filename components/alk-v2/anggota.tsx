@@ -5,11 +5,61 @@ import {
   createPengurusKota,
   updatePengurusKota,
   type PengurusKotaRow,
+  type PesertaKotaRow,
 } from '@/lib/actions/pengurus-kota'
+import { USERLEVEL_LABEL } from '@/lib/pwa-member'
 import { ALK_BASE, divisiToRole } from './paths'
 import { ANTON, BTN, BTN_SHELL, ERROR, IconButton, MONO, PANEL, PaperHeader, PaperMain, PRESS, Strip } from '@/components/pwa/paper-ui'
 import { SearchBox } from './list-tools'
-import { Empty, FLD, Field, FieldGroup, Icon, Note, PersonChip, Pill, Seg, SectionCard, Sheet, SheetHead, Toast } from './ui'
+import { Empty, FLD, Field, FieldGroup, Icon, Note, PersonChip, Pill, Seg, SectionCard, Sheet, SheetHead, Toast, type PillTone } from './ui'
+
+const LEVEL_TONE: Record<string, PillTone> = {
+  '0': 'slate',
+  '1': 'gold',
+  '2': 'amber',
+  '3': 'green',
+  '4': 'red',
+  '5': 'sky',
+}
+
+export function PesertaListClient({
+  peserta,
+  namaCabang,
+}: {
+  peserta: PesertaKotaRow[]
+  namaCabang: string
+}) {
+  const [q, setQ] = useState('')
+  const needle = q.trim().toLowerCase()
+  const list = peserta.filter(
+    (p) => !needle || `${p.nama} ${p.email} ${p.usercode}`.toLowerCase().includes(needle),
+  )
+
+  return (
+    <PaperMain>
+      <PaperHeader sticker={`${namaCabang} · ${peserta.length} anggota`} title="LevelUP Kota" />
+      <div className="px-5 mt-5 pb-4">
+        <SearchBox value={q} onChange={setQ} placeholder="Cari nama atau email" />
+        <div className="mt-4 space-y-2.5">
+          {list.length ? (
+            list.map((p) => (
+              <div key={p.id_peserta} className={`w-full flex items-center gap-3 p-3 ${PANEL}`}>
+                <PersonChip />
+                <span className="flex-1 min-w-0">
+                  <span className={`${ANTON} block text-[16px] leading-tight tracking-[.02em] truncate`}>{p.nama}</span>
+                  <span className={`${MONO} block mt-0.5 text-[11px] text-[#44403c] truncate`}>{p.email}</span>
+                </span>
+                <Pill tone={LEVEL_TONE[p.userlevel] ?? 'slate'}>{USERLEVEL_LABEL[p.userlevel] ?? 'Tamu'}</Pill>
+              </div>
+            ))
+          ) : (
+            <Empty>Tidak ada anggota yang cocok</Empty>
+          )}
+        </div>
+      </div>
+    </PaperMain>
+  )
+}
 
 export function AnggotaListClient({
   members,
