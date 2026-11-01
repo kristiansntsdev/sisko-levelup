@@ -14,6 +14,14 @@ export type PengurusKotaRow = {
   me: boolean
 }
 
+export type PesertaKotaRow = {
+  id_peserta: number
+  nama: string
+  usercode: string
+  email: string
+  userlevel: string
+}
+
 type Result = { ok: true } | { ok: false; error: string }
 
 /** Akun sistem / non-kota — tidak tampil di tab Anggota. */
@@ -44,6 +52,17 @@ export async function listPengurusKota(): Promise<PengurusKotaRow[]> {
     ...r,
     me: r.id_pengurus === me.id_pengurus,
   }))
+}
+
+/** Anggota tab untuk Admin LK kota (bukan Sekretariat Nasional): peserta kotanya, bukan daftar pengurus. */
+export async function listPesertaKota(): Promise<PesertaKotaRow[]> {
+  const me = await requireAlkPengurus()
+  const rows = await db.peserta.findMany({
+    where: { kotalevelup: me.kotalevelup },
+    orderBy: { nama: 'asc' },
+    select: { id_peserta: true, nama: true, usercode: true, email: true, userlevel: true },
+  })
+  return rows
 }
 
 export async function createPengurusKota(input: {
