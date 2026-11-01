@@ -20,6 +20,8 @@ export type PesertaKotaRow = {
   usercode: string
   email: string
   userlevel: string
+  gereja: string
+  tgllahir: string
 }
 
 type Result = { ok: true } | { ok: false; error: string }
@@ -60,7 +62,7 @@ export async function listPesertaKota(): Promise<PesertaKotaRow[]> {
   const rows = await db.peserta.findMany({
     where: { kotalevelup: me.kotalevelup },
     orderBy: { nama: 'asc' },
-    select: { id_peserta: true, nama: true, usercode: true, email: true, userlevel: true },
+    select: { id_peserta: true, nama: true, usercode: true, email: true, userlevel: true, gereja: true, tgllahir: true },
   })
   return rows
 }

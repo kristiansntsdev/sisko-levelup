@@ -7,7 +7,7 @@ import {
   type PengurusKotaRow,
   type PesertaKotaRow,
 } from '@/lib/actions/pengurus-kota'
-import { USERLEVEL_LABEL } from '@/lib/pwa-member'
+import { parseDob, USERLEVEL_LABEL } from '@/lib/pwa-member'
 import { ALK_BASE, divisiToRole } from './paths'
 import { ANTON, BTN, BTN_SHELL, ERROR, IconButton, LABEL, MONO, PANEL, PaperHeader, PaperMain, PRESS, Strip } from '@/components/pwa/paper-ui'
 import { PAGE_SIZE_EVENT, Pager, SearchBox } from './list-tools'
@@ -88,16 +88,24 @@ export function PesertaListClient({
         </div>
         <div className="mt-4 space-y-2.5">
           {list.length ? (
-            list.map((p) => (
-              <div key={p.id_peserta} className={`w-full flex items-center gap-3 p-3 ${PANEL}`}>
-                <PersonChip />
-                <span className="flex-1 min-w-0">
-                  <span className={`${ANTON} block text-[16px] leading-tight tracking-[.02em] truncate`}>{p.nama}</span>
-                  <span className={`${MONO} block mt-0.5 text-[11px] text-[#44403c] truncate`}>{p.email}</span>
-                </span>
-                <Pill tone={LEVEL_TONE[p.userlevel] ?? 'slate'}>{USERLEVEL_LABEL[p.userlevel] ?? 'Tamu'}</Pill>
-              </div>
-            ))
+            list.map((p) => {
+              const dob = parseDob(p.tgllahir)?.long
+              return (
+                <div key={p.id_peserta} className={`w-full flex items-center gap-3 p-3 ${PANEL}`}>
+                  <PersonChip />
+                  <span className="flex-1 min-w-0">
+                    <span className={`${ANTON} block text-[16px] leading-tight tracking-[.02em] truncate`}>{p.nama}</span>
+                    <span className={`${MONO} block mt-0.5 text-[11px] text-[#44403c] truncate`}>{p.email}</span>
+                    {(p.gereja || dob) && (
+                      <span className={`${MONO} block mt-0.5 text-[11px] text-[#78716c] truncate`}>
+                        {[p.gereja, dob].filter(Boolean).join(' · ')}
+                      </span>
+                    )}
+                  </span>
+                  <Pill tone={LEVEL_TONE[p.userlevel] ?? 'slate'}>{USERLEVEL_LABEL[p.userlevel] ?? 'Tamu'}</Pill>
+                </div>
+              )
+            })
           ) : (
             <Empty>Tidak ada anggota yang cocok</Empty>
           )}
