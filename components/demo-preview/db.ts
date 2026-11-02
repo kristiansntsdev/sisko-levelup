@@ -3,12 +3,12 @@
 // so the shim actions can return exactly what lib/actions/* return and the real UI renders unchanged.
 // State lives in memory + localStorage only. Never import lib/actions/*, next-auth, @/lib/db or prisma here.
 
-export const STORAGE_KEY = 'levelup-demo-preview:v2'
+export const STORAGE_KEY = 'levelup-demo-preview:v3'
 const VERSION = 2
 const DAY = 24 * 60 * 60 * 1000
 const WIB = 7 * 60 * 60 * 1000
 
-export type DbCabang = { id_cabang: number; namacabang: string }
+export type DbCabang = { id_cabang: number; namacabang: string; leadercabang: string }
 
 export type DbPeserta = {
   id_peserta: number
@@ -189,6 +189,13 @@ function wibWall(now: Date, minutesAgo: number): { date: string; jam: string } {
 
 const ago = (now: Date, ms: number) => new Date(now.getTime() - ms).toISOString()
 
+/** Sample korwil list for the Surat Keuangan picker (the real app reads it from pphtgd-official). Fictional names. */
+export const DEMO_KORWIL = [
+  { id: 1, nama: 'Korwil Medan', koordinator: 'Pdt. Winsan Iksan, S.Th', kota: 'Medan' },
+  { id: 2, nama: 'Korwil Binjai', koordinator: 'Pdt. Andreas Harahap', kota: 'Binjai' },
+  { id: 3, nama: 'Korwil Pematangsiantar', koordinator: 'Pdt. Markus Purba', kota: 'Pematangsiantar' },
+]
+
 export const HOME_CABANG = '12'
 
 export function buildSeed(now: Date = new Date()): DemoDb {
@@ -196,11 +203,11 @@ export function buildSeed(now: Date = new Date()): DemoDb {
   const id = () => n++
 
   const cabang: DbCabang[] = [
-    { id_cabang: 9, namacabang: 'LevelUP Deli Serdang' },
-    { id_cabang: 12, namacabang: 'LevelUP Medan' },
-    { id_cabang: 14, namacabang: 'LevelUP Binjai' },
-    { id_cabang: 17, namacabang: 'LevelUP Pematangsiantar' },
-    { id_cabang: 21, namacabang: 'LevelUP Tebing Tinggi' },
+    { id_cabang: 9, namacabang: 'LevelUP Deli Serdang', leadercabang: 'Yohanes Sitepu' },
+    { id_cabang: 12, namacabang: 'LevelUP Medan', leadercabang: 'Esra Londa' },
+    { id_cabang: 14, namacabang: 'LevelUP Binjai', leadercabang: 'Daniel Ginting' },
+    { id_cabang: 17, namacabang: 'LevelUP Pematangsiantar', leadercabang: 'Samuel Simanjuntak' },
+    { id_cabang: 21, namacabang: 'LevelUP Tebing Tinggi', leadercabang: 'Martha Silalahi' },
   ]
 
   const mk = (p: Partial<DbPeserta> & Pick<DbPeserta, 'nama' | 'email' | 'userlevel'>): DbPeserta => {

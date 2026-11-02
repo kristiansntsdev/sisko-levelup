@@ -34,6 +34,7 @@ export default async function EventDanaPage({
       tglDisplay={event.tglDisplay}
       jumlahPeserta={event.registrasi.length}
       reimburse={reimburse}
+      suratHref={`/surat-keuangan/${event.id_event}`}
     />
   )
 }

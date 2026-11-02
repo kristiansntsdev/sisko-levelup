@@ -30,7 +30,7 @@ export function DemoBar() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Menu demo"
-        className={`${LABEL} fixed left-0 top-28 z-[60] -rotate-0 rounded-r-md bg-[#161616]/80 py-2.5 pl-0.5 pr-1 text-[8px] font-bold text-[#ffd83d] [writing-mode:vertical-rl] ${PRESS}`}
+        className={`${LABEL} print:hidden fixed left-0 top-28 z-[60] -rotate-0 rounded-r-md bg-[#161616]/80 py-2.5 pl-0.5 pr-1 text-[8px] font-bold text-[#ffd83d] [writing-mode:vertical-rl] ${PRESS}`}
       >
         DEMO
       </button>

@@ -81,6 +81,14 @@ function DanaApprovalCard({ reimburse }: { reimburse: ReimburseData }) {
       {reimburse.approvenasional === '1' ? (
         <div className="mx-4 mb-4 bg-green-light rounded-[14px] px-4 py-3 text-center">
           <p className="text-[14px] font-semibold text-green-dark">Dana disetujui</p>
+          <a
+            href={`/surat-keuangan/${reimburse.id_event}`}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-1 inline-block text-[13px] font-semibold text-green-dark underline"
+          >
+            Cetak Surat untuk Keuangan
+          </a>
         </div>
       ) : reimburse.approvenasional === '0' ? (
         <div className="mx-4 mb-4 bg-red-light rounded-[14px] px-4 py-3">

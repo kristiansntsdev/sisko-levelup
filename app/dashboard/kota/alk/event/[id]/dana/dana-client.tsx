@@ -24,6 +24,7 @@ export function DanaClient({
   jumlahPeserta,
   reimburse,
   backUrl: backUrlProp,
+  suratHref,
 }: {
   idEvent: number
   namaEvent: string
@@ -31,6 +32,8 @@ export function DanaClient({
   jumlahPeserta: number
   reimburse: ReimburseData | null
   backUrl?: string
+  /** Link cetak surat untuk Keuangan; tampil setelah dana disetujui */
+  suratHref?: string
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -98,6 +101,16 @@ export function DanaClient({
             <p className="text-[14px] font-semibold text-green-dark">
               Pengajuan sudah disetujui Sekretariat Nasional
             </p>
+            {suratHref && reimburse?.ajukan === 'Ajukan' ? (
+              <a
+                href={suratHref}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 inline-block text-[13px] font-semibold text-green-dark underline"
+              >
+                Cetak Surat untuk Keuangan
+              </a>
+            ) : null}
           </div>
         ) : isRejected && reimburse?.notenasional ? (
           <div className="bg-amber-light border border-border rounded-[14px] px-4 py-3">

@@ -97,12 +97,22 @@ scripts/monitoring-sheet.gs           # Apps Script: paste ke spreadsheet, sync 
   demo-preview/                       # Demo publik: layar ASLI (hasil salinan generator) + data localStorage; login pilih akun demo, tombol DEMO = ganti akun + reset
 components/demo-preview/              # db.ts (tabel meniru Prisma + seed + store localStorage), shim/ (pengganti lib/actions + next-auth), clone/ (GENERATED), alk.tsx, reimburse-progress.tsx
 scripts/gen-demo-preview.mjs          # Salin UI asli ke /demo-preview + ganti import action/rute; jalankan ulang setelah mengubah layar asli
+  surat-keuangan/[id]/page.tsx        # Cetak surat Permohonan Pengajuan Support Dana untuk Keuangan (kop public/assets/kop-keuangan.png); hanya setelah approvenasional=1; pilih Korwil dari API pphtgd
+components/documents/surat-keuangan.tsx # Surat Keuangan murni (buildSuratKeuangan, matchKorwil, SuratKeuanganPage); dipakai halaman asli + /demo-preview/surat-keuangan/[id]
+lib/surat-keuangan.ts                 # loadSuratKeuangan: event + reimburse + cabang.leadercabang + peserta unik dari absen
+lib/pphtgd-korwil.ts                  # listKorwilPphtgd: GET pphtgd-official /api/internal/levelup/korwils (Bearer PPHTGD_API_SECRET), tanpa default
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-11-03]
+- Surat Keuangan: `/surat-keuangan/{id}` (di luar shell, cetak A4 satu halaman via browser) terisi otomatis dari data pengajuan dana setelah Sekretariat Nasional approve. Tombol "Cetak Surat untuk Keuangan" di form dana (legacy + v2) dan kartu approve. Koordinator = `cabang.leadercabang`; Jumlah Peserta = peserta unik di `absen`; Nomor Rekening (label lama "Nama Rekening" salah); baris Nama Event baru
+- TTD 3 kolom: Korwil PPHTGD (nama koordinator dari API pphtgd-official, dipilih saat cetak, otomatis terpilih kalau nama korwil cocok dengan kota; tidak disimpan), PIC LevelUP Pusat = Steven Kusuma, Keuangan PPHTGD kosong. Env: `PPHTGD_API_URL`, `PPHTGD_API_SECRET` (= `LEVELUP_API_SECRET` di pphtgd). API gagal: surat tetap bisa dicetak, nama Korwil kosong
+- Kop dicetak sebagai `<img>`, bukan CSS background (background dibuang saat cetak). `public/template2.png` pindah ke `public/assets/kop-keuangan.png`
+- Demo: `/demo-preview/surat-keuangan/{id}` (korwil contoh `DEMO_KORWIL`, `cabang.leadercabang` di seed), kunci localStorage naik ke `v3`; halaman dana demo kini ikut berubah setelah tombol simulasi Pusat/Keuangan
+
 ## Recent Updates [2026-11-02]
 - `/demo-preview`: demo klik-bisa untuk semua alur, tampilan 100% sama dengan aplikasi asli (user menolak versi gambar-ulang). Layar asli (Beranda, Kartu, Tiket, Events, Join, Daftar, Profil, Sekretariat v2) disalin oleh `scripts/gen-demo-preview.mjs`: import `@/lib/actions/*`, `next-auth/react`, `@/app/admin/actions` dialihkan ke `components/demo-preview/shim/*`, rute `/dashboard` dst jadi `/demo-preview/...`. File hasil generate diberi header GENERATED, jangan diedit; ubah layar asli lalu jalankan `node scripts/gen-demo-preview.mjs`. Patch yang disengaja ada di `PATCHES` generator dan gagal keras kalau teks asli berubah
-- Data hanya di browser: kunci localStorage `levelup-demo-preview:v2` (`components/demo-preview/db.ts`, tabel dengan nama kolom Prisma). Tidak boleh mengimpor `lib/actions/*` sungguhan, `@/auth`, `@/lib/db`, prisma (hanya `import type` / `export type *`). Tombol **DEMO** di tepi kiri = ganti akun + reset semua flow
+- Data hanya di browser: kunci localStorage `levelup-demo-preview:v3` (`components/demo-preview/db.ts`, tabel dengan nama kolom Prisma). Tidak boleh mengimpor `lib/actions/*` sungguhan, `@/auth`, `@/lib/db`, prisma (hanya `import type` / `export type *`). Tombol **DEMO** di tepi kiri = ganti akun + reset semua flow
 - Akun di layar login (password `demo123`, bisa email atau No. HP): Tamu, Volunteer, Squad, Core, Akun Google baru (masuk ke Daftar), Admin LK Medan (satu akun Sekretariat untuk approval, event, scan, reimburse)
 - Beda dari aplikasi asli (hanya di demo): Join Volunteer butuh approve Admin lewat tile baru **Approval Volunteer** (aslinya instan); event langsung disetujui; tiket event nasional langsung confirmed; tile **Reimburse** aktif dengan daftar + panel **Status Pencairan** (PIC sekarang: ALK Kota / LevelUP Pusat / Keuangan, riwayat) + tombol simulasi Pusat dan Keuangan; di Scan ada panel **simulasi scan** karena tidak semua browser punya kamera BarcodeDetector. Layar khusus Sekretariat Nasional (approve event, tiket nasional, pindah kota) dan `/absen` tidak ada, route itu jatuh ke halaman "Belum ada di demo"
 

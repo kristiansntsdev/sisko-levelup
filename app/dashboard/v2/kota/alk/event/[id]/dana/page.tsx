@@ -25,6 +25,7 @@ export default async function AlkV2DanaPage({
       jumlahPeserta={event.registrasi.length}
       reimburse={reimburse}
       backUrl={`${ALK_EVENT_BASE}/${event.id_event}`}
+      suratHref={`/surat-keuangan/${event.id_event}`}
     />
   )
 }
