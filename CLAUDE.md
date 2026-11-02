@@ -94,8 +94,17 @@ lib/actions/reimburse.ts              # submitReimburse (ALK Kota) + approve/rej
 lib/monitoring-sheet.ts               # Form Monitoring Teknis: status H-14 / H+14 / kelengkapan per event kota
 app/api/internal/monitoring-sheet/    # GET ?year= (Bearer MONITORING_SHEET_SECRET) → dibaca Apps Script
 scripts/monitoring-sheet.gs           # Apps Script: paste ke spreadsheet, sync tab per tahun tiap 5 menit
+  demo-preview/                       # Demo publik: layar ASLI (hasil salinan generator) + data localStorage; login pilih akun demo, tombol DEMO = ganti akun + reset
+components/demo-preview/              # db.ts (tabel meniru Prisma + seed + store localStorage), shim/ (pengganti lib/actions + next-auth), clone/ (GENERATED), alk.tsx, reimburse-progress.tsx
+scripts/gen-demo-preview.mjs          # Salin UI asli ke /demo-preview + ganti import action/rute; jalankan ulang setelah mengubah layar asli
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-11-02]
+- `/demo-preview`: demo klik-bisa untuk semua alur, tampilan 100% sama dengan aplikasi asli (user menolak versi gambar-ulang). Layar asli (Beranda, Kartu, Tiket, Events, Join, Daftar, Profil, Sekretariat v2) disalin oleh `scripts/gen-demo-preview.mjs`: import `@/lib/actions/*`, `next-auth/react`, `@/app/admin/actions` dialihkan ke `components/demo-preview/shim/*`, rute `/dashboard` dst jadi `/demo-preview/...`. File hasil generate diberi header GENERATED, jangan diedit; ubah layar asli lalu jalankan `node scripts/gen-demo-preview.mjs`. Patch yang disengaja ada di `PATCHES` generator dan gagal keras kalau teks asli berubah
+- Data hanya di browser: kunci localStorage `levelup-demo-preview:v2` (`components/demo-preview/db.ts`, tabel dengan nama kolom Prisma). Tidak boleh mengimpor `lib/actions/*` sungguhan, `@/auth`, `@/lib/db`, prisma (hanya `import type` / `export type *`). Tombol **DEMO** di tepi kiri = ganti akun + reset semua flow
+- Akun di layar login (password `demo123`, bisa email atau No. HP): Tamu, Volunteer, Squad, Core, Akun Google baru (masuk ke Daftar), Admin LK Medan (satu akun Sekretariat untuk approval, event, scan, reimburse)
+- Beda dari aplikasi asli (hanya di demo): Join Volunteer butuh approve Admin lewat tile baru **Approval Volunteer** (aslinya instan); event langsung disetujui; tiket event nasional langsung confirmed; tile **Reimburse** aktif dengan daftar + panel **Status Pencairan** (PIC sekarang: ALK Kota / LevelUP Pusat / Keuangan, riwayat) + tombol simulasi Pusat dan Keuangan; di Scan ada panel **simulasi scan** karena tidak semua browser punya kamera BarcodeDetector. Layar khusus Sekretariat Nasional (approve event, tiket nasional, pindah kota) dan `/absen` tidak ada, route itu jatuh ke halaman "Belum ada di demo"
 
 ## Recent Updates [2026-11-01]
 - Multi-lokasi scan event nasional (`wwtype=nasional`, non-Online): tabel `event_lokasi` + `event_sesi.id_lokasi`. Form Sekretariat punya section **Lokasi Scan** (nama, alamat+pin, radius); kosong = pakai titik utama. Di Scan operator memilih lokasi; sesi **terkunci ke lokasi pada scan sukses pertama** (update bersyarat `id_lokasi IS NULL` di transaksi absen), scan lokasi lain → `lokasi_conflict`. Memilih lokasi saja tidak mengunci. 2+ lokasi wajib punya minimal 1 sesi. Hapus lokasi yang sudah mengunci sesi ditolak

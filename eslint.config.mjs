@@ -13,6 +13,12 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  // /demo-preview contains generated copies of real screens (scripts/gen-demo-preview.mjs), which carry their own
+  // eslint-disable comments from the originals; don't warn about directives that no longer apply.
+  {
+    files: ["app/demo-preview/**", "components/demo-preview/**"],
+    linterOptions: { reportUnusedDisableDirectives: "off" },
+  },
 ]);
 
 export default eslintConfig;
