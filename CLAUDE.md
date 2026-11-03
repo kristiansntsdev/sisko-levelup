@@ -101,10 +101,14 @@ scripts/gen-demo-preview.mjs          # Salin UI asli ke /demo-preview + ganti i
 components/documents/surat-keuangan.tsx # Surat Keuangan murni (buildSuratKeuangan, matchKorwil, SuratKeuanganPage); dipakai halaman asli + /demo-preview/surat-keuangan/[id]
 lib/surat-keuangan.ts                 # loadSuratKeuangan: event + reimburse + cabang.leadercabang + peserta unik dari absen
 lib/pphtgd-korwil.ts                  # listKorwilPphtgd: GET pphtgd-official /api/internal/levelup/korwils (Bearer PPHTGD_API_SECRET), tanpa default
+  dashboard/v2/kota/alk/reimburse/    # Sekretariat v2: daftar pengajuan dana (Nasional = semua kota + antrian; ALK Kota = status event kotanya) + [id] review Approve/Tolak/Tandai cair (nasional only)
+components/alk-v2/reimburse.tsx       # ReimburseListV2Client + ReimburseReviewV2Client (gaya kertas)
+lib/reimburse-stage.ts                # reimburseStage + REIMBURSE_STAGE: satu sumber tahap dana (belum/pusat/keuangan/cair/ditolak), dipakai app asli + demo
 task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-11-03]
+- Reimburse di Sekretariat v2: tile Reimburse + Lainnya "ALK" aktif → `/dashboard/v2/kota/alk/reimburse`. Nasional: daftar semua kota (default Menunggu) + review `/reimburse/{id}` (Approve, Tolak + alasan, Cetak Surat, **Tandai sudah cair** = `reimburse.approvekeuangan='1'`, Telegram "Dana Cair"); item "n pengajuan dana" di Perlu Tindakan + badge tile. ALK Kota: status dana event kotanya (hanya event yang sudah berjalan) lalu ke form dana. `ReimburseData.approvekeuangan` baru; tahap hanya dari `lib/reimburse-stage.ts`. Demo: daftar kota-view dari clone `reimburse.tsx`, layar review nasional tidak ada
 - Surat Keuangan: `/surat-keuangan/{id}` (di luar shell, cetak A4 satu halaman via browser) terisi otomatis dari data pengajuan dana setelah Sekretariat Nasional approve. Tombol "Cetak Surat untuk Keuangan" di form dana (legacy + v2) dan kartu approve. Koordinator = `cabang.leadercabang`; Jumlah Peserta = peserta unik di `absen`; Nomor Rekening (label lama "Nama Rekening" salah); baris Nama Event baru
 - TTD 3 kolom: Korwil PPHTGD (nama koordinator dari API pphtgd-official, dipilih saat cetak, otomatis terpilih kalau nama korwil cocok dengan kota; tidak disimpan), PIC LevelUP Pusat = Steven Kusuma, Keuangan PPHTGD kosong. Env: `PPHTGD_API_URL`, `PPHTGD_API_SECRET` (= `LEVELUP_API_SECRET` di pphtgd). API gagal: surat tetap bisa dicetak, nama Korwil kosong
 - Kop dicetak sebagai `<img>`, bukan CSS background (background dibuang saat cetak). `public/template2.png` pindah ke `public/assets/kop-keuangan.png`

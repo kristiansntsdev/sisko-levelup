@@ -32,7 +32,7 @@ export function LainnyaClient({
       <div className="px-5 mt-5 space-y-4 pb-4">
         <div className={`${PANEL} ${ROWS} overflow-hidden`}>
           <Row icon="box" title="Nama PIC" sub="Alokasi stok & klaim" right={<SoonTag />} onClick={() => flash('Alokasi stok & klaim')} />
-          <Row icon="receipt" tint="gold" title="ALK" sub="Status dana per kegiatan" right={<SoonTag />} onClick={() => flash('Status dana per kegiatan')} />
+          <Row icon="receipt" tint="gold" title="ALK" sub="Status dana per kegiatan" onClick={() => router.push(`${ALK_BASE}/reimburse`)} />
           <Row icon="link" title="VOL" sub="Pendaftaran anggota baru" onClick={() => setRegOpen(true)} />
           <Row icon="chat" tint="gold" title="Pengaduan ke Pusat" sub="Laporkan kendala ke admin pusat" right={<SoonTag />} onClick={() => flash('Pengaduan ke Pusat')} />
         </div>

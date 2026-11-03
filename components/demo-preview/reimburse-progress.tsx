@@ -9,23 +9,20 @@ import { Pill, type PillTone } from '@/components/pwa/ui'
 import { Empty, PersonChip } from './clone/alk-v2/ui'
 import { ALK_BASE, ALK_EVENT_BASE } from './clone/alk-v2/paths'
 import { Loading, useAlk } from './alk'
+import { REIMBURSE_STAGE, reimburseStage, type ReimburseStage } from '@/lib/reimburse-stage'
 import { snapshot, subscribe, type DbReimburse } from './db'
 import { approveReimburseNasional, cairkanReimburse, rejectReimburseNasional } from './shim/actions/reimburse'
 import { fmtShort } from './shim/util'
 
-export type Stage = 'belum' | 'tanpa_dana' | 'ditolak' | 'pusat' | 'keuangan' | 'cair'
+export type Stage = ReimburseStage
 
 export function stageOf(r?: DbReimburse): Stage {
-  if (!r || !r.ajukan) return 'belum'
-  if (r.ajukan === 'Tidak Ajukan') return 'tanpa_dana'
-  if (r.approvenasional === '0') return 'ditolak'
-  if (r.approvenasional === '') return 'pusat'
-  return r.approvekeuangan === '1' ? 'cair' : 'keuangan'
+  return reimburseStage(r)
 }
 
-const LABEL_OF: Record<Stage, string> = { belum: 'Belum diajukan', tanpa_dana: 'Tanpa dana', ditolak: 'Ditolak', pusat: 'Di LevelUP Pusat', keuangan: 'Di Keuangan', cair: 'Cair' }
-const PIC_OF: Record<Stage, string> = { belum: 'ALK Kota', tanpa_dana: '—', ditolak: 'ALK Kota (perbaiki & ajukan ulang)', pusat: 'LevelUP Pusat', keuangan: 'Keuangan', cair: 'Selesai' }
-const TONE_OF: Record<Stage, PillTone> = { belum: 'slate', tanpa_dana: 'slate', ditolak: 'red', pusat: 'amber', keuangan: 'amber', cair: 'green' }
+const LABEL_OF = Object.fromEntries(Object.entries(REIMBURSE_STAGE).map(([k, v]) => [k, v.label])) as Record<Stage, string>
+const PIC_OF = Object.fromEntries(Object.entries(REIMBURSE_STAGE).map(([k, v]) => [k, v.pic])) as Record<Stage, string>
+const TONE_OF = Object.fromEntries(Object.entries(REIMBURSE_STAGE).map(([k, v]) => [k, v.tone])) as Record<Stage, PillTone>
 const STEPS = ['Diajukan', 'LevelUP Pusat', 'Keuangan', 'Cair'] as const
 /** How many steps are done for each stage (the current step is the next one). */
 const DONE: Record<Stage, number> = { belum: 0, tanpa_dana: 0, ditolak: 1, pusat: 1, keuangan: 2, cair: 4 }
@@ -124,56 +121,5 @@ export function ReimburseProgress({ idEvent }: { idEvent: number }) {
         </section>
       )}
     </div>
-  )
-}
-
-const FILTERS: [Stage | 'all', string][] = [['all', 'Semua'], ['belum', 'Belum diajukan'], ['pusat', 'Di Pusat'], ['keuangan', 'Di Keuangan'], ['cair', 'Cair'], ['ditolak', 'Ditolak']]
-
-export function ReimburseListPage() {
-  const router = useRouter()
-  const alk = useAlk()
-  const db = useSyncExternalStore(subscribe, snapshot, () => null)
-  const [filter, setFilter] = useState<Stage | 'all'>('all')
-  if (!alk || !db) return <Loading />
-
-  const rows = db.event
-    .filter((e) => e.id_cabang === alk.cabang)
-    .sort((a, b) => b.tglevent.localeCompare(a.tglevent))
-    .map((e) => ({ e, stage: stageOf(db.reimburse.find((r) => r.id_event === String(e.id_event))) }))
-    .filter((x) => filter === 'all' || x.stage === filter)
-
-  return (
-    <PaperMain>
-      <PaperHeader
-        sticker={`${rows.length} event`}
-        title="Reimburse"
-        leading={<IconButton icon="chevronLeft" label="Kembali" onClick={() => router.push(ALK_BASE)} className="-rotate-3" />}
-      />
-      <div className="mt-4 flex gap-2 overflow-x-auto px-5 pb-1">
-        {FILTERS.map(([v, label]) => (
-          <button key={v} type="button" onClick={() => setFilter(v)} className={`${LABEL} shrink-0 rounded-full px-3.5 py-2 text-[10.5px] font-bold ${filter === v ? 'bg-[#161616] text-[#ffd83d]' : 'bg-[#fffdf7] text-[#161616]'}`}>
-            {label}
-          </button>
-        ))}
-      </div>
-      <div className="mt-4 space-y-3 px-5 pb-4">
-        {rows.length === 0 ? (
-          <Empty>Tidak ada event di filter ini.</Empty>
-        ) : (
-          rows.map(({ e, stage }) => (
-            <Link key={e.id_event} href={`${ALK_EVENT_BASE}/${e.id_event}/dana`} className={`flex items-center gap-3 p-3.5 ${PANEL} ${PRESS}`}>
-              <PersonChip />
-              <span className="min-w-0 flex-1">
-                <span className={`${ANTON} block truncate text-[16px] leading-tight tracking-[.02em]`}>{e.nama_event}</span>
-                <span className={`${MONO} mt-0.5 block text-[10.5px] font-bold text-[#44403c]`}>
-                  {fmtShort(e.tglevent)} · PIC: {PIC_OF[stage]}
-                </span>
-              </span>
-              <Pill tone={TONE_OF[stage]}>{LABEL_OF[stage]}</Pill>
-            </Link>
-          ))
-        )}
-      </div>
-    </PaperMain>
   )
 }

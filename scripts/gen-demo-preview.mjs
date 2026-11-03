@@ -31,7 +31,7 @@ const FILES = [
   ['app/daftar/page.tsx', 'app/demo-preview/daftar/page.tsx'],
   ['components/pwa/shell.tsx', 'components/demo-preview/clone/pwa/shell.tsx'],
   // Sekretariat v2 (event-approve, pindah-kota, tiket-nasional are Sekretariat Nasional only: not in the demo)
-  ...['anggota', 'approval', 'beranda', 'event-detail', 'events', 'lainnya', 'list-tools', 'scan', 'shell', 'ui'].map((n) => [`components/alk-v2/${n}.tsx`, `components/demo-preview/clone/alk-v2/${n}.tsx`]),
+  ...['anggota', 'approval', 'beranda', 'event-detail', 'events', 'lainnya', 'list-tools', 'reimburse', 'scan', 'shell', 'ui'].map((n) => [`components/alk-v2/${n}.tsx`, `components/demo-preview/clone/alk-v2/${n}.tsx`]),
   ['components/alk-v2/paths.ts', 'components/demo-preview/clone/alk-v2/paths.ts'],
   ['components/kota/event-form.tsx', 'components/demo-preview/clone/kota/event-form.tsx'],
   ['app/dashboard/kota/alk/event/[id]/dana/dana-client.tsx', 'components/demo-preview/clone/kota/dana-client.tsx'],
@@ -84,10 +84,6 @@ const PATCHES = {
     ['{u.usercode} · VOLUNTEER → SQUAD', "{u.usercode} · {kind === 'volunteer' ? 'TAMU → VOLUNTEER' : 'VOLUNTEER → SQUAD'}"],
   ],
   'components/alk-v2/beranda.tsx': [
-    [
-      "    { i: 'receipt', t: 'Reimburse', tint: 'gold', soon: 'Reimburse' },",
-      "    { i: 'receipt', t: 'Reimburse', tint: 'gold', href: `${ALK_BASE}/reimburse` },",
-    ],
     [
       "    { i: 'calPlus', t: 'Buat Event', tint: 'red', href: `${ALK_BASE}/event/new` },",
       "    { i: 'userPlus', t: 'Approval Volunteer', tint: 'gold', href: `${ALK_BASE}/approval-volunteer` },\n    { i: 'calPlus', t: 'Buat Event', tint: 'red', href: `${ALK_BASE}/event/new` },",

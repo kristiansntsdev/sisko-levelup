@@ -14,6 +14,7 @@ import {
   rejectReimburseNasional,
   type ReimburseData,
 } from '@/lib/actions/reimburse'
+import { isAjukan } from '@/lib/reimburse-stage'
 import { FlyerQaSummary } from '@/components/kota/flyer-qa-summary'
 import { BeritaAcaraQaSummary } from '@/components/kota/berita-acara-qa-summary'
 
@@ -276,7 +277,7 @@ export function EventApproveClient({
         <FlyerQaSummary eventId={event.id_event} initial={event.flyerQa} live={false} />
         <BeritaAcaraQaSummary eventId={event.id_event} initial={event.beritaAcaraQa} live={false} />
 
-        {role === 'alk' && reimburse?.ajukan === 'Ajukan' ? (
+        {role === 'alk' && reimburse && isAjukan(reimburse.ajukan) ? (
           <DanaApprovalCard reimburse={reimburse} />
         ) : null}
 

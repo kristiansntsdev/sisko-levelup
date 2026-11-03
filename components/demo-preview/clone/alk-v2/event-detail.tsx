@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation'
 import QRCode from 'qrcode'
 import { ajukanEvent, type EventDetailFull } from '@/components/demo-preview/shim/actions/event'
 import type { ReimburseData } from '@/components/demo-preview/shim/actions/reimburse'
+import { REIMBURSE_STAGE, reimburseStage } from '@/lib/reimburse-stage'
 import { isEventFullyApproved } from '@/lib/event-approval'
 import { NASIONAL_KHUSUS_VALUE } from '@/lib/event-cabang'
 import { eventEntryPath, isOnlineEvent } from '@/lib/event-link'
@@ -260,14 +261,8 @@ function DanaRow({
   reimburse?: ReimburseData | null
   eventBasePath: string
 }) {
-  const status =
-    reimburse?.approvenasional === '1'
-      ? ({ label: 'Disetujui', tone: 'green' } as const)
-      : reimburse?.approvenasional === '0'
-        ? ({ label: 'Ditolak', tone: 'red' } as const)
-        : reimburse
-          ? ({ label: 'Menunggu', tone: 'amber' } as const)
-          : null
+  const stage = reimburseStage(reimburse)
+  const status = reimburse && stage !== 'tanpa_dana' ? REIMBURSE_STAGE[stage] : null
 
   return (
     <Link href={`${eventBasePath}/${eventId}/dana`} className={`w-full px-4 py-3.5 flex items-center justify-between gap-3 ${PANEL} ${PRESS}`}>

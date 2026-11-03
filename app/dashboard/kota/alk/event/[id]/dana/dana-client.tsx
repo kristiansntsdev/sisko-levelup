@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { isAjukan } from '@/lib/reimburse-stage'
 import { submitReimburse, type ReimburseData } from '@/lib/actions/reimburse'
 
 const inputCls =
@@ -100,8 +101,9 @@ export function DanaClient({
           <div className="bg-green-light rounded-[14px] px-4 py-3 text-center">
             <p className="text-[14px] font-semibold text-green-dark">
               Pengajuan sudah disetujui Sekretariat Nasional
+              {reimburse?.approvekeuangan === '1' ? ' · Dana sudah cair' : ''}
             </p>
-            {suratHref && reimburse?.ajukan === 'Ajukan' ? (
+            {suratHref && isAjukan(reimburse?.ajukan) ? (
               <a
                 href={suratHref}
                 target="_blank"

@@ -1,12 +1,14 @@
 'use client'
-import type { ReimburseData, SubmitReimburseInput } from '@/lib/actions/reimburse'
-import { addLog, getDb, mutate, type DbReimburse } from '../../db'
+import type { ReimburseData, ReimburseListItem, ReimburseReview, SubmitReimburseInput } from '@/lib/actions/reimburse'
+import { reimburseStage } from '@/lib/reimburse-stage'
+import { addLog, getDb, mutate, wibDay, type DbReimburse } from '../../db'
+import { alkPengurus, fmtShort } from '../util'
 
 export type * from '@/lib/actions/reimburse'
 
 const toData = (r: DbReimburse): ReimburseData => ({
   id_reimburse: r.id_reimburse, id_event: r.id_event, ajukan: r.ajukan, namabank: r.namabank, norek: r.norek, namarek: r.namarek,
-  danausul: r.danausul, danariil: r.danariil, laporan: r.laporan, bukti: r.bukti, approvenasional: r.approvenasional, notenasional: r.notenasional,
+  danausul: r.danausul, danariil: r.danariil, laporan: r.laporan, bukti: r.bukti, approvenasional: r.approvenasional, notenasional: r.notenasional, approvekeuangan: r.approvekeuangan,
 })
 
 export async function getReimburseForEvent(idEvent: number): Promise<ReimburseData | null> {
@@ -71,4 +73,44 @@ export async function cairkanReimburse(idReimburse: number): Promise<ReimburseAp
     addLog(d, 'Keuangan mencairkan dana (simulasi)')
   })
   return { ok: true }
+}
+
+/** Demo admin is an ALK Kota account, so this is always the kota view (events that have already started). */
+export async function listReimburseSekretariat(): Promise<{ isNasional: boolean; items: ReimburseListItem[] } | null> {
+  const me = alkPengurus()
+  if (!me) return null
+  const d = getDb()
+  const today = wibDay()
+  const namaCabang = d.cabang.find((c) => String(c.id_cabang) === me.cabang)?.namacabang ?? '-'
+  return {
+    isNasional: false,
+    items: d.event
+      .filter((e) => e.id_cabang === me.cabang && e.tglevent <= today)
+      .sort((a, b) => b.tglevent.localeCompare(a.tglevent))
+      .map((e) => {
+        const r = d.reimburse.find((x) => x.id_event === String(e.id_event))
+        return {
+          id_event: e.id_event,
+          nama_event: e.nama_event,
+          tglDisplay: fmtShort(e.tglevent),
+          namaCabang,
+          stage: reimburseStage(r),
+          danausul: r?.danausul ?? '',
+          notenasional: r?.notenasional ?? '',
+        }
+      }),
+  }
+}
+
+export async function countPendingReimburseNasional(): Promise<number> {
+  return 0
+}
+
+/** Sekretariat Nasional screens are not part of the demo. */
+export async function getReimburseReview(_idEvent?: number): Promise<ReimburseReview | null> { // eslint-disable-line @typescript-eslint/no-unused-vars
+  return null
+}
+
+export async function cairkanReimburseNasional(_idReimburse?: number): Promise<ReimburseApprovalResult> { // eslint-disable-line @typescript-eslint/no-unused-vars
+  return { ok: false, error: 'Hanya Sekretariat Nasional yang bisa menandai cair (tidak ada di demo)' }
 }

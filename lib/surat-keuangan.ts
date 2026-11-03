@@ -1,10 +1,22 @@
 import { db } from '@/lib/db'
+import { isAjukan } from '@/lib/reimburse-stage'
 import { buildSuratKeuangan, type SuratKeuanganData } from '@/components/documents/surat-keuangan'
 
 export type SuratKeuanganResult =
   | { status: 'ok'; data: SuratKeuanganData; idCabang: string; namaCabang: string }
   | { status: 'not_found' }
   | { status: 'not_ready' }
+
+/** Unique peserta with an absen row; same match as getEventDetail (int or legacy string id). */
+export async function countHadirUnik(idEvent: number): Promise<number> {
+  const absen = await db.absen.findMany({
+    where: { OR: [{ id_event_int: idEvent }, { id_event: String(idEvent) }] },
+    select: { id_peserta: true, id_peserta_int: true },
+  })
+  return new Set(
+    absen.map((a) => a.id_peserta_int ?? parseInt(a.id_peserta, 10)).filter((n) => n != null && !isNaN(n)),
+  ).size
+}
 
 const iso = (d: Date) => d.toISOString().slice(0, 10)
 
@@ -18,23 +30,14 @@ export async function loadSuratKeuangan(idEvent: number): Promise<SuratKeuanganR
 
   const reimburse = await db.reimburse.findFirst({ where: { id_event: String(idEvent) } })
   if (!reimburse) return { status: 'not_found' }
-  if (reimburse.ajukan !== 'Ajukan' || reimburse.approvenasional !== '1') return { status: 'not_ready' }
+  if (!isAjukan(reimburse.ajukan) || reimburse.approvenasional !== '1') return { status: 'not_ready' }
 
   const cabangId = Number(event.id_cabang)
   const cabang = Number.isInteger(cabangId) && cabangId > 0
     ? await db.cabang.findUnique({ where: { id_cabang: cabangId }, select: { namacabang: true, leadercabang: true } })
     : null
 
-  // Same match as getEventDetail: absen rows reference the event by int or legacy string id.
-  const absen = await db.absen.findMany({
-    where: { OR: [{ id_event_int: idEvent }, { id_event: String(idEvent) }] },
-    select: { id_peserta: true, id_peserta_int: true },
-  })
-  const hadir = new Set(
-    absen
-      .map((a) => a.id_peserta_int ?? parseInt(a.id_peserta, 10))
-      .filter((n) => n != null && !isNaN(n)),
-  )
+  const hadir = await countHadirUnik(idEvent)
 
   return {
     status: 'ok',
@@ -50,7 +53,7 @@ export async function loadSuratKeuangan(idEvent: number): Promise<SuratKeuanganR
       },
       cabang,
       reimburse,
-      jumlahHadir: hadir.size,
+      jumlahHadir: hadir,
     }),
   }
 }
