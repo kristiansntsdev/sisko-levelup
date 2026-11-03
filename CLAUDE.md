@@ -43,6 +43,9 @@ components/landing/zine.tsx           # Design system landing (kertas lecek, tor
   dashboard/tiket/                    # My Tickets (TicketCard) + [id] detail tiket + QR
   dashboard/riwayat/                  # Milestone stub dari registrasi
   dashboard/kesaksian/                # Kesaksian UI stub
+  dashboard/pemuridan/                # Daftar seri Pemuridan (progres per perangkat) + [slug] cerita interaktif fullscreen
+components/pemuridan/                 # Cerita Pemuridan: story-player (kartu 9:16), kit.ts (gambar SVG + kelas Tailwind literal), satu file per seri, stories.ts (slug → cerita)
+lib/pemuridan.ts                      # PEMURIDAN (daftar seri, bagian = jumlah scene), findSeri, progressKey
   dashboard/profil/                   # Profil + masuk pengurus sheet
   dashboard/profil/edit/              # Perubahan Data v2; ajukan pindah LevelUP Kota (nasional approve)
 lib/actions/wilayah.ts                # listProvinsi/Kabupaten/Kecamatan/Desa (BPS codes)
@@ -108,6 +111,10 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-11-03]
+- Pemuridan: tile Beranda aktif → `/dashboard/pemuridan` (daftar seri) → `/dashboard/pemuridan/pola-pikir`, cerita interaktif Seri #1 · Pola Pikir "Mereka Keluar Tetapi Gagal Masuk" (10 bagian, 1 Korintus 10) dari desain `Keluar tapi Gagal Masuk.html`. Di-port ke `components/pemuridan/` (React + Tailwind, animasi `animate-story-*` di `@theme` `globals.css`); gambar, copy dan posisi diukur sama dengan desain. Latar gurun malam gelap di sekitar kartu sengaja dipertahankan dari desain. Bottom nav disembunyikan di layar cerita
+- Scene membuat markup sebagai string lalu `mount()` memasang interaksinya; React hanya memegang bar progres, judul, dan tombol. Kelas di string scene wajib literal dari `kit.ts` supaya Tailwind menemukannya. Fix dari desain: bintang berkelip dulu menumpuk di pojok kiri atas (animasi CSS menimpa `transform` SVG), sekarang dibungkus `<g>`
+- Progres = bagian terakhir dibuka, disimpan per perangkat di localStorage `levelup-pemuridan:{slug}` (belum ke DB). `?s=n` membuka bagian n langsung. Seri baru: file scene baru + entri `STORIES` + `PEMURIDAN`
+- Demo: daftar + cerita Pemuridan ikut disalin generator `/demo-preview`
 - Reimburse di Sekretariat v2: tile Reimburse + Lainnya "ALK" aktif → `/dashboard/v2/kota/alk/reimburse`. Nasional: daftar semua kota (default Menunggu) + review `/reimburse/{id}` (Approve, Tolak + alasan, Cetak Surat, **Tandai sudah cair** = `reimburse.approvekeuangan='1'`, Telegram "Dana Cair"); item "n pengajuan dana" di Perlu Tindakan + badge tile. ALK Kota: status dana event kotanya (hanya event yang sudah berjalan) lalu ke form dana. `ReimburseData.approvekeuangan` baru; tahap hanya dari `lib/reimburse-stage.ts`. Demo: daftar kota-view dari clone `reimburse.tsx`, layar review nasional tidak ada
 - Surat Keuangan: `/surat-keuangan/{id}` (di luar shell, cetak A4 satu halaman via browser) terisi otomatis dari data pengajuan dana setelah Sekretariat Nasional approve. Tombol "Cetak Surat untuk Keuangan" di form dana (legacy + v2) dan kartu approve. Koordinator = `cabang.leadercabang`; Jumlah Peserta = peserta unik di `absen`; Nomor Rekening (label lama "Nama Rekening" salah); baris Nama Event baru
 - TTD 3 kolom: Korwil PPHTGD (nama koordinator dari API pphtgd-official, dipilih saat cetak, otomatis terpilih kalau nama korwil cocok dengan kota; tidak disimpan), PIC LevelUP Pusat = Steven Kusuma, Keuangan PPHTGD kosong. Env: `PPHTGD_API_URL`, `PPHTGD_API_SECRET` (= `LEVELUP_API_SECRET` di pphtgd). API gagal: surat tetap bisa dicetak, nama Korwil kosong

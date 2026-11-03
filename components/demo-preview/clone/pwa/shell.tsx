@@ -24,6 +24,7 @@ const TABS: Tab[] = [
 ]
 
 const TICKET_DETAIL = /^\/demo-preview\/dashboard\/tiket\/\d+/
+const PEMURIDAN_STORY = /^\/demo-preview\/dashboard\/pemuridan\/[^/]+/
 
 function pathMatches(pathname: string, match: string[]) {
   return match.some((m) => pathname === m || (m !== '/demo-preview/dashboard' && pathname.startsWith(m + '/')))
@@ -38,7 +39,7 @@ export function shouldHideMemberNav(pathname: string) {
   if (isKotaAdminPath(pathname)) return true
   if (pathname.startsWith('/demo-preview/login') || pathname.startsWith('/demo-preview/daftar')) return true
   if (pathname.startsWith('/demo-preview/events') || pathname.startsWith('/demo-preview/join/')) return true
-  if (TICKET_DETAIL.test(pathname)) return true
+  if (TICKET_DETAIL.test(pathname) || PEMURIDAN_STORY.test(pathname)) return true
   if (pathname.startsWith('/demo-preview/absen/')) return true
   return false
 }

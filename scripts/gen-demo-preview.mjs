@@ -24,6 +24,8 @@ const FILES = [
   ['app/dashboard/tiket/[id]/absen-event-button.tsx', 'app/demo-preview/dashboard/tiket/[id]/absen-event-button.tsx'],
   ['app/dashboard/riwayat/page.tsx', 'app/demo-preview/dashboard/riwayat/page.tsx'],
   ['app/dashboard/kesaksian/page.tsx', 'app/demo-preview/dashboard/kesaksian/page.tsx'],
+  ['app/dashboard/pemuridan/page.tsx', 'app/demo-preview/dashboard/pemuridan/page.tsx'],
+  ['app/dashboard/pemuridan/[slug]/page.tsx', 'app/demo-preview/dashboard/pemuridan/[slug]/page.tsx'],
   ['app/dashboard/profil/page.tsx', 'app/demo-preview/dashboard/profil/page.tsx'],
   ['app/dashboard/profil/edit/page.tsx', 'app/demo-preview/dashboard/profil/edit/page.tsx'],
   ['app/events/page.tsx', 'app/demo-preview/events/page.tsx'],
@@ -60,6 +62,7 @@ const PATCHES = {
   'components/pwa/shell.tsx': [
     ["from './ui'", "from '@/components/pwa/ui'"],
     ['/^\\/dashboard\\/tiket\\/\\d+/', '/^\\/demo-preview\\/dashboard\\/tiket\\/\\d+/'],
+    ['/^\\/dashboard\\/pemuridan\\/[^/]+/', '/^\\/demo-preview\\/dashboard\\/pemuridan\\/[^/]+/'],
   ],
   'app/dashboard/page.tsx': [
     ['import { getPendingSquadForMe, joinSquad, joinVolunteer }', 'import { getPendingSquadForMe, getPendingVolunteerForMe, joinSquad, joinVolunteer }'],
