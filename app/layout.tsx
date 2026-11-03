@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow_Semi_Condensed, DM_Sans, Space_Grotesk, Instrument_Serif, DM_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui";
 import { Providers } from "@/components/providers";
 import "./globals.css";
@@ -82,6 +83,7 @@ export default function RootLayout({
           {children}
           <Toaster />
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
