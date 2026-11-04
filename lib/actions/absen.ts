@@ -118,24 +118,33 @@ export type RecentAbsenRow = {
   time: string
 }
 
+export type RecentAbsen = { rows: RecentAbsenRow[]; total: number }
+
+/** Absen terbaru + total hadir untuk event; `idSesi` membatasi ke satu sesi (null = semua absen event). */
 export async function getRecentAbsenForEvent(
   idEvent: number,
   limit = 5,
-): Promise<RecentAbsenRow[]> {
-  const rows = await db.absen.findMany({
-    where: {
-      OR: [{ id_event_int: idEvent }, { id_event: String(idEvent) }],
-    },
-    orderBy: { timestamp: 'desc' },
-    take: limit,
-    select: {
-      id_absen: true,
-      id_peserta_int: true,
-      id_peserta: true,
-      id_sesi: true,
-      timestamp: true,
-    },
-  })
+  idSesi: number | null = null,
+): Promise<RecentAbsen> {
+  const where = {
+    OR: [{ id_event_int: idEvent }, { id_event: String(idEvent) }],
+    ...(idSesi != null ? { id_sesi: idSesi } : {}),
+  }
+  const [rows, total] = await Promise.all([
+    db.absen.findMany({
+      where,
+      orderBy: { timestamp: 'desc' },
+      take: limit,
+      select: {
+        id_absen: true,
+        id_peserta_int: true,
+        id_peserta: true,
+        id_sesi: true,
+        timestamp: true,
+      },
+    }),
+    db.absen.count({ where }),
+  ])
   const ids = rows
     .map((r) => r.id_peserta_int ?? Number(r.id_peserta))
     .filter((n) => Number.isFinite(n))
@@ -146,7 +155,7 @@ export async function getRecentAbsenForEvent(
       })
     : []
   const byId = new Map(pesertas.map((p) => [p.id_peserta, p]))
-  return rows.map((r) => {
+  const list = rows.map((r) => {
     const pid = r.id_peserta_int ?? Number(r.id_peserta)
     const p = byId.get(pid)
     const ts = r.timestamp instanceof Date ? r.timestamp : new Date(r.timestamp)
@@ -164,4 +173,5 @@ export async function getRecentAbsenForEvent(
       }),
     }
   })
+  return { rows: list, total }
 }

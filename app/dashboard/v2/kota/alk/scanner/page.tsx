@@ -31,15 +31,7 @@ export default async function AlkV2ScannerPage({
     },
   })
 
-  const counts = await Promise.all(
-    rows.map((e) =>
-      db.absen.count({
-        where: { OR: [{ id_event_int: e.id_event }, { id_event: String(e.id_event) }] },
-      }),
-    ),
-  )
-
-  const events: ScanEvent[] = rows.map((e, i) => {
+  const events: ScanEvent[] = rows.map((e) => {
     const ms = e.tglevent instanceof Date ? e.tglevent.getTime() : 0
     return {
       id_event: e.id_event,
@@ -59,7 +51,6 @@ export default async function AlkV2ScannerPage({
       jenisevent: e.jenisevent ?? '',
       alamatevent: e.alamatevent,
       radius: e.radius,
-      hadir: counts[i] ?? 0,
     }
   })
 

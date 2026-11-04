@@ -3,7 +3,7 @@
 import { eventDateTime, isOnlineAbsenOpen } from '@/lib/event-absen-window'
 import { parseLocalDate } from '@/lib/event-sesi'
 import type { QRPayload } from '@/lib/qr'
-import type { RecentAbsenRow } from '@/lib/actions/absen'
+import type { RecentAbsen } from '@/lib/actions/absen'
 import { addLog, getDb, mutate } from '../../db'
 import { sessionPeserta, sessionPengurus } from '../util'
 
@@ -66,10 +66,10 @@ export async function absenOnlineSelf(idRegistrasi: number): Promise<
   return { success: false, reason: res.reason === 'already_scanned' ? 'already_scanned' : 'error' }
 }
 
-export async function getRecentAbsenForEvent(idEvent: number, limit = 5): Promise<RecentAbsenRow[]> {
+export async function getRecentAbsenForEvent(idEvent: number, limit = 5, idSesi: number | null = null): Promise<RecentAbsen> {
   const d = getDb()
-  return d.absen
-    .filter((a) => a.id_event === idEvent)
+  const all = d.absen.filter((a) => a.id_event === idEvent && (idSesi == null || a.id_sesi === idSesi))
+  const rows = all
     .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
     .slice(0, limit)
     .map((a) => {
@@ -83,4 +83,5 @@ export async function getRecentAbsenForEvent(idEvent: number, limit = 5): Promis
         time: new Date(a.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }),
       }
     })
+  return { rows, total: all.length }
 }

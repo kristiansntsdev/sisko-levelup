@@ -2,7 +2,7 @@
 // GENERATED from components/alk-v2/scan.tsx by scripts/gen-demo-preview.mjs — do not edit; change the source or the generator and re-run.
 'use client'
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
-import { createAbsen, getPesertaPreview, getRecentAbsenForEvent, type RecentAbsenRow } from '@/components/demo-preview/shim/actions/absen'
+import { createAbsen, getPesertaPreview, getRecentAbsenForEvent, type RecentAbsen } from '@/components/demo-preview/shim/actions/absen'
 import { getEventLocation, getEventLokasi, getEventSesi } from '@/components/demo-preview/shim/actions/event'
 import { parseLatLng, type EventLokasiRow } from '@/lib/event-lokasi'
 import type { EventSesiRow } from '@/lib/event-sesi'
@@ -20,7 +20,6 @@ export type ScanEvent = {
   jenisevent: string
   alamatevent: string
   radius: number
-  hadir: number
 }
 
 type Preview = { payload: QRPayload; nama: string; gereja: string }
@@ -144,11 +143,14 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
   const [pickOpen, setPickOpen] = useState(false)
   const [sesiList, setSesiList] = useState<EventSesiRow[]>([])
   const [sesiId, setSesiId] = useState<number | null>(null)
+  // id_event pemilik sesiList; list absen baru dimuat setelah sesi event ini diketahui
+  const [sesiFor, setSesiFor] = useState(0)
   const [lokasiList, setLokasiList] = useState<EventLokasiRow[]>([])
   const [lokasiPick, setLokasiPick] = useState<number | null>(null)
   const [lokasiReady, setLokasiReady] = useState(false)
-  const [recent, setRecent] = useState<RecentAbsenRow[]>([])
-  const [hadir, setHadir] = useState(e?.hadir ?? 0)
+  // Absen live per (event, sesi): `key` mencegah list sesi lain tampil sebentar saat ganti sesi
+  const [live, setLive] = useState<RecentAbsen & { key: string }>({ key: '', rows: [], total: 0 })
+  const liveSeqRef = useRef(0)
 
   const [cam, setCam] = useState<CamStatus>('off')
   const [error, setError] = useState('')
@@ -184,6 +186,13 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
   const lokasiId = lockedLokasiId ?? lokasiPick
   const activeLokasi = lokasiList.find((l) => l.id_lokasi === lokasiId) ?? null
 
+  // List + hitungan hadir hanya untuk sesi terpilih (event tanpa sesi = semua absen event).
+  const sesiReady = !!e && sesiFor === e.id_event
+  const filterSesi = sesiList.length > 0 ? sesiId : null
+  const liveKey = sesiReady ? `${e.id_event}:${filterSesi ?? ''}` : ''
+  const recent = live.key === liveKey ? live.rows : []
+  const hadir = liveKey && live.key === liveKey ? live.total : null
+
   fsRef.current = fullscreen
   ctxRef.current = {
     eventId: e?.id_event ?? 0,
@@ -209,16 +218,17 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
     setDone(null)
   }, [])
 
-  const refreshRecent = useCallback(async (idEvent: number, fs: boolean) => {
-    const rows = await getRecentAbsenForEvent(idEvent, fs ? RECENT_FS : RECENT_NORMAL)
-    setRecent(rows)
+  const refreshRecent = useCallback(async (idEvent: number, idSesi: number | null, fs: boolean) => {
+    const seq = ++liveSeqRef.current
+    const res = await getRecentAbsenForEvent(idEvent, fs ? RECENT_FS : RECENT_NORMAL, idSesi)
+    if (seq !== liveSeqRef.current) return // ada request yang lebih baru (ganti sesi / poll)
+    setLive({ ...res, key: `${idEvent}:${idSesi ?? ''}` })
   }, [])
 
-  // Load sesi + recent when event changes
+  // Load sesi + lokasi when event changes
   useEffect(() => {
     if (!e) return
     let stop = false
-    setHadir(e.hadir)
     resetScan()
     setLokasiReady(false)
     setLokasiList([])
@@ -232,24 +242,24 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
       if (stop) return
       setSesiList(rows)
       setSesiId(rows[0]?.id_sesi ?? null)
-    })
-    void refreshRecent(e.id_event, fsRef.current).then(() => {
-      /* ok */
+      setSesiFor(e.id_event)
     })
     return () => {
       stop = true
     }
-  }, [e, resetScan, refreshRecent])
+  }, [e, resetScan])
 
-  // Live poll while fullscreen
+  // List absen sesi terpilih; muat ulang saat event/sesi/mode berubah, poll 4 detik saat fullscreen
+  const liveEventId = sesiReady ? e.id_event : 0
   useEffect(() => {
-    if (!fullscreen || !e) return
-    void refreshRecent(e.id_event, true)
+    if (!liveEventId) return
+    void refreshRecent(liveEventId, filterSesi, fullscreen)
+    if (!fullscreen) return
     const id = window.setInterval(() => {
-      void refreshRecent(e.id_event, true)
+      void refreshRecent(liveEventId, filterSesi, true)
     }, 4000)
     return () => clearInterval(id)
-  }, [fullscreen, e, refreshRecent])
+  }, [liveEventId, filterSesi, fullscreen, refreshRecent])
 
   // Lock body scroll + Esc to exit fullscreen
   useEffect(() => {
@@ -405,8 +415,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
         const res = await createAbsen(payload, hasSesi ? sid : null, hasLokasi ? lid : null)
         if (res.success) {
           if (hasLokasi && sid != null && lid != null) lockSesiLocal(sid, lid)
-          setHadir((n) => n + 1)
-          void refreshRecent(evId, true)
+          void refreshRecent(evId, hasSesi ? sid : null, true)
           showFlash({
             ok: true,
             title: 'Berhasil absen',
@@ -545,7 +554,6 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
     window.clearTimeout(flashTimerRef.current)
     stopCamera()
     setCam('off')
-    if (e) void refreshRecent(e.id_event, false)
   }
 
   function confirm() {
@@ -572,9 +580,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
         if (lokasiList.length > 0 && sesiId != null && lokasiId != null) lockSesiLocal(sesiId, lokasiId)
         setDone(res.nama || preview.nama)
         setPreview(null)
-        setHadir((n) => n + 1)
-        const rows = await getRecentAbsenForEvent(e.id_event, RECENT_NORMAL)
-        setRecent(rows)
+        await refreshRecent(e.id_event, sesiList.length > 0 ? sesiId : null, false)
         setToast('Kehadiran tercatat')
         setTimeout(() => setToast(null), 2000)
         return
@@ -650,7 +656,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
     <PaperMain>
       {!fullscreen && (
         <>
-          <PaperHeader sticker={`${hadir} hadir`} title="Scan Absensi">
+          <PaperHeader sticker={`${hadir ?? '…'} hadir${selectedSesi ? ` · ${selectedSesi.nama}` : ''}`} title="Scan Absensi">
             <p className={`${MONO} mt-1 text-[12px] font-bold text-[#44403c] truncate`}>{e.nama_event}</p>
           </PaperHeader>
 
@@ -918,7 +924,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
               <div className="pointer-events-auto min-w-0 rounded-2xl bg-black/55 backdrop-blur px-3.5 py-2.5 ring-1 ring-white/10">
                 <p className={`${ANTON} text-[16px] tracking-[.01em] truncate`}>{e.nama_event}</p>
                 <p className="text-[11px] text-white/70">
-                  <span className="text-[#ffd83d] font-bold">{hadir} hadir</span>
+                  <span className="text-[#ffd83d] font-bold">{hadir ?? '…'} hadir</span>
                   {selectedSesi ? ` · ${selectedSesi.nama}` : ''}
                   {activeLokasi ? ` · ${activeLokasi.nama}` : ''}
                 </p>

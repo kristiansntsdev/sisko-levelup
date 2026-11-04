@@ -25,7 +25,6 @@ function ScannerPage() {
         jenisevent: e.jenisevent,
         alamatevent: e.alamatevent,
         radius: e.radius,
-        hadir: d.absen.filter((a) => a.id_event === e.id_event).length,
       }))
   })
   if (!alk || !events) return <Loading />

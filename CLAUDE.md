@@ -110,6 +110,9 @@ lib/reimburse-stage.ts                # reimburseStage + REIMBURSE_STAGE: satu s
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-11-04]
+- Scan Sekretariat v2 (biasa + Fullscreen): list "Absen live"/"Baru Saja Tercatat" dan angka "n hadir" kini hanya untuk sesi yang dipilih (dulu semua absen event, jadi sesi baru langsung terlihat penuh). Event tanpa sesi tetap semua absen event. `getRecentAbsenForEvent(idEvent, limit, idSesi)` mengembalikan `{ rows, total }`; `ScanEvent.hadir` + 80 query count di halaman scanner dihapus
+
 ## Recent Updates [2026-11-03]
 - Pemuridan: tile Beranda aktif → `/dashboard/pemuridan` (daftar seri) → `/dashboard/pemuridan/pola-pikir`, cerita interaktif Seri #1 · Pola Pikir "Mereka Keluar Tetapi Gagal Masuk" (10 bagian, 1 Korintus 10) dari desain `Keluar tapi Gagal Masuk.html`. Di-port ke `components/pemuridan/` (React + Tailwind, animasi `animate-story-*` di `@theme` `globals.css`); gambar, copy dan posisi diukur sama dengan desain. Latar gurun malam gelap di sekitar kartu sengaja dipertahankan dari desain. Bottom nav disembunyikan di layar cerita
 - Scene membuat markup sebagai string lalu `mount()` memasang interaksinya; React hanya memegang bar progres, judul, dan tombol. Kelas di string scene wajib literal dari `kit.ts` supaya Tailwind menemukannya. Fix dari desain: bintang berkelip dulu menumpuk di pojok kiri atas (animasi CSS menimpa `transform` SVG), sekarang dibungkus `<g>`
