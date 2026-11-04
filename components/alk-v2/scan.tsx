@@ -223,29 +223,34 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
     setLive({ ...res, key: `${idEvent}:${idSesi ?? ''}` })
   }, [])
 
+  // Efek di bawah memakai id event, bukan objek `e`: setelah scan sukses server me-revalidate
+  // halaman ini, `events` datang sebagai array baru, dan pilihan sesi/lokasi tidak boleh ikut reset.
+  const curEventId = e?.id_event ?? 0
+  const curOnline = e?.jenisevent === 'Online'
+
   // Load sesi + lokasi when event changes
   useEffect(() => {
-    if (!e) return
+    if (!curEventId) return
     let stop = false
     resetScan()
     setLokasiReady(false)
     setLokasiList([])
     setLokasiPick(null)
-    void getEventLokasi(e.id_event).then((rows) => {
+    void getEventLokasi(curEventId).then((rows) => {
       if (stop) return
       setLokasiList(rows)
       setLokasiReady(true)
     })
-    void getEventSesi(e.id_event).then((rows) => {
+    void getEventSesi(curEventId).then((rows) => {
       if (stop) return
       setSesiList(rows)
       setSesiId(rows[0]?.id_sesi ?? null)
-      setSesiFor(e.id_event)
+      setSesiFor(curEventId)
     })
     return () => {
       stop = true
     }
-  }, [e, resetScan])
+  }, [curEventId, resetScan])
 
   // List absen sesi terpilih; muat ulang saat event/sesi/mode berubah, poll 4 detik saat fullscreen
   const liveEventId = sesiReady ? e.id_event : 0
@@ -277,7 +282,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
   // Geolocation — titik lokasi terpilih (multi-lokasi) atau titik utama event
   const activeLokasiId = activeLokasi?.id_lokasi ?? null
   useEffect(() => {
-    if (!e || e.jenisevent === 'Online' || !('geolocation' in navigator) || !lokasiReady) {
+    if (!curEventId || curOnline || !('geolocation' in navigator) || !lokasiReady) {
       setLoc('idle')
       return
     }
@@ -306,7 +311,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
       watch(pt.lat, pt.lng, activeLokasi.radius)
     } else {
       setLoc('checking')
-      void getEventLocation(e.id_event).then((locRow) => {
+      void getEventLocation(curEventId).then((locRow) => {
         if (stop) return
         const pt = parseLatLng(locRow?.longlatevent)
         if (!locRow || !pt || locRow.radius <= 0) {
@@ -323,7 +328,7 @@ export function ScanClient({ events, initialEventId }: { events: ScanEvent[]; in
     }
     // activeLokasi is derived from (lokasiList, activeLokasiId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [e, lokasiReady, lokasiList, activeLokasiId])
+  }, [curEventId, curOnline, lokasiReady, lokasiList, activeLokasiId])
 
   useEffect(() => () => {
     stopCamera()
