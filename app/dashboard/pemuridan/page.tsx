@@ -1,10 +1,10 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { notFound, useRouter } from 'next/navigation'
 import { useSyncExternalStore } from 'react'
 import { ANTON, IconButton, LABEL, MONO, PANEL, PaperHeader, PaperMain, PRESS, Strip, TAPE } from '@/components/pwa/paper-ui'
-import { PEMURIDAN, progressKey, type Seri } from '@/lib/pemuridan'
+import { PEMURIDAN, PEMURIDAN_AKTIF, progressKey, type Seri } from '@/lib/pemuridan'
 
 const noSubscribe = () => () => {}
 
@@ -20,6 +20,7 @@ function savedPart(seri: Seri) {
 
 export default function PemuridanPage() {
   const router = useRouter()
+  if (!PEMURIDAN_AKTIF) notFound()
   return (
     <PaperMain>
       <PaperHeader

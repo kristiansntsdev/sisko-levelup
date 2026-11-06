@@ -217,6 +217,11 @@ export type upgrade = Prisma.upgradeModel
  */
 export type pindah_kota = Prisma.pindah_kotaModel
 /**
+ * Model feedback_app
+ * Masukan anggota dari Profil → Feedback App. Satu baris per kiriman.
+ */
+export type feedback_app = Prisma.feedback_appModel
+/**
  * Model wilayah_desa
  * 
  */

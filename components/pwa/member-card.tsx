@@ -57,20 +57,21 @@ const PHOTO_FIT = 'object-cover object-[50%_25%]'
 export function MemberPhoto({ src, fallback }: { src?: string; fallback: ReactNode }) {
   const [failed, setFailed] = useState<string | null>(null)
   if (!src || failed === src) return <>{fallback}</>
-  // eslint-disable-next-line @next/next/no-img-element -- already sized and converted at upload; card scales by CSS zoom
+  // eslint-disable-next-line @next/next/no-img-element -- already sized and converted at upload; card scales by CSS transform
   return <img src={src} alt="" onError={() => setFailed(src)} className={`absolute inset-0 w-full h-full ${PHOTO_FIT}`} />
 }
 
 // Fixed-size canvas scaled to its container, so the composition is identical on every width.
-// The aspect-ratio box holds the height before the first measure; the first zoom is a typical phone width.
+// The aspect-ratio box holds the height before the first measure; the first scale is a typical phone width.
+// transform, not CSS zoom: on some iPhones WebKit shrank the boxes but drew the text at full size.
 function FitCanvas({ children, onClick }: { children: ReactNode; onClick?: () => void }) {
   const ref = useRef<HTMLDivElement>(null)
-  const [zoom, setZoom] = useState(350 / CANVAS_W)
+  const [scale, setScale] = useState(350 / CANVAS_W)
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
     const ro = new ResizeObserver(() => {
-      if (el.clientWidth) setZoom(el.clientWidth / CANVAS_W)
+      if (el.clientWidth) setScale(el.clientWidth / CANVAS_W)
     })
     ro.observe(el)
     return () => ro.disconnect()
@@ -79,9 +80,11 @@ function FitCanvas({ children, onClick }: { children: ReactNode; onClick?: () =>
     <div
       ref={ref}
       onClick={onClick}
-      className={`w-full aspect-[1005/650] rounded-2xl overflow-hidden shadow-[0_18px_40px_-12px_rgba(40,30,10,.6)] ${onClick ? 'cursor-pointer active:scale-[.99] transition' : ''}`}
+      className={`relative isolate w-full aspect-[1005/650] rounded-2xl overflow-hidden shadow-[0_18px_40px_-12px_rgba(40,30,10,.6)] ${onClick ? 'cursor-pointer active:scale-[.99] transition' : ''}`}
     >
-      <div style={{ width: CANVAS_W, zoom }}>{children}</div>
+      <div className="absolute left-0 top-0 origin-top-left" style={{ width: CANVAS_W, transform: `scale(${scale})` }}>
+        {children}
+      </div>
     </div>
   )
 }

@@ -255,6 +255,25 @@ export async function POST(req: NextRequest) {
     `)
   }
 
+  const feedbackAppTables = await db.$queryRaw<{ TABLE_NAME: string }[]>`
+    SELECT TABLE_NAME FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'feedback_app'
+  `
+  const addedFeedbackApp = feedbackAppTables.length === 0
+  if (addedFeedbackApp) {
+    await db.$executeRawUnsafe(`
+      CREATE TABLE feedback_app (
+        id_feedback INT NOT NULL AUTO_INCREMENT,
+        id_peserta TEXT NOT NULL,
+        pilihan TEXT NOT NULL,
+        jawaban TEXT NOT NULL,
+        created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id_feedback),
+        KEY idx_feedback_app_peserta (id_peserta(64))
+      )
+    `)
+  }
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -286,6 +305,7 @@ export async function POST(req: NextRequest) {
     addedDokumentasiCreatedAt,
     addedReimburseLaporanAt,
     addedPindahKota,
+    addedFeedbackApp,
     brimUpdated: brim.count,
     brim: row,
   })

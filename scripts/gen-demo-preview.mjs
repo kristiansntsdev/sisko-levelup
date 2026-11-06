@@ -11,7 +11,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
 const ROOT = new URL('..', import.meta.url).pathname
-const SHIM_ACTIONS = ['absen', 'event', 'jobs-place', 'kas-kota', 'peserta', 'pengurus-kota', 'pindah-kota', 'pwa-auth', 'registrasi', 'reimburse', 'upgrade', 'wfe-serentak', 'wilayah']
+const SHIM_ACTIONS = ['absen', 'event', 'feedback-app', 'jobs-place', 'kas-kota', 'peserta', 'pengurus-kota', 'pindah-kota', 'pwa-auth', 'registrasi', 'reimburse', 'upgrade', 'wfe-serentak', 'wilayah']
 
 /** [source, destination] */
 const FILES = [
@@ -28,6 +28,7 @@ const FILES = [
   ['app/dashboard/pemuridan/[slug]/page.tsx', 'app/demo-preview/dashboard/pemuridan/[slug]/page.tsx'],
   ['app/dashboard/profil/page.tsx', 'app/demo-preview/dashboard/profil/page.tsx'],
   ['app/dashboard/profil/edit/page.tsx', 'app/demo-preview/dashboard/profil/edit/page.tsx'],
+  ['app/dashboard/profil/feedback/page.tsx', 'app/demo-preview/dashboard/profil/feedback/page.tsx'],
   ['app/events/page.tsx', 'app/demo-preview/events/page.tsx'],
   ['app/join/[eventId]/join-client.tsx', 'app/demo-preview/join/[eventId]/join-client.tsx'],
   ['app/daftar/page.tsx', 'app/demo-preview/daftar/page.tsx'],

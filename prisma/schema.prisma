@@ -408,6 +408,15 @@ model pindah_kota {
   decided_at   DateTime? @db.DateTime(0)
 }
 
+/// Masukan anggota dari Profil → Feedback App. Satu baris per kiriman.
+model feedback_app {
+  id_feedback Int      @id @default(autoincrement())
+  id_peserta  String   @db.Text
+  pilihan     String   @db.Text
+  jawaban     String   @db.Text
+  created_at  DateTime @default(now()) @db.DateTime(0)
+}
+
 model wilayah_desa {
   id           String  @id @db.VarChar(10)
   kecamatan_id String? @db.VarChar(7)

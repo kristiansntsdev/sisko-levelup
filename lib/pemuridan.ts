@@ -1,4 +1,8 @@
 // Pemuridan series shown in the member PWA. The interactive story for each slug lives in components/pemuridan/stories.ts.
+
+/** Hidden for now: Beranda tile shows SOON and /dashboard/pemuridan/* returns 404. Set true to publish again. */
+export const PEMURIDAN_AKTIF = false
+
 export type Seri = {
   slug: string
   no: number

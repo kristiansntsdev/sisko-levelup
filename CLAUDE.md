@@ -45,9 +45,11 @@ components/landing/zine.tsx           # Design system landing (kertas lecek, tor
   dashboard/kesaksian/                # Kesaksian UI stub
   dashboard/pemuridan/                # Daftar seri Pemuridan (progres per perangkat) + [slug] cerita interaktif fullscreen
 components/pemuridan/                 # Cerita Pemuridan: story-player (kartu 9:16), kit.ts (gambar SVG + kelas Tailwind literal), satu file per seri, stories.ts (slug → cerita)
-lib/pemuridan.ts                      # PEMURIDAN (daftar seri, bagian = jumlah scene), findSeri, progressKey
+lib/pemuridan.ts                      # PEMURIDAN_AKTIF (sakelar tampil), PEMURIDAN (daftar seri, bagian = jumlah scene), findSeri, progressKey
   dashboard/profil/                   # Profil + masuk pengurus sheet
   dashboard/profil/edit/              # Perubahan Data v2; ajukan pindah LevelUP Kota (nasional approve)
+  dashboard/profil/feedback/          # Feedback App: pertanyaan "butuh apa tiap hari" + chip ide → tabel feedback_app
+lib/actions/feedback-app.ts           # kirimFeedbackApp (peserta login, boleh kirim berkali-kali); pilihan dari lib/feedback-app.ts
 lib/actions/wilayah.ts                # listProvinsi/Kabupaten/Kecamatan/Desa (BPS codes)
 lib/actions/pindah-kota.ts            # ajukan/batal/list/approve/reject pindah LevelUP Kota (nasional only)
   dashboard/v2/kota/alk/pindah-kota/  # Nasional: antrian Approve/Tolak pindah kota
@@ -66,7 +68,7 @@ components/alk-v2/                    # Sekretariat v2 shell + screens (gaya ker
   dashboard/v2/kota/alk/event/[id]/   # Detail Event v2 (EventDetailV2Client, proto KEventScreen)
   dashboard/v2/kota/alk/event/[id]/approve/ # Nasional: approve/reject event (v2 UI)
 components/pwa/                       # LevelUP PWA UI kit + MemberShell (PlainBar/Panel/Qr)
-components/pwa/member-card.tsx        # MemberCard: desain ID Card Gen Z (canvas 1005x650 di-zoom ke lebar container; Anton + Space Mono)
+components/pwa/member-card.tsx        # MemberCard: desain ID Card Gen Z (canvas 1005x650 di-scale `transform` ke lebar container, bukan CSS `zoom`; Anton + Space Mono)
 components/pwa/profile-photo.tsx      # ProfilePhotoPicker: pilih, pratinjau di kartu asli, simpan
 lib/actions/peserta-foto.ts           # updateFotoPeserta: WebP ke Blob, update peserta.foto, hapus foto lama
 components/pwa/paper-ui.tsx           # Kit gaya kertas halaman anggota (warna landing + font kartu); latar kertas dari MemberShell
@@ -109,6 +111,15 @@ components/alk-v2/reimburse.tsx       # ReimburseListV2Client + ReimburseReviewV
 lib/reimburse-stage.ts                # reimburseStage + REIMBURSE_STAGE: satu sumber tahap dana (belum/pusat/keuangan/cair/ditolak), dipakai app asli + demo
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-11-06]
+- Pemuridan disembunyikan: `PEMURIDAN_AKTIF = false` di `lib/pemuridan.ts` → tile Beranda kembali SOON, `/dashboard/pemuridan` + `/dashboard/pemuridan/{slug}` 404 (demo ikut). Kode cerita tetap ada; set `true` + jalankan generator demo untuk membuka lagi
+
+## Recent Updates [2026-11-05]
+- Profil: menu baru **Feedback App** → `/dashboard/profil/feedback`. Pertanyaan "Sebagai pemuda Kristen, kamu butuh apa sih? Apa yang pengen kamu dapetin tiap hari dari app ini?" + chip ide opsional (`FEEDBACK_PILIHAN` di `lib/feedback-app.ts`) + chip **Lainnya** untuk ide sendiri (maks 5, 40 karakter, koma = beberapa sekaligus; yang sama dengan bawaan mencentang bawaan; `addLainnya` dipakai client + server) + jawaban wajib (maks 2000). Ide sendiri disimpan bersama pilihan bawaan di `pilihan`, setelah yang bawaan. Tersimpan di tabel baru `feedback_app` (`id_peserta`, `pilihan` dipisah koma, `jawaban`, `created_at`); tabel lama `feedback` milik kelaswp, jangan dipakai. Belum ada layar untuk membaca hasilnya (query DB langsung)
+- Migrasi: `POST /api/internal/prod-migrate` (CREATE TABLE `feedback_app`)
+- Fix MemberCard di sebagian iPhone: teks kartu tampil ~3x terlalu besar dan keluar kotak (kotak mengecil, teks tidak). `FitCanvas` kini pakai `transform: scale()` + `origin-top-left`, bukan CSS `zoom`. Jangan kembali ke `zoom` untuk kanvas berukuran tetap
+- Demo: halaman ikut disalin generator; shim `kirimFeedbackApp` tidak menyimpan apa pun
 
 ## Recent Updates [2026-11-04]
 - Scan Sekretariat v2 (biasa + Fullscreen): list "Absen live"/"Baru Saja Tercatat" dan angka "n hadir" kini hanya untuk sesi yang dipilih (dulu semua absen event, jadi sesi baru langsung terlihat penuh). Event tanpa sesi tetap semua absen event. `getRecentAbsenForEvent(idEvent, limit, idSesi)` mengembalikan `{ rows, total }`; `ScanEvent.hadir` + 80 query count di halaman scanner dihapus

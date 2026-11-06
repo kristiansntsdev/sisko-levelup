@@ -9,6 +9,7 @@ import { getRegistrasiByPeserta } from '@/lib/actions/registrasi'
 import { getPendingSquadForMe, joinSquad, joinVolunteer } from '@/lib/actions/upgrade'
 import { getActiveSessions } from '@/lib/actions/pwa-auth'
 import { LEVEL_STEPS, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
+import { PEMURIDAN_AKTIF } from '@/lib/pemuridan'
 import { ID_FONTS, MemberCard } from '@/components/pwa/member-card'
 import {
   ANTON,
@@ -35,7 +36,9 @@ type Registrasi = Awaited<ReturnType<typeof getRegistrasiByPeserta>>[number]
 
 const FEATURES: { i: IconName; t: string; href?: string; chip?: string }[] = [
   { i: 'ticket', t: 'My Ticket', href: '/dashboard/tiket', chip: 'bg-[#e02a2f] text-white' },
-  { i: 'users', t: 'Pemuridan', href: '/dashboard/pemuridan', chip: 'bg-[#161616] text-[#ffd83d]' },
+  PEMURIDAN_AKTIF
+    ? { i: 'users', t: 'Pemuridan', href: '/dashboard/pemuridan', chip: 'bg-[#161616] text-[#ffd83d]' }
+    : { i: 'users', t: 'Pemuridan' },
   { i: 'calendar', t: 'Event', href: '/events', chip: 'bg-[#ffd83d] text-[#161616]' },
   { i: 'book', t: 'DeeperWP' },
   { i: 'gift', t: 'Birthday' },

@@ -11,6 +11,7 @@ import { getRegistrasiByPeserta } from '@/components/demo-preview/shim/actions/r
 import { getPendingSquadForMe, getPendingVolunteerForMe, joinSquad, joinVolunteer } from '@/components/demo-preview/shim/actions/upgrade'
 import { getActiveSessions } from '@/components/demo-preview/shim/actions/pwa-auth'
 import { LEVEL_STEPS, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
+import { PEMURIDAN_AKTIF } from '@/lib/pemuridan'
 import { ID_FONTS, MemberCard } from '@/components/pwa/member-card'
 import {
   ANTON,
@@ -37,7 +38,9 @@ type Registrasi = Awaited<ReturnType<typeof getRegistrasiByPeserta>>[number]
 
 const FEATURES: { i: IconName; t: string; href?: string; chip?: string }[] = [
   { i: 'ticket', t: 'My Ticket', href: '/demo-preview/dashboard/tiket', chip: 'bg-[#e02a2f] text-white' },
-  { i: 'users', t: 'Pemuridan', href: '/demo-preview/dashboard/pemuridan', chip: 'bg-[#161616] text-[#ffd83d]' },
+  PEMURIDAN_AKTIF
+    ? { i: 'users', t: 'Pemuridan', href: '/demo-preview/dashboard/pemuridan', chip: 'bg-[#161616] text-[#ffd83d]' }
+    : { i: 'users', t: 'Pemuridan' },
   { i: 'calendar', t: 'Event', href: '/demo-preview/events', chip: 'bg-[#ffd83d] text-[#161616]' },
   { i: 'book', t: 'DeeperWP' },
   { i: 'gift', t: 'Birthday' },

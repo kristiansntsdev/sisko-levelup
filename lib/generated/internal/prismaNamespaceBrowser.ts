@@ -86,6 +86,7 @@ export const ModelName = {
   transaksi: 'transaksi',
   upgrade: 'upgrade',
   pindah_kota: 'pindah_kota',
+  feedback_app: 'feedback_app',
   wilayah_desa: 'wilayah_desa',
   wilayah_kabupaten: 'wilayah_kabupaten',
   wilayah_kecamatan: 'wilayah_kecamatan',
@@ -582,6 +583,17 @@ export const Pindah_kotaScalarFieldEnum = {
 } as const
 
 export type Pindah_kotaScalarFieldEnum = (typeof Pindah_kotaScalarFieldEnum)[keyof typeof Pindah_kotaScalarFieldEnum]
+
+
+export const Feedback_appScalarFieldEnum = {
+  id_feedback: 'id_feedback',
+  id_peserta: 'id_peserta',
+  pilihan: 'pilihan',
+  jawaban: 'jawaban',
+  created_at: 'created_at'
+} as const
+
+export type Feedback_appScalarFieldEnum = (typeof Feedback_appScalarFieldEnum)[keyof typeof Feedback_appScalarFieldEnum]
 
 
 export const Wilayah_desaScalarFieldEnum = {
@@ -1112,6 +1124,15 @@ export const pindah_kotaOrderByRelevanceFieldEnum = {
 } as const
 
 export type pindah_kotaOrderByRelevanceFieldEnum = (typeof pindah_kotaOrderByRelevanceFieldEnum)[keyof typeof pindah_kotaOrderByRelevanceFieldEnum]
+
+
+export const feedback_appOrderByRelevanceFieldEnum = {
+  id_peserta: 'id_peserta',
+  pilihan: 'pilihan',
+  jawaban: 'jawaban'
+} as const
+
+export type feedback_appOrderByRelevanceFieldEnum = (typeof feedback_appOrderByRelevanceFieldEnum)[keyof typeof feedback_appOrderByRelevanceFieldEnum]
 
 
 export const wilayah_desaOrderByRelevanceFieldEnum = {

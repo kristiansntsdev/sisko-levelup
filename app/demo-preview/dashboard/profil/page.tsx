@@ -147,6 +147,15 @@ export default function ProfilPage() {
             <span className={`${ANTON} flex-1 text-[16px] tracking-[.02em]`}>Perubahan Data</span>
             <Icon name="chevron" className="w-5 h-5 shrink-0" sw={2} />
           </button>
+          <button
+            type="button"
+            onClick={() => router.push('/demo-preview/dashboard/profil/feedback')}
+            className="w-full flex items-center gap-3 py-3 text-left"
+          >
+            <Chip name="chat" className="bg-[#ffd83d] text-[#161616]" />
+            <span className={`${ANTON} flex-1 text-[16px] tracking-[.02em]`}>Feedback App</span>
+            <Icon name="chevron" className="w-5 h-5 shrink-0" sw={2} />
+          </button>
           {soonMenu.map((m) => (
             <button
               key={m.t}
