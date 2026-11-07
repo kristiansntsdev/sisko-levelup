@@ -274,6 +274,24 @@ export async function POST(req: NextRequest) {
     `)
   }
 
+  const kesaksianTables = await db.$queryRaw<{ TABLE_NAME: string }[]>`
+    SELECT TABLE_NAME FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'kesaksian'
+  `
+  const addedKesaksian = kesaksianTables.length === 0
+  if (addedKesaksian) {
+    await db.$executeRawUnsafe(`
+      CREATE TABLE kesaksian (
+        id_kesaksian INT NOT NULL AUTO_INCREMENT,
+        id_peserta TEXT NOT NULL,
+        isi TEXT NOT NULL,
+        created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id_kesaksian),
+        KEY idx_kesaksian_peserta (id_peserta(64))
+      )
+    `)
+  }
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -306,6 +324,7 @@ export async function POST(req: NextRequest) {
     addedReimburseLaporanAt,
     addedPindahKota,
     addedFeedbackApp,
+    addedKesaksian,
     brimUpdated: brim.count,
     brim: row,
   })

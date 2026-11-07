@@ -11,7 +11,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
 const ROOT = new URL('..', import.meta.url).pathname
-const SHIM_ACTIONS = ['absen', 'event', 'feedback-app', 'jobs-place', 'kas-kota', 'peserta', 'pengurus-kota', 'pindah-kota', 'pwa-auth', 'registrasi', 'reimburse', 'upgrade', 'wfe-serentak', 'wilayah']
+const SHIM_ACTIONS = ['absen', 'event', 'feedback-app', 'jobs-place', 'kesaksian', 'kas-kota', 'peserta', 'pengurus-kota', 'pindah-kota', 'pwa-auth', 'registrasi', 'reimburse', 'upgrade', 'wfe-serentak', 'wilayah']
 
 /** [source, destination] */
 const FILES = [
