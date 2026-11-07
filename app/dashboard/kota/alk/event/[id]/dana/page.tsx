@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { getEventDetail } from '@/lib/actions/event'
-import { getReimburseForEvent } from '@/lib/actions/reimburse'
+import { getDanaForm, getReimburseForEvent } from '@/lib/actions/reimburse'
 import { DanaClient } from './dana-client'
 
 export default async function EventDanaPage({
@@ -25,7 +25,7 @@ export default async function EventDanaPage({
   const event = await getEventDetail(Number(id))
   if (!event) redirect('/dashboard/kota/alk')
 
-  const reimburse = await getReimburseForEvent(event.id_event)
+  const [reimburse, form] = await Promise.all([getReimburseForEvent(event.id_event), getDanaForm(event.id_event)])
 
   return (
     <DanaClient
@@ -34,6 +34,7 @@ export default async function EventDanaPage({
       tglDisplay={event.tglDisplay}
       jumlahPeserta={event.registrasi.length}
       reimburse={reimburse}
+      form={form}
       suratHref={`/surat-keuangan/${event.id_event}`}
     />
   )

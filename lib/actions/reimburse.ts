@@ -1,22 +1,23 @@
 'use server'
 import { cookies } from 'next/headers'
-import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { setActor } from '@/lib/request-context'
-import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
 import { requireSekretariatNasional } from '@/lib/actions/event'
 import { getPengurusFromCookie } from '@/lib/pengurus-session'
 import { isNasionalAdmin, resolveEventCabang } from '@/lib/event-cabang'
 import { wibToday } from '@/lib/wib'
-import { countHadirUnik } from '@/lib/surat-keuangan'
-import { AJUKAN_VALUES, isAjukan, reimburseStage, type ReimburseStage } from '@/lib/reimburse-stage'
-import { ALK_BASE } from '@/components/alk-v2/paths'
+import { loadDanaByEvent, type DanaView } from '@/lib/dana-approval'
+import { danaLinkUrl, korwilWaText, korwilWaUrl, newDanaTokens } from '@/lib/dana-link'
+import { danaTelegram, revalidateDana, sendDanaGroupNotif } from '@/lib/dana-flow'
+import { listKorwilPphtgd } from '@/lib/pphtgd-korwil'
+import { matchKorwil, type KorwilOption } from '@/lib/surat-keuangan-data'
 import {
-  notifyTelegram,
-  formatTelegramMessage,
-  eventActionButtons,
-  eventTelegramScope,
-} from '@/lib/telegram'
+  AJUKAN_VALUES,
+  isReimburseLocked,
+  reimburseRejection,
+  reimburseStage,
+  type ReimburseStage,
+} from '@/lib/reimburse-stage'
 
 export type ReimburseData = {
   id_reimburse: number
@@ -29,9 +30,12 @@ export type ReimburseData = {
   danariil: string
   laporan: string
   bukti: string
+  approvepphtgd: string
+  notepphtgd: string
   approvenasional: string
   notenasional: string
   approvekeuangan: string
+  buktitf: string
 }
 
 function toReimburseData(r: {
@@ -45,9 +49,12 @@ function toReimburseData(r: {
   danariil: string
   laporan: string
   bukti: string
+  approvepphtgd: string
+  notepphtgd: string
   approvenasional: string
   notenasional: string
   approvekeuangan: string
+  buktitf: string
 }): ReimburseData {
   return {
     id_reimburse: r.id_reimburse,
@@ -60,9 +67,12 @@ function toReimburseData(r: {
     danariil: r.danariil,
     laporan: r.laporan,
     bukti: r.bukti,
+    approvepphtgd: r.approvepphtgd,
+    notepphtgd: r.notepphtgd,
     approvenasional: r.approvenasional,
     notenasional: r.notenasional,
     approvekeuangan: r.approvekeuangan,
+    buktitf: r.buktitf,
   }
 }
 
@@ -82,12 +92,6 @@ async function requireAlkPengurus(): Promise<void> {
   setActor({ type: 'pengurus', id: Number(pengurusId), label: pengurus.username })
 }
 
-function revalidateReimburseV2(idEvent: number) {
-  revalidatePath(ALK_BASE)
-  revalidatePath(`${ALK_BASE}/reimburse`)
-  revalidatePath(`${ALK_BASE}/reimburse/${idEvent}`)
-}
-
 export type SubmitReimburseInput = {
   ajukan: 'Ajukan' | 'Tidak Ajukan'
   bukti: string
@@ -97,15 +101,30 @@ export type SubmitReimburseInput = {
   norek: string
   namabank: string
   namarek: string
+  /** Korwil PPHTGD (id dari API pphtgd); wajib kalau ajukan = Ajukan */
+  korwilId: number | null
 }
 
-/** ALK Kota: create/update pengajuan support dana untuk satu event (satu baris per event). */
+/**
+ * ALK Kota: create/update pengajuan support dana untuk satu event (satu baris per event).
+ * Ajukan = snapshot korwil PPHTGD + token link baru (link lama mati) dan alur mulai lagi dari Korwil.
+ */
 export async function submitReimburse(idEvent: number, input: SubmitReimburseInput): Promise<void> {
   await requireAlkPengurus()
 
   const existing = await db.reimburse.findFirst({ where: { id_event: String(idEvent) } })
-  if (existing?.approvenasional === '1') {
-    throw new Error('Pengajuan sudah disetujui, tidak bisa diedit')
+  if (existing && isReimburseLocked(reimburseStage(existing))) {
+    throw new Error('Pengajuan sudah disetujui Korwil, tidak bisa diedit')
+  }
+
+  // Data korwil diambil ulang dari pphtgd, bukan dari client.
+  let korwil: KorwilOption | null = null
+  if (input.ajukan === 'Ajukan') {
+    if (!input.korwilId) throw new Error('Pilih Korwil PPHTGD dulu')
+    const list = await listKorwilPphtgd()
+    if (!list.ok) throw new Error('Data korwil PPHTGD tidak bisa dimuat, coba lagi')
+    korwil = list.korwil.find((k) => k.id === input.korwilId) ?? null
+    if (!korwil) throw new Error('Korwil tidak ditemukan di PPHTGD, pilih ulang')
   }
 
   const laporan = input.laporan.trim()
@@ -122,148 +141,114 @@ export async function submitReimburse(idEvent: number, input: SubmitReimburseInp
     norek: input.norek.trim(),
     namabank: input.namabank.trim(),
     namarek: input.namarek.trim(),
+    approvepphtgd: '',
+    notepphtgd: '',
     approvenasional: '',
     notenasional: '',
+    approvekeuangan: '',
+    buktitf: '',
   }
 
-  if (existing) {
-    await db.reimburse.update({ where: { id_reimburse: existing.id_reimburse }, data })
-  } else {
-    await db.reimburse.create({
-      data: {
-        ...data,
-        reimburse: '',
-        approvepphtgd: '',
-        approvekeuangan: '',
-        notepphtgd: '',
-        notekeuangan: '',
-        approveadmin: '',
-        noteadmin: '',
-        buktitf: '',
-      },
-    })
-  }
-
-  revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
-  revalidatePath(`/dashboard/kota/alk/event/${idEvent}/dana`)
-  revalidatePath('/dashboard/kota/alk')
-  revalidateReimburseV2(idEvent)
-}
-
-async function telegramScopeForReimburseEvent(event: {
-  id_cabang: string
-  khusus: string | null
-  tglevent: Date
-  tgleventselesai: Date
-}) {
-  let cabangName: string | null = null
-  if (event.id_cabang !== NASIONAL_EVENT_CABANG) {
-    const cabangId = Number(event.id_cabang)
-    if (Number.isFinite(cabangId)) {
-      const row = await db.cabang.findUnique({
-        where: { id_cabang: cabangId },
-        select: { namacabang: true },
-      })
-      cabangName = row?.namacabang ?? null
+  await db.$transaction(async (tx) => {
+    const row = existing
+      ? await tx.reimburse.update({ where: { id_reimburse: existing.id_reimburse }, data })
+      : await tx.reimburse.create({
+          data: {
+            ...data,
+            reimburse: '',
+            notekeuangan: '',
+            approveadmin: '',
+            noteadmin: '',
+          },
+        })
+    if (!korwil) {
+      await tx.reimburse_approval.deleteMany({ where: { id_reimburse: row.id_reimburse } })
+      return
     }
-  }
-  return eventTelegramScope({
-    idCabang: event.id_cabang,
-    khusus: event.khusus ?? '',
-    cabangName,
-    tglevent: event.tglevent,
-    tgleventselesai: event.tgleventselesai,
+    const snapshot = {
+      korwil_id: korwil.id,
+      korwil_nama: korwil.nama,
+      korwil_koordinator: korwil.koordinator ?? '',
+      korwil_wa: korwil.wa,
+      ...newDanaTokens(),
+      korwil_at: null,
+      pic_at: null,
+      cair_at: null,
+      notif_pic_at: null,
+      notif_keuangan_at: null,
+    }
+    await tx.reimburse_approval.upsert({
+      where: { id_reimburse: row.id_reimburse },
+      create: { id_reimburse: row.id_reimburse, ...snapshot },
+      update: snapshot,
+    })
   })
+
+  revalidateDana(idEvent)
+
+  if (korwil) {
+    const res = await loadDanaByEvent(idEvent)
+    if (res) await danaTelegram(res.view, 'Dana Diajukan ke Korwil')
+  }
 }
 
-function fmtDanaTelegram(raw: string): string {
-  const n = parseInt(String(raw).replace(/\D/g, ''), 10)
-  return Number.isFinite(n) && n > 0 ? `Rp ${n.toLocaleString('id-ID')}` : '-'
+export type DanaKorwilPick = { options: KorwilOption[]; defaultId: number | null; error: string | null }
+
+/** Isi Kartu "Kirim ke Korwil": link korwil + wa.me. Link PIC/Keuangan tidak pernah dikirim ke ALK Kota. */
+export type DanaKorwilShare = {
+  korwil: KorwilOption
+  link: string
+  waUrl: string | null
+  waText: string
+}
+
+export type DanaForm = {
+  view: DanaView | null
+  share: DanaKorwilShare | null
+  korwil: DanaKorwilPick
+}
+
+function korwilShare(view: DanaView, tokenKorwil: string): DanaKorwilShare | null {
+  if (!view.korwil) return null
+  const link = danaLinkUrl(tokenKorwil)
+  const waText = korwilWaText({
+    koordinator: view.korwil.koordinator ?? '',
+    kota: view.kota,
+    event: view.namaEvent,
+    tanggal: view.tanggal,
+    link,
+  })
+  return { korwil: view.korwil, link, waText, waUrl: korwilWaUrl(view.korwil.wa, waText) }
+}
+
+/** Form dana ALK Kota: status alur + pilihan korwil (default = korwil yang namanya sama dengan LevelUP Kota). */
+export async function getDanaForm(idEvent: number): Promise<DanaForm | null> {
+  const me = await getAlkSession()
+  if (!me) return null
+  const event = await db.event.findUnique({ where: { id_event: idEvent }, select: { id_cabang: true } })
+  if (!event || (!me.isNasional && event.id_cabang !== me.cabang)) return null
+
+  const [res, list, cabang] = await Promise.all([
+    loadDanaByEvent(idEvent),
+    listKorwilPphtgd(),
+    Number(event.id_cabang) > 0
+      ? db.cabang.findUnique({ where: { id_cabang: Number(event.id_cabang) }, select: { namacabang: true } })
+      : Promise.resolve(null),
+  ])
+  const options = list.ok ? list.korwil : []
+  const view = res?.view ?? null
+  return {
+    view,
+    share: view && res?.tokens && view.stage === 'korwil' ? korwilShare(view, res.tokens.token_korwil) : null,
+    korwil: {
+      options,
+      defaultId: view?.korwil?.id ?? matchKorwil(options, cabang?.namacabang ?? ''),
+      error: list.ok ? null : list.error,
+    },
+  }
 }
 
 export type ReimburseApprovalResult = { ok: true } | { ok: false; error: string }
-
-/** Sekretariat Nasional approve pengajuan support dana → approvenasional = 1 */
-export async function approveReimburseNasional(idReimburse: number): Promise<ReimburseApprovalResult> {
-  const gate = await requireSekretariatNasional()
-  if (!gate.ok) return gate
-
-  const row = await db.reimburse.findUnique({ where: { id_reimburse: idReimburse } })
-  if (!row) return { ok: false, error: 'Pengajuan dana tidak ditemukan' }
-
-  await db.reimburse.update({ where: { id_reimburse: idReimburse }, data: { approvenasional: '1' } })
-
-  const idEvent = Number(row.id_event)
-  revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
-  revalidatePath(`/dashboard/kota/alk/event/${idEvent}/approve`)
-  revalidateReimburseV2(idEvent)
-
-  const event = await db.event.findUnique({
-    where: { id_event: idEvent },
-    select: { nama_event: true, khusus: true, id_cabang: true, tglevent: true, tgleventselesai: true },
-  })
-  if (event) {
-    const scope = await telegramScopeForReimburseEvent(event)
-    void notifyTelegram(
-      formatTelegramMessage({
-        tag: scope.tag,
-        action: 'Approved Dana',
-        eventName: event.nama_event,
-        fields: {
-          ...scope.fields,
-          'Pengajuan Dana': fmtDanaTelegram(row.danausul),
-          'Dana Riil': fmtDanaTelegram(row.danariil),
-          ID: idEvent,
-        },
-      }),
-      { buttons: eventActionButtons(idEvent) },
-    )
-  }
-  return { ok: true }
-}
-
-/** Sekretariat Nasional reject pengajuan support dana → approvenasional = 0, catat alasan */
-export async function rejectReimburseNasional(
-  idReimburse: number,
-  alasan: string,
-): Promise<ReimburseApprovalResult> {
-  const gate = await requireSekretariatNasional()
-  if (!gate.ok) return gate
-
-  const reason = alasan.trim()
-  if (!reason) return { ok: false, error: 'Alasan reject wajib diisi' }
-
-  const row = await db.reimburse.findUnique({ where: { id_reimburse: idReimburse } })
-  if (!row) return { ok: false, error: 'Pengajuan dana tidak ditemukan' }
-
-  await db.reimburse.update({
-    where: { id_reimburse: idReimburse },
-    data: { approvenasional: '0', notenasional: reason },
-  })
-
-  const idEvent = Number(row.id_event)
-  revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
-  revalidatePath(`/dashboard/kota/alk/event/${idEvent}/approve`)
-  revalidateReimburseV2(idEvent)
-
-  const event = await db.event.findUnique({
-    where: { id_event: idEvent },
-    select: { nama_event: true, khusus: true, id_cabang: true, tglevent: true, tgleventselesai: true },
-  })
-  if (event) {
-    const scope = await telegramScopeForReimburseEvent(event)
-    void notifyTelegram(
-      formatTelegramMessage({
-        tag: scope.tag,
-        action: 'Rejected Dana',
-        eventName: event.nama_event,
-        fields: { ...scope.fields, Alasan: reason, ID: idEvent },
-      }),
-      { buttons: eventActionButtons(idEvent) },
-    )
-  }
-  return { ok: true }
-}
 
 // ── Sekretariat v2: daftar, review dan pencairan ─────────────────────────────
 
@@ -274,7 +259,8 @@ export type ReimburseListItem = {
   namaCabang: string
   stage: ReimburseStage
   danausul: string
-  notenasional: string
+  /** Alasan tolak (Korwil atau PIC LevelUP); '' kalau tidak ditolak */
+  alasanTolak: string
 }
 
 const tglShort = (d: Date) =>
@@ -316,11 +302,13 @@ export async function listReimburseSekretariat(): Promise<{ isNasional: boolean;
         namaCabang: nama.get(e.id_cabang) ?? '-',
         stage: reimburseStage(r),
         danausul: r.danausul,
-        notenasional: r.notenasional,
+        alasanTolak: reimburseRejection(r)?.alasan ?? '',
         sort: e.tglevent.getTime(),
       }]
     })
-    items.sort((a, b) => (a.stage === 'pusat' ? 0 : 1) - (b.stage === 'pusat' ? 0 : 1) || b.sort - a.sort)
+    // Yang masih berjalan (Korwil / PIC / Keuangan) di atas, lalu terbaru dulu.
+    const open = (st: ReimburseStage) => (st === 'korwil' || st === 'pusat' || st === 'keuangan' ? 0 : 1)
+    items.sort((a, b) => open(a.stage) - open(b.stage) || b.sort - a.sort)
     return { isNasional: true, items: items.map(({ sort: _sort, ...i }) => i) }
   }
 
@@ -348,82 +336,56 @@ export async function listReimburseSekretariat(): Promise<{ isNasional: boolean;
         namaCabang: cabangRow?.namacabang ?? '-',
         stage: reimburseStage(r),
         danausul: r?.danausul ?? '',
-        notenasional: r?.notenasional ?? '',
+        alasanTolak: reimburseRejection(r)?.alasan ?? '',
       }
     }),
   }
 }
 
-export async function countPendingReimburseNasional(): Promise<number> {
-  const me = await getAlkSession()
-  if (!me?.isNasional) return 0
-  return db.reimburse.count({ where: { ajukan: { in: AJUKAN_VALUES }, approvenasional: '' } })
-}
-
 export type ReimburseReview = {
-  id_event: number
-  nama_event: string
-  tglDisplay: string
-  namaCabang: string
-  jumlahHadir: number
-  reimburse: ReimburseData
+  view: DanaView
+  /** Link langkah aktif (untuk disalin / dikirim ulang); null kalau langkahnya sudah lewat */
+  links: { korwil: string | null; pic: string | null; keuangan: string | null }
+  share: DanaKorwilShare | null
 }
 
-/** Sekretariat Nasional: detail satu pengajuan dana. null kalau bukan nasional / tidak ada pengajuan. */
+/** Sekretariat Nasional: tracker read-only satu pengajuan dana. null kalau bukan nasional / tidak ada pengajuan. */
 export async function getReimburseReview(idEvent: number): Promise<ReimburseReview | null> {
   const gate = await requireSekretariatNasional()
   if (!gate.ok) return null
-  const [event, row] = await Promise.all([
-    db.event.findUnique({
-      where: { id_event: idEvent },
-      select: { nama_event: true, tglevent: true, id_cabang: true },
-    }),
-    db.reimburse.findFirst({ where: { id_event: String(idEvent), ajukan: { in: AJUKAN_VALUES } } }),
-  ])
-  if (!event || !row) return null
-  const cabang = Number(event.id_cabang) > 0
-    ? await db.cabang.findUnique({ where: { id_cabang: Number(event.id_cabang) }, select: { namacabang: true } })
-    : null
+  const res = await loadDanaByEvent(idEvent)
+  if (!res || res.view.stage === 'belum' || res.view.stage === 'tanpa_dana') return null
+  const { view, tokens } = res
   return {
-    id_event: idEvent,
-    nama_event: event.nama_event,
-    tglDisplay: tglShort(event.tglevent),
-    namaCabang: cabang?.namacabang ?? '-',
-    jumlahHadir: await countHadirUnik(idEvent),
-    reimburse: toReimburseData(row),
+    view,
+    links: {
+      korwil: tokens && view.stage === 'korwil' ? danaLinkUrl(tokens.token_korwil) : null,
+      pic: tokens && view.stage === 'pusat' ? danaLinkUrl(tokens.token_pic) : null,
+      keuangan: tokens && view.stage === 'keuangan' ? danaLinkUrl(tokens.token_keuangan) : null,
+    },
+    share: tokens && view.stage === 'korwil' ? korwilShare(view, tokens.token_korwil) : null,
   }
 }
 
-/** Sekretariat Nasional: tandai dana sudah ditransfer Keuangan → approvekeuangan = 1 */
-export async function cairkanReimburseNasional(idReimburse: number): Promise<ReimburseApprovalResult> {
+/** Sekretariat Nasional: kirim ulang link langkah aktif (PIC / Keuangan) ke grup WA pphtgd, mis. setelah pphtgd down. */
+export async function resendDanaNotif(idEvent: number): Promise<ReimburseApprovalResult> {
   const gate = await requireSekretariatNasional()
   if (!gate.ok) return gate
-
-  const row = await db.reimburse.findUnique({ where: { id_reimburse: idReimburse } })
-  if (!row) return { ok: false, error: 'Pengajuan dana tidak ditemukan' }
-  if (row.approvenasional !== '1') return { ok: false, error: 'Dana belum disetujui' }
-
-  await db.reimburse.update({ where: { id_reimburse: idReimburse }, data: { approvekeuangan: '1' } })
-
-  const idEvent = Number(row.id_event)
-  revalidateReimburseV2(idEvent)
-  revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
-
-  const event = await db.event.findUnique({
-    where: { id_event: idEvent },
-    select: { nama_event: true, khusus: true, id_cabang: true, tglevent: true, tgleventselesai: true },
-  })
-  if (event) {
-    const scope = await telegramScopeForReimburseEvent(event)
-    void notifyTelegram(
-      formatTelegramMessage({
-        tag: scope.tag,
-        action: 'Dana Cair',
-        eventName: event.nama_event,
-        fields: { ...scope.fields, 'Pengajuan Dana': fmtDanaTelegram(row.danausul), ID: idEvent },
-      }),
-      { buttons: eventActionButtons(idEvent) },
-    )
+  let res = await loadDanaByEvent(idEvent)
+  if (!res) return { ok: false, error: 'Pengajuan dana tidak ditemukan' }
+  const stage = res.view.stage === 'pusat' ? 'pic' : res.view.stage === 'keuangan' ? 'keuangan' : null
+  if (!stage) return { ok: false, error: 'Tidak ada notif grup untuk langkah ini' }
+  // Pengajuan lama yang sudah disetujui Sekretariat Nasional sebelum alur link: buat link Keuangan sekarang
+  // (korwil_id 0 = tidak ada snapshot korwil), supaya Keuangan tetap bisa menandai transfer.
+  if (!res.tokens && stage === 'keuangan') {
+    await db.reimburse_approval.create({
+      data: { id_reimburse: res.view.idReimburse, korwil_id: 0, korwil_nama: '', ...newDanaTokens() },
+    })
+    res = await loadDanaByEvent(idEvent)
   }
+  if (!res?.tokens) return { ok: false, error: 'Link pengajuan belum ada. ALK Kota perlu Ajukan ulang.' }
+  const sent = await sendDanaGroupNotif(res.view, res.tokens, stage)
+  if (!sent.ok) return { ok: false, error: `Gagal kirim ke pphtgd: ${sent.error}` }
+  revalidateDana(idEvent)
   return { ok: true }
 }

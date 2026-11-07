@@ -203,6 +203,13 @@ export type feedback_app = Prisma.feedback_appModel
  */
 export type kesaksian = Prisma.kesaksianModel
 /**
+ * Model reimburse_approval
+ * Alur pengajuan dana (1:1 dengan reimburse): korwil PPHTGD yang dipilih ALK Kota saat submit + token link
+ * tanpa login per peran. Status tetap di reimburse (approvepphtgd → approvenasional → approvekeuangan).
+ * Token dibuat ulang setiap submit, jadi link lama mati setelah data diubah.
+ */
+export type reimburse_approval = Prisma.reimburse_approvalModel
+/**
  * Model wilayah_desa
  * 
  */

@@ -32,9 +32,10 @@ export default function DemoSuratKeuanganPage() {
     )
   }
   if (reimburse.ajukan !== 'Ajukan' || reimburse.approvenasional !== '1') {
+    // Same rule as the real page: printable once the PIC LevelUP Pusat approved.
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#efe8da] px-6 text-center">
-        <p className="text-[15px] font-bold">Surat tersedia setelah dana disetujui Sekretariat Nasional</p>
+        <p className="text-[15px] font-bold">Surat tersedia setelah dana disetujui PIC LevelUP Pusat</p>
         <a href={back} className="text-[13px] font-bold underline">← Kembali</a>
       </main>
     )
@@ -60,6 +61,12 @@ export default function DemoSuratKeuanganPage() {
       backHref={back}
       korwilOptions={DEMO_KORWIL}
       defaultKorwilId={matchKorwil(DEMO_KORWIL, cabang?.namacabang ?? '')}
+      fixedKorwil={reimburse.korwil}
+      approvals={{
+        korwil: reimburse.approvepphtgd === '1' ? 'Disetujui via link' : null,
+        pic: reimburse.approvenasional === '1' ? 'Disetujui via link' : null,
+        keuangan: reimburse.approvekeuangan === '1' ? 'Sudah ditransfer' : null,
+      }}
     />
   )
 }

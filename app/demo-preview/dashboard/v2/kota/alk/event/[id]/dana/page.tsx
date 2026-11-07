@@ -7,39 +7,50 @@ import { DanaClient } from '@/components/demo-preview/clone/kota/dana-client'
 import { snapshot, subscribe } from '@/components/demo-preview/db'
 import { ReimburseProgress } from '@/components/demo-preview/reimburse-progress'
 import { getEventDetail } from '@/components/demo-preview/shim/actions/event'
-import { getReimburseForEvent } from '@/components/demo-preview/shim/actions/reimburse'
+import { getDanaForm, getReimburseForEvent } from '@/components/demo-preview/shim/actions/reimburse'
 
 export default function AlkV2DanaPage() {
   const { id } = useParams<{ id: string }>()
   const data = useLoad(async () => {
     const event = await getEventDetail(Number(id))
-    return { event, reimburse: event ? await getReimburseForEvent(event.id_event) : null }
+    return {
+      event,
+      reimburse: event ? await getReimburseForEvent(event.id_event) : null,
+      form: event ? await getDanaForm(event.id_event) : null,
+    }
   })
   // The real page re-renders on the server after each change; here the demo store drives it, so the approval
-  // status (and the Cetak Surat link) follow the Pusat/Keuangan simulation buttons.
+  // status (and the Cetak Surat link) follow the Korwil/PIC/Keuangan simulation buttons.
   const db = useSyncExternalStore(subscribe, snapshot, () => null)
-  const [fresh, setFresh] = useState<Awaited<ReturnType<typeof getReimburseForEvent>>>()
+  const [fresh, setFresh] = useState<{
+    reimburse: Awaited<ReturnType<typeof getReimburseForEvent>>
+    form: Awaited<ReturnType<typeof getDanaForm>>
+  }>()
   useEffect(() => {
     if (!db) return
     let live = true
-    getReimburseForEvent(Number(id)).then((r) => live && setFresh(r))
+    Promise.all([getReimburseForEvent(Number(id)), getDanaForm(Number(id))]).then(
+      ([reimburse, form]) => live && setFresh({ reimburse, form }),
+    )
     return () => {
       live = false
     }
   }, [db, id])
   if (!data?.event) return <Loading />
   const event = data.event
-  const reimburse = fresh ?? data.reimburse
+  const reimburse = fresh ? fresh.reimburse : data.reimburse
+  const form = fresh ? fresh.form : data.form
   return (
     // The real form is a min-h-screen <main>; relax it so the demo's status panel sits right under the form.
     <div className="[&>main]:min-h-0">
       <DanaClient
-        key={reimburse?.approvenasional ?? 'new'}
+        key={reimburse ? `${reimburse.approvepphtgd}-${reimburse.approvenasional}-${reimburse.approvekeuangan}` : 'new'}
         idEvent={event.id_event}
         namaEvent={event.nama_event}
         tglDisplay={event.tglDisplay}
         jumlahPeserta={event.registrasi.length}
         reimburse={reimburse}
+        form={form}
         backUrl={`${ALK_EVENT_BASE}/${event.id_event}`}
         suratHref={`/demo-preview/surat-keuangan/${event.id_event}`}
       />

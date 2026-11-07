@@ -1,4 +1,4 @@
-import type { KorwilOption } from '@/components/documents/surat-keuangan'
+import type { KorwilOption } from '@/lib/surat-keuangan-data'
 
 export type KorwilResult = { ok: true; korwil: KorwilOption[] } | { ok: false; error: string }
 
@@ -14,10 +14,18 @@ export async function listKorwilPphtgd(): Promise<KorwilResult> {
       signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) return { ok: false, error: `pphtgd HTTP ${res.status}` }
-    const json = (await res.json()) as { korwils?: Array<{ id: number; nama: string; koordinator: string | null; kota: string | null }> }
+    const json = (await res.json()) as {
+      korwils?: Array<{ id: number; nama: string; koordinator: string | null; kota: string | null; wa?: string | null }>
+    }
     return {
       ok: true,
-      korwil: (json.korwils ?? []).map((k) => ({ id: k.id, nama: k.nama, koordinator: k.koordinator, kota: k.kota })),
+      korwil: (json.korwils ?? []).map((k) => ({
+        id: k.id,
+        nama: k.nama,
+        koordinator: k.koordinator,
+        kota: k.kota,
+        wa: k.wa ?? null,
+      })),
     }
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : 'Gagal memuat korwil' }

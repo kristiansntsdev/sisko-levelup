@@ -9,12 +9,8 @@ import {
   rejectEventAlkNasional,
   rejectEventBrimNasional,
 } from '@/lib/actions/event'
-import {
-  approveReimburseNasional,
-  rejectReimburseNasional,
-  type ReimburseData,
-} from '@/lib/actions/reimburse'
-import { isAjukan } from '@/lib/reimburse-stage'
+import type { ReimburseData } from '@/lib/actions/reimburse'
+import { isAjukan, REIMBURSE_STAGE, reimburseRejection, reimburseStage } from '@/lib/reimburse-stage'
 import { FlyerQaSummary } from '@/components/kota/flyer-qa-summary'
 import { BeritaAcaraQaSummary } from '@/components/kota/berita-acara-qa-summary'
 
@@ -23,51 +19,16 @@ function fmtRp(raw: string): string {
   return Number.isFinite(n) && n > 0 ? `Rp ${n.toLocaleString('id-ID')}` : '-'
 }
 
+/** Read-only: dana disetujui lewat link tanpa login (Korwil PPHTGD → PIC LevelUP Pusat → Keuangan PPHTGD). */
 function DanaApprovalCard({ reimburse }: { reimburse: ReimburseData }) {
-  const [alasan, setAlasan] = useState('')
-  const [error, setError] = useState('')
-  const [pending, startTransition] = useTransition()
-  const [action, setAction] = useState<'approve' | 'reject' | null>(null)
-  const router = useRouter()
-
-  const decided = reimburse.approvenasional === '1' || reimburse.approvenasional === '0'
-
-  function handleApprove() {
-    setError('')
-    setAction('approve')
-    startTransition(async () => {
-      const res = await approveReimburseNasional(reimburse.id_reimburse)
-      if (!res.ok) {
-        setError(res.error)
-        setAction(null)
-        return
-      }
-      router.refresh()
-    })
-  }
-
-  function handleReject() {
-    setError('')
-    if (!alasan.trim()) {
-      setError('Alasan reject wajib diisi')
-      return
-    }
-    setAction('reject')
-    startTransition(async () => {
-      const res = await rejectReimburseNasional(reimburse.id_reimburse, alasan)
-      if (!res.ok) {
-        setError(res.error)
-        setAction(null)
-        return
-      }
-      router.refresh()
-    })
-  }
+  const stage = reimburseStage(reimburse)
+  const rejection = reimburseRejection(reimburse)
 
   return (
     <div className="bg-surface border border-border rounded-[16px] overflow-hidden">
-      <div className="px-4 py-3 border-b border-border">
+      <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-2">
         <p className="text-[13px] font-semibold text-fg">Pengajuan Support Dana</p>
+        <p className="text-[12px] font-semibold text-muted">{REIMBURSE_STAGE[stage].label}</p>
       </div>
       <div className="px-4 py-3 flex flex-col gap-2">
         <Row label="Link Dokumentasi" value={reimburse.bukti || '-'} />
@@ -77,11 +38,14 @@ function DanaApprovalCard({ reimburse }: { reimburse: ReimburseData }) {
         <Row label="No Rekening" value={reimburse.norek || '-'} />
         <Row label="Nama Bank" value={reimburse.namabank || '-'} />
         <Row label="Atas Nama" value={reimburse.namarek || '-'} />
+        <Row label="Sekarang di" value={REIMBURSE_STAGE[stage].pic} />
       </div>
 
-      {reimburse.approvenasional === '1' ? (
+      {stage === 'keuangan' || stage === 'cair' ? (
         <div className="mx-4 mb-4 bg-green-light rounded-[14px] px-4 py-3 text-center">
-          <p className="text-[14px] font-semibold text-green-dark">Dana disetujui</p>
+          <p className="text-[14px] font-semibold text-green-dark">
+            Disetujui PIC LevelUP Pusat{stage === 'cair' ? ' · Dana sudah cair' : ''}
+          </p>
           <a
             href={`/surat-keuangan/${reimburse.id_event}`}
             target="_blank"
@@ -91,49 +55,15 @@ function DanaApprovalCard({ reimburse }: { reimburse: ReimburseData }) {
             Cetak Surat untuk Keuangan
           </a>
         </div>
-      ) : reimburse.approvenasional === '0' ? (
+      ) : rejection ? (
         <div className="mx-4 mb-4 bg-red-light rounded-[14px] px-4 py-3">
-          <p className="text-[11px] font-semibold text-red-dark uppercase tracking-wide">Ditolak</p>
-          {reimburse.notenasional ? (
-            <p className="text-[13px] text-fg mt-1 whitespace-pre-wrap">{reimburse.notenasional}</p>
-          ) : null}
+          <p className="text-[11px] font-semibold text-red-dark uppercase tracking-wide">Ditolak {rejection.oleh}</p>
+          {rejection.alasan ? <p className="text-[13px] text-fg mt-1 whitespace-pre-wrap">{rejection.alasan}</p> : null}
         </div>
-      ) : null}
-
-      {!decided && (
-        <div className="px-4 pb-4 flex flex-col gap-3">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-[13px] font-semibold text-fg">Alasan Reject</span>
-            <textarea
-              value={alasan}
-              onChange={(e) => setAlasan(e.target.value)}
-              rows={3}
-              placeholder="Isi jika reject…"
-              className="w-full rounded-[14px] border border-border bg-surface px-3.5 py-3 text-[14px] text-fg placeholder:text-subtle resize-none focus:outline-none focus:border-accent"
-            />
-          </label>
-
-          {error ? <p className="text-[13px] text-red font-medium">{error}</p> : null}
-
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={handleApprove}
-              disabled={pending}
-              className="flex-1 py-3 rounded-[14px] bg-green text-white font-semibold text-[14px] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-            >
-              {pending && action === 'approve' ? '…' : 'Approve'}
-            </button>
-            <button
-              type="button"
-              onClick={handleReject}
-              disabled={pending}
-              className="flex-1 py-3 rounded-[14px] bg-red text-white font-semibold text-[14px] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-            >
-              {pending && action === 'reject' ? '…' : 'Reject'}
-            </button>
-          </div>
-        </div>
+      ) : (
+        <p className="mx-4 mb-4 text-[12px] text-muted">
+          Persetujuan lewat link WhatsApp: Korwil PPHTGD lalu PIC LevelUP Pusat. Pantau di Sekretariat v2 → Reimburse.
+        </p>
       )}
     </div>
   )

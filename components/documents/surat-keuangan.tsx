@@ -1,95 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { levelupKota } from '@/components/documents/_shared/document-header'
-import { formatCurrency } from '@/lib/documents/form-data'
+import {
+  SURAT_KEUANGAN,
+  type KorwilOption,
+  type SuratApprovals,
+  type SuratKeuanganData,
+} from '@/lib/surat-keuangan-data'
 
-export type SuratKeuanganData = {
-  namaKoordinator: string
-  kota: string
-  namaEvent: string
-  tanggalEvent: string
-  tempat: string
-  jumlahPeserta: string
-  pengajuanDana: string
-  namabank: string
-  norek: string
-  namarek: string
-}
-
-export type KorwilOption = { id: number; nama: string; koordinator: string | null; kota: string | null }
-
-export const SURAT_KEUANGAN = {
-  kepada: ['Yth. Pdt. Himawan Leenardo', 'Pengurus PPHTGD Pusat', 'di tempat'],
-  picPusat: { role: 'PIC LevelUP Pusat', nama: 'Steven Kusuma' },
-  keuangan: { role: 'Keuangan PPHTGD', nama: '' },
-} as const
-
-const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-
-function parts(iso: string) {
-  const [y, m, d] = iso.slice(0, 10).split('-').map(Number)
-  return { y, m: m - 1, d }
-}
-
-function dash(v: string | null | undefined) {
-  return v && v.trim() ? v.trim() : '-'
-}
-
-/** "04 Juli 2026" or "14 – 15 Mei 2026" / "30 April – 1 Mei 2026" for ranges. Inputs are YYYY-MM-DD (date-only, no timezone shift). */
-export function formatTanggalEvent(mulai: string, selesai: string): string {
-  const a = parts(mulai)
-  const b = parts(selesai || mulai)
-  const dd = (n: number) => String(n).padStart(2, '0')
-  if (a.y === b.y && a.m === b.m && a.d === b.d) return `${dd(a.d)} ${BULAN[a.m]} ${a.y}`
-  if (a.y === b.y && a.m === b.m) return `${dd(a.d)} – ${dd(b.d)} ${BULAN[a.m]} ${a.y}`
-  if (a.y === b.y) return `${dd(a.d)} ${BULAN[a.m]} – ${dd(b.d)} ${BULAN[b.m]} ${a.y}`
-  return `${dd(a.d)} ${BULAN[a.m]} ${a.y} – ${dd(b.d)} ${BULAN[b.m]} ${b.y}`
-}
-
-function rp(raw: string): string {
-  const n = Number(String(raw ?? '').replace(/\D/g, ''))
-  return n > 0 ? formatCurrency(n) : '-'
-}
-
-export function buildSuratKeuangan(input: {
-  event: { nama_event: string; tglMulai: string; tglSelesai: string; alamatevent: string; jenisevent: string }
-  cabang: { namacabang: string; leadercabang: string } | null
-  reimburse: { danausul: string; namabank: string; norek: string; namarek: string }
-  jumlahHadir: number
-}): SuratKeuanganData {
-  const { event, cabang, reimburse } = input
-  return {
-    namaKoordinator: dash(cabang?.leadercabang),
-    kota: cabang?.namacabang ? levelupKota(cabang.namacabang) : '-',
-    namaEvent: dash(event.nama_event),
-    tanggalEvent: formatTanggalEvent(event.tglMulai, event.tglSelesai),
-    tempat: event.jenisevent === 'Online' ? 'Online' : dash(event.alamatevent),
-    jumlahPeserta: String(input.jumlahHadir),
-    pengajuanDana: rp(reimburse.danausul),
-    namabank: dash(reimburse.namabank),
-    norek: dash(reimburse.norek),
-    namarek: dash(reimburse.namarek),
-  }
-}
-
-function norm(s: string | null | undefined): string {
-  return (s ?? '')
-    .toLowerCase()
-    .replace(/\b(level\s*up|korwil|kota|kabupaten|kab\.?)\b/g, ' ')
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim()
-}
-
-/** Pre-selects the korwil whose name (then coordinator city) equals the LevelUP kota; null when nothing matches. */
-export function matchKorwil(options: KorwilOption[], kotaName: string): number | null {
-  const key = norm(kotaName)
-  if (!key) return null
-  const byName = options.find((o) => norm(o.nama) === key)
-  if (byName) return byName.id
-  const byKota = options.find((o) => norm(o.kota) === key)
-  return byKota ? byKota.id : null
-}
+// Data helpers live in lib/surat-keuangan-data.ts (server-callable); re-exported for client callers.
+export {
+  SURAT_KEUANGAN,
+  buildSuratKeuangan,
+  formatTanggalEvent,
+  matchKorwil,
+  type KorwilOption,
+  type SuratApprovals,
+  type SuratKeuanganData,
+} from '@/lib/surat-keuangan-data'
 
 const SERIF = { fontFamily: "'Times New Roman', Times, serif" }
 
@@ -113,7 +41,25 @@ function Heading({ children }: { children: string }) {
   )
 }
 
-export function SuratKeuanganDocument({ data, korwil }: { data: SuratKeuanganData; korwil: KorwilOption | null }) {
+function Approved({ text }: { text?: string | null }) {
+  if (!text) return null
+  return (
+    <div className="flex h-full items-center justify-center px-2 text-center text-[9pt] font-bold italic text-[#1d4ed8]">
+      {text}
+    </div>
+  )
+}
+
+export function SuratKeuanganDocument({
+  data,
+  korwil,
+  approvals,
+}: {
+  data: SuratKeuanganData
+  korwil: KorwilOption | null
+  /** Persetujuan lewat link tanpa login, dicetak di kotak TTD */
+  approvals?: SuratApprovals
+}) {
   const { picPusat, keuangan } = SURAT_KEUANGAN
   return (
     <div
@@ -171,8 +117,10 @@ export function SuratKeuanganDocument({ data, korwil }: { data: SuratKeuanganDat
               ))}
             </tr>
             <tr>
-              {[0, 1, 2].map((i) => (
-                <td key={i} className="border border-black" style={{ height: '28mm' }} />
+              {[approvals?.korwil, approvals?.pic, approvals?.keuangan].map((text, i) => (
+                <td key={i} className="border border-black" style={{ height: '28mm' }}>
+                  <Approved text={text} />
+                </td>
               ))}
             </tr>
             <tr>
@@ -196,16 +144,22 @@ export function SuratKeuanganPage({
   korwilOptions,
   defaultKorwilId,
   korwilError,
+  fixedKorwil,
+  approvals,
 }: {
   data: SuratKeuanganData
   backHref: string
   korwilOptions: KorwilOption[]
   defaultKorwilId: number | null
   korwilError?: string | null
+  /** Korwil yang dipilih ALK Kota saat submit (snapshot); kalau ada, picker disembunyikan */
+  fixedKorwil?: KorwilOption | null
+  approvals?: SuratApprovals
 }) {
   const [korwilId, setKorwilId] = useState<number | null>(defaultKorwilId)
-  const korwil = korwilOptions.find((o) => o.id === korwilId) ?? null
-  const needsPick = korwilOptions.length > 0 && !korwil
+  const picked = korwilOptions.find((o) => o.id === korwilId) ?? null
+  const korwil = fixedKorwil ?? picked
+  const needsPick = !fixedKorwil && korwilOptions.length > 0 && !picked
 
   return (
     <div className="min-h-screen bg-[#ddd9d3] print:min-h-0 print:bg-white">
@@ -214,7 +168,12 @@ export function SuratKeuanganPage({
         <a href={backHref} className="text-[13px] font-bold underline">
           ← Kembali
         </a>
-        {korwilOptions.length > 0 ? (
+        {fixedKorwil ? (
+          <span className="text-[13px]">
+            <span className="font-bold">Korwil</span> {fixedKorwil.nama}
+            {fixedKorwil.koordinator ? ` — ${fixedKorwil.koordinator}` : ''}
+          </span>
+        ) : korwilOptions.length > 0 ? (
           <label className="flex items-center gap-2 text-[13px]">
             <span className="font-bold">Korwil</span>
             <select
@@ -232,7 +191,7 @@ export function SuratKeuanganPage({
             </select>
           </label>
         ) : null}
-        {korwilError ? (
+        {!fixedKorwil && korwilError ? (
           <span className="text-[12px] font-bold text-[#c21f24]">
             Data korwil PPHTGD tidak bisa dimuat — nama Korwil dikosongkan
           </span>
@@ -248,7 +207,7 @@ export function SuratKeuanganPage({
       </div>
       <div className="overflow-x-auto px-2 py-4 print:p-0">
         <div className="mx-auto w-fit shadow-[0_4px_28px_rgba(0,0,0,.18)] print:shadow-none">
-          <SuratKeuanganDocument data={data} korwil={korwil} />
+          <SuratKeuanganDocument data={data} korwil={korwil} approvals={approvals} />
         </div>
       </div>
     </div>

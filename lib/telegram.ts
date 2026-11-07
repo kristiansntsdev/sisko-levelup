@@ -43,6 +43,11 @@ export function eventDetailLink(idEvent: number): string {
   return `${publicAppBase()}/dashboard/kota/alk/event/${idEvent}`
 }
 
+/** Status pengajuan dana satu event (Sekretariat Nasional, read-only tracker). */
+export function danaReviewLink(idEvent: number): string {
+  return `${publicAppBase()}/dashboard/v2/kota/alk/reimburse/${idEvent}`
+}
+
 /** Antrian approve tiket event nasional (Sekretariat Nasional). */
 export function tiketNasionalApproveLink(): string {
   return `${publicAppBase()}/dashboard/v2/kota/alk/tiket-nasional`

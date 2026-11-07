@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { requireAlkPengurus } from '@/lib/alk-auth'
 import { getEventDetail } from '@/lib/actions/event'
-import { getReimburseForEvent } from '@/lib/actions/reimburse'
+import { getDanaForm, getReimburseForEvent } from '@/lib/actions/reimburse'
 import { DanaClient } from '@/app/dashboard/kota/alk/event/[id]/dana/dana-client'
 import { ALK_BASE, ALK_EVENT_BASE } from '@/components/alk-v2/paths'
 
@@ -15,7 +15,7 @@ export default async function AlkV2DanaPage({
   const event = await getEventDetail(Number(id))
   if (!event) redirect(`${ALK_BASE}/event`)
 
-  const reimburse = await getReimburseForEvent(event.id_event)
+  const [reimburse, form] = await Promise.all([getReimburseForEvent(event.id_event), getDanaForm(event.id_event)])
 
   return (
     <DanaClient
@@ -24,6 +24,7 @@ export default async function AlkV2DanaPage({
       tglDisplay={event.tglDisplay}
       jumlahPeserta={event.registrasi.length}
       reimburse={reimburse}
+      form={form}
       backUrl={`${ALK_EVENT_BASE}/${event.id_event}`}
       suratHref={`/surat-keuangan/${event.id_event}`}
     />

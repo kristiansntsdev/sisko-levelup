@@ -3,11 +3,115 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { isAjukan } from '@/lib/reimburse-stage'
-import { submitReimburse, type ReimburseData } from '@/lib/actions/reimburse'
+import {
+  DANA_STEPS,
+  danaStepIndex,
+  isAjukan,
+  isReimburseLocked,
+  REIMBURSE_STAGE,
+  reimburseRejection,
+  reimburseStage,
+} from '@/lib/reimburse-stage'
+import { submitReimburse, type DanaForm, type ReimburseData } from '@/lib/actions/reimburse'
 
 const inputCls =
   'w-full px-3.5 py-3 border-[1.5px] border-border rounded-input text-[15px] bg-surface text-fg outline-none focus:border-accent transition-colors disabled:opacity-60'
+
+function CopyText({ value, label }: { value: string; label: string }) {
+  const [done, setDone] = useState(false)
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        void navigator.clipboard?.writeText(value).then(() => {
+          setDone(true)
+          setTimeout(() => setDone(false), 1500)
+        })
+      }}
+      className="flex-1 py-3 rounded-btn border-[1.5px] border-border text-[14px] font-semibold text-fg"
+    >
+      {done ? 'Tersalin ✓' : label}
+    </button>
+  )
+}
+
+/** Korwil PPHTGD → PIC LevelUP Pusat → Keuangan PPHTGD → Cair */
+function DanaTracker({ reimburse, form }: { reimburse: ReimburseData; form: DanaForm | null }) {
+  const stage = reimburseStage(reimburse)
+  const current = danaStepIndex(stage)
+  const rejection = reimburseRejection(reimburse)
+  const at = form?.view?.at
+  const stamps = [at?.korwil, at?.pic, at?.cair, null]
+  return (
+    <div className="bg-surface border border-border rounded-card px-4 py-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[13px] font-semibold text-fg">Status Pengajuan</p>
+        <p className="text-[12px] font-semibold text-muted">{REIMBURSE_STAGE[stage].label}</p>
+      </div>
+      <ol className="mt-3 flex flex-col gap-2">
+        {DANA_STEPS.map((s, i) => {
+          const done = current > i || (current === 4 && i === 3)
+          const active = current === i
+          return (
+            <li key={s.key} className="flex items-center gap-2.5">
+              <span
+                className={`w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-[12px] font-bold ${
+                  done ? 'bg-fg text-surface' : active ? 'bg-accent text-white' : 'border-[1.5px] border-border text-muted'
+                }`}
+              >
+                {done ? '✓' : i + 1}
+              </span>
+              <span className={`text-[13px] ${active ? 'font-semibold text-fg' : 'text-muted'}`}>{s.label}</span>
+              {done && stamps[i] ? <span className="ml-auto text-[11px] text-muted">{stamps[i]}</span> : null}
+            </li>
+          )
+        })}
+      </ol>
+      {rejection ? (
+        <div className="mt-3 bg-amber-light rounded-[10px] px-3 py-2.5">
+          <p className="text-[11px] font-semibold text-amber-dark uppercase tracking-wide">Ditolak {rejection.oleh} — alasan</p>
+          <p className="text-[13px] text-fg mt-1 whitespace-pre-wrap">{rejection.alasan || '-'}</p>
+          <p className="text-[12px] text-muted mt-1.5">Perbaiki data lalu Ajukan lagi. Link lama otomatis tidak berlaku.</p>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+/** Setelah Ajukan: ALK Kota kirim link approval ke WhatsApp ketua korwil (wa.me). */
+function KirimKorwilCard({ share }: { share: NonNullable<DanaForm['share']> }) {
+  return (
+    <div className="bg-surface border-2 border-accent rounded-card px-4 py-4">
+      <p className="text-[14px] font-semibold text-fg">Kirim ke Korwil</p>
+      <p className="text-[13px] text-muted mt-1">
+        {share.korwil.nama}
+        {share.korwil.koordinator ? ` — ${share.korwil.koordinator}` : ''}
+      </p>
+      <p className="text-[12px] text-muted mt-2">
+        Korwil membuka link tanpa login, lalu Setujui / Tolak. Setelah disetujui, PIC LevelUP Pusat dan Keuangan
+        PPHTGD dapat notif WhatsApp otomatis.
+      </p>
+      {share.waUrl ? (
+        <a
+          href={share.waUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-3 block w-full py-3.5 bg-[#1f9d55] text-white rounded-btn text-[15px] font-semibold text-center"
+        >
+          Kirim via WhatsApp
+        </a>
+      ) : (
+        <p className="mt-3 bg-amber-light rounded-[10px] px-3 py-2.5 text-[13px] text-fg">
+          Nomor WhatsApp korwil belum ada di PPHTGD. Salin pesan lalu kirim manual ke korwil.
+        </p>
+      )}
+      <div className="mt-2.5 flex gap-2">
+        <CopyText value={share.link} label="Salin link" />
+        <CopyText value={share.waText} label="Salin pesan" />
+      </div>
+    </div>
+  )
+}
 
 function FormField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -24,6 +128,7 @@ export function DanaClient({
   tglDisplay,
   jumlahPeserta,
   reimburse,
+  form,
   backUrl: backUrlProp,
   suratHref,
 }: {
@@ -32,8 +137,10 @@ export function DanaClient({
   tglDisplay: string
   jumlahPeserta: number
   reimburse: ReimburseData | null
+  /** Status alur + pilihan korwil PPHTGD (getDanaForm) */
+  form: DanaForm | null
   backUrl?: string
-  /** Link cetak surat untuk Keuangan; tampil setelah dana disetujui */
+  /** Link cetak surat untuk Keuangan; tampil setelah disetujui PIC LevelUP Pusat */
   suratHref?: string
 }) {
   const router = useRouter()
@@ -50,10 +157,15 @@ export function DanaClient({
   const [norek, setNorek] = useState(reimburse?.norek ?? '')
   const [namabank, setNamabank] = useState(reimburse?.namabank ?? '')
   const [namarek, setNamarek] = useState(reimburse?.namarek ?? '')
+  const [korwilId, setKorwilId] = useState<number | null>(form?.korwil.defaultId ?? null)
 
-  const isApproved = reimburse?.approvenasional === '1'
-  const isRejected = reimburse?.approvenasional === '0'
+  const stage = reimburseStage(reimburse)
+  // Terkunci begitu Korwil ACC (sampai ada yang menolak)
+  const isApproved = isReimburseLocked(stage)
   const backUrl = backUrlProp ?? `/dashboard/kota/alk/event/${idEvent}`
+  const korwilOptions = form?.korwil.options ?? []
+  const pickedKorwil = korwilOptions.find((k) => k.id === korwilId) ?? null
+  const korwilBlocked = ajukan === 'Ajukan' && (!!form?.korwil.error || !pickedKorwil)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -69,9 +181,16 @@ export function DanaClient({
           norek,
           namabank,
           namarek,
+          korwilId: ajukan === 'Ajukan' ? korwilId : null,
         })
-        router.push(backUrl)
-        router.refresh()
+        if (ajukan === 'Ajukan') {
+          // Tetap di halaman ini: kartu "Kirim ke Korwil" muncul setelah tersimpan
+          router.refresh()
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        } else {
+          router.push(backUrl)
+          router.refresh()
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Gagal menyimpan. Coba lagi.')
       }
@@ -97,29 +216,23 @@ export function DanaClient({
           <p className="text-[12px] text-muted mt-0.5">{tglDisplay}</p>
         </div>
 
-        {isApproved ? (
+        {reimburse && isAjukan(reimburse.ajukan) ? <DanaTracker reimburse={reimburse} form={form} /> : null}
+
+        {form?.share ? <KirimKorwilCard share={form.share} /> : null}
+
+        {(stage === 'keuangan' || stage === 'cair') && suratHref ? (
           <div className="bg-green-light rounded-[14px] px-4 py-3 text-center">
             <p className="text-[14px] font-semibold text-green-dark">
-              Pengajuan sudah disetujui Sekretariat Nasional
-              {reimburse?.approvekeuangan === '1' ? ' · Dana sudah cair' : ''}
+              Disetujui PIC LevelUP Pusat{stage === 'cair' ? ' · Dana sudah cair' : ''}
             </p>
-            {suratHref && isAjukan(reimburse?.ajukan) ? (
-              <a
-                href={suratHref}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-2 inline-block text-[13px] font-semibold text-green-dark underline"
-              >
-                Cetak Surat untuk Keuangan
-              </a>
-            ) : null}
-          </div>
-        ) : isRejected && reimburse?.notenasional ? (
-          <div className="bg-amber-light border border-border rounded-[14px] px-4 py-3">
-            <p className="text-[11px] font-semibold text-amber-dark uppercase tracking-wide">
-              Ditolak — alasan
-            </p>
-            <p className="text-[13px] text-fg mt-1.5 whitespace-pre-wrap">{reimburse.notenasional}</p>
+            <a
+              href={suratHref}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-block text-[13px] font-semibold text-green-dark underline"
+            >
+              Cetak Surat untuk Keuangan
+            </a>
           </div>
         ) : null}
 
@@ -139,6 +252,36 @@ export function DanaClient({
                 <option value="Tidak Ajukan">Tidak Ajukan</option>
               </select>
             </FormField>
+
+            {ajukan === 'Ajukan' ? (
+              <FormField label="Korwil PPHTGD">
+                {form?.korwil.error ? (
+                  <p className="text-[13px] text-red font-medium">
+                    Data korwil PPHTGD tidak bisa dimuat ({form.korwil.error}). Coba muat ulang halaman.
+                  </p>
+                ) : (
+                  <>
+                    <select
+                      value={korwilId ?? ''}
+                      onChange={(e) => setKorwilId(e.target.value ? Number(e.target.value) : null)}
+                      disabled={isApproved}
+                      className={`${inputCls} appearance-none`}
+                    >
+                      <option value="">Pilih Korwil</option>
+                      {korwilOptions.map((k) => (
+                        <option key={k.id} value={k.id}>
+                          {k.nama}
+                          {k.koordinator ? ` — ${k.koordinator}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                    {pickedKorwil && !pickedKorwil.wa ? (
+                      <p className="text-[12px] text-muted">Nomor WhatsApp korwil ini belum ada di PPHTGD; link dikirim manual.</p>
+                    ) : null}
+                  </>
+                )}
+              </FormField>
+            ) : null}
 
             <FormField label="Link Dokumentasi">
               <input
@@ -227,10 +370,10 @@ export function DanaClient({
         {!isApproved && (
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || korwilBlocked}
             className="w-full py-4 bg-accent text-white rounded-btn text-[16px] font-semibold disabled:opacity-60 transition-opacity"
           >
-            {isPending ? 'Menyimpan...' : 'Ajukan'}
+            {isPending ? 'Menyimpan...' : stage === 'korwil' || stage === 'ditolak' ? 'Simpan & Ajukan Ulang' : 'Ajukan'}
           </button>
         )}
       </form>

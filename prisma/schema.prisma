@@ -425,6 +425,26 @@ model kesaksian {
   created_at   DateTime @default(now()) @db.DateTime(0)
 }
 
+/// Alur pengajuan dana (1:1 dengan reimburse): korwil PPHTGD yang dipilih ALK Kota saat submit + token link
+/// tanpa login per peran. Status tetap di reimburse (approvepphtgd → approvenasional → approvekeuangan).
+/// Token dibuat ulang setiap submit, jadi link lama mati setelah data diubah.
+model reimburse_approval {
+  id_reimburse       Int       @id
+  korwil_id          Int
+  korwil_nama        String    @db.VarChar(255)
+  korwil_koordinator String    @default("") @db.VarChar(255)
+  korwil_wa          String?   @db.VarChar(20)
+  token_korwil       String    @unique(map: "uq_reimburse_approval_korwil") @db.VarChar(64)
+  token_pic          String    @unique(map: "uq_reimburse_approval_pic") @db.VarChar(64)
+  token_keuangan     String    @unique(map: "uq_reimburse_approval_keuangan") @db.VarChar(64)
+  korwil_at          DateTime? @db.DateTime(0)
+  pic_at             DateTime? @db.DateTime(0)
+  cair_at            DateTime? @db.DateTime(0)
+  notif_pic_at       DateTime? @db.DateTime(0)
+  notif_keuangan_at  DateTime? @db.DateTime(0)
+  created_at         DateTime  @default(now()) @db.DateTime(0)
+}
+
 model wilayah_desa {
   id           String  @id @db.VarChar(10)
   kecamatan_id String? @db.VarChar(7)

@@ -3,28 +3,27 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
 import {
-  approveReimburseNasional,
-  cairkanReimburseNasional,
-  rejectReimburseNasional,
+  resendDanaNotif,
   type ReimburseListItem,
   type ReimburseReview,
 } from '@/lib/actions/reimburse'
-import { REIMBURSE_STAGE, type ReimburseStage } from '@/lib/reimburse-stage'
+import { DANA_STEPS, danaStepIndex, REIMBURSE_STAGE, type ReimburseStage } from '@/lib/reimburse-stage'
 import { ANTON, BTN, ERROR, IconButton, LABEL, MONO, PANEL, PaperHeader, PaperMain, PRESS, ROWS, Strip } from '@/components/pwa/paper-ui'
 import { Pill } from '@/components/pwa/ui'
 import { PAGE_SIZE_EVENT, Pager, SearchBox } from './list-tools'
-import { ALK_BASE, ALK_EVENT_BASE, Decide, Empty, FLD, Field, Note, PersonChip, Sheet, SheetHead, Toast } from './ui'
+import { ALK_BASE, ALK_EVENT_BASE, Empty, Note, PersonChip, Toast } from './ui'
 
 function fmtRp(s: string) {
   const n = parseInt(String(s).replace(/\D/g, ''), 10)
   return isNaN(n) || n === 0 ? '-' : `Rp ${n.toLocaleString('id-ID')}`
 }
 
-type Filter = ReimburseStage | 'all' | 'disetujui'
+type Filter = ReimburseStage | 'all' | 'menunggu'
 
+// Menunggu = masih di Korwil PPHTGD atau PIC LevelUP Pusat
 const FILTERS_NASIONAL: [Filter, string][] = [
-  ['pusat', 'Menunggu'],
-  ['disetujui', 'Disetujui'],
+  ['menunggu', 'Menunggu'],
+  ['keuangan', 'Siap ditransfer'],
   ['cair', 'Cair'],
   ['ditolak', 'Ditolak'],
   ['all', 'Semua'],
@@ -32,11 +31,17 @@ const FILTERS_NASIONAL: [Filter, string][] = [
 const FILTERS_KOTA: [Filter, string][] = [
   ['all', 'Semua'],
   ['belum', 'Belum diajukan'],
-  ['pusat', 'Menunggu'],
-  ['keuangan', 'Disetujui'],
+  ['menunggu', 'Menunggu'],
+  ['keuangan', 'Siap ditransfer'],
   ['cair', 'Cair'],
   ['ditolak', 'Ditolak'],
 ]
+
+function matchFilter(filter: Filter, stage: ReimburseStage) {
+  if (filter === 'all') return true
+  if (filter === 'menunggu') return stage === 'korwil' || stage === 'pusat'
+  return stage === filter
+}
 
 export function ReimburseListV2Client({ isNasional, items }: { isNasional: boolean; items: ReimburseListItem[] }) {
   const router = useRouter()
@@ -48,7 +53,7 @@ export function ReimburseListV2Client({ isNasional, items }: { isNasional: boole
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase()
     return items.filter((i) => {
-      if (filter === 'disetujui' ? i.stage !== 'keuangan' && i.stage !== 'cair' : filter !== 'all' && i.stage !== filter) return false
+      if (!matchFilter(filter, i.stage)) return false
       return !needle || `${i.nama_event} ${i.namaCabang} ${i.tglDisplay}`.toLowerCase().includes(needle)
     })
   }, [items, filter, q])
@@ -132,29 +137,45 @@ function ExtLink({ href }: { href: string }) {
   )
 }
 
+function CopyLine({ label, value }: { label: string; value: string }) {
+  const [done, setDone] = useState(false)
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        void navigator.clipboard?.writeText(value).then(() => {
+          setDone(true)
+          setTimeout(() => setDone(false), 1500)
+        })
+      }}
+      className={`${MONO} w-full rounded-[10px] px-3 py-2.5 text-left text-[12px] font-bold ring-2 ring-[#161616] ${PRESS}`}
+    >
+      {done ? 'Tersalin ✓' : label}
+    </button>
+  )
+}
+
+/** Sekretariat Nasional: tracker read-only. Keputusan diambil lewat link tanpa login (Korwil → PIC LevelUP → Keuangan). */
 export function ReimburseReviewV2Client({ review }: { review: ReimburseReview }) {
   const router = useRouter()
-  const { reimburse: r } = review
-  const stage: ReimburseStage = r.approvenasional === '0' ? 'ditolak' : r.approvenasional !== '1' ? 'pusat' : r.approvekeuangan === '1' ? 'cair' : 'keuangan'
+  const { view, links, share } = review
+  const r = view.reimburse
+  const stage = view.stage
   const st = REIMBURSE_STAGE[stage]
+  const current = danaStepIndex(stage)
+  const stamps = [view.at.korwil, view.at.pic, view.at.cair, null]
   const [pending, start] = useTransition()
   const [error, setError] = useState('')
   const [toast, setToast] = useState<string | null>(null)
-  const [rejectOpen, setRejectOpen] = useState(false)
-  const [alasan, setAlasan] = useState('')
-  const [confirmCair, setConfirmCair] = useState(false)
+  const notifStage = stage === 'pusat' ? view.at.notifPic : stage === 'keuangan' ? view.at.notifKeuangan : undefined
 
-  function flash(msg: string) {
-    setToast(msg)
-    setTimeout(() => setToast(null), 2200)
-  }
-  function run(fn: () => Promise<{ ok: true } | { ok: false; error: string }>, done: string, after?: () => void) {
+  function resend() {
     setError('')
     start(async () => {
-      const res = await fn()
+      const res = await resendDanaNotif(view.idEvent)
       if (!res.ok) return setError(res.error)
-      after?.()
-      flash(done)
+      setToast('Notif WA grup terkirim')
+      setTimeout(() => setToast(null), 2200)
       router.refresh()
     })
   }
@@ -162,8 +183,8 @@ export function ReimburseReviewV2Client({ review }: { review: ReimburseReview })
   return (
     <PaperMain>
       <PaperHeader
-        sticker={`${review.namaCabang} · ${review.tglDisplay}`}
-        title={review.nama_event}
+        sticker={`${view.kota} · ${view.tanggal}`}
+        title={view.namaEvent}
         leading={<IconButton icon="chevronLeft" label="Kembali" onClick={() => router.push(`${ALK_BASE}/reimburse`)} className="-rotate-3" />}
       />
       <div className="px-5 mt-5 space-y-4 pb-4">
@@ -173,78 +194,93 @@ export function ReimburseReviewV2Client({ review }: { review: ReimburseReview })
         </div>
 
         <div className={`${PANEL} ${ROWS} overflow-hidden`}>
+          {DANA_STEPS.map((s, i) => {
+            const done = current > i || (current === 4 && i === 3)
+            const active = current === i
+            return (
+              <div key={s.key} className="flex items-center gap-3 px-4 py-2.5">
+                <span
+                  className={`${MONO} flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
+                    done ? 'bg-[#161616] text-[#ffd83d]' : active ? 'bg-[#ffd83d] text-[#161616] ring-2 ring-[#161616]' : 'ring-2 ring-[#161616]/20 text-[#57534e]'
+                  }`}
+                >
+                  {done ? '✓' : i + 1}
+                </span>
+                <span className={`${MONO} flex-1 text-[12px] font-bold ${active ? '' : 'text-[#57534e]'}`}>
+                  {s.label}
+                  {i === 0 && view.korwil ? <span className="block text-[10.5px] font-normal">{view.korwil.nama}{view.korwil.koordinator ? ` — ${view.korwil.koordinator}` : ''}</span> : null}
+                </span>
+                {done && stamps[i] ? <span className={`${MONO} text-[10px] text-[#57534e]`}>{stamps[i]}</span> : null}
+              </div>
+            )
+          })}
+        </div>
+
+        {view.rejection ? (
+          <>
+            <p className={`${ERROR} whitespace-pre-wrap`}>Ditolak {view.rejection.oleh}: {view.rejection.alasan || '-'}</p>
+            <Note tone="rose">Menunggu ALK Kota memperbaiki dan mengajukan ulang.</Note>
+          </>
+        ) : null}
+
+        {stage === 'korwil' && !view.korwil ? (
+          <Note tone="rose">Pengajuan lama tanpa korwil. ALK Kota perlu memilih Korwil PPHTGD lalu Ajukan ulang.</Note>
+        ) : null}
+
+        {links.korwil || links.pic || links.keuangan ? (
+          <div className="space-y-2">
+            <p className={`${LABEL} text-[9.5px] text-[#57534e]`}>Link langkah aktif (tanpa login)</p>
+            {links.korwil ? <CopyLine label="Salin link Korwil" value={links.korwil} /> : null}
+            {share?.waUrl ? (
+              <a href={share.waUrl} target="_blank" rel="noreferrer" className={`${MONO} block w-full rounded-[10px] bg-[#1f9d55] px-3 py-2.5 text-center text-[12px] font-bold text-white ${PRESS}`}>
+                Kirim ke Korwil via WhatsApp
+              </a>
+            ) : null}
+            {links.pic ? <CopyLine label="Salin link PIC LevelUP Pusat" value={links.pic} /> : null}
+            {links.keuangan ? <CopyLine label="Salin link Keuangan PPHTGD" value={links.keuangan} /> : null}
+          </div>
+        ) : null}
+
+        {notifStage !== undefined ? (
+          <div className="space-y-2">
+            {notifStage ? (
+              <Note tone="sky">Notif WA grup PPHTGD terkirim {notifStage}.</Note>
+            ) : stage === 'keuangan' && !links.keuangan ? (
+              <Note tone="rose">
+                Pengajuan lama (disetujui sebelum alur link): link Keuangan belum ada. Tombol di bawah membuat link dan
+                mengirimnya ke grup WA PPHTGD.
+              </Note>
+            ) : (
+              <Note tone="rose">Notif WA grup PPHTGD belum terkirim.</Note>
+            )}
+            <button type="button" disabled={pending} onClick={resend} className={BTN}>
+              <Strip tone="ink" className="py-2.5 text-[16px]">
+                {pending ? '...' : stage === 'keuangan' && !links.keuangan ? 'Kirim link Keuangan ke grup WA' : 'Kirim ulang notif WA grup'}
+              </Strip>
+            </button>
+          </div>
+        ) : null}
+
+        <div className={`${PANEL} ${ROWS} overflow-hidden`}>
           <Line label="Link Dokumentasi"><ExtLink href={r.bukti} /></Line>
           <Line label="Link Laporan"><ExtLink href={r.laporan} /></Line>
-          <Line label="Jumlah Hadir (absen)">{review.jumlahHadir}</Line>
+          <Line label="Jumlah Hadir (absen)">{view.hadir}</Line>
           <Line label="Pengajuan Dana">{fmtRp(r.danausul)}</Line>
           <Line label="Penggunaan Dana Riil">{fmtRp(r.danariil)}</Line>
           <Line label="Bank">{r.namabank || '-'}</Line>
           <Line label="No Rekening">{r.norek || '-'}</Line>
           <Line label="Atas Nama">{r.namarek || '-'}</Line>
+          {r.buktitf ? <Line label="Bukti Transfer"><ExtLink href={r.buktitf} /></Line> : null}
         </div>
 
         {error ? <p role="alert" className={ERROR}>{error}</p> : null}
 
-        {stage === 'pusat' ? (
-          <Decide
-            approve={pending ? '...' : 'Approve'}
-            reject="Tolak"
-            disabled={pending}
-            onApprove={() => run(() => approveReimburseNasional(r.id_reimburse), 'Dana disetujui')}
-            onReject={() => { setError(''); setRejectOpen(true) }}
-          />
-        ) : null}
-
-        {stage === 'ditolak' ? (
-          <>
-            {r.notenasional ? <p className={`${ERROR} whitespace-pre-wrap`}>Alasan ditolak: {r.notenasional}</p> : null}
-            <Note tone="rose">Menunggu ALK Kota memperbaiki dan mengajukan ulang.</Note>
-          </>
-        ) : null}
-
         {stage === 'keuangan' || stage === 'cair' ? (
-          <div className="space-y-3">
-            <a href={`/surat-keuangan/${review.id_event}`} target="_blank" rel="noreferrer" className={BTN}>
-              <Strip tone="ink" className="py-2.5 text-[16px]">Cetak Surat untuk Keuangan</Strip>
-            </a>
-            {stage === 'keuangan' ? (
-              <button type="button" disabled={pending} onClick={() => setConfirmCair(true)} className={BTN}>
-                <Strip className="py-2.5 text-[16px]">Tandai sudah cair</Strip>
-              </button>
-            ) : (
-              <Note tone="sky">Dana sudah ditandai cair.</Note>
-            )}
-          </div>
+          <a href={`/surat-keuangan/${view.idEvent}`} target="_blank" rel="noreferrer" className={BTN}>
+            <Strip tone="ink" className="py-2.5 text-[16px]">Cetak Surat untuk Keuangan</Strip>
+          </a>
         ) : null}
       </div>
-
-      <Sheet open={rejectOpen} onClose={() => { if (!pending) { setRejectOpen(false); setError('') } }}>
-        <SheetHead title="Tolak pengajuan dana" sub={review.nama_event} />
-        <Field label="Alasan">
-          <textarea value={alasan} onChange={(e) => setAlasan(e.target.value)} rows={4} placeholder="Alasan penolakan…" className={`${FLD} resize-none`} />
-        </Field>
-        {error ? <p role="alert" className={`${ERROR} mt-2`}>{error}</p> : null}
-        <button
-          type="button"
-          disabled={pending}
-          onClick={() => run(() => rejectReimburseNasional(r.id_reimburse, alasan), 'Pengajuan ditolak', () => { setRejectOpen(false); setAlasan('') })}
-          className={`mt-4 ${BTN}`}
-        >
-          <Strip>{pending ? '...' : 'Tolak pengajuan'}</Strip>
-        </button>
-      </Sheet>
-
-      <Sheet open={confirmCair} onClose={() => { if (!pending) setConfirmCair(false) }}>
-        <SheetHead title="Tandai sudah cair?" sub="Pastikan Keuangan PPHTGD sudah mentransfer dana ke rekening." />
-        <button
-          type="button"
-          disabled={pending}
-          onClick={() => run(() => cairkanReimburseNasional(r.id_reimburse), 'Dana ditandai cair', () => setConfirmCair(false))}
-          className={`mt-4 ${BTN}`}
-        >
-          <Strip tone="ink">{pending ? '...' : 'Ya, sudah cair'}</Strip>
-        </button>
-      </Sheet>
       <Toast msg={toast} />
     </PaperMain>
   )

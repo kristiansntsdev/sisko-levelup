@@ -105,13 +105,32 @@ components/demo-preview/              # db.ts (tabel meniru Prisma + seed + stor
 scripts/gen-demo-preview.mjs          # Salin UI asli ke /demo-preview + ganti import action/rute; jalankan ulang setelah mengubah layar asli
   surat-keuangan/[id]/page.tsx        # Cetak surat Permohonan Pengajuan Support Dana untuk Keuangan (kop public/assets/kop-keuangan.png); hanya setelah approvenasional=1; pilih Korwil dari API pphtgd
 components/documents/surat-keuangan.tsx # Surat Keuangan murni (buildSuratKeuangan, matchKorwil, SuratKeuanganPage); dipakai halaman asli + /demo-preview/surat-keuangan/[id]
-lib/surat-keuangan.ts                 # loadSuratKeuangan: event + reimburse + cabang.leadercabang + peserta unik dari absen
+lib/surat-keuangan.ts                 # loadSuratKeuangan (cetak ALK, siap setelah PIC LevelUP ACC) di atas loadDanaByEvent
 lib/pphtgd-korwil.ts                  # listKorwilPphtgd: GET pphtgd-official /api/internal/levelup/korwils (Bearer PPHTGD_API_SECRET), tanpa default
   dashboard/v2/kota/alk/reimburse/    # Sekretariat v2: daftar pengajuan dana (Nasional = semua kota + antrian; ALK Kota = status event kotanya) + [id] review Approve/Tolak/Tandai cair (nasional only)
 components/alk-v2/reimburse.tsx       # ReimburseListV2Client + ReimburseReviewV2Client (gaya kertas)
-lib/reimburse-stage.ts                # reimburseStage + REIMBURSE_STAGE: satu sumber tahap dana (belum/pusat/keuangan/cair/ditolak), dipakai app asli + demo
+lib/reimburse-stage.ts                # reimburseStage + REIMBURSE_STAGE + DANA_STEPS: tahap dana (belum/korwil/pusat/keuangan/cair/ditolak), dipakai app asli + demo
+  dana/[token]/page.tsx               # Link tanpa login: Korwil PPHTGD / PIC LevelUP Pusat / Keuangan PPHTGD (peran dari token)
+components/dana/dana-approval.tsx     # UI link dana: ringkasan, tracker, pratinjau surat, Setujui/Tolak, upload bukti transfer
+lib/dana-approval.ts                  # loadDanaByEvent/loadDanaByToken → DanaView (dipakai link, form ALK, review Nasional, cetak surat); countHadirUnik
+lib/dana-link.ts                      # newDanaTokens, danaLinkUrl (AUTH_URL), korwilWaText/korwilWaUrl (wa.me)
+lib/dana-flow.ts                      # sendDanaGroupNotif (pphtgd → grup WA, isi notif_*_at), danaTelegram, revalidateDana
+lib/actions/dana-link.ts              # decideDanaKorwil, decideDanaPic, markDanaCair (auth = token)
+lib/pphtgd-notify.ts                  # notifyPphtgdDana: POST pphtgd /api/internal/levelup/dana/notify (Bearer PPHTGD_API_SECRET)
+lib/surat-keuangan-data.ts            # buildSuratKeuangan, matchKorwil, KorwilOption (+wa), SURAT_KEUANGAN: data surat murni, aman di server
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-11-07]
+- **Alur pengajuan dana baru** (ganti approval Sekretariat Nasional di app): ALK Kota submit + pilih **Korwil PPHTGD** (nama korwil — ketua, dari API pphtgd `listKorwilPphtgd`, default `matchKorwil` nama kota) → kartu **Kirim ke Korwil** (wa.me ke nomor ketua korwil + Salin link/pesan) → Korwil buka `/dana/{token}` tanpa login, lihat ringkasan (dana, rekening, acara, peserta hadir) → Setujui/Tolak → sisko `POST {PPHTGD_API_URL}/api/internal/levelup/dana/notify` → pphtgd kirim link **PIC LevelUP Pusat** ke grup WA pengajuan kegiatan → PIC Setujui (lihat surat) → WA kedua: link **Keuangan PPHTGD** → tandai sudah ditransfer + upload bukti opsional (Blob `reimburse/buktitf/`)
+- Status tetap di kolom lama `reimburse`: `approvepphtgd` (Korwil) → `approvenasional` (PIC LevelUP) → `approvekeuangan` (cair) + `notepphtgd`/`notenasional`/`buktitf`. Stage baru `korwil` di `lib/reimburse-stage.ts`; `approvenasional='1'` dicek dulu supaya baris lama tetap benar. Form ALK terkunci begitu Korwil ACC (`isReimburseLocked`)
+- Tabel baru `reimburse_approval` (1:1 `id_reimburse`): snapshot korwil (id, nama, koordinator, wa) + token per peran (`token_korwil/pic/keuangan`, 43 char base64url, unik) + waktu langkah + `notif_pic_at`/`notif_keuangan_at`. Token dibuat ulang tiap submit → link lama "Link tidak berlaku". Semua tulis kondisional pada langkah aktif (double tap aman). `korwil_id 0` = baris lama tanpa snapshot
+- Sekretariat Nasional: Approve/Tolak/Tandai cair **dihapus** (juga action `approve/reject/cairkanReimburseNasional`, `countPendingReimburseNasional`, todo beranda). Review `/reimburse/{id}` = tracker read-only + salin link langkah aktif + **Kirim ulang notif WA grup** (kalau pphtgd gagal; untuk baris lama di tahap keuangan sekaligus membuat link Keuangan). Kartu dana di approve legacy jadi read-only
+- Notif pphtgd gagal tidak membatalkan keputusan (`notif_*_at` NULL, terlihat di review Nasional). Telegram ops tiap langkah hanya status + tombol ke review Nasional, tidak pernah berisi link `/dana`
+- Surat Keuangan: korwil dari snapshot (picker hanya baris lama), kotak TTD dapat cap "Disetujui via link · {tgl WIB}". Helper data surat pindah ke `lib/surat-keuangan-data.ts` (bisa dipanggil server; ekspor fungsi dari file `'use client'` = client reference di server)
+- `/dana/[token]`: publik, noindex, `referrer: no-referrer`, gaya kertas, teks/tombol besar (banyak korwil sudah tua), konfirmasi sekali sebelum kirim
+- Demo: korwil step + simulasi Korwil/PIC/Keuangan di `reimburse-progress.tsx`, `DEMO_KORWIL.wa = null` (tidak pernah wa.me), kunci localStorage `v4`. `/dana/*` tidak ada di demo
+- Rilis: **pphtgd dulu** (field `wa` + endpoint notify), lalu sisko (prod-migrate otomatis CREATE TABLE `reimburse_approval`)
 
 ## Recent Updates [2026-11-07]
 - Kesaksian (`/dashboard/kesaksian`) kini tersimpan di DB, bukan stub: tabel baru `kesaksian` (`id_kesaksian`, `id_peserta`, `isi`, `created_at`). Peserta login tulis lewat `kirimKesaksian` (wajib isi, maks 2000, boleh berkali-kali) dan hanya melihat kesaksiannya sendiri (`listKesaksianSaya`, terbaru dulu). Belum ada layar pengurus untuk membaca semua kesaksian (query DB langsung)

@@ -3,7 +3,7 @@
 // so the shim actions can return exactly what lib/actions/* return and the real UI renders unchanged.
 // State lives in memory + localStorage only. Never import lib/actions/*, next-auth, @/lib/db or prisma here.
 
-export const STORAGE_KEY = 'levelup-demo-preview:v3'
+export const STORAGE_KEY = 'levelup-demo-preview:v4'
 const VERSION = 2
 const DAY = 24 * 60 * 60 * 1000
 const WIB = 7 * 60 * 60 * 1000
@@ -114,10 +114,21 @@ export type DbReimburse = {
   danariil: string
   laporan: string
   bukti: string
+  /** Korwil PPHTGD (step 1): '' menunggu, '1' setuju, '0' tolak */
+  approvepphtgd: string
+  notepphtgd: string
+  /** PIC LevelUP Pusat (step 2) */
   approvenasional: string
   notenasional: string
+  /** Keuangan PPHTGD (step 3) = cair */
   approvekeuangan: string
   notekeuangan: string
+  buktitf: string
+  /** Snapshot korwil yang dipilih saat submit (reimburse_approval di app asli) */
+  korwil: DemoKorwil | null
+  korwil_at: string | null
+  pic_at: string | null
+  cair_at: string | null
   at: string // last time the request changed hands
   history: DbReimburseHistory[]
 }
@@ -189,11 +200,16 @@ function wibWall(now: Date, minutesAgo: number): { date: string; jam: string } {
 
 const ago = (now: Date, ms: number) => new Date(now.getTime() - ms).toISOString()
 
-/** Sample korwil list for the Surat Keuangan picker (the real app reads it from pphtgd-official). Fictional names. */
-export const DEMO_KORWIL = [
-  { id: 1, nama: 'Korwil Medan', koordinator: 'Pdt. Winsan Iksan, S.Th', kota: 'Medan' },
-  { id: 2, nama: 'Korwil Binjai', koordinator: 'Pdt. Andreas Harahap', kota: 'Binjai' },
-  { id: 3, nama: 'Korwil Pematangsiantar', koordinator: 'Pdt. Markus Purba', kota: 'Pematangsiantar' },
+export type DemoKorwil = { id: number; nama: string; koordinator: string | null; kota: string | null; wa: string | null }
+
+/**
+ * Sample korwil list for the dana form + Surat Keuangan (the real app reads it from pphtgd-official). Fictional names.
+ * wa is always null: the demo must never open wa.me to a real number.
+ */
+export const DEMO_KORWIL: DemoKorwil[] = [
+  { id: 1, nama: 'Korwil Medan', koordinator: 'Pdt. Winsan Iksan, S.Th', kota: 'Medan', wa: null },
+  { id: 2, nama: 'Korwil Binjai', koordinator: 'Pdt. Andreas Harahap', kota: 'Binjai', wa: null },
+  { id: 3, nama: 'Korwil Pematangsiantar', koordinator: 'Pdt. Markus Purba', kota: 'Pematangsiantar', wa: null },
 ]
 
 export const HOME_CABANG = '12'
@@ -322,18 +338,23 @@ export function buildSeed(now: Date = new Date()): DemoDb {
     {
       id_reimburse: id(), id_event: String(lalu1.id_event), ajukan: 'Ajukan', namabank: 'BCA', norek: '1234567890', namarek: 'ALK LevelUP Medan',
       danausul: '1200000', danariil: '1150000', laporan: 'https://drive.google.com/demo-lpj', bukti: 'https://drive.google.com/demo-dokumentasi',
-      approvenasional: '1', notenasional: '', approvekeuangan: '1', notekeuangan: '', at: ago(now, 24 * DAY),
+      approvepphtgd: '1', notepphtgd: '', approvenasional: '1', notenasional: '', approvekeuangan: '1', notekeuangan: '', buktitf: '',
+      korwil: DEMO_KORWIL[0], korwil_at: ago(now, 29 * DAY), pic_at: ago(now, 27 * DAY), cair_at: ago(now, 24 * DAY),
+      at: ago(now, 24 * DAY),
       history: [
         { stage: 'Diajukan oleh ALK Kota', at: ago(now, 30 * DAY), by: 'Admin LK Medan' },
-        { stage: 'Disetujui LevelUP Pusat', at: ago(now, 27 * DAY), by: 'LevelUP Pusat' },
-        { stage: 'Dana dicairkan', at: ago(now, 24 * DAY), by: 'Keuangan' },
+        { stage: 'Disetujui Korwil PPHTGD', at: ago(now, 29 * DAY), by: 'Korwil Medan' },
+        { stage: 'Disetujui PIC LevelUP Pusat', at: ago(now, 27 * DAY), by: 'PIC LevelUP Pusat' },
+        { stage: 'Dana ditransfer', at: ago(now, 24 * DAY), by: 'Keuangan PPHTGD' },
       ],
     },
     {
       id_reimburse: id(), id_event: String(lalu2.id_event), ajukan: 'Ajukan', namabank: 'BCA', norek: '1234567890', namarek: 'ALK LevelUP Medan',
       danausul: '1200000', danariil: '', laporan: '', bukti: 'https://drive.google.com/demo-dokumentasi-2',
-      approvenasional: '', notenasional: '', approvekeuangan: '', notekeuangan: '', at: ago(now, 3 * DAY),
-      history: [{ stage: 'Diajukan oleh ALK Kota', at: ago(now, 3 * DAY), by: 'Admin LK Medan' }],
+      approvepphtgd: '', notepphtgd: '', approvenasional: '', notenasional: '', approvekeuangan: '', notekeuangan: '', buktitf: '',
+      korwil: DEMO_KORWIL[0], korwil_at: null, pic_at: null, cair_at: null,
+      at: ago(now, 3 * DAY),
+      history: [{ stage: 'Diajukan oleh ALK Kota · menunggu Korwil', at: ago(now, 3 * DAY), by: 'Admin LK Medan' }],
     },
   ]
 

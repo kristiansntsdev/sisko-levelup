@@ -292,6 +292,37 @@ export async function POST(req: NextRequest) {
     `)
   }
 
+  // Alur dana: snapshot korwil PPHTGD + token link tanpa login per peran (Korwil → PIC LevelUP → Keuangan).
+  const reimburseApprovalTables = await db.$queryRaw<{ TABLE_NAME: string }[]>`
+    SELECT TABLE_NAME FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'reimburse_approval'
+  `
+  const addedReimburseApproval = reimburseApprovalTables.length === 0
+  if (addedReimburseApproval) {
+    await db.$executeRawUnsafe(`
+      CREATE TABLE reimburse_approval (
+        id_reimburse INT NOT NULL,
+        korwil_id INT NOT NULL,
+        korwil_nama VARCHAR(255) NOT NULL,
+        korwil_koordinator VARCHAR(255) NOT NULL DEFAULT '',
+        korwil_wa VARCHAR(20) NULL,
+        token_korwil VARCHAR(64) NOT NULL,
+        token_pic VARCHAR(64) NOT NULL,
+        token_keuangan VARCHAR(64) NOT NULL,
+        korwil_at DATETIME(0) NULL,
+        pic_at DATETIME(0) NULL,
+        cair_at DATETIME(0) NULL,
+        notif_pic_at DATETIME(0) NULL,
+        notif_keuangan_at DATETIME(0) NULL,
+        created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id_reimburse),
+        UNIQUE KEY uq_reimburse_approval_korwil (token_korwil),
+        UNIQUE KEY uq_reimburse_approval_pic (token_pic),
+        UNIQUE KEY uq_reimburse_approval_keuangan (token_keuangan)
+      )
+    `)
+  }
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -325,6 +356,7 @@ export async function POST(req: NextRequest) {
     addedPindahKota,
     addedFeedbackApp,
     addedKesaksian,
+    addedReimburseApproval,
     brimUpdated: brim.count,
     brim: row,
   })

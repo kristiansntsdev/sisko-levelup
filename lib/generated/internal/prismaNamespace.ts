@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.8.0
- * Query Engine version: 3c6e192761c0362d496ed980de936e2f3cebcd3a
+ * Prisma Client JS version: 7.9.1
+ * Query Engine version: e922089b7d7502aff4249d5da3420f6fa55fc6ad
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.8.0",
-  engine: "3c6e192761c0362d496ed980de936e2f3cebcd3a"
+  client: "7.9.1",
+  engine: "e922089b7d7502aff4249d5da3420f6fa55fc6ad"
 }
 
 /**
@@ -156,6 +156,19 @@ export type Subset<T, U> = {
 };
 
 /**
+ * Resolved type of the argument passed to the `PrismaClient` constructor.
+ *
+ * When called without a narrower options type (the common case), this resolves
+ * to `PrismaClientOptions` directly, which produces a clear TypeScript error
+ * message (`not assignable to parameter of type 'PrismaClientOptions'`) when
+ * the argument is missing or incomplete. When the user supplies a narrower
+ * options type (e.g. via a literal), it falls back to `Subset` to keep
+ * filtering out unknown properties.
+ */
+export type PrismaClientConstructorArgs<Options extends PrismaClientOptions> =
+  [PrismaClientOptions] extends [Options] ? PrismaClientOptions : Subset<Options, PrismaClientOptions>;
+
+/**
  * SelectSubset
  * @desc From `T` pick properties that exist in `U`. Simple version of Intersection.
  * Additionally, it validates, if both select and include are present. If the case, it errors.
@@ -187,7 +200,7 @@ type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
 export type XOR<T, U> =
   T extends object ?
   U extends object ?
-    (Without<T, U> & U) | (Without<U, T> & T)
+    ((Without<T, U> & U) | (Without<U, T> & T)) & object
   : U : T
 
 
@@ -421,6 +434,7 @@ export const ModelName = {
   pindah_kota: 'pindah_kota',
   feedback_app: 'feedback_app',
   kesaksian: 'kesaksian',
+  reimburse_approval: 'reimburse_approval',
   wilayah_desa: 'wilayah_desa',
   wilayah_kabupaten: 'wilayah_kabupaten',
   wilayah_kecamatan: 'wilayah_kecamatan',
@@ -448,7 +462,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "event_lokasi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "feedback_app" | "kesaksian" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "event_lokasi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "feedback_app" | "kesaksian" | "reimburse_approval" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2894,6 +2908,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    reimburse_approval: {
+      payload: Prisma.$reimburse_approvalPayload<ExtArgs>
+      fields: Prisma.reimburse_approvalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.reimburse_approvalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$reimburse_approvalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.reimburse_approvalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$reimburse_approvalPayload>
+        }
+        findFirst: {
+          args: Prisma.reimburse_approvalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$reimburse_approvalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.reimburse_approvalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$reimburse_approvalPayload>
+        }
+        findMany: {
+          args: Prisma.reimburse_approvalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$reimburse_approvalPayload>[]
+        }
+        create: {
+          args: Prisma.reimburse_approvalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$reimburse_approvalPayload>
+        }
+        createMany: {
+          args: Prisma.reimburse_approvalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.reimburse_approvalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$reimburse_approvalPayload>
+        }
+        update: {
+          args: Prisma.reimburse_approvalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$reimburse_approvalPayload>
+        }
+        deleteMany: {
+          args: Prisma.reimburse_approvalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.reimburse_approvalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.reimburse_approvalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$reimburse_approvalPayload>
+        }
+        aggregate: {
+          args: Prisma.Reimburse_approvalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReimburse_approval>
+        }
+        groupBy: {
+          args: Prisma.reimburse_approvalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Reimburse_approvalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.reimburse_approvalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Reimburse_approvalCountAggregateOutputType> | number
+        }
+      }
+    }
     wilayah_desa: {
       payload: Prisma.$wilayah_desaPayload<ExtArgs>
       fields: Prisma.wilayah_desaFieldRefs
@@ -4214,6 +4294,26 @@ export const KesaksianScalarFieldEnum = {
 export type KesaksianScalarFieldEnum = (typeof KesaksianScalarFieldEnum)[keyof typeof KesaksianScalarFieldEnum]
 
 
+export const Reimburse_approvalScalarFieldEnum = {
+  id_reimburse: 'id_reimburse',
+  korwil_id: 'korwil_id',
+  korwil_nama: 'korwil_nama',
+  korwil_koordinator: 'korwil_koordinator',
+  korwil_wa: 'korwil_wa',
+  token_korwil: 'token_korwil',
+  token_pic: 'token_pic',
+  token_keuangan: 'token_keuangan',
+  korwil_at: 'korwil_at',
+  pic_at: 'pic_at',
+  cair_at: 'cair_at',
+  notif_pic_at: 'notif_pic_at',
+  notif_keuangan_at: 'notif_keuangan_at',
+  created_at: 'created_at'
+} as const
+
+export type Reimburse_approvalScalarFieldEnum = (typeof Reimburse_approvalScalarFieldEnum)[keyof typeof Reimburse_approvalScalarFieldEnum]
+
+
 export const Wilayah_desaScalarFieldEnum = {
   id: 'id',
   kecamatan_id: 'kecamatan_id',
@@ -4761,6 +4861,18 @@ export const kesaksianOrderByRelevanceFieldEnum = {
 export type kesaksianOrderByRelevanceFieldEnum = (typeof kesaksianOrderByRelevanceFieldEnum)[keyof typeof kesaksianOrderByRelevanceFieldEnum]
 
 
+export const reimburse_approvalOrderByRelevanceFieldEnum = {
+  korwil_nama: 'korwil_nama',
+  korwil_koordinator: 'korwil_koordinator',
+  korwil_wa: 'korwil_wa',
+  token_korwil: 'token_korwil',
+  token_pic: 'token_pic',
+  token_keuangan: 'token_keuangan'
+} as const
+
+export type reimburse_approvalOrderByRelevanceFieldEnum = (typeof reimburse_approvalOrderByRelevanceFieldEnum)[keyof typeof reimburse_approvalOrderByRelevanceFieldEnum]
+
+
 export const wilayah_desaOrderByRelevanceFieldEnum = {
   id: 'id',
   kecamatan_id: 'kecamatan_id',
@@ -4970,19 +5082,10 @@ export type BatchPayload = {
 export const defineExtension = runtime.Extensions.defineExtension as unknown as runtime.Types.Extensions.ExtendsHook<"define", TypeMapCb, runtime.Types.Extensions.DefaultArgs>
 export type DefaultPrismaClient = PrismaClient
 export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
-export type PrismaClientOptions = ({
-  /**
-   * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-pg`.
-   */
-  adapter: runtime.SqlDriverAdapterFactory
-  accelerateUrl?: never
-} | {
-  /**
-   * Prisma Accelerate URL allowing the client to connect through Accelerate instead of a direct database.
-   */
-  accelerateUrl: string
-  adapter?: never
-}) & {
+/**
+ * Options common to all variants of `PrismaClientOptions`, regardless of whether you connect to your database through a driver adapter or through Prisma Accelerate.
+ */
+export interface PrismaClientBaseOptions {
   /**
    * @default "colorless"
    */
@@ -5069,6 +5172,56 @@ export type PrismaClientOptions = ({
    */
   queryPlanCacheMaxSize?: number
 }
+
+/**
+ * `PrismaClient` options for connecting to your database through Prisma Accelerate instead of a driver adapter.
+ * 
+ * Learn more: https://pris.ly/d/accelerate
+ */
+export interface PrismaClientOptionsWithAccelerateUrl extends PrismaClientBaseOptions {
+  /**
+   * The Prisma Accelerate connection URL. Use this option to connect to your database through Prisma Accelerate instead of using a driver adapter to connect directly.
+   * 
+   * Learn more: https://pris.ly/d/accelerate
+   */
+  accelerateUrl: string
+  adapter?: never
+}
+
+/**
+ * `PrismaClient` options for connecting to your database through a driver adapter. This is the common case in Prisma 7.
+ * 
+ * Learn more: https://pris.ly/d/driver-adapters
+ */
+export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions {
+  /**
+   * A driver adapter that PrismaClient uses to connect to your database, such as the ones provided by `@prisma/adapter-pg`, `@prisma/adapter-libsql`, `@prisma/adapter-planetscale`, etc.
+   * 
+   * A driver adapter is **required** unless you connect to your database through Prisma Accelerate (in which case use `accelerateUrl` instead).
+   * 
+   * Learn more: https://pris.ly/d/driver-adapters
+   * 
+   * @example
+   * ```ts
+   * import { PrismaPg } from '@prisma/adapter-pg'
+   * import { PrismaClient } from './generated/prisma/client'
+   * 
+   * const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+   * const prisma = new PrismaClient({ adapter })
+   * ```
+   */
+  adapter: runtime.SqlDriverAdapterFactory
+  accelerateUrl?: never
+}
+
+/**
+ * Options passed to the `PrismaClient` constructor.
+ * 
+ * A driver adapter (or, alternatively, a Prisma Accelerate URL) is **required**. See {@link PrismaClientOptionsWithAdapter} and {@link PrismaClientOptionsWithAccelerateUrl} for the two variants. All other properties live in {@link PrismaClientBaseOptions} and are optional.
+ * 
+ * Learn more about driver adapters: https://pris.ly/d/driver-adapters
+ */
+export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   sequelizeMeta?: Prisma.SequelizeMetaOmit
   absen?: Prisma.absenOmit
@@ -5107,6 +5260,7 @@ export type GlobalOmitConfig = {
   pindah_kota?: Prisma.pindah_kotaOmit
   feedback_app?: Prisma.feedback_appOmit
   kesaksian?: Prisma.kesaksianOmit
+  reimburse_approval?: Prisma.reimburse_approvalOmit
   wilayah_desa?: Prisma.wilayah_desaOmit
   wilayah_kabupaten?: Prisma.wilayah_kabupatenOmit
   wilayah_kecamatan?: Prisma.wilayah_kecamatanOmit

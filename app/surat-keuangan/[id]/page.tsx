@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import { requireAlkPengurus } from '@/lib/alk-auth'
 import { loadSuratKeuangan } from '@/lib/surat-keuangan'
 import { listKorwilPphtgd } from '@/lib/pphtgd-korwil'
-import { matchKorwil, SuratKeuanganPage } from '@/components/documents/surat-keuangan'
+import { matchKorwil } from '@/lib/surat-keuangan-data'
+import { SuratKeuanganPage } from '@/components/documents/surat-keuangan'
 import { ALK_BASE, ALK_EVENT_BASE } from '@/components/alk-v2/paths'
 
 export const metadata: Metadata = { title: 'Surat Keuangan', robots: { index: false, follow: false } }
@@ -22,9 +23,23 @@ export default async function SuratKeuanganRoute({ params }: { params: Promise<{
   if (res.status === 'not_ready') {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#efe8da] px-6 text-center">
-        <p className="text-[15px] font-bold">Surat tersedia setelah dana disetujui Sekretariat Nasional</p>
+        <p className="text-[15px] font-bold">Surat tersedia setelah dana disetujui PIC LevelUP Pusat</p>
         <a href={back} className="text-[13px] font-bold underline">← Kembali</a>
       </main>
+    )
+  }
+
+  // Korwil yang dipilih saat submit tercetak apa adanya; picker hanya untuk pengajuan lama tanpa snapshot.
+  if (res.korwil) {
+    return (
+      <SuratKeuanganPage
+        data={res.data}
+        backHref={back}
+        korwilOptions={[]}
+        defaultKorwilId={null}
+        fixedKorwil={res.korwil}
+        approvals={res.approvals}
+      />
     )
   }
 
@@ -37,6 +52,7 @@ export default async function SuratKeuanganRoute({ params }: { params: Promise<{
       korwilOptions={options}
       defaultKorwilId={matchKorwil(options, res.namaCabang)}
       korwilError={korwil.ok ? null : korwil.error}
+      approvals={res.approvals}
     />
   )
 }

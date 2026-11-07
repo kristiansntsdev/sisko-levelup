@@ -1,59 +1,32 @@
-import { db } from '@/lib/db'
-import { isAjukan } from '@/lib/reimburse-stage'
-import { buildSuratKeuangan, type SuratKeuanganData } from '@/components/documents/surat-keuangan'
+import { loadDanaByEvent } from '@/lib/dana-approval'
+import type { KorwilOption, SuratApprovals, SuratKeuanganData } from '@/lib/surat-keuangan-data'
 
 export type SuratKeuanganResult =
-  | { status: 'ok'; data: SuratKeuanganData; idCabang: string; namaCabang: string }
+  | {
+      status: 'ok'
+      data: SuratKeuanganData
+      idCabang: string
+      namaCabang: string
+      /** Snapshot korwil dari submit; null untuk baris lama (korwil dipilih saat cetak) */
+      korwil: KorwilOption | null
+      approvals: SuratApprovals
+    }
   | { status: 'not_found' }
   | { status: 'not_ready' }
 
-/** Unique peserta with an absen row; same match as getEventDetail (int or legacy string id). */
-export async function countHadirUnik(idEvent: number): Promise<number> {
-  const absen = await db.absen.findMany({
-    where: { OR: [{ id_event_int: idEvent }, { id_event: String(idEvent) }] },
-    select: { id_peserta: true, id_peserta_int: true },
-  })
-  return new Set(
-    absen.map((a) => a.id_peserta_int ?? parseInt(a.id_peserta, 10)).filter((n) => n != null && !isNaN(n)),
-  ).size
-}
-
-const iso = (d: Date) => d.toISOString().slice(0, 10)
-
-/** Data surat pengajuan support dana untuk Keuangan; hanya tersedia setelah Sekretariat Nasional approve. */
+/** Data surat pengajuan support dana untuk Keuangan; hanya tersedia setelah PIC LevelUP Pusat approve. */
 export async function loadSuratKeuangan(idEvent: number): Promise<SuratKeuanganResult> {
-  const event = await db.event.findUnique({
-    where: { id_event: idEvent },
-    select: { nama_event: true, tglevent: true, tgleventselesai: true, alamatevent: true, jenisevent: true, id_cabang: true },
-  })
-  if (!event) return { status: 'not_found' }
-
-  const reimburse = await db.reimburse.findFirst({ where: { id_event: String(idEvent) } })
-  if (!reimburse) return { status: 'not_found' }
-  if (!isAjukan(reimburse.ajukan) || reimburse.approvenasional !== '1') return { status: 'not_ready' }
-
-  const cabangId = Number(event.id_cabang)
-  const cabang = Number.isInteger(cabangId) && cabangId > 0
-    ? await db.cabang.findUnique({ where: { id_cabang: cabangId }, select: { namacabang: true, leadercabang: true } })
-    : null
-
-  const hadir = await countHadirUnik(idEvent)
-
+  const res = await loadDanaByEvent(idEvent)
+  if (!res) return { status: 'not_found' }
+  const { view } = res
+  // keuangan/cair = dana diajukan + disetujui PIC LevelUP Pusat (approvenasional = 1)
+  if (view.stage !== 'keuangan' && view.stage !== 'cair') return { status: 'not_ready' }
   return {
     status: 'ok',
-    idCabang: event.id_cabang,
-    namaCabang: cabang?.namacabang ?? '',
-    data: buildSuratKeuangan({
-      event: {
-        nama_event: event.nama_event,
-        tglMulai: iso(event.tglevent),
-        tglSelesai: iso(event.tgleventselesai),
-        alamatevent: event.alamatevent,
-        jenisevent: event.jenisevent,
-      },
-      cabang,
-      reimburse,
-      jumlahHadir: hadir,
-    }),
+    idCabang: view.idCabang,
+    namaCabang: view.namaCabang,
+    data: view.surat,
+    korwil: view.korwil,
+    approvals: view.approvals,
   }
 }

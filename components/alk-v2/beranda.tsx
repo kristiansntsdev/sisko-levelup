@@ -37,7 +37,6 @@ export function BerandaClient({
   pendingApprovals,
   pendingPindahKota = 0,
   pendingTiketNasional = 0,
-  pendingReimburse = 0,
   events,
   isNasional = false,
 }: {
@@ -48,7 +47,6 @@ export function BerandaClient({
   pendingApprovals: number
   pendingPindahKota?: number
   pendingTiketNasional?: number
-  pendingReimburse?: number
   events: EventDashboard[]
   isNasional?: boolean
 }) {
@@ -101,16 +99,6 @@ export function BerandaClient({
         href: `${ALK_BASE}/tiket-nasional`,
       })
     }
-    if (isNasional && pendingReimburse) {
-      list.push({
-        key: 'reimburse',
-        i: 'receipt',
-        tint: 'gold',
-        t: `${pendingReimburse} pengajuan dana menunggu approval`,
-        s: 'Approve / Tolak · Sekretariat Nasional',
-        href: `${ALK_BASE}/reimburse`,
-      })
-    }
     for (const e of events) {
       if (e.approvenasional === '0' && e.notenasional) {
         list.push({
@@ -156,7 +144,7 @@ export function BerandaClient({
       soon: 'Set Role',
     })
     return list
-  }, [events, isNasional, namaCabang, pendingApprovals, pendingPindahKota, pendingReimburse, pendingTiketNasional])
+  }, [events, isNasional, namaCabang, pendingApprovals, pendingPindahKota, pendingTiketNasional])
 
   const filteredTodos = useMemo(() => {
     const needle = todoQ.trim().toLowerCase()
@@ -174,7 +162,7 @@ export function BerandaClient({
     { i: 'userPlus', t: 'Tambah Pengurus', tint: 'gold', href: `${ALK_BASE}/anggota/baru` },
     { i: 'users', t: 'Approval Member', tint: 'red', href: `${ALK_BASE}/approval`, badge: pendingApprovals || undefined },
     { i: 'calPlus', t: 'Buat Event', tint: 'red', href: `${ALK_BASE}/event/new` },
-    { i: 'receipt', t: 'Reimburse', tint: 'gold', href: `${ALK_BASE}/reimburse`, badge: isNasional ? pendingReimburse || undefined : undefined },
+    { i: 'receipt', t: 'Reimburse', tint: 'gold', href: `${ALK_BASE}/reimburse` },
     { i: 'shield', t: 'Set Role', tint: 'red', soon: 'Set Role' },
     { i: 'grid', t: 'Lainnya', tint: 'slate', href: `${ALK_BASE}/lainnya` },
   ]

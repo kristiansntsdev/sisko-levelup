@@ -88,6 +88,7 @@ export const ModelName = {
   pindah_kota: 'pindah_kota',
   feedback_app: 'feedback_app',
   kesaksian: 'kesaksian',
+  reimburse_approval: 'reimburse_approval',
   wilayah_desa: 'wilayah_desa',
   wilayah_kabupaten: 'wilayah_kabupaten',
   wilayah_kecamatan: 'wilayah_kecamatan',
@@ -605,6 +606,26 @@ export const KesaksianScalarFieldEnum = {
 } as const
 
 export type KesaksianScalarFieldEnum = (typeof KesaksianScalarFieldEnum)[keyof typeof KesaksianScalarFieldEnum]
+
+
+export const Reimburse_approvalScalarFieldEnum = {
+  id_reimburse: 'id_reimburse',
+  korwil_id: 'korwil_id',
+  korwil_nama: 'korwil_nama',
+  korwil_koordinator: 'korwil_koordinator',
+  korwil_wa: 'korwil_wa',
+  token_korwil: 'token_korwil',
+  token_pic: 'token_pic',
+  token_keuangan: 'token_keuangan',
+  korwil_at: 'korwil_at',
+  pic_at: 'pic_at',
+  cair_at: 'cair_at',
+  notif_pic_at: 'notif_pic_at',
+  notif_keuangan_at: 'notif_keuangan_at',
+  created_at: 'created_at'
+} as const
+
+export type Reimburse_approvalScalarFieldEnum = (typeof Reimburse_approvalScalarFieldEnum)[keyof typeof Reimburse_approvalScalarFieldEnum]
 
 
 export const Wilayah_desaScalarFieldEnum = {
@@ -1152,6 +1173,18 @@ export const kesaksianOrderByRelevanceFieldEnum = {
 } as const
 
 export type kesaksianOrderByRelevanceFieldEnum = (typeof kesaksianOrderByRelevanceFieldEnum)[keyof typeof kesaksianOrderByRelevanceFieldEnum]
+
+
+export const reimburse_approvalOrderByRelevanceFieldEnum = {
+  korwil_nama: 'korwil_nama',
+  korwil_koordinator: 'korwil_koordinator',
+  korwil_wa: 'korwil_wa',
+  token_korwil: 'token_korwil',
+  token_pic: 'token_pic',
+  token_keuangan: 'token_keuangan'
+} as const
+
+export type reimburse_approvalOrderByRelevanceFieldEnum = (typeof reimburse_approvalOrderByRelevanceFieldEnum)[keyof typeof reimburse_approvalOrderByRelevanceFieldEnum]
 
 
 export const wilayah_desaOrderByRelevanceFieldEnum = {
