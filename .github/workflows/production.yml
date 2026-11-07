@@ -27,3 +27,12 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
       - run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      # Migrasi DB idempotent (cek dulu, baru CREATE/ADD): aman dijalankan tiap release, efektif hanya sekali per perubahan skema.
+      - name: Run prod-migrate
+        env:
+          AUTH_URL: ${{ secrets.AUTH_URL }}
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+        run: |
+          curl -sS --fail-with-body --retry 3 --retry-delay 5 --retry-all-errors --max-time 90 \
+            -X POST "${AUTH_URL%/}/api/internal/prod-migrate" \
+            -H "Authorization: Bearer ${INTERNAL_API_SECRET}"

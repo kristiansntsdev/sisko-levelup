@@ -115,7 +115,7 @@ task.md                               # Blocked: approval sampai core
 
 ## Recent Updates [2026-11-07]
 - Kesaksian (`/dashboard/kesaksian`) kini tersimpan di DB, bukan stub: tabel baru `kesaksian` (`id_kesaksian`, `id_peserta`, `isi`, `created_at`). Peserta login tulis lewat `kirimKesaksian` (wajib isi, maks 2000, boleh berkali-kali) dan hanya melihat kesaksiannya sendiri (`listKesaksianSaya`, terbaru dulu). Belum ada layar pengurus untuk membaca semua kesaksian (query DB langsung)
-- Migrasi: `POST /api/internal/prod-migrate` (CREATE TABLE `kesaksian`) — jalankan sebelum deploy dipakai
+- Migrasi: `POST /api/internal/prod-migrate` (CREATE TABLE `kesaksian`). Kini otomatis: step terakhir `.github/workflows/production.yml` (tag `release-*`) memanggilnya setelah `vercel deploy --prod`. Idempotent, jadi aman tiap release. Butuh secret GitHub `INTERNAL_API_SECRET` (sama dengan env Vercel) + `AUTH_URL` = domain produksi
 - Demo: shim `kesaksian` hanya menyimpan di memori modul (hilang saat reload)
 
 ## Recent Updates [2026-11-06]
