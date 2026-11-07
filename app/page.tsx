@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { connection } from 'next/server'
 import { InstallApp } from '@/components/install-app'
 import { getPublicEvents, type EventListItem } from '@/lib/actions/event'
 import { EventThumb } from '@/components/pwa/ui'
@@ -110,6 +111,9 @@ function Polaroid({ e, i }: { e: EventListItem; i: number }) {
 }
 
 export default async function LandingPage() {
+  // Render per request: event list depends on "today" (WIB) + live DB. Prerendered at build it froze the
+  // list until the next deploy and made every build depend on the DB being reachable.
+  await connection()
   const { events } = await getPublicEvents()
   const open = events.filter((e) => e.regState === 'OPEN')
   const preview = (open.length ? open : events).slice(0, PREVIEW_N)

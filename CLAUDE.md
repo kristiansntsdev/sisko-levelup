@@ -118,6 +118,10 @@ task.md                               # Blocked: approval sampai core
 - Migrasi: `POST /api/internal/prod-migrate` (CREATE TABLE `kesaksian`). Kini otomatis: step terakhir `.github/workflows/production.yml` (tag `release-*`) memanggilnya setelah `vercel deploy --prod`. Idempotent, jadi aman tiap release. Butuh secret GitHub `INTERNAL_API_SECRET` (sama dengan env Vercel) + `AUTH_URL` = domain produksi
 - Demo: shim `kesaksian` hanya menyimpan di memori modul (hilang saat reload)
 
+## Recent Updates [2026-11-07]
+- Landing `/` kini render per request (`await connection()`), bukan prerender saat build. Dulu daftar event dibekukan saat build (`tgleventselesai >= hari build`) sampai deploy berikutnya, dan build produksi gagal kalau MySQL Hostinger timeout dari runner CI. Tidak boleh ada halaman yang query DB saat build
+- CI production: langkah prod-migrate memanggil `https://www.levelupgen.com` langsung (domain lain redirect, curl dulu exit 0 tanpa migrasi) dan gagal kalau bukan HTTP 200
+
 ## Recent Updates [2026-11-06]
 - Pemuridan disembunyikan: `PEMURIDAN_AKTIF = false` di `lib/pemuridan.ts` → tile Beranda kembali SOON, `/dashboard/pemuridan` + `/dashboard/pemuridan/{slug}` 404 (demo ikut). Kode cerita tetap ada; set `true` + jalankan generator demo untuk membuka lagi
 
