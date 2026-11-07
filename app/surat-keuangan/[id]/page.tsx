@@ -39,6 +39,7 @@ export default async function SuratKeuanganRoute({ params }: { params: Promise<{
         defaultKorwilId={null}
         fixedKorwil={res.korwil}
         approvals={res.approvals}
+        verifikasiUrl={res.verifikasiUrl}
       />
     )
   }
@@ -53,6 +54,7 @@ export default async function SuratKeuanganRoute({ params }: { params: Promise<{
       defaultKorwilId={matchKorwil(options, res.namaCabang)}
       korwilError={korwil.ok ? null : korwil.error}
       approvals={res.approvals}
+      verifikasiUrl={res.verifikasiUrl}
     />
   )
 }

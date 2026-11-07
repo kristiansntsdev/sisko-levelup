@@ -20,13 +20,14 @@ export type SuratKeuanganData = {
 /** Korwil PPHTGD dari API pphtgd-official. `wa` = digit internasional untuk wa.me (null kalau tidak ada). */
 export type KorwilOption = { id: number; nama: string; koordinator: string | null; kota: string | null; wa: string | null }
 
-/** Teks "Disetujui via link · {tgl}" di kotak TTD; null = belum. */
+/** Teks "Ditandatangani · {tgl}" di kotak TTD (di bawah QR); null = belum. */
 export type SuratApprovals = { korwil?: string | null; pic?: string | null; keuangan?: string | null }
 
 export const SURAT_KEUANGAN = {
   kepada: ['Yth. Pdt. Himawan Leenardo', 'Pengurus PPHTGD Pusat', 'di tempat'],
-  picPusat: { role: 'PIC LevelUP Pusat', nama: 'Steven Kusuma' },
-  keuangan: { role: 'Keuangan PPHTGD', nama: '' },
+  picPusat: { role: 'PIC LevelUP Pusat', nama: 'Stefanus Kusuma' },
+  // Tanpa nama orang: baris nama di bawah kotak TTD juga "Keuangan PPHTGD"
+  keuangan: { role: 'Keuangan PPHTGD', nama: 'Keuangan PPHTGD' },
 } as const
 
 const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']

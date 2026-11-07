@@ -5,6 +5,7 @@ import { useEffect, useSyncExternalStore } from 'react'
 import { buildSuratKeuangan, matchKorwil, SuratKeuanganPage } from '@/components/documents/surat-keuangan'
 import { DEMO_KORWIL, snapshot, subscribe } from '@/components/demo-preview/db'
 import { Loading } from '@/components/demo-preview/alk'
+import { demoDanaView } from '@/components/demo-preview/shim/actions/reimburse'
 
 const ALK = '/demo-preview/dashboard/v2/kota/alk'
 
@@ -55,6 +56,7 @@ export default function DemoSuratKeuanganPage() {
     reimburse,
     jumlahHadir: hadir,
   })
+  const view = demoDanaView(eventId)
   return (
     <SuratKeuanganPage
       data={data}
@@ -62,11 +64,9 @@ export default function DemoSuratKeuanganPage() {
       korwilOptions={DEMO_KORWIL}
       defaultKorwilId={matchKorwil(DEMO_KORWIL, cabang?.namacabang ?? '')}
       fixedKorwil={reimburse.korwil}
-      approvals={{
-        korwil: reimburse.approvepphtgd === '1' ? 'Disetujui via link' : null,
-        pic: reimburse.approvenasional === '1' ? 'Disetujui via link' : null,
-        keuangan: reimburse.approvekeuangan === '1' ? 'Sudah ditransfer' : null,
-      }}
+      // Sama dengan halaman asli: cap + QR tanda tangan dari view pengajuan (QR → /demo-preview/verifikasi/{id})
+      approvals={view?.approvals}
+      verifikasiUrl={view?.verifikasiUrl}
     />
   )
 }

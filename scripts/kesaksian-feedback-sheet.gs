@@ -42,6 +42,9 @@ function syncSisko() {
   try {
     var data = fetchSisko_();
     var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    // Terlihat di Executions → klik satu run
+    console.log('SISKO: ' + (data.kesaksian || []).length + ' kesaksian, ' + (data.feedback || []).length +
+      ' feedback · tujuan "' + ss.getName() + '" ' + ss.getUrl());
     TABS.forEach(function (tab) { writeTab_(ss, tab, data[tab.key] || []); });
   } finally {
     lock.releaseLock();
@@ -71,7 +74,10 @@ function writeTab_(ss, tab, rows) {
 
   var last = sh.getLastRow();
   var current = last > 0 ? sh.getRange(1, 1, last, 2).getDisplayValues() : [];
-  if (JSON.stringify(current) === JSON.stringify(values)) return;
+  if (JSON.stringify(current) === JSON.stringify(values)) {
+    console.log(tab.name + ': tidak ada data baru (' + rows.length + ' baris), sheet tidak ditulis');
+    return;
+  }
 
   sh.getRange(1, 1, sh.getMaxRows(), 2).clearContent();
   if (sh.getMaxRows() < values.length) sh.insertRowsAfter(sh.getMaxRows(), values.length - sh.getMaxRows());
@@ -86,6 +92,7 @@ function writeTab_(ss, tab, rows) {
   sh.setColumnWidth(1, 220);
   sh.setColumnWidth(2, 640);
   sh.getRange(1, 2, values.length, 1).setWrap(true);
+  console.log(tab.name + ': ditulis ' + rows.length + ' baris');
 }
 
 /** Awalan ' membuat Sheets menyimpan teks apa adanya (tanpa tanda ' terlihat), jadi "=..." tidak jadi rumus. */

@@ -1,7 +1,7 @@
 // Server-only loader for one support-dana request: the shared view behind the no-login /dana/{token} links,
 // the ALK Kota form, the Sekretariat Nasional review and the Surat Keuangan print page.
 import { db } from '@/lib/db'
-import type { DanaPeran } from '@/lib/dana-link'
+import { cekVerifikasiHash, parseVerifikasiKode, verifikasiKode, verifikasiUrl, type DanaPeran } from '@/lib/dana-link'
 import {
   reimburseRejection,
   reimburseStage,
@@ -33,6 +33,10 @@ export type DanaTokens = { token_korwil: string; token_pic: string; token_keuang
 export type DanaView = {
   idEvent: number
   idReimburse: number
+  /** "DANA-00012", tampil di halaman verifikasi */
+  idDokumen: string
+  /** Isi QR di kotak TTD Surat Keuangan; null untuk baris lama tanpa reimburse_approval */
+  verifikasiUrl: string | null
   idCabang: string
   /** namacabang mentah (untuk matchKorwil) */
   namaCabang: string
@@ -58,6 +62,8 @@ export type DanaView = {
   /** Snapshot korwil saat submit; null untuk baris lama sebelum alur Korwil */
   korwil: KorwilOption | null
   at: {
+    /** Waktu pertama kali diajukan ke Korwil (reimburse_approval.created_at) */
+    diajukan: string | null
     korwil: string | null
     pic: string | null
     cair: string | null
@@ -115,11 +121,13 @@ async function buildView(row: ReimburseRow, approval: ApprovalRow | null): Promi
         wa: approval.korwil_wa,
       }
     : null
-  const stamp = (d: Date | null | undefined) => (d ? `Disetujui via link · ${fmtWib(d)}` : null)
+  const stamp = (d: Date | null | undefined) => (d ? `Ditandatangani · ${fmtWib(d)}` : null)
 
   return {
     idEvent,
     idReimburse: row.id_reimburse,
+    idDokumen: `DANA-${String(row.id_reimburse).padStart(5, '0')}`,
+    verifikasiUrl: approval ? verifikasiUrl(verifikasiKode(row.id_reimburse, approval.token_korwil)) : null,
     idCabang: event.id_cabang,
     namaCabang: cabang?.namacabang ?? '',
     kota: cabang?.namacabang ? levelupKota(cabang.namacabang) : '-',
@@ -142,6 +150,7 @@ async function buildView(row: ReimburseRow, approval: ApprovalRow | null): Promi
     },
     korwil,
     at: {
+      diajukan: fmtWib(approval?.created_at),
       korwil: fmtWib(approval?.korwil_at),
       pic: fmtWib(approval?.pic_at),
       cair: fmtWib(approval?.cair_at),
@@ -198,4 +207,14 @@ export async function loadDanaByToken(
   if (!row) return null
   const view = await buildView(row, approval)
   return view ? { peran, view, tokens: tokensOf(approval)! } : null
+}
+
+/** Halaman publik /verifikasi/{kode} (QR di kotak TTD). null = kode salah atau pengajuan sudah disubmit ulang. */
+export async function loadDanaByVerifikasi(kode: string): Promise<DanaView | null> {
+  const parsed = parseVerifikasiKode(kode)
+  if (!parsed) return null
+  const approval = await db.reimburse_approval.findUnique({ where: { id_reimburse: parsed.idReimburse } })
+  if (!approval || !cekVerifikasiHash(parsed.hash, approval.token_korwil)) return null
+  const row = await db.reimburse.findUnique({ where: { id_reimburse: approval.id_reimburse } })
+  return row ? buildView(row, approval) : null
 }

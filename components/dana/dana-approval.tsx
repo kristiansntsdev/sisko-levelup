@@ -109,7 +109,7 @@ function SuratPreview({ view }: { view: DanaView }) {
   return (
     <div ref={box} className="relative w-full overflow-hidden rounded-[6px] ring-1 ring-[#161616]/15" style={{ height: ((297 / 25.4) * 96) * scale }}>
       <div className="absolute left-0 top-0 origin-top-left" style={{ transform: `scale(${scale})` }}>
-        <SuratKeuanganDocument data={view.surat} korwil={view.korwil} approvals={view.approvals} />
+        <SuratKeuanganDocument data={view.surat} korwil={view.korwil} approvals={view.approvals} verifikasiUrl={view.verifikasiUrl} />
       </div>
     </div>
   )
@@ -435,7 +435,7 @@ export function DanaApproval({ token, peran, view }: { token: string; peran: Dan
       </div>
       {showSurat ? (
         <div className="hidden print:block">
-          <SuratKeuanganDocument data={view.surat} korwil={view.korwil} approvals={view.approvals} />
+          <SuratKeuanganDocument data={view.surat} korwil={view.korwil} approvals={view.approvals} verifikasiUrl={view.verifikasiUrl} />
         </div>
       ) : null}
     </>

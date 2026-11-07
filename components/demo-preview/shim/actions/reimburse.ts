@@ -21,16 +21,29 @@ const fmtWib = (iso: string | null) =>
     ? `${new Date(iso).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB`
     : null
 
+export const demoVerifikasiUrl = (idEvent: number) =>
+  `${typeof window === 'undefined' ? '' : window.location.origin}/demo-preview/verifikasi/${idEvent}`
+
+/** View satu pengajuan dana untuk halaman verifikasi demo; null kalau belum ada. */
+export function demoDanaView(idEvent: number): DanaView | null {
+  const d = getDb()
+  const r = d.reimburse.find((x) => x.id_event === String(idEvent))
+  return r ? demoView(d, r) : null
+}
+
 /** Same shape as lib/dana-approval buildView, from the demo store. */
 function demoView(d: DemoDb, r: DbReimburse): DanaView | null {
   const event = d.event.find((e) => String(e.id_event) === r.id_event)
   if (!event) return null
   const cabang = d.cabang.find((c) => String(c.id_cabang) === event.id_cabang) ?? null
   const hadir = new Set(d.absen.filter((a) => a.id_event === event.id_event).map((a) => a.id_peserta)).size
-  const stamp = (iso: string | null) => (iso ? `Disetujui via link · ${fmtWib(iso)}` : null)
+  const stamp = (iso: string | null) => (iso ? `Ditandatangani · ${fmtWib(iso)}` : null)
   return {
     idEvent: event.id_event,
     idReimburse: r.id_reimburse,
+    idDokumen: `DANA-${String(r.id_reimburse).padStart(5, '0')}`,
+    // QR TTD di demo menuju halaman verifikasi demo (data dari localStorage browser ini)
+    verifikasiUrl: r.korwil ? demoVerifikasiUrl(event.id_event) : null,
     idCabang: event.id_cabang,
     namaCabang: cabang?.namacabang ?? '',
     kota: cabang?.namacabang ? levelupKota(cabang.namacabang) : '-',
@@ -46,7 +59,7 @@ function demoView(d: DemoDb, r: DbReimburse): DanaView | null {
       bukti: r.bukti, laporan: r.laporan, buktitf: r.buktitf,
     },
     korwil: r.korwil,
-    at: { korwil: fmtWib(r.korwil_at), pic: fmtWib(r.pic_at), cair: fmtWib(r.cair_at), notifPic: null, notifKeuangan: null },
+    at: { diajukan: fmtWib(r.history[0]?.at ?? null), korwil: fmtWib(r.korwil_at), pic: fmtWib(r.pic_at), cair: fmtWib(r.cair_at), notifPic: null, notifKeuangan: null },
     surat: buildSuratKeuangan({
       event: { nama_event: event.nama_event, tglMulai: event.tglevent, tglSelesai: event.tgleventselesai, alamatevent: event.alamatevent, jenisevent: event.jenisevent },
       cabang,

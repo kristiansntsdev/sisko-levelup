@@ -1,5 +1,5 @@
 // Server-only (uses secrets); never import from a client component.
-import { randomBytes } from 'node:crypto'
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 
 export type DanaPeran = 'korwil' | 'pic' | 'keuangan'
 
@@ -12,11 +12,45 @@ export function newDanaTokens(): { token_korwil: string; token_pic: string; toke
   return { token_korwil: token(), token_pic: token(), token_keuangan: token() }
 }
 
-/** Link tanpa login di domain produksi. AUTH_URL wajib (origin polos, lihat decision next_config). */
-export function danaLinkUrl(t: string): string {
+/** Origin produksi untuk link di luar app. AUTH_URL wajib (origin polos, lihat decision next_config). */
+function appOrigin(): string {
   const base = process.env.AUTH_URL?.replace(/\/$/, '')
   if (!base) throw new Error('AUTH_URL belum di-set')
-  return `${base}/dana/${t}`
+  return base
+}
+
+/** Link tanpa login di domain produksi. */
+export function danaLinkUrl(t: string): string {
+  return `${appOrigin()}/dana/${t}`
+}
+
+// ── QR tanda tangan Surat Keuangan → /verifikasi/{kode} ─────────────────────────────────────────
+// kode = id_reimburse + 16 char sha256(token_korwil) (96 bit, pendek supaya QR renggang meski ada logo di tengah):
+// tidak bisa ditebak, tidak membuka link
+// approval (hash satu arah), ikut mati saat ALK Kota submit ulang (token baru), dan tanpa kolom DB baru.
+
+function verifikasiHash(tokenKorwil: string): string {
+  return createHash('sha256').update(`surat-verifikasi:${tokenKorwil}`).digest('base64url').slice(0, 16)
+}
+
+export function verifikasiKode(idReimburse: number, tokenKorwil: string): string {
+  return `${idReimburse}-${verifikasiHash(tokenKorwil)}`
+}
+
+/** null = format salah (tanpa query DB). */
+export function parseVerifikasiKode(kode: string): { idReimburse: number; hash: string } | null {
+  const m = /^(\d{1,10})-([A-Za-z0-9_-]{16})$/.exec(kode)
+  return m ? { idReimburse: Number(m[1]), hash: m[2] } : null
+}
+
+export function cekVerifikasiHash(hash: string, tokenKorwil: string): boolean {
+  const a = Buffer.from(hash)
+  const b = Buffer.from(verifikasiHash(tokenKorwil))
+  return a.length === b.length && timingSafeEqual(a, b)
+}
+
+export function verifikasiUrl(kode: string): string {
+  return `${appOrigin()}/verifikasi/${kode}`
 }
 
 /** Pesan yang dikirim ALK Kota ke WhatsApp ketua korwil. */

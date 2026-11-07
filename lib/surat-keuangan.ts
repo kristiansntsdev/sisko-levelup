@@ -10,6 +10,8 @@ export type SuratKeuanganResult =
       /** Snapshot korwil dari submit; null untuk baris lama (korwil dipilih saat cetak) */
       korwil: KorwilOption | null
       approvals: SuratApprovals
+      /** Isi QR tanda tangan; null untuk baris lama tanpa reimburse_approval */
+      verifikasiUrl: string | null
     }
   | { status: 'not_found' }
   | { status: 'not_ready' }
@@ -28,5 +30,6 @@ export async function loadSuratKeuangan(idEvent: number): Promise<SuratKeuanganR
     data: view.surat,
     korwil: view.korwil,
     approvals: view.approvals,
+    verifikasiUrl: view.verifikasiUrl,
   }
 }
