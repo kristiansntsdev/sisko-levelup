@@ -13,6 +13,7 @@ import {
   reimburseStage,
 } from '@/lib/reimburse-stage'
 import { submitReimburse, type DanaForm, type ReimburseData } from '@/lib/actions/reimburse'
+import type { KorwilOption } from '@/lib/surat-keuangan-data'
 
 const inputCls =
   'w-full px-3.5 py-3 border-[1.5px] border-border rounded-input text-[15px] bg-surface text-fg outline-none focus:border-accent transition-colors disabled:opacity-60'
@@ -110,6 +111,134 @@ function KirimKorwilCard({ share }: { share: NonNullable<DanaForm['share']> }) {
         <CopyText value={share.waText} label="Salin pesan" />
       </div>
     </div>
+  )
+}
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden className={className}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+  )
+}
+
+/** Semua kata harus ada di nama korwil / ketua / kota ("ngawi winsan" cocok dengan "Korwil Ngawi — Winsan Iksan"). */
+function matchesKorwil(k: KorwilOption, words: string[]): boolean {
+  const hay = `${k.nama} ${k.koordinator ?? ''} ${k.kota ?? ''}`.toLowerCase()
+  return words.every((w) => hay.includes(w))
+}
+
+/** Pilih korwil lewat sheet dengan kotak cari (daftar korwil PPHTGD panjang, dropdown susah dipakai di HP). */
+function KorwilPicker({
+  options,
+  value,
+  onChange,
+  disabled,
+}: {
+  options: KorwilOption[]
+  value: number | null
+  onChange: (id: number) => void
+  disabled: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const [q, setQ] = useState('')
+  const selected = options.find((k) => k.id === value) ?? null
+  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean)
+  const shown = words.length ? options.filter((k) => matchesKorwil(k, words)) : options
+
+  function close() {
+    setOpen(false)
+    setQ('')
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        disabled={disabled}
+        className={`${inputCls} flex items-center gap-2 text-left`}
+      >
+        <span className={`flex-1 min-w-0 truncate ${selected ? '' : 'text-muted'}`}>
+          {selected ? `${selected.nama}${selected.koordinator ? ` — ${selected.koordinator}` : ''}` : 'Cari Korwil...'}
+        </span>
+        <SearchIcon className="w-[18px] h-[18px] shrink-0 text-muted" />
+      </button>
+
+      {open ? (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label="Pilih Korwil PPHTGD">
+          <button type="button" aria-label="Tutup" className="absolute inset-0 bg-black/40" onClick={close} />
+          <div className="relative w-full max-w-[480px] h-[85vh] sm:h-auto sm:max-h-[80vh] flex flex-col rounded-t-[20px] sm:rounded-[20px] bg-surface px-4 pt-4 pb-[max(16px,env(safe-area-inset-bottom))] shadow-xl">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[15px] font-semibold text-fg">Pilih Korwil PPHTGD</p>
+              <button type="button" onClick={close} className="text-[13px] text-muted hover:text-fg px-1 py-1">
+                Tutup
+              </button>
+            </div>
+            <label className="mt-3 flex items-center gap-2 px-3.5 py-3 border-[1.5px] border-border rounded-input bg-surface focus-within:border-accent transition-colors">
+              <SearchIcon className="w-5 h-5 shrink-0 text-muted" />
+              <input
+                type="search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') close()
+                  // Enter = pilih kalau hasilnya tinggal satu (jangan submit form)
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    if (shown.length === 1) {
+                      onChange(shown[0].id)
+                      close()
+                    }
+                  }
+                }}
+                placeholder="Nama korwil, kota, atau ketua"
+                autoFocus
+                className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-fg placeholder:text-muted"
+              />
+              {q ? (
+                <button type="button" onClick={() => setQ('')} aria-label="Hapus pencarian" className="text-[18px] leading-none text-muted px-1">
+                  ×
+                </button>
+              ) : null}
+            </label>
+            <p className="mt-2 text-[11px] text-muted">
+              {words.length ? `${shown.length} dari ${options.length} korwil` : `${options.length} korwil`}
+            </p>
+            <div className="mt-2 flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 -mx-1 px-1 pb-1">
+              {shown.length ? (
+                shown.map((k) => {
+                  const on = k.id === value
+                  return (
+                    <button
+                      key={k.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => {
+                        onChange(k.id)
+                        close()
+                      }}
+                      className={`shrink-0 flex items-center gap-3 text-left px-3.5 py-3 rounded-input border-[1.5px] transition-colors ${
+                        on ? 'border-accent bg-accent-light' : 'border-border bg-surface'
+                      }`}
+                    >
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-[14px] font-semibold text-fg">{k.nama}</span>
+                        {k.koordinator ? <span className="block text-[12px] text-muted">{k.koordinator}</span> : null}
+                      </span>
+                      {on ? <span className="text-[16px] font-bold text-accent shrink-0">✓</span> : null}
+                    </button>
+                  )
+                })
+              ) : (
+                <p className="text-center text-[13px] text-muted py-8">Tidak ada korwil “{q.trim()}”</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   )
 }
 
@@ -265,20 +394,7 @@ export function DanaClient({
                   </p>
                 ) : (
                   <>
-                    <select
-                      value={korwilId ?? ''}
-                      onChange={(e) => setKorwilId(e.target.value ? Number(e.target.value) : null)}
-                      disabled={isApproved}
-                      className={`${inputCls} appearance-none`}
-                    >
-                      <option value="">Pilih Korwil</option>
-                      {korwilOptions.map((k) => (
-                        <option key={k.id} value={k.id}>
-                          {k.nama}
-                          {k.koordinator ? ` — ${k.koordinator}` : ''}
-                        </option>
-                      ))}
-                    </select>
+                    <KorwilPicker options={korwilOptions} value={korwilId} onChange={setKorwilId} disabled={isApproved} />
                     {pickedKorwil && !pickedKorwil.wa ? (
                       <p className="text-[12px] text-muted">Nomor WhatsApp korwil ini belum ada di PPHTGD; link dikirim manual.</p>
                     ) : null}
