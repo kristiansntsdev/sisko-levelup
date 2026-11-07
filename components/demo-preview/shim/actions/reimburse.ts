@@ -110,7 +110,24 @@ export async function getDanaForm(idEvent: number): Promise<DanaForm | null> {
           }
         : null,
     korwil: { options: DEMO_KORWIL, defaultId: view?.korwil?.id ?? matchKorwil(DEMO_KORWIL, cabang?.namacabang ?? ''), error: null },
+    rekening: demoRekening(d, event.id_cabang),
   }
+}
+
+/** Rekening tersimpan (tabel rekening_kota di app asli): diturunkan dari pengajuan dana kota yang sama, terbaru dulu. */
+function demoRekening(d: DemoDb, idCabang: string): DanaForm['rekening'] {
+  const eventIds = new Set(d.event.filter((e) => e.id_cabang === idCabang).map((e) => String(e.id_event)))
+  const seen = new Set<string>()
+  return d.reimburse
+    .filter((r) => eventIds.has(r.id_event) && r.norek.trim())
+    .sort((a, b) => b.at.localeCompare(a.at))
+    .flatMap((r) => {
+      const norek = r.norek.replace(/[\s.-]/g, '')
+      if (seen.has(norek)) return []
+      seen.add(norek)
+      return [{ norek, namabank: r.namabank, namarek: r.namarek }]
+    })
+    .slice(0, 5)
 }
 
 export type ReimburseApprovalResult = { ok: true } | { ok: false; error: string }

@@ -89,6 +89,7 @@ export const ModelName = {
   feedback_app: 'feedback_app',
   kesaksian: 'kesaksian',
   reimburse_approval: 'reimburse_approval',
+  rekening_kota: 'rekening_kota',
   wilayah_desa: 'wilayah_desa',
   wilayah_kabupaten: 'wilayah_kabupaten',
   wilayah_kecamatan: 'wilayah_kecamatan',
@@ -626,6 +627,18 @@ export const Reimburse_approvalScalarFieldEnum = {
 } as const
 
 export type Reimburse_approvalScalarFieldEnum = (typeof Reimburse_approvalScalarFieldEnum)[keyof typeof Reimburse_approvalScalarFieldEnum]
+
+
+export const Rekening_kotaScalarFieldEnum = {
+  id_rekening: 'id_rekening',
+  id_cabang: 'id_cabang',
+  norek: 'norek',
+  namabank: 'namabank',
+  namarek: 'namarek',
+  used_at: 'used_at'
+} as const
+
+export type Rekening_kotaScalarFieldEnum = (typeof Rekening_kotaScalarFieldEnum)[keyof typeof Rekening_kotaScalarFieldEnum]
 
 
 export const Wilayah_desaScalarFieldEnum = {
@@ -1185,6 +1198,16 @@ export const reimburse_approvalOrderByRelevanceFieldEnum = {
 } as const
 
 export type reimburse_approvalOrderByRelevanceFieldEnum = (typeof reimburse_approvalOrderByRelevanceFieldEnum)[keyof typeof reimburse_approvalOrderByRelevanceFieldEnum]
+
+
+export const rekening_kotaOrderByRelevanceFieldEnum = {
+  id_cabang: 'id_cabang',
+  norek: 'norek',
+  namabank: 'namabank',
+  namarek: 'namarek'
+} as const
+
+export type rekening_kotaOrderByRelevanceFieldEnum = (typeof rekening_kotaOrderByRelevanceFieldEnum)[keyof typeof rekening_kotaOrderByRelevanceFieldEnum]
 
 
 export const wilayah_desaOrderByRelevanceFieldEnum = {

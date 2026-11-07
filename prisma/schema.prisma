@@ -445,6 +445,19 @@ model reimburse_approval {
   created_at         DateTime  @default(now()) @db.DateTime(0)
 }
 
+/// Rekening tersimpan per LevelUP Kota (cache form pengajuan dana). Diisi setiap ALK Kota menyimpan form dana,
+/// lalu dipakai untuk mengisi No Rekening / Nama Bank / Atas Nama di pengajuan berikutnya. id_cabang = event.id_cabang.
+model rekening_kota {
+  id_rekening Int      @id @default(autoincrement())
+  id_cabang   String   @db.VarChar(16)
+  norek       String   @db.VarChar(64)
+  namabank    String   @default("") @db.VarChar(100)
+  namarek     String   @default("") @db.VarChar(255)
+  used_at     DateTime @default(now()) @db.DateTime(0)
+
+  @@unique([id_cabang, norek], map: "uq_rekening_kota")
+}
+
 model wilayah_desa {
   id           String  @id @db.VarChar(10)
   kecamatan_id String? @db.VarChar(7)

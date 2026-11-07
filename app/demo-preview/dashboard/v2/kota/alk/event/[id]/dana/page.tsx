@@ -48,7 +48,7 @@ export default function AlkV2DanaPage() {
         idEvent={event.id_event}
         namaEvent={event.nama_event}
         tglDisplay={event.tglDisplay}
-        jumlahPeserta={event.registrasi.length}
+        jumlahPeserta={new Set(event.absen.map((a) => a.id_peserta)).size}
         reimburse={reimburse}
         form={form}
         backUrl={`${ALK_EVENT_BASE}/${event.id_event}`}

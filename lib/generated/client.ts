@@ -234,6 +234,12 @@ export type kesaksian = Prisma.kesaksianModel
  */
 export type reimburse_approval = Prisma.reimburse_approvalModel
 /**
+ * Model rekening_kota
+ * Rekening tersimpan per LevelUP Kota (cache form pengajuan dana). Diisi setiap ALK Kota menyimpan form dana,
+ * lalu dipakai untuk mengisi No Rekening / Nama Bank / Atas Nama di pengajuan berikutnya. id_cabang = event.id_cabang.
+ */
+export type rekening_kota = Prisma.rekening_kotaModel
+/**
  * Model wilayah_desa
  * 
  */

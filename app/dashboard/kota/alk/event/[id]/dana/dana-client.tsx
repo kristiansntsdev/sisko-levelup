@@ -154,9 +154,13 @@ export function DanaClient({
   const [laporan, setLaporan] = useState(reimburse?.laporan ?? '')
   const [danausul, setDanausul] = useState(reimburse?.danausul ?? '')
   const [danariil, setDanariil] = useState(reimburse?.danariil ?? '')
-  const [norek, setNorek] = useState(reimburse?.norek ?? '')
-  const [namabank, setNamabank] = useState(reimburse?.namabank ?? '')
-  const [namarek, setNamarek] = useState(reimburse?.namarek ?? '')
+  // Rekening tersimpan LevelUP Kota: isi otomatis yang terakhir dipakai kalau pengajuan ini belum punya rekening
+  const savedRekening = form?.rekening ?? []
+  const ownRekening = !!(reimburse && (reimburse.norek || reimburse.namabank || reimburse.namarek))
+  const prefill = ownRekening ? reimburse : (savedRekening[0] ?? null)
+  const [norek, setNorek] = useState(prefill?.norek ?? '')
+  const [namabank, setNamabank] = useState(prefill?.namabank ?? '')
+  const [namarek, setNamarek] = useState(prefill?.namarek ?? '')
   const [korwilId, setKorwilId] = useState<number | null>(form?.korwil.defaultId ?? null)
 
   const stage = reimburseStage(reimburse)
@@ -332,6 +336,37 @@ export function DanaClient({
                 className={inputCls}
               />
             </FormField>
+
+            {!isApproved && savedRekening.length > 0 ? (
+              <div className="flex flex-col gap-1.5">
+                <p className="text-[12px] font-medium text-muted">Rekening tersimpan</p>
+                {savedRekening.map((r) => {
+                  const picked = r.norek === norek && r.namabank === namabank && r.namarek === namarek
+                  return (
+                    <button
+                      key={r.norek}
+                      type="button"
+                      aria-pressed={picked}
+                      onClick={() => {
+                        setNorek(r.norek)
+                        setNamabank(r.namabank)
+                        setNamarek(r.namarek)
+                      }}
+                      className={`text-left px-3.5 py-2.5 rounded-input border-[1.5px] transition-colors ${
+                        picked ? 'border-accent bg-accent-light' : 'border-border bg-surface'
+                      }`}
+                    >
+                      <span className="block text-[14px] font-semibold text-fg break-all">
+                        {r.namabank ? `${r.namabank} · ` : ''}
+                        {r.norek}
+                      </span>
+                      <span className="block text-[12px] text-muted">a.n. {r.namarek || '-'}</span>
+                    </button>
+                  )
+                })}
+                <p className="text-[11px] text-muted">Tap untuk mengisi. Rekening baru otomatis tersimpan saat form disimpan.</p>
+              </div>
+            ) : null}
 
             <FormField label="No Rekening">
               <input

@@ -323,6 +323,27 @@ export async function POST(req: NextRequest) {
     `)
   }
 
+  // Rekening tersimpan per LevelUP Kota: cache No Rekening / Nama Bank / Atas Nama untuk form dana.
+  const rekeningKotaTables = await db.$queryRaw<{ TABLE_NAME: string }[]>`
+    SELECT TABLE_NAME FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'rekening_kota'
+  `
+  const addedRekeningKota = rekeningKotaTables.length === 0
+  if (addedRekeningKota) {
+    await db.$executeRawUnsafe(`
+      CREATE TABLE rekening_kota (
+        id_rekening INT NOT NULL AUTO_INCREMENT,
+        id_cabang VARCHAR(16) NOT NULL,
+        norek VARCHAR(64) NOT NULL,
+        namabank VARCHAR(100) NOT NULL DEFAULT '',
+        namarek VARCHAR(255) NOT NULL DEFAULT '',
+        used_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id_rekening),
+        UNIQUE KEY uq_rekening_kota (id_cabang, norek)
+      )
+    `)
+  }
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -357,6 +378,7 @@ export async function POST(req: NextRequest) {
     addedFeedbackApp,
     addedKesaksian,
     addedReimburseApproval,
+    addedRekeningKota,
     brimUpdated: brim.count,
     brim: row,
   })

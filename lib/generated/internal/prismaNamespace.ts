@@ -435,6 +435,7 @@ export const ModelName = {
   feedback_app: 'feedback_app',
   kesaksian: 'kesaksian',
   reimburse_approval: 'reimburse_approval',
+  rekening_kota: 'rekening_kota',
   wilayah_desa: 'wilayah_desa',
   wilayah_kabupaten: 'wilayah_kabupaten',
   wilayah_kecamatan: 'wilayah_kecamatan',
@@ -462,7 +463,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "event_lokasi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "feedback_app" | "kesaksian" | "reimburse_approval" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "event_lokasi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "feedback_app" | "kesaksian" | "reimburse_approval" | "rekening_kota" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2974,6 +2975,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    rekening_kota: {
+      payload: Prisma.$rekening_kotaPayload<ExtArgs>
+      fields: Prisma.rekening_kotaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.rekening_kotaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$rekening_kotaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.rekening_kotaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$rekening_kotaPayload>
+        }
+        findFirst: {
+          args: Prisma.rekening_kotaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$rekening_kotaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.rekening_kotaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$rekening_kotaPayload>
+        }
+        findMany: {
+          args: Prisma.rekening_kotaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$rekening_kotaPayload>[]
+        }
+        create: {
+          args: Prisma.rekening_kotaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$rekening_kotaPayload>
+        }
+        createMany: {
+          args: Prisma.rekening_kotaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.rekening_kotaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$rekening_kotaPayload>
+        }
+        update: {
+          args: Prisma.rekening_kotaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$rekening_kotaPayload>
+        }
+        deleteMany: {
+          args: Prisma.rekening_kotaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.rekening_kotaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.rekening_kotaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$rekening_kotaPayload>
+        }
+        aggregate: {
+          args: Prisma.Rekening_kotaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRekening_kota>
+        }
+        groupBy: {
+          args: Prisma.rekening_kotaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Rekening_kotaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.rekening_kotaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Rekening_kotaCountAggregateOutputType> | number
+        }
+      }
+    }
     wilayah_desa: {
       payload: Prisma.$wilayah_desaPayload<ExtArgs>
       fields: Prisma.wilayah_desaFieldRefs
@@ -4314,6 +4381,18 @@ export const Reimburse_approvalScalarFieldEnum = {
 export type Reimburse_approvalScalarFieldEnum = (typeof Reimburse_approvalScalarFieldEnum)[keyof typeof Reimburse_approvalScalarFieldEnum]
 
 
+export const Rekening_kotaScalarFieldEnum = {
+  id_rekening: 'id_rekening',
+  id_cabang: 'id_cabang',
+  norek: 'norek',
+  namabank: 'namabank',
+  namarek: 'namarek',
+  used_at: 'used_at'
+} as const
+
+export type Rekening_kotaScalarFieldEnum = (typeof Rekening_kotaScalarFieldEnum)[keyof typeof Rekening_kotaScalarFieldEnum]
+
+
 export const Wilayah_desaScalarFieldEnum = {
   id: 'id',
   kecamatan_id: 'kecamatan_id',
@@ -4873,6 +4952,16 @@ export const reimburse_approvalOrderByRelevanceFieldEnum = {
 export type reimburse_approvalOrderByRelevanceFieldEnum = (typeof reimburse_approvalOrderByRelevanceFieldEnum)[keyof typeof reimburse_approvalOrderByRelevanceFieldEnum]
 
 
+export const rekening_kotaOrderByRelevanceFieldEnum = {
+  id_cabang: 'id_cabang',
+  norek: 'norek',
+  namabank: 'namabank',
+  namarek: 'namarek'
+} as const
+
+export type rekening_kotaOrderByRelevanceFieldEnum = (typeof rekening_kotaOrderByRelevanceFieldEnum)[keyof typeof rekening_kotaOrderByRelevanceFieldEnum]
+
+
 export const wilayah_desaOrderByRelevanceFieldEnum = {
   id: 'id',
   kecamatan_id: 'kecamatan_id',
@@ -5261,6 +5350,7 @@ export type GlobalOmitConfig = {
   feedback_app?: Prisma.feedback_appOmit
   kesaksian?: Prisma.kesaksianOmit
   reimburse_approval?: Prisma.reimburse_approvalOmit
+  rekening_kota?: Prisma.rekening_kotaOmit
   wilayah_desa?: Prisma.wilayah_desaOmit
   wilayah_kabupaten?: Prisma.wilayah_kabupatenOmit
   wilayah_kecamatan?: Prisma.wilayah_kecamatanOmit

@@ -186,9 +186,55 @@ export async function submitReimburse(idEvent: number, input: SubmitReimburseInp
 
   revalidateDana(idEvent)
 
+  const event = await db.event.findUnique({ where: { id_event: idEvent }, select: { id_cabang: true } })
+  if (event) await saveRekeningKota(event.id_cabang, data)
+
   if (korwil) {
     const res = await loadDanaByEvent(idEvent)
     if (res) await danaTelegram(res.view, 'Dana Diajukan ke Korwil')
+  }
+}
+
+/** Rekening tersimpan LevelUP Kota (tabel rekening_kota), terbaru dipakai dulu. */
+export type SavedRekening = { norek: string; namabank: string; namarek: string }
+
+/** No rekening sebagai kunci cache: tanpa spasi, titik, strip ("123 456-7" = "1234567"). */
+const rekeningKey = (norek: string) => norek.replace(/[\s.-]/g, '')
+
+/**
+ * Cache rekening per LevelUP Kota setiap form dana disimpan. Cache saja: gagal tulis tidak membatalkan
+ * pengajuan yang sudah tersimpan di reimburse.
+ */
+async function saveRekeningKota(
+  idCabang: string,
+  r: { norek: string; namabank: string; namarek: string },
+): Promise<void> {
+  const norek = rekeningKey(r.norek)
+  if (!idCabang || !norek || norek.length > 64) return
+  const fields = { namabank: r.namabank.slice(0, 100), namarek: r.namarek.slice(0, 255), used_at: new Date() }
+  try {
+    await db.rekening_kota.upsert({
+      where: { id_cabang_norek: { id_cabang: idCabang, norek } },
+      create: { id_cabang: idCabang, norek, ...fields },
+      update: fields,
+    })
+  } catch (err) {
+    console.error('[rekening_kota] gagal simpan', err)
+  }
+}
+
+async function listRekeningKota(idCabang: string): Promise<SavedRekening[]> {
+  if (!idCabang) return []
+  try {
+    return await db.rekening_kota.findMany({
+      where: { id_cabang: idCabang },
+      orderBy: { used_at: 'desc' },
+      take: 5,
+      select: { norek: true, namabank: true, namarek: true },
+    })
+  } catch (err) {
+    console.error('[rekening_kota] gagal baca', err)
+    return []
   }
 }
 
@@ -206,6 +252,8 @@ export type DanaForm = {
   view: DanaView | null
   share: DanaKorwilShare | null
   korwil: DanaKorwilPick
+  /** Rekening yang pernah dipakai LevelUP Kota event ini, terbaru dulu (maks 5) */
+  rekening: SavedRekening[]
 }
 
 function korwilShare(view: DanaView, tokenKorwil: string): DanaKorwilShare | null {
@@ -228,12 +276,13 @@ export async function getDanaForm(idEvent: number): Promise<DanaForm | null> {
   const event = await db.event.findUnique({ where: { id_event: idEvent }, select: { id_cabang: true } })
   if (!event || (!me.isNasional && event.id_cabang !== me.cabang)) return null
 
-  const [res, list, cabang] = await Promise.all([
+  const [res, list, cabang, rekening] = await Promise.all([
     loadDanaByEvent(idEvent),
     listKorwilPphtgd(),
     Number(event.id_cabang) > 0
       ? db.cabang.findUnique({ where: { id_cabang: Number(event.id_cabang) }, select: { namacabang: true } })
       : Promise.resolve(null),
+    listRekeningKota(event.id_cabang),
   ])
   const options = list.ok ? list.korwil : []
   const view = res?.view ?? null
@@ -245,6 +294,7 @@ export async function getDanaForm(idEvent: number): Promise<DanaForm | null> {
       defaultId: view?.korwil?.id ?? matchKorwil(options, cabang?.namacabang ?? ''),
       error: list.ok ? null : list.error,
     },
+    rekening,
   }
 }
 
