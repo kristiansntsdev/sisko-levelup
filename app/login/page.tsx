@@ -29,12 +29,36 @@ const LOGIN_INPUT =
 const LOGIN_BOX =
   'flex items-center overflow-hidden rounded-[10px] bg-[#efe8da]/50 ring-1 ring-[#161616]/15 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-[#161616]'
 
+// Auth.js yang gagal balik ke /login?error=... tanpa callbackUrl. Tujuan login Google
+// disimpan per tab supaya "coba lagi" tetap ke link semula (join/absen), bukan /dashboard.
+const CALLBACK_KEY = 'levelup-login-callback'
+
+function signInGoogle(callbackUrl: string) {
+  try {
+    sessionStorage.setItem(CALLBACK_KEY, callbackUrl)
+  } catch {}
+  void signIn('google', { callbackUrl })
+}
+
+function savedCallback(): string | null {
+  try {
+    const v = sessionStorage.getItem(CALLBACK_KEY)
+    return v && v.startsWith('/') && !v.startsWith('//') && !v.startsWith('/\\') ? v : null
+  } catch {
+    return null
+  }
+}
+
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard'
+  const callbackParam = searchParams.get('callbackUrl')
+  const callbackUrl = callbackParam ?? '/dashboard'
+  const authError = searchParams.get('error')
   const auto = searchParams.get('auto') === '1'
   const redirected = useRef(false)
+  // Dibaca saat tombol ditekan (sessionStorage tidak ada saat render server)
+  const dest = () => callbackParam ?? (authError ? savedCallback() : null) ?? '/dashboard'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -46,7 +70,7 @@ function LoginForm() {
   useEffect(() => {
     if (!auto || redirected.current) return
     redirected.current = true
-    void signIn('google', { callbackUrl })
+    signInGoogle(callbackUrl)
   }, [auto, callbackUrl])
 
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && password.length >= 6
@@ -56,6 +80,7 @@ function LoginForm() {
     if (!valid || loading) return
     setError('')
     setLoading(true)
+    const to = dest()
     try {
       const res = await loginEmailPassword(email, password)
       if ('error' in res) {
@@ -67,14 +92,14 @@ function LoginForm() {
         email,
         password,
         redirect: false,
-        callbackUrl,
+        callbackUrl: to,
       })
       if (result?.error) {
         setError('Email atau password salah.')
         setLoading(false)
         return
       }
-      router.push(callbackUrl)
+      router.push(to)
       router.refresh()
     } catch (err) {
       // pengurus path: server action redirect()
@@ -106,9 +131,17 @@ function LoginForm() {
       <div className="px-5 mt-5 pb-[max(env(safe-area-inset-bottom),32px)]">
         <form onSubmit={onSubmit} className={`relative p-5 ${PANEL}`}>
           <span aria-hidden className={`${TAPE} -left-4 -top-1`} />
+          {authError && (
+            <div role="alert" className="mb-4 rounded-sm bg-[#e02a2f]/8 ring-1 ring-[#e02a2f]/30 px-3.5 py-3">
+              <p className={ERROR}>Login belum berhasil, coba lagi.</p>
+              <p className={`${MONO} mt-1 text-[11.5px] leading-relaxed text-[#44403c]`}>
+                Tekan Masuk dengan Google sekali lagi. Kalau masih gagal, buka www.levelupgen.com langsung di Chrome atau Safari, bukan dari dalam WhatsApp / Instagram.
+              </p>
+            </div>
+          )}
           <button
             type="button"
-            onClick={() => signIn('google', { callbackUrl })}
+            onClick={() => signInGoogle(dest())}
             className={`${ANTON} w-full py-3 rounded-sm ring-2 ring-[#161616] bg-white text-[17px] tracking-[.03em] flex items-center justify-center gap-2.5 ${PRESS}`}
           >
             <GoogleIcon />

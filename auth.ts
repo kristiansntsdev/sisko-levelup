@@ -126,6 +126,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/login',
+    // Error login (mis. cookie PKCE hilang) → /login?error=..., bukan halaman "Server error"
+    error: '/login',
   },
   callbacks: {
     async jwt({ token, user, account, trigger, session }) {
