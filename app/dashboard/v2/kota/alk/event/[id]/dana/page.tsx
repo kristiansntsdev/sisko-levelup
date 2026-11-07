@@ -32,7 +32,6 @@ export default async function AlkV2DanaPage({
       reimburse={reimburse}
       form={form}
       backUrl={`${ALK_EVENT_BASE}/${event.id_event}`}
-      suratHref={`/surat-keuangan/${event.id_event}`}
     />
   )
 }

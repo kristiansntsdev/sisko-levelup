@@ -20,7 +20,7 @@ export default function AlkV2DanaPage() {
     }
   })
   // The real page re-renders on the server after each change; here the demo store drives it, so the approval
-  // status (and the Cetak Surat link) follow the Korwil/PIC/Keuangan simulation buttons.
+  // status follows the Korwil/PIC/Keuangan simulation buttons.
   const db = useSyncExternalStore(subscribe, snapshot, () => null)
   const [fresh, setFresh] = useState<{
     reimburse: Awaited<ReturnType<typeof getReimburseForEvent>>
@@ -52,7 +52,6 @@ export default function AlkV2DanaPage() {
         reimburse={reimburse}
         form={form}
         backUrl={`${ALK_EVENT_BASE}/${event.id_event}`}
-        suratHref={`/demo-preview/surat-keuangan/${event.id_event}`}
       />
       <ReimburseProgress idEvent={event.id_event} />
     </div>

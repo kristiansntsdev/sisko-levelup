@@ -330,7 +330,6 @@ export function DanaClient({
   reimburse,
   form,
   backUrl: backUrlProp,
-  suratHref,
 }: {
   idEvent: number
   namaEvent: string
@@ -340,8 +339,6 @@ export function DanaClient({
   /** Status alur + pilihan korwil PPHTGD (getDanaForm) */
   form: DanaForm | null
   backUrl?: string
-  /** Link cetak surat untuk Keuangan; tampil setelah disetujui PIC LevelUP Pusat */
-  suratHref?: string
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -424,22 +421,6 @@ export function DanaClient({
 
         {form?.share ? <KirimKorwilCard share={form.share} /> : null}
 
-        {(stage === 'keuangan' || stage === 'cair') && suratHref ? (
-          <div className="bg-green-light rounded-[14px] px-4 py-3 text-center">
-            <p className="text-[14px] font-semibold text-green-dark">
-              Disetujui PIC LevelUP Pusat{stage === 'cair' ? ' · Dana sudah cair' : ''}
-            </p>
-            <a
-              href={suratHref}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-block text-[13px] font-semibold text-green-dark underline"
-            >
-              Cetak Surat untuk Keuangan
-            </a>
-          </div>
-        ) : null}
-
         <div className="bg-surface border border-border rounded-card overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
             <p className="text-[13px] font-semibold text-fg">Form Pengajuan Dana</p>
@@ -459,7 +440,14 @@ export function DanaClient({
 
             {ajukan === 'Ajukan' ? (
               <FormField label="Korwil PPHTGD">
-                {form?.korwil.error ? (
+                {isApproved ? (
+                  // Sudah disetujui Korwil: tampilkan korwil yang dipilih saat submit, tanpa picker / data pphtgd
+                  <p className="text-[15px] text-fg px-0.5 py-1">
+                    {form?.view?.korwil
+                      ? `${form.view.korwil.nama}${form.view.korwil.koordinator ? ` — ${form.view.korwil.koordinator}` : ''}`
+                      : '-'}
+                  </p>
+                ) : form?.korwil.error ? (
                   <p className="text-[13px] text-red font-medium">
                     Data korwil PPHTGD tidak bisa dimuat ({form.korwil.error}). Coba muat ulang halaman.
                   </p>

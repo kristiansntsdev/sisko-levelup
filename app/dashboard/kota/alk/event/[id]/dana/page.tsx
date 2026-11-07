@@ -41,7 +41,6 @@ export default async function EventDanaPage({
       jumlahPeserta={hadir}
       reimburse={reimburse}
       form={form}
-      suratHref={`/surat-keuangan/${event.id_event}`}
     />
   )
 }
