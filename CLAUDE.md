@@ -120,6 +120,7 @@ task.md                               # Blocked: approval sampai core
 
 ## Recent Updates [2026-11-07]
 - Landing `/` kini render per request (`await connection()`), bukan prerender saat build. Dulu daftar event dibekukan saat build (`tgleventselesai >= hari build`) sampai deploy berikutnya, dan build produksi gagal kalau MySQL Hostinger timeout dari runner CI. Tidak boleh ada halaman yang query DB saat build
+- CI preview + production: `vercel deploy --prebuilt --archive=tgz`. Tanpa archive tiap deploy unggah ~2900 file output satu per satu, dan Vercel Hobby membatasi 5000 unggahan file per hari (`api-upload-free`), habis setelah ~3 deploy. Jangan hapus flag ini
 - CI production: langkah prod-migrate memanggil `https://www.levelupgen.com` langsung (domain lain redirect, curl dulu exit 0 tanpa migrasi) dan gagal kalau bukan HTTP 200
 
 ## Recent Updates [2026-11-06]
