@@ -100,6 +100,8 @@ lib/actions/reimburse.ts              # submitReimburse (ALK Kota) + approve/rej
 lib/monitoring-sheet.ts               # Form Monitoring Teknis: status H-14 / H+14 / kelengkapan per event kota
 app/api/internal/monitoring-sheet/    # GET ?year= (Bearer MONITORING_SHEET_SECRET) → dibaca Apps Script
 scripts/monitoring-sheet.gs           # Apps Script: paste ke spreadsheet, sync tab per tahun tiap 5 menit
+app/api/internal/kesaksian-feedback-sheet/ # GET (Bearer KESAKSIAN_SHEET_SECRET) → nama + isi kesaksian & feedback_app, terbaru dulu
+scripts/kesaksian-feedback-sheet.gs   # Apps Script: tab "Kesaksian" + "Feedback APP" (kolom Nama, isi) tiap 5 menit
   demo-preview/                       # Demo publik: layar ASLI (hasil salinan generator) + data localStorage; login pilih akun demo, tombol DEMO = ganti akun + reset
 components/demo-preview/              # db.ts (tabel meniru Prisma + seed + store localStorage), shim/ (pengganti lib/actions + next-auth), clone/ (GENERATED), alk.tsx, reimburse-progress.tsx
 scripts/gen-demo-preview.mjs          # Salin UI asli ke /demo-preview + ganti import action/rute; jalankan ulang setelah mengubah layar asli
@@ -120,6 +122,9 @@ lib/pphtgd-notify.ts                  # notifyPphtgdDana: POST pphtgd /api/inter
 lib/surat-keuangan-data.ts            # buildSuratKeuangan, matchKorwil, KorwilOption (+wa), SURAT_KEUANGAN: data surat murni, aman di server
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-11-07]
+- Kesaksian + Feedback App ke Google Sheets (spreadsheet `1DEQvqgkDs2dz4jbILgosLsmGHS_FdnYXgCw4vTYmLb8`): Apps Script `scripts/kesaksian-feedback-sheet.gs` tarik `GET /api/internal/kesaksian-feedback-sheet` tiap 5 menit (pola sama dengan Form Monitoring). Tab `Kesaksian` dan `Feedback APP`, hanya kolom Nama + isi, terbaru di atas, ditulis ulang hanya kalau berubah. Isi feedback = jawaban + baris `Pilihan: ...`. Secret sendiri `KESAKSIAN_SHEET_SECRET` (env Vercel + Script Properties `SISKO_API_SECRET`), tanpa fallback: kosong = 401. Teks berawalan `= + - @` disimpan sebagai teks, bukan rumus
 
 ## Recent Updates [2026-11-07]
 - Form dana (legacy + v2): **Jumlah Peserta = peserta unik di `absen`** (`countHadirUnik`), bukan `registrasi` (contoh: 88 registrasi, 72 hadir). Sekarang sama dengan angka yang dilihat Korwil dan di Surat Keuangan
