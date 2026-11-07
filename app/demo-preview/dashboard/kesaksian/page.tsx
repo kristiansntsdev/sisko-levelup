@@ -1,8 +1,10 @@
 /* eslint-disable */
 // GENERATED from app/dashboard/kesaksian/page.tsx by scripts/gen-demo-preview.mjs — do not edit; change the source or the generator and re-run.
 'use client'
-import { useState } from 'react'
-import { BTN, BTN_SHELL, LABEL, MONO, PANEL, PaperHeader, PaperMain, PaperToast, Strip, TAPE } from '@/components/pwa/paper-ui'
+import { useEffect, useState } from 'react'
+import { kirimKesaksian, listKesaksianSaya } from '@/components/demo-preview/shim/actions/kesaksian'
+import { KESAKSIAN_MAX, type KesaksianItem } from '@/lib/kesaksian'
+import { BTN, BTN_SHELL, ERROR, LABEL, MONO, PANEL, PaperHeader, PaperMain, PaperToast, Strip, TAPE } from '@/components/pwa/paper-ui'
 import { Field, FLD, Icon, Sheet, SheetHead } from '@/components/pwa/ui'
 
 // Ruled note paper, same line color as the landing page's note. Text line height matches the rule spacing.
@@ -12,8 +14,42 @@ export default function KesaksianPage() {
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
   const [toast, setToast] = useState<string | null>(null)
-  // ponytail: no kesaksian table yet — UI stub only
-  const items: { t: string; when: string }[] = []
+  const [items, setItems] = useState<KesaksianItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    listKesaksianSaya()
+      .then((rows) => alive && setItems(rows))
+      .catch(() => {})
+      .finally(() => alive && setLoading(false))
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  async function kirim() {
+    setSaving(true)
+    setError(null)
+    try {
+      const r = await kirimKesaksian(text)
+      if (!r.ok) {
+        setError(r.error)
+        return
+      }
+      setItems((cur) => [r.item, ...cur])
+      setOpen(false)
+      setText('')
+      setToast('Kesaksian tersimpan')
+      setTimeout(() => setToast(null), 2400)
+    } catch {
+      setError('Gagal menyimpan. Coba lagi ya.')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <PaperMain>
@@ -30,7 +66,9 @@ export default function KesaksianPage() {
         }
       />
       <div className="px-5 mt-5 space-y-4">
-        {items.length === 0 ? (
+        {loading ? (
+          <p className={`${MONO} text-[12px] text-[#57534e]`}>Memuat…</p>
+        ) : items.length === 0 ? (
           <div className={`relative ${PANEL}`}>
             <span aria-hidden className={`${TAPE} -left-4 -top-1`} />
             <p className={`${MONO} ${LINED} rounded-[14px] text-[13px] text-[#44403c] px-5 pt-7 pb-[28px]`}>
@@ -39,36 +77,28 @@ export default function KesaksianPage() {
           </div>
         ) : (
           items.map((i) => (
-            <div key={i.when} className={`rounded-[14px] px-5 pt-7 pb-[28px] ${LINED} ${PANEL}`}>
-              <p className={`${MONO} text-[13px]`}>{i.t}</p>
-              <p className={`${LABEL} text-[9.5px] text-[#57534e]`}>{i.when}</p>
+            <div key={i.id} className={`rounded-[14px] px-5 pt-7 pb-[28px] ${LINED} ${PANEL}`}>
+              <p className={`${MONO} text-[13px] whitespace-pre-wrap break-words`}>{i.isi}</p>
+              <p className={`${LABEL} text-[9.5px] text-[#57534e]`}>{i.tanggal}</p>
             </div>
           ))
         )}
       </div>
 
       <Sheet open={open} onClose={() => setOpen(false)}>
-        <SheetHead title="Tulis Kesaksian" sub="Fitur simpan ke server segera hadir — draft lokal saja." />
+        <SheetHead title="Tulis Kesaksian" sub="Tersimpan di akunmu, hanya kamu yang bisa melihatnya." />
         <Field label="Kesaksian">
           <textarea
             className={`${FLD} min-h-[120px] resize-none`}
             value={text}
             onChange={(e) => setText(e.target.value)}
+            maxLength={KESAKSIAN_MAX}
             placeholder="Tuliskan kesaksianmu..."
           />
         </Field>
-        <button
-          type="button"
-          disabled={!text.trim()}
-          onClick={() => {
-            setOpen(false)
-            setText('')
-            setToast('Kesaksian tersimpan di perangkat (stub)')
-            setTimeout(() => setToast(null), 2400)
-          }}
-          className={`mt-4 ${BTN}`}
-        >
-          <Strip>Kirim</Strip>
+        {error && <p className={`mt-3 ${ERROR}`}>{error}</p>}
+        <button type="button" disabled={!text.trim() || saving} onClick={kirim} className={`mt-4 ${BTN}`}>
+          <Strip>{saving ? 'Menyimpan…' : 'Kirim'}</Strip>
         </button>
       </Sheet>
       <PaperToast msg={toast} />

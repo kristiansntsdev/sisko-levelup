@@ -42,7 +42,8 @@ components/landing/zine.tsx           # Design system landing (kertas lecek, tor
   dashboard/kartu/                    # Detail Kartu Anggota: MemberCard + data anggota
   dashboard/tiket/                    # My Tickets (TicketCard) + [id] detail tiket + QR
   dashboard/riwayat/                  # Milestone stub dari registrasi
-  dashboard/kesaksian/                # Kesaksian UI stub
+  dashboard/kesaksian/                # Kesaksian saya: tulis + daftar (tabel kesaksian, hanya terlihat penulisnya)
+lib/actions/kesaksian.ts              # kirimKesaksian + listKesaksianSaya (peserta login); batas/format di lib/kesaksian.ts
   dashboard/pemuridan/                # Daftar seri Pemuridan (progres per perangkat) + [slug] cerita interaktif fullscreen
 components/pemuridan/                 # Cerita Pemuridan: story-player (kartu 9:16), kit.ts (gambar SVG + kelas Tailwind literal), satu file per seri, stories.ts (slug → cerita)
 lib/pemuridan.ts                      # PEMURIDAN_AKTIF (sakelar tampil), PEMURIDAN (daftar seri, bagian = jumlah scene), findSeri, progressKey
@@ -111,6 +112,11 @@ components/alk-v2/reimburse.tsx       # ReimburseListV2Client + ReimburseReviewV
 lib/reimburse-stage.ts                # reimburseStage + REIMBURSE_STAGE: satu sumber tahap dana (belum/pusat/keuangan/cair/ditolak), dipakai app asli + demo
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-11-07]
+- Kesaksian (`/dashboard/kesaksian`) kini tersimpan di DB, bukan stub: tabel baru `kesaksian` (`id_kesaksian`, `id_peserta`, `isi`, `created_at`). Peserta login tulis lewat `kirimKesaksian` (wajib isi, maks 2000, boleh berkali-kali) dan hanya melihat kesaksiannya sendiri (`listKesaksianSaya`, terbaru dulu). Belum ada layar pengurus untuk membaca semua kesaksian (query DB langsung)
+- Migrasi: `POST /api/internal/prod-migrate` (CREATE TABLE `kesaksian`) — jalankan sebelum deploy dipakai
+- Demo: shim `kesaksian` hanya menyimpan di memori modul (hilang saat reload)
 
 ## Recent Updates [2026-11-06]
 - Pemuridan disembunyikan: `PEMURIDAN_AKTIF = false` di `lib/pemuridan.ts` → tile Beranda kembali SOON, `/dashboard/pemuridan` + `/dashboard/pemuridan/{slug}` 404 (demo ikut). Kode cerita tetap ada; set `true` + jalankan generator demo untuk membuka lagi

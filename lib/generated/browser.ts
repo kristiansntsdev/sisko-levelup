@@ -198,6 +198,11 @@ export type pindah_kota = Prisma.pindah_kotaModel
  */
 export type feedback_app = Prisma.feedback_appModel
 /**
+ * Model kesaksian
+ * Kesaksian anggota dari Beranda → Kesaksian. Satu baris per kiriman, hanya terlihat oleh penulisnya.
+ */
+export type kesaksian = Prisma.kesaksianModel
+/**
  * Model wilayah_desa
  * 
  */

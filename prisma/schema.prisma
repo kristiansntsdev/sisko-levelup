@@ -417,6 +417,14 @@ model feedback_app {
   created_at  DateTime @default(now()) @db.DateTime(0)
 }
 
+/// Kesaksian anggota dari Beranda → Kesaksian. Satu baris per kiriman, hanya terlihat oleh penulisnya.
+model kesaksian {
+  id_kesaksian Int      @id @default(autoincrement())
+  id_peserta   String   @db.Text
+  isi          String   @db.Text
+  created_at   DateTime @default(now()) @db.DateTime(0)
+}
+
 model wilayah_desa {
   id           String  @id @db.VarChar(10)
   kecamatan_id String? @db.VarChar(7)
