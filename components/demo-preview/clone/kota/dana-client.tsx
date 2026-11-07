@@ -180,8 +180,11 @@ function KorwilPicker({
             </div>
             <label className="mt-3 flex items-center gap-2 px-3.5 py-3 border-[1.5px] border-border rounded-input bg-surface focus-within:border-accent transition-colors">
               <SearchIcon className="w-5 h-5 shrink-0 text-muted" />
+              {/* type="text" (bukan "search"): browser menambah tombol × sendiri, jadi muncul dua */}
               <input
-                type="search"
+                type="text"
+                inputMode="search"
+                enterKeyHint="search"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => {
