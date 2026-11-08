@@ -428,6 +428,17 @@ model kesaksian {
   created_at   DateTime @default(now()) @db.DateTime(0)
 }
 
+/// Fitur beta yang dibuka per anggota (fitur = 'weworship' → tile WeWorship di Beranda + boleh masuk weworship.id/prototype).
+/// Tanpa UI: developer menulis langsung di DB, mis. INSERT INTO beta_akses (id_peserta, fitur) VALUES (123, 'weworship')
+model beta_akses {
+  id_peserta Int
+  fitur      String   @db.VarChar(32)
+  created_at DateTime @default(now()) @db.DateTime(0)
+
+  @@id([id_peserta, fitur])
+  @@index([fitur], map: "idx_beta_akses_fitur")
+}
+
 /// Alur pengajuan dana (1:1 dengan reimburse): korwil PPHTGD yang dipilih ALK Kota saat submit + token link
 /// tanpa login per peran. Status tetap di reimburse (approvepphtgd → approvenasional → approvekeuangan).
 /// Token dibuat ulang setiap submit, jadi link lama mati setelah data diubah.

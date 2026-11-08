@@ -88,6 +88,7 @@ export const ModelName = {
   pindah_kota: 'pindah_kota',
   feedback_app: 'feedback_app',
   kesaksian: 'kesaksian',
+  beta_akses: 'beta_akses',
   reimburse_approval: 'reimburse_approval',
   rekening_kota: 'rekening_kota',
   wilayah_desa: 'wilayah_desa',
@@ -607,6 +608,15 @@ export const KesaksianScalarFieldEnum = {
 } as const
 
 export type KesaksianScalarFieldEnum = (typeof KesaksianScalarFieldEnum)[keyof typeof KesaksianScalarFieldEnum]
+
+
+export const Beta_aksesScalarFieldEnum = {
+  id_peserta: 'id_peserta',
+  fitur: 'fitur',
+  created_at: 'created_at'
+} as const
+
+export type Beta_aksesScalarFieldEnum = (typeof Beta_aksesScalarFieldEnum)[keyof typeof Beta_aksesScalarFieldEnum]
 
 
 export const Reimburse_approvalScalarFieldEnum = {
@@ -1187,6 +1197,13 @@ export const kesaksianOrderByRelevanceFieldEnum = {
 } as const
 
 export type kesaksianOrderByRelevanceFieldEnum = (typeof kesaksianOrderByRelevanceFieldEnum)[keyof typeof kesaksianOrderByRelevanceFieldEnum]
+
+
+export const beta_aksesOrderByRelevanceFieldEnum = {
+  fitur: 'fitur'
+} as const
+
+export type beta_aksesOrderByRelevanceFieldEnum = (typeof beta_aksesOrderByRelevanceFieldEnum)[keyof typeof beta_aksesOrderByRelevanceFieldEnum]
 
 
 export const reimburse_approvalOrderByRelevanceFieldEnum = {

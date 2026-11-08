@@ -11,7 +11,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
 const ROOT = new URL('..', import.meta.url).pathname
-const SHIM_ACTIONS = ['absen', 'event', 'feedback-app', 'jobs-place', 'kesaksian', 'kas-kota', 'peserta', 'pengurus-kota', 'pindah-kota', 'pwa-auth', 'registrasi', 'reimburse', 'upgrade', 'wfe-serentak', 'wilayah']
+const SHIM_ACTIONS = ['absen', 'beta', 'event', 'feedback-app', 'jobs-place', 'kesaksian', 'kas-kota', 'peserta', 'pengurus-kota', 'pindah-kota', 'pwa-auth', 'registrasi', 'reimburse', 'upgrade', 'wfe-serentak', 'wilayah']
 
 /** [source, destination] */
 const FILES = [
@@ -68,7 +68,7 @@ const PATCHES = {
   'app/dashboard/page.tsx': [
     ['import { getPendingSquadForMe, joinSquad, joinVolunteer }', 'import { getPendingSquadForMe, getPendingVolunteerForMe, joinSquad, joinVolunteer }'],
     ['  const [pendingSquad, setPendingSquad] = useState(false)\n', '  const [pendingSquad, setPendingSquad] = useState(false)\n  const [pendingVolunteer, setPendingVolunteer] = useState(false)\n'],
-    ['      getActiveSessions(),\n    ]).then(([regs, p, c, pending, cabs, sessions]) => {\n', '      getActiveSessions(),\n      getPendingVolunteerForMe(),\n    ]).then(([regs, p, c, pending, cabs, sessions, pendingVol]) => {\n      setPendingVolunteer(pendingVol)\n'],
+    ['      getBetaAksesSaya(),\n    ]).then(([regs, p, c, pending, cabs, sessions, fitur]) => {\n', '      getBetaAksesSaya(),\n      getPendingVolunteerForMe(),\n    ]).then(([regs, p, c, pending, cabs, sessions, fitur, pendingVol]) => {\n      setPendingVolunteer(pendingVol)\n'],
     ["    if (res.ok) {\n      setUserLevel('1')\n      flash('Kamu sekarang Volunteer')\n    }", "    if (res.ok) {\n      setPendingVolunteer(true)\n      flash('Pengajuan Volunteer terkirim')\n    }"],
     ['  level,\n  pendingSquad,\n  joinLoading,', '  level,\n  pendingVolunteer,\n  pendingSquad,\n  joinLoading,'],
     ['  level: string\n  pendingSquad: boolean\n', '  level: string\n  pendingVolunteer: boolean\n  pendingSquad: boolean\n'],

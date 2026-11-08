@@ -227,6 +227,12 @@ export type feedback_app = Prisma.feedback_appModel
  */
 export type kesaksian = Prisma.kesaksianModel
 /**
+ * Model beta_akses
+ * Fitur beta yang dibuka per anggota (fitur = 'weworship' → tile WeWorship di Beranda + boleh masuk weworship.id/prototype).
+ * Tanpa UI: developer menulis langsung di DB, mis. INSERT INTO beta_akses (id_peserta, fitur) VALUES (123, 'weworship')
+ */
+export type beta_akses = Prisma.beta_aksesModel
+/**
  * Model reimburse_approval
  * Alur pengajuan dana (1:1 dengan reimburse): korwil PPHTGD yang dipilih ALK Kota saat submit + token link
  * tanpa login per peran. Status tetap di reimburse (approvepphtgd → approvenasional → approvekeuangan).

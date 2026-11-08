@@ -375,6 +375,24 @@ export async function POST(req: NextRequest) {
     await db.$executeRawUnsafe(`ALTER TABLE kas_kota_txn ADD KEY idx_kas_kota_txn_event (id_event)`)
   }
 
+  // Akses fitur beta per anggota (WeWorship prototype). Diisi developer langsung di DB, tanpa UI.
+  const betaAksesTables = await db.$queryRaw<{ TABLE_NAME: string }[]>`
+    SELECT TABLE_NAME FROM information_schema.TABLES
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'beta_akses'
+  `
+  const addedBetaAkses = betaAksesTables.length === 0
+  if (addedBetaAkses) {
+    await db.$executeRawUnsafe(`
+      CREATE TABLE beta_akses (
+        id_peserta INT NOT NULL,
+        fitur VARCHAR(32) NOT NULL,
+        created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id_peserta, fitur),
+        KEY idx_beta_akses_fitur (fitur)
+      )
+    `)
+  }
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -414,6 +432,7 @@ export async function POST(req: NextRequest) {
     addedReimburseApproval,
     addedRekeningKota,
     addedKasTxnIdEvent,
+    addedBetaAkses,
     brimUpdated: brim.count,
     brim: row,
   })

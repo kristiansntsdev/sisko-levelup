@@ -434,6 +434,7 @@ export const ModelName = {
   pindah_kota: 'pindah_kota',
   feedback_app: 'feedback_app',
   kesaksian: 'kesaksian',
+  beta_akses: 'beta_akses',
   reimburse_approval: 'reimburse_approval',
   rekening_kota: 'rekening_kota',
   wilayah_desa: 'wilayah_desa',
@@ -463,7 +464,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "event_lokasi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "feedback_app" | "kesaksian" | "reimburse_approval" | "rekening_kota" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "event_lokasi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "feedback_app" | "kesaksian" | "beta_akses" | "reimburse_approval" | "rekening_kota" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2909,6 +2910,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    beta_akses: {
+      payload: Prisma.$beta_aksesPayload<ExtArgs>
+      fields: Prisma.beta_aksesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.beta_aksesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$beta_aksesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.beta_aksesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$beta_aksesPayload>
+        }
+        findFirst: {
+          args: Prisma.beta_aksesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$beta_aksesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.beta_aksesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$beta_aksesPayload>
+        }
+        findMany: {
+          args: Prisma.beta_aksesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$beta_aksesPayload>[]
+        }
+        create: {
+          args: Prisma.beta_aksesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$beta_aksesPayload>
+        }
+        createMany: {
+          args: Prisma.beta_aksesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.beta_aksesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$beta_aksesPayload>
+        }
+        update: {
+          args: Prisma.beta_aksesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$beta_aksesPayload>
+        }
+        deleteMany: {
+          args: Prisma.beta_aksesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.beta_aksesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.beta_aksesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$beta_aksesPayload>
+        }
+        aggregate: {
+          args: Prisma.Beta_aksesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBeta_akses>
+        }
+        groupBy: {
+          args: Prisma.beta_aksesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Beta_aksesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.beta_aksesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Beta_aksesCountAggregateOutputType> | number
+        }
+      }
+    }
     reimburse_approval: {
       payload: Prisma.$reimburse_approvalPayload<ExtArgs>
       fields: Prisma.reimburse_approvalFieldRefs
@@ -4361,6 +4428,15 @@ export const KesaksianScalarFieldEnum = {
 export type KesaksianScalarFieldEnum = (typeof KesaksianScalarFieldEnum)[keyof typeof KesaksianScalarFieldEnum]
 
 
+export const Beta_aksesScalarFieldEnum = {
+  id_peserta: 'id_peserta',
+  fitur: 'fitur',
+  created_at: 'created_at'
+} as const
+
+export type Beta_aksesScalarFieldEnum = (typeof Beta_aksesScalarFieldEnum)[keyof typeof Beta_aksesScalarFieldEnum]
+
+
 export const Reimburse_approvalScalarFieldEnum = {
   id_reimburse: 'id_reimburse',
   korwil_id: 'korwil_id',
@@ -4941,6 +5017,13 @@ export const kesaksianOrderByRelevanceFieldEnum = {
 export type kesaksianOrderByRelevanceFieldEnum = (typeof kesaksianOrderByRelevanceFieldEnum)[keyof typeof kesaksianOrderByRelevanceFieldEnum]
 
 
+export const beta_aksesOrderByRelevanceFieldEnum = {
+  fitur: 'fitur'
+} as const
+
+export type beta_aksesOrderByRelevanceFieldEnum = (typeof beta_aksesOrderByRelevanceFieldEnum)[keyof typeof beta_aksesOrderByRelevanceFieldEnum]
+
+
 export const reimburse_approvalOrderByRelevanceFieldEnum = {
   korwil_nama: 'korwil_nama',
   korwil_koordinator: 'korwil_koordinator',
@@ -5350,6 +5433,7 @@ export type GlobalOmitConfig = {
   pindah_kota?: Prisma.pindah_kotaOmit
   feedback_app?: Prisma.feedback_appOmit
   kesaksian?: Prisma.kesaksianOmit
+  beta_akses?: Prisma.beta_aksesOmit
   reimburse_approval?: Prisma.reimburse_approvalOmit
   rekening_kota?: Prisma.rekening_kotaOmit
   wilayah_desa?: Prisma.wilayah_desaOmit

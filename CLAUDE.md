@@ -39,6 +39,9 @@ components/landing/zine.tsx           # Design system landing (kertas lecek, tor
   daftar/page.tsx                     # Pendaftaran v2 Gen Z (intro → form live MemberCard → kartu jadi); Google baru → completeRegistration
   dashboard/layout.tsx                # MemberShell bottom nav (skip /dashboard/kota + /dashboard/v2/kota)
   dashboard/page.tsx                  # Beranda PWA warna landing (kertas, hitam, merah, kuning) + font kartu: MemberCard, level, menu, tiket
+lib/beta.ts                           # BETA_WEWORSHIP ('weworship') + WEWORSHIP_URL (tile WeWorship)
+lib/actions/beta.ts                   # getBetaAksesSaya: fitur beta anggota login dari tabel beta_akses (diisi developer langsung di DB)
+app/api/internal/weworship-beta/      # POST { email } (Bearer WEWORSHIP_BETA_SECRET) → { allowed }: dipanggil fe-admin-weworship sebelum sesi /prototype
   dashboard/kartu/                    # Detail Kartu Anggota: MemberCard + data anggota
   dashboard/tiket/                    # My Tickets (TicketCard) + [id] detail tiket + QR
   dashboard/riwayat/                  # Milestone stub dari registrasi
@@ -132,6 +135,10 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-11-09]
+- **WeWorship (beta)** ganti tile Birthday di Beranda (ikon `music` baru). Anggota yang punya baris `beta_akses` (`fitur='weworship'`) melihat tile aktif + cap **Beta** → `https://www.weworship.id/prototype` di tab baru (PWA terpasang: in-app browser); anggota lain = tile Soon. Bukan iframe: cookie sesi WeWorship `SameSite=Lax` + login Google menolak di-frame, jadi di dalam iframe selalu belum login
+- Tabel baru `beta_akses` (`id_peserta` + `fitur` PK, `created_at`), `prod-migrate` → `addedBetaAkses`. **Tanpa UI**, tambah tester langsung di DB: `INSERT INTO beta_akses (id_peserta, fitur) VALUES (123, 'weworship')`; cabut = `DELETE`. `getBetaAksesSaya` gagal baca (mis. sebelum migrasi) → `console.error` + tile Soon, Beranda tetap jalan
+- Login WeWorship prototype ikut dikunci: fe-admin-weworship memanggil `POST /api/internal/weworship-beta` `{ email }` sebelum membuat sesi `/prototype` (Google, login email, daftar). Email dicocokkan ke `peserta.email` atau email Google di `auth_users` milik peserta di daftar. Gagal / env kosong = ditolak. Secret sendiri `WEWORSHIP_BETA_SECRET` (env Vercel sisko) = `SISKO_BETA_SECRET` di fe-admin-weworship, plus `SISKO_URL=https://www.levelupgen.com`
+- Demo: shim `beta` selalu `[]` (tile WeWorship = Soon); patch generator Beranda ikut `getBetaAksesSaya`
 - Kolom baru `peserta.created_at` + `peserta.updated_at` (DATETIME NULL, `prod-migrate` → `addedPesertaCreatedAt`/`addedPesertaUpdatedAt`): member yang sudah ada tetap NULL (= member lama, tanggal daftar tidak tercatat), baris baru dapat `CURRENT_TIMESTAMP`; `updated_at` = `ON UPDATE CURRENT_TIMESTAMP` di MySQL (ikut berubah untuk update dari luar Prisma). Tanpa backfill: `auth_users.created_at` = login Google pertama di v2, bukan tanggal daftar
 - Field-nya **belum** ada di `schema.prisma` (sengaja): prod-migrate jalan setelah deploy, dan Prisma membaca semua kolom di find/update tanpa `select`, jadi field + migrasi dalam satu rilis = semua query peserta error sampai migrasi selesai. Tambahkan field di rilis berikutnya setelah kolom ada di prod
 

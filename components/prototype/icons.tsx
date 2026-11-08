@@ -6,6 +6,7 @@ const P = {
   book: '<path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13"/>',
   gift: '<rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M12 8v12.5M5 12v6.5a2 2 0 002 2h10a2 2 0 002-2V12M12 8S11 3.5 8 3.5a2.2 2.2 0 000 4.5M12 8s1-4.5 4-4.5a2.2 2.2 0 010 4.5"/>',
   chat: '<path d="M20 12a8 8 0 01-11.6 7.1L4 20l.9-4.4A8 8 0 1120 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>',
+  music: '<path d="M9 17.5V5.5l11-2v12"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="15.5" r="2.5"/>',
   megaphone: '<path d="M4 10v4a1 1 0 001 1h2l6 4.5v-15L7 9H5a1 1 0 00-1 1z"/><path d="M16.5 9a4 4 0 010 6M19 6.5a7.5 7.5 0 010 11"/>',
   bell: '<path d="M6 16.5V11a6 6 0 0112 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 004 0"/>',
   grid: '<rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/>',

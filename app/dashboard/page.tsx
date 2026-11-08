@@ -8,6 +8,8 @@ import { getMemberCardForPeserta, getPesertaById } from '@/lib/actions/peserta'
 import { getRegistrasiByPeserta } from '@/lib/actions/registrasi'
 import { getPendingSquadForMe, joinSquad, joinVolunteer } from '@/lib/actions/upgrade'
 import { getActiveSessions } from '@/lib/actions/pwa-auth'
+import { getBetaAksesSaya } from '@/lib/actions/beta'
+import { BETA_WEWORSHIP, WEWORSHIP_URL } from '@/lib/beta'
 import { LEVEL_STEPS, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
 import { PEMURIDAN_AKTIF } from '@/lib/pemuridan'
 import { ID_FONTS, MemberCard } from '@/components/pwa/member-card'
@@ -34,14 +36,15 @@ import { Field, FLD, Icon, Sheet, SheetHead, type IconName } from '@/components/
 
 type Registrasi = Awaited<ReturnType<typeof getRegistrasiByPeserta>>[number]
 
-const FEATURES: { i: IconName; t: string; href?: string; chip?: string }[] = [
+/** `beta`: tile hanya terbuka untuk anggota yang punya baris beta_akses dengan fitur itu; anggota lain melihat Soon. */
+const FEATURES: { i: IconName; t: string; href?: string; chip?: string; beta?: string }[] = [
   { i: 'ticket', t: 'My Ticket', href: '/dashboard/tiket', chip: 'bg-[#e02a2f] text-white' },
   PEMURIDAN_AKTIF
     ? { i: 'users', t: 'Pemuridan', href: '/dashboard/pemuridan', chip: 'bg-[#161616] text-[#ffd83d]' }
     : { i: 'users', t: 'Pemuridan' },
   { i: 'calendar', t: 'Event', href: '/events', chip: 'bg-[#ffd83d] text-[#161616]' },
   { i: 'book', t: 'DeeperWP' },
-  { i: 'gift', t: 'Birthday' },
+  { i: 'music', t: 'WeWorship', href: WEWORSHIP_URL, chip: 'bg-[#e02a2f] text-white', beta: BETA_WEWORSHIP },
   { i: 'chat', t: 'Kesaksian', href: '/dashboard/kesaksian', chip: 'bg-[#161616] text-[#ffd83d]' },
 ]
 
@@ -133,16 +136,37 @@ function LevelPanel({
   )
 }
 
-function FeatureTile({ f, tilt, onSoon }: { f: (typeof FEATURES)[number]; tilt: string; onSoon: (t: string) => void }) {
+function FeatureTile({
+  f,
+  tilt,
+  beta,
+  onSoon,
+}: {
+  f: (typeof FEATURES)[number]
+  tilt: string
+  beta: string[]
+  onSoon: (t: string) => void
+}) {
   const base = `relative h-[104px] rounded-[14px] flex flex-col items-center justify-center gap-2 text-[#161616] ${tilt} ${PRESS}`
   const label = <span className={`${ANTON} text-[14.5px] leading-none tracking-[.02em] text-center`}>{f.t}</span>
-  if (f.href) {
-    return (
-      <Link href={f.href} className={`${base} bg-[#fffdf7] ${LIFTED}`}>
+  if (f.href && (!f.beta || beta.includes(f.beta))) {
+    const body = (
+      <>
         <span className={`w-11 h-11 rounded-[10px] -rotate-3 flex items-center justify-center ${f.chip}`}>
           <Icon name={f.i} className="w-[22px] h-[22px]" />
         </span>
         {label}
+        {f.beta && <span className={`${LABEL} absolute right-1.5 top-1.5 rotate-6 text-[8.5px] font-bold text-[#c21f24]`}>Beta</span>}
+      </>
+    )
+    // Situs luar dibuka di tab baru (PWA terpasang: in-app browser), jadi Beranda tetap terbuka di belakangnya.
+    return f.href.startsWith('http') ? (
+      <a href={f.href} target="_blank" rel="noopener" className={`${base} bg-[#fffdf7] ${LIFTED}`}>
+        {body}
+      </a>
+    ) : (
+      <Link href={f.href} className={`${base} bg-[#fffdf7] ${LIFTED}`}>
+        {body}
       </Link>
     )
   }
@@ -173,6 +197,7 @@ export default function DashboardPage() {
   const [pengurusDest, setPengurusDest] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [soon, setSoon] = useState<string | null>(null)
+  const [beta, setBeta] = useState<string[]>([])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -196,7 +221,9 @@ export default function DashboardPage() {
       getPendingSquadForMe(),
       getCabangs(),
       getActiveSessions(),
-    ]).then(([regs, p, c, pending, cabs, sessions]) => {
+      getBetaAksesSaya(),
+    ]).then(([regs, p, c, pending, cabs, sessions, fitur]) => {
+      setBeta(fitur)
       setRegistrasi(regs)
       setPendingSquad(pending)
       setCabangs(cabs)
@@ -288,7 +315,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-3 gap-2.5">
           {FEATURES.map((f, i) => (
-            <FeatureTile key={f.t} f={f} tilt={TILT[i]} onSoon={setSoon} />
+            <FeatureTile key={f.t} f={f} tilt={TILT[i]} beta={beta} onSoon={setSoon} />
           ))}
         </div>
 
