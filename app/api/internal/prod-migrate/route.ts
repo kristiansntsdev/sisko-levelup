@@ -231,6 +231,24 @@ export async function POST(req: NextRequest) {
   const addedDokumentasiCreatedAt = await ensureTimestampColumn('dokumentasi_kota', 'created_at', true)
   const addedReimburseLaporanAt = await ensureTimestampColumn('reimburse', 'laporan_at', false)
 
+  // Member baru vs lama: peserta yang sudah ada sebelum kolom ini tetap NULL (tanggal daftar tidak tercatat).
+  // updated_at diisi MySQL sendiri (ON UPDATE) supaya perubahan dari luar Prisma / raw SQL ikut tercatat.
+  // EXTRA dicek terpisah: kalau MODIFY gagal setelah ADD, run berikutnya tetap melengkapinya.
+  const addedPesertaCreatedAt = await ensureTimestampColumn('peserta', 'created_at', true)
+  const addedPesertaUpdatedAt = await ensureTimestampColumn('peserta', 'updated_at', false)
+  const pesertaUpdatedAt = await db.$queryRaw<{ EXTRA: string }[]>`
+    SELECT EXTRA FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'peserta'
+      AND COLUMN_NAME = 'updated_at'
+  `
+  const setPesertaUpdatedAtOnUpdate = !/on update/i.test(pesertaUpdatedAt[0]?.EXTRA ?? '')
+  if (setPesertaUpdatedAtOnUpdate) {
+    await db.$executeRawUnsafe(
+      `ALTER TABLE peserta MODIFY COLUMN updated_at DATETIME(0) NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`,
+    )
+  }
+
   const pindahKotaTables = await db.$queryRaw<{ TABLE_NAME: string }[]>`
     SELECT TABLE_NAME FROM information_schema.TABLES
     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pindah_kota'
@@ -387,6 +405,9 @@ export async function POST(req: NextRequest) {
     addedEventCreatedAt,
     addedDokumentasiCreatedAt,
     addedReimburseLaporanAt,
+    addedPesertaCreatedAt,
+    addedPesertaUpdatedAt,
+    setPesertaUpdatedAtOnUpdate,
     addedPindahKota,
     addedFeedbackApp,
     addedKesaksian,

@@ -268,6 +268,9 @@ model peserta {
   foto            String          @db.Text
   status          peserta_status? @default(pending)
   role            peserta_role?   @default(guest)
+  // created_at + updated_at (DATETIME NULL, NULL = member lama) ditambah prod-migrate, sengaja belum ditulis di sini:
+  // Prisma membaca semua kolom model di setiap find/update tanpa select, jadi kalau field ini ikut rilis yang sama
+  // query peserta error di jeda antara deploy dan prod-migrate. Tambahkan field-nya di rilis sesudah kolom ada di prod.
   auth_users      auth_users[]
   jobs_place      jobs_place?     @relation(fields: [id_tempat_kerja], references: [id_jobs_place], map: "peserta_tempat_kerja_fk")
   registrasi      registrasi[]
