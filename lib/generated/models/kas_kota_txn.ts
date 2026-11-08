@@ -30,12 +30,14 @@ export type Kas_kota_txnAvgAggregateOutputType = {
   id_txn: number | null
   id_cabang: number | null
   jumlah: runtime.Decimal | null
+  id_event: number | null
 }
 
 export type Kas_kota_txnSumAggregateOutputType = {
   id_txn: number | null
   id_cabang: number | null
   jumlah: runtime.Decimal | null
+  id_event: number | null
 }
 
 export type Kas_kota_txnMinAggregateOutputType = {
@@ -46,6 +48,7 @@ export type Kas_kota_txnMinAggregateOutputType = {
   jumlah: runtime.Decimal | null
   tipe: $Enums.kas_kota_txn_tipe | null
   kategori: $Enums.kas_kota_txn_kategori | null
+  id_event: number | null
   created_at: Date | null
 }
 
@@ -57,6 +60,7 @@ export type Kas_kota_txnMaxAggregateOutputType = {
   jumlah: runtime.Decimal | null
   tipe: $Enums.kas_kota_txn_tipe | null
   kategori: $Enums.kas_kota_txn_kategori | null
+  id_event: number | null
   created_at: Date | null
 }
 
@@ -68,6 +72,7 @@ export type Kas_kota_txnCountAggregateOutputType = {
   jumlah: number
   tipe: number
   kategori: number
+  id_event: number
   created_at: number
   _all: number
 }
@@ -77,12 +82,14 @@ export type Kas_kota_txnAvgAggregateInputType = {
   id_txn?: true
   id_cabang?: true
   jumlah?: true
+  id_event?: true
 }
 
 export type Kas_kota_txnSumAggregateInputType = {
   id_txn?: true
   id_cabang?: true
   jumlah?: true
+  id_event?: true
 }
 
 export type Kas_kota_txnMinAggregateInputType = {
@@ -93,6 +100,7 @@ export type Kas_kota_txnMinAggregateInputType = {
   jumlah?: true
   tipe?: true
   kategori?: true
+  id_event?: true
   created_at?: true
 }
 
@@ -104,6 +112,7 @@ export type Kas_kota_txnMaxAggregateInputType = {
   jumlah?: true
   tipe?: true
   kategori?: true
+  id_event?: true
   created_at?: true
 }
 
@@ -115,6 +124,7 @@ export type Kas_kota_txnCountAggregateInputType = {
   jumlah?: true
   tipe?: true
   kategori?: true
+  id_event?: true
   created_at?: true
   _all?: true
 }
@@ -213,6 +223,7 @@ export type Kas_kota_txnGroupByOutputType = {
   jumlah: runtime.Decimal
   tipe: $Enums.kas_kota_txn_tipe
   kategori: $Enums.kas_kota_txn_kategori
+  id_event: number | null
   created_at: Date | null
   _count: Kas_kota_txnCountAggregateOutputType | null
   _avg: Kas_kota_txnAvgAggregateOutputType | null
@@ -247,6 +258,7 @@ export type kas_kota_txnWhereInput = {
   jumlah?: Prisma.DecimalFilter<"kas_kota_txn"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   tipe?: Prisma.Enumkas_kota_txn_tipeFilter<"kas_kota_txn"> | $Enums.kas_kota_txn_tipe
   kategori?: Prisma.Enumkas_kota_txn_kategoriFilter<"kas_kota_txn"> | $Enums.kas_kota_txn_kategori
+  id_event?: Prisma.IntNullableFilter<"kas_kota_txn"> | number | null
   created_at?: Prisma.DateTimeNullableFilter<"kas_kota_txn"> | Date | string | null
 }
 
@@ -258,6 +270,7 @@ export type kas_kota_txnOrderByWithRelationInput = {
   jumlah?: Prisma.SortOrder
   tipe?: Prisma.SortOrder
   kategori?: Prisma.SortOrder
+  id_event?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _relevance?: Prisma.kas_kota_txnOrderByRelevanceInput
 }
@@ -273,6 +286,7 @@ export type kas_kota_txnWhereUniqueInput = Prisma.AtLeast<{
   jumlah?: Prisma.DecimalFilter<"kas_kota_txn"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   tipe?: Prisma.Enumkas_kota_txn_tipeFilter<"kas_kota_txn"> | $Enums.kas_kota_txn_tipe
   kategori?: Prisma.Enumkas_kota_txn_kategoriFilter<"kas_kota_txn"> | $Enums.kas_kota_txn_kategori
+  id_event?: Prisma.IntNullableFilter<"kas_kota_txn"> | number | null
   created_at?: Prisma.DateTimeNullableFilter<"kas_kota_txn"> | Date | string | null
 }, "id_txn">
 
@@ -284,6 +298,7 @@ export type kas_kota_txnOrderByWithAggregationInput = {
   jumlah?: Prisma.SortOrder
   tipe?: Prisma.SortOrder
   kategori?: Prisma.SortOrder
+  id_event?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.kas_kota_txnCountOrderByAggregateInput
   _avg?: Prisma.kas_kota_txnAvgOrderByAggregateInput
@@ -303,6 +318,7 @@ export type kas_kota_txnScalarWhereWithAggregatesInput = {
   jumlah?: Prisma.DecimalWithAggregatesFilter<"kas_kota_txn"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   tipe?: Prisma.Enumkas_kota_txn_tipeWithAggregatesFilter<"kas_kota_txn"> | $Enums.kas_kota_txn_tipe
   kategori?: Prisma.Enumkas_kota_txn_kategoriWithAggregatesFilter<"kas_kota_txn"> | $Enums.kas_kota_txn_kategori
+  id_event?: Prisma.IntNullableWithAggregatesFilter<"kas_kota_txn"> | number | null
   created_at?: Prisma.DateTimeNullableWithAggregatesFilter<"kas_kota_txn"> | Date | string | null
 }
 
@@ -313,6 +329,7 @@ export type kas_kota_txnCreateInput = {
   jumlah: runtime.Decimal | runtime.DecimalJsLike | number | string
   tipe: $Enums.kas_kota_txn_tipe
   kategori?: $Enums.kas_kota_txn_kategori
+  id_event?: number | null
   created_at?: Date | string | null
 }
 
@@ -324,6 +341,7 @@ export type kas_kota_txnUncheckedCreateInput = {
   jumlah: runtime.Decimal | runtime.DecimalJsLike | number | string
   tipe: $Enums.kas_kota_txn_tipe
   kategori?: $Enums.kas_kota_txn_kategori
+  id_event?: number | null
   created_at?: Date | string | null
 }
 
@@ -334,6 +352,7 @@ export type kas_kota_txnUpdateInput = {
   jumlah?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   tipe?: Prisma.Enumkas_kota_txn_tipeFieldUpdateOperationsInput | $Enums.kas_kota_txn_tipe
   kategori?: Prisma.Enumkas_kota_txn_kategoriFieldUpdateOperationsInput | $Enums.kas_kota_txn_kategori
+  id_event?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -345,6 +364,7 @@ export type kas_kota_txnUncheckedUpdateInput = {
   jumlah?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   tipe?: Prisma.Enumkas_kota_txn_tipeFieldUpdateOperationsInput | $Enums.kas_kota_txn_tipe
   kategori?: Prisma.Enumkas_kota_txn_kategoriFieldUpdateOperationsInput | $Enums.kas_kota_txn_kategori
+  id_event?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -356,6 +376,7 @@ export type kas_kota_txnCreateManyInput = {
   jumlah: runtime.Decimal | runtime.DecimalJsLike | number | string
   tipe: $Enums.kas_kota_txn_tipe
   kategori?: $Enums.kas_kota_txn_kategori
+  id_event?: number | null
   created_at?: Date | string | null
 }
 
@@ -366,6 +387,7 @@ export type kas_kota_txnUpdateManyMutationInput = {
   jumlah?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   tipe?: Prisma.Enumkas_kota_txn_tipeFieldUpdateOperationsInput | $Enums.kas_kota_txn_tipe
   kategori?: Prisma.Enumkas_kota_txn_kategoriFieldUpdateOperationsInput | $Enums.kas_kota_txn_kategori
+  id_event?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -377,6 +399,7 @@ export type kas_kota_txnUncheckedUpdateManyInput = {
   jumlah?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   tipe?: Prisma.Enumkas_kota_txn_tipeFieldUpdateOperationsInput | $Enums.kas_kota_txn_tipe
   kategori?: Prisma.Enumkas_kota_txn_kategoriFieldUpdateOperationsInput | $Enums.kas_kota_txn_kategori
+  id_event?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -394,6 +417,7 @@ export type kas_kota_txnCountOrderByAggregateInput = {
   jumlah?: Prisma.SortOrder
   tipe?: Prisma.SortOrder
   kategori?: Prisma.SortOrder
+  id_event?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -401,6 +425,7 @@ export type kas_kota_txnAvgOrderByAggregateInput = {
   id_txn?: Prisma.SortOrder
   id_cabang?: Prisma.SortOrder
   jumlah?: Prisma.SortOrder
+  id_event?: Prisma.SortOrder
 }
 
 export type kas_kota_txnMaxOrderByAggregateInput = {
@@ -411,6 +436,7 @@ export type kas_kota_txnMaxOrderByAggregateInput = {
   jumlah?: Prisma.SortOrder
   tipe?: Prisma.SortOrder
   kategori?: Prisma.SortOrder
+  id_event?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -422,6 +448,7 @@ export type kas_kota_txnMinOrderByAggregateInput = {
   jumlah?: Prisma.SortOrder
   tipe?: Prisma.SortOrder
   kategori?: Prisma.SortOrder
+  id_event?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
 }
 
@@ -429,6 +456,7 @@ export type kas_kota_txnSumOrderByAggregateInput = {
   id_txn?: Prisma.SortOrder
   id_cabang?: Prisma.SortOrder
   jumlah?: Prisma.SortOrder
+  id_event?: Prisma.SortOrder
 }
 
 export type Enumkas_kota_txn_tipeFieldUpdateOperationsInput = {
@@ -449,6 +477,7 @@ export type kas_kota_txnSelect<ExtArgs extends runtime.Types.Extensions.Internal
   jumlah?: boolean
   tipe?: boolean
   kategori?: boolean
+  id_event?: boolean
   created_at?: boolean
 }, ExtArgs["result"]["kas_kota_txn"]>
 
@@ -462,10 +491,11 @@ export type kas_kota_txnSelectScalar = {
   jumlah?: boolean
   tipe?: boolean
   kategori?: boolean
+  id_event?: boolean
   created_at?: boolean
 }
 
-export type kas_kota_txnOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_txn" | "id_cabang" | "tanggal" | "keterangan" | "jumlah" | "tipe" | "kategori" | "created_at", ExtArgs["result"]["kas_kota_txn"]>
+export type kas_kota_txnOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_txn" | "id_cabang" | "tanggal" | "keterangan" | "jumlah" | "tipe" | "kategori" | "id_event" | "created_at", ExtArgs["result"]["kas_kota_txn"]>
 
 export type $kas_kota_txnPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "kas_kota_txn"
@@ -478,6 +508,10 @@ export type $kas_kota_txnPayload<ExtArgs extends runtime.Types.Extensions.Intern
     jumlah: runtime.Decimal
     tipe: $Enums.kas_kota_txn_tipe
     kategori: $Enums.kas_kota_txn_kategori
+    /**
+     * Event untuk kategori event (NULL = harian, atau baris lama yang hanya menyimpan nama event di keterangan)
+     */
+    id_event: number | null
     created_at: Date | null
   }, ExtArgs["result"]["kas_kota_txn"]>
   composites: {}
@@ -855,6 +889,7 @@ export interface kas_kota_txnFieldRefs {
   readonly jumlah: Prisma.FieldRef<"kas_kota_txn", 'Decimal'>
   readonly tipe: Prisma.FieldRef<"kas_kota_txn", 'kas_kota_txn_tipe'>
   readonly kategori: Prisma.FieldRef<"kas_kota_txn", 'kas_kota_txn_kategori'>
+  readonly id_event: Prisma.FieldRef<"kas_kota_txn", 'Int'>
   readonly created_at: Prisma.FieldRef<"kas_kota_txn", 'DateTime'>
 }
     

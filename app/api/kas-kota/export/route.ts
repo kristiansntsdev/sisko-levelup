@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import ExcelJS from 'exceljs'
 import { db } from '@/lib/db'
 import { Prisma } from '@/lib/generated/client'
+import { kasEventId } from '@/lib/kas-event'
 
 const ID_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
 
@@ -58,7 +59,7 @@ export async function GET(req: NextRequest) {
     db.kas_kota_txn.findMany({ where, orderBy: { tanggal: 'asc' } }),
     db.event.findMany({
       where: { id_cabang: pengurus.kotalevelup },
-      select: { id_event: true, nama_event: true },
+      select: { id_event: true, nama_event: true, tglevent: true },
     }),
     db.cabang.findUnique({ where: { id_cabang: idCabang }, select: { namacabang: true } }),
   ])
@@ -66,13 +67,10 @@ export async function GET(req: NextRequest) {
   const eventMap = new Map(events.map((e) => [e.id_event, e.nama_event]))
 
   let rows = txns
-  if (eventId && eventId !== 'all') {
-    const eventName = eventMap.get(Number(eventId))
-    if (eventName) {
-      rows = rows.filter(
-        (t) => t.kategori === 'event' && (t.keterangan === eventName || t.keterangan.startsWith(`${eventName} - `))
-      )
-    }
+  if (eventId && eventId !== 'all' && eventMap.has(Number(eventId))) {
+    // id_event kalau tersimpan; baris lama dicocokkan lewat nama (event bernama sama → tanggal terdekat)
+    const refs = events.map((e) => ({ id_event: e.id_event, nama_event: e.nama_event, tglMs: e.tglevent.getTime() }))
+    rows = rows.filter((t) => kasEventId(t, refs) === Number(eventId))
   }
 
   const wb = new ExcelJS.Workbook()

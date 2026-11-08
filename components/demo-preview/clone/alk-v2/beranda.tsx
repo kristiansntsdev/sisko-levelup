@@ -60,13 +60,13 @@ export function BerandaClient({
   const eventCount = stats.eventOffline + stats.eventOnline
   const pct = totalPeserta ? Math.round((stats.pesertaCore / totalPeserta) * 100) : 0
 
-  const tiles: [IconName, string, string | number][] = [
+  const tiles: [IconName, string, string | number, string?][] = [
     ['users', 'Total LevelUP Kota', stats.totalCabang],
     ['check', 'Total CORE', stats.pesertaCore],
     ['users', 'Squad', stats.pesertaSquad],
     ['userPlus', 'Volunteer', stats.pesertaVolunteer],
     ['calendar', 'Jumlah Event', eventCount],
-    ['receipt', 'Saldo Kas', fmtRp(saldo)],
+    ['receipt', 'Saldo Kas', fmtRp(saldo), `${ALK_BASE}/kas`],
   ]
 
   const todos: Todo[] = useMemo(() => {
@@ -166,6 +166,7 @@ export function BerandaClient({
     { i: 'userPlus', t: 'Approval Volunteer', tint: 'gold', href: `${ALK_BASE}/approval-volunteer` },
     { i: 'calPlus', t: 'Buat Event', tint: 'red', href: `${ALK_BASE}/event/new` },
     { i: 'receipt', t: 'Reimburse', tint: 'gold', href: `${ALK_BASE}/reimburse` },
+    { i: 'box', t: 'Kas Kota', tint: 'red', href: `${ALK_BASE}/kas` },
     { i: 'shield', t: 'Set Role', tint: 'red', soon: 'Set Role' },
     { i: 'grid', t: 'Lainnya', tint: 'slate', href: `${ALK_BASE}/lainnya` },
   ]
@@ -191,16 +192,21 @@ export function BerandaClient({
       <div className="px-5 mt-5 flex flex-col gap-7 pb-4">
         <section aria-label="Ringkasan" className={`relative grid grid-cols-2 ${PANEL}`}>
           <span aria-hidden className={TAPE_RIGHT} />
-          {tiles.map(([i, l, v], idx) => (
+          {tiles.map(([i, l, v, href], idx) => (
             <div
               key={l}
-              className={`p-3.5 min-w-0 border-dotted border-[#161616]/20 ${idx % 2 === 0 ? 'border-r-2' : ''} ${idx < tiles.length - 2 ? 'border-b-2' : ''}`}
+              role={href ? 'link' : undefined}
+              tabIndex={href ? 0 : undefined}
+              onClick={href ? () => router.push(href) : undefined}
+              onKeyDown={href ? (e) => e.key === 'Enter' && router.push(href) : undefined}
+              className={`p-3.5 min-w-0 border-dotted border-[#161616]/20 ${idx % 2 === 0 ? 'border-r-2' : ''} ${idx < tiles.length - 2 ? 'border-b-2' : ''} ${href ? `cursor-pointer active:bg-[#161616]/5 ${PRESS}` : ''}`}
             >
               <div className={`${LABEL} flex items-center gap-1.5 text-[9px] text-[#57534e]`}>
                 <span className="shrink-0 text-[#c21f24]">
                   <Icon name={i} className="w-3.5 h-3.5" sw={2.2} />
                 </span>
                 <span className="min-w-0">{l}</span>
+                {href && <Icon name="chevron" className="w-3.5 h-3.5 ml-auto shrink-0 text-[#161616]" sw={2.2} />}
               </div>
               <div className="flex items-end justify-between gap-2 mt-2">
                 <p className={`${ANTON} ${typeof v === 'string' && v.length > 8 ? 'text-[24px]' : 'text-[36px]'} leading-none text-[#161616] truncate`}>{v}</p>

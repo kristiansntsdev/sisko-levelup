@@ -153,6 +153,7 @@ interface TxnFormProps {
     keterangan: string
     tanggal: string
     kategori: 'harian' | 'event'
+    idEvent: number | null
   }) => void
 }
 
@@ -198,6 +199,10 @@ function TxnForm({
     return events[0]?.id_event ? String(events[0].id_event) : ''
   })
   const submittingRef = useRef(false)
+  // Sheet stays open when the server rejects the entry, so allow another submit once the transition ends.
+  useEffect(() => {
+    if (!isPending) submittingRef.current = false
+  }, [isPending])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -209,7 +214,7 @@ function TxnForm({
     const finalKeterangan = kategori === 'event'
       ? (keterangan ? `${selectedEventName} - ${keterangan}` : selectedEventName)
       : keterangan
-    onSubmit({ tipe, jumlah, keterangan: finalKeterangan, tanggal, kategori })
+    onSubmit({ tipe, jumlah, keterangan: finalKeterangan, tanggal, kategori, idEvent: kategori === 'event' ? Number(selectedEventId) : null })
   }
 
   const segBase = 'flex-1 py-2.5 rounded-[9px] text-[14px] font-medium transition-all duration-150 cursor-pointer border-none'
@@ -743,6 +748,7 @@ export function KasTab({ kasKota, events, cabangName }: { kasKota: KasKotaData; 
   const [editTxn, setEditTxn] = useState<TxnKotaItem | null>(null)
   const [page, setPage] = useState(0)
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState('')
   const [tab, setTab] = useState<'semua' | 'harian' | 'event'>('semua')
   const [selectedEventId, setSelectedEventId] = useState<number | ''>(events[0]?.id_event ?? '')
 
@@ -809,24 +815,30 @@ export function KasTab({ kasKota, events, cabangName }: { kasKota: KasKotaData; 
     setPage(0)
   }
 
-  function handleAdd(data: { tipe: 'masuk' | 'keluar'; jumlah: number; keterangan: string; tanggal: string; kategori: 'harian' | 'event' }) {
+  function handleAdd(data: { tipe: 'masuk' | 'keluar'; jumlah: number; keterangan: string; tanggal: string; kategori: 'harian' | 'event'; idEvent: number | null }) {
+    setError('')
     startTransition(async () => {
-      await addTxnKota({ idCabang: kasKota.id_cabang, ...data })
+      const res = await addTxnKota(data)
+      if (!res.ok) return setError(res.error)
       setSheet(null)
     })
   }
 
-  function handleUpdate(data: { tipe: 'masuk' | 'keluar'; jumlah: number; keterangan: string; tanggal: string; kategori: 'harian' | 'event' }) {
+  function handleUpdate(data: { tipe: 'masuk' | 'keluar'; jumlah: number; keterangan: string; tanggal: string; kategori: 'harian' | 'event'; idEvent: number | null }) {
     if (!editTxn) return
+    setError('')
     startTransition(async () => {
-      await updateTxnKota(editTxn.id_txn, kasKota.id_cabang, editTxn.jumlah, editTxn.tipe, data)
+      const res = await updateTxnKota(editTxn.id_txn, data)
+      if (!res.ok) return setError(res.error)
       setEditTxn(null)
     })
   }
 
   function handleDelete(txn: TxnKotaItem) {
+    setError('')
     startTransition(async () => {
-      await deleteTxnKota(txn.id_txn, kasKota.id_cabang, txn.jumlah, txn.tipe)
+      const res = await deleteTxnKota(txn.id_txn)
+      if (!res.ok) setError(res.error)
     })
   }
 
@@ -928,6 +940,7 @@ export function KasTab({ kasKota, events, cabangName }: { kasKota: KasKotaData; 
       <div>
         <p className="text-[15px] font-bold text-fg mb-2.5">Riwayat Transaksi</p>
         <FilterTabs tabs={tabList} active={tab} onChange={(k) => changeTab(k as 'semua' | 'harian' | 'event')} />
+        {error && !sheet && !editTxn && <p className="text-[13px] font-medium text-red mt-2.5">{error}</p>}
         {tab === 'event' && (
           <div className="mt-2.5">
             {events.length === 0 ? (
@@ -990,7 +1003,7 @@ export function KasTab({ kasKota, events, cabangName }: { kasKota: KasKotaData; 
       {sheet && (
         <Sheet
           title={sheet === 'masuk' ? 'Catat Pemasukan' : 'Catat Pengeluaran'}
-          onClose={() => setSheet(null)}
+          onClose={() => { setSheet(null); setError('') }}
         >
           <TxnForm
             events={events}
@@ -998,11 +1011,12 @@ export function KasTab({ kasKota, events, cabangName }: { kasKota: KasKotaData; 
             isPending={isPending}
             onSubmit={handleAdd}
           />
+          {error && <p className="text-[13px] font-medium text-red mt-3">{error}</p>}
         </Sheet>
       )}
 
       {editTxn && (
-        <Sheet title="Edit Transaksi" onClose={() => setEditTxn(null)}>
+        <Sheet title="Edit Transaksi" onClose={() => { setEditTxn(null); setError('') }}>
           <TxnForm
             events={events}
             initialTipe={editTxn.tipe}
@@ -1014,6 +1028,7 @@ export function KasTab({ kasKota, events, cabangName }: { kasKota: KasKotaData; 
             isPending={isPending}
             onSubmit={handleUpdate}
           />
+          {error && <p className="text-[13px] font-medium text-red mt-3">{error}</p>}
         </Sheet>
       )}
 

@@ -34,7 +34,7 @@ const FILES = [
   ['app/daftar/page.tsx', 'app/demo-preview/daftar/page.tsx'],
   ['components/pwa/shell.tsx', 'components/demo-preview/clone/pwa/shell.tsx'],
   // Sekretariat v2 (event-approve, pindah-kota, tiket-nasional are Sekretariat Nasional only: not in the demo)
-  ...['anggota', 'approval', 'beranda', 'event-detail', 'events', 'lainnya', 'list-tools', 'reimburse', 'scan', 'shell', 'ui'].map((n) => [`components/alk-v2/${n}.tsx`, `components/demo-preview/clone/alk-v2/${n}.tsx`]),
+  ...['anggota', 'approval', 'beranda', 'event-detail', 'events', 'kas', 'lainnya', 'list-tools', 'reimburse', 'scan', 'shell', 'ui'].map((n) => [`components/alk-v2/${n}.tsx`, `components/demo-preview/clone/alk-v2/${n}.tsx`]),
   ['components/alk-v2/paths.ts', 'components/demo-preview/clone/alk-v2/paths.ts'],
   ['components/kota/event-form.tsx', 'components/demo-preview/clone/kota/event-form.tsx'],
   ['app/dashboard/kota/alk/event/[id]/dana/dana-client.tsx', 'components/demo-preview/clone/kota/dana-client.tsx'],

@@ -532,9 +532,12 @@ model kas_kota_txn {
   jumlah     Decimal               @db.Decimal(15, 2)
   tipe       kas_kota_txn_tipe
   kategori   kas_kota_txn_kategori @default(harian)
+  /// Event untuk kategori event (NULL = harian, atau baris lama yang hanya menyimpan nama event di keterangan)
+  id_event   Int?
   created_at DateTime?             @default(now()) @db.DateTime(0)
 
   @@index([id_cabang], map: "idx_id_cabang")
+  @@index([id_event], map: "idx_kas_kota_txn_event")
 }
 
 model dokumentasi_kota {

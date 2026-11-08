@@ -344,6 +344,19 @@ export async function POST(req: NextRequest) {
     `)
   }
 
+  // Kas Kota: transaksi event menyimpan id_event (dulu hanya nama event di keterangan; nama event bisa kembar).
+  const kasTxnIdEventCols = await db.$queryRaw<{ COLUMN_NAME: string }[]>`
+    SELECT COLUMN_NAME FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'kas_kota_txn'
+      AND COLUMN_NAME = 'id_event'
+  `
+  const addedKasTxnIdEvent = kasTxnIdEventCols.length === 0
+  if (addedKasTxnIdEvent) {
+    await db.$executeRawUnsafe(`ALTER TABLE kas_kota_txn ADD COLUMN id_event INT NULL`)
+    await db.$executeRawUnsafe(`ALTER TABLE kas_kota_txn ADD KEY idx_kas_kota_txn_event (id_event)`)
+  }
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -379,6 +392,7 @@ export async function POST(req: NextRequest) {
     addedKesaksian,
     addedReimburseApproval,
     addedRekeningKota,
+    addedKasTxnIdEvent,
     brimUpdated: brim.count,
     brim: row,
   })

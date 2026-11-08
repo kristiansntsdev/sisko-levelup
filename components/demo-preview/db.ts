@@ -3,8 +3,8 @@
 // so the shim actions can return exactly what lib/actions/* return and the real UI renders unchanged.
 // State lives in memory + localStorage only. Never import lib/actions/*, next-auth, @/lib/db or prisma here.
 
-export const STORAGE_KEY = 'levelup-demo-preview:v4'
-const VERSION = 2
+export const STORAGE_KEY = 'levelup-demo-preview:v5'
+const VERSION = 3
 const DAY = 24 * 60 * 60 * 1000
 const WIB = 7 * 60 * 60 * 1000
 
@@ -133,6 +133,19 @@ export type DbReimburse = {
   history: DbReimburseHistory[]
 }
 
+/** kas_kota_txn; saldo is derived from these rows in the demo (the real app keeps it in kas_kota). */
+export type DbKasTxn = {
+  id_txn: number
+  id_cabang: number
+  /** yyyy-mm-dd, WIB calendar day */
+  tanggal: string
+  keterangan: string
+  jumlah: number
+  tipe: 'masuk' | 'keluar'
+  kategori: 'harian' | 'event'
+  id_event: number | null
+}
+
 export type DbSession = {
   idPeserta: number | null
   idPengurus: number | null
@@ -152,6 +165,7 @@ export type DemoDb = {
   absen: DbAbsen[]
   upgrade: DbUpgrade[]
   reimburse: DbReimburse[]
+  kas_kota_txn: DbKasTxn[]
   log: { id: number; at: string; msg: string }[]
   nextId: number
   session: DbSession
@@ -358,6 +372,21 @@ export function buildSeed(now: Date = new Date()): DemoDb {
     },
   ]
 
+  const kas = (days: number, tipe: DbKasTxn['tipe'], e: DbEvent | null, keterangan: string, jumlah: number): DbKasTxn => ({
+    id_txn: id(), id_cabang: Number(HOME_CABANG), tanggal: wibDay(days, now), tipe, jumlah,
+    kategori: e ? 'event' : 'harian', id_event: e?.id_event ?? null,
+    keterangan: e ? `${e.nama_event} - ${keterangan}` : keterangan,
+  })
+  // Sums to Rp 4.250.000, the saldo the Beranda tile showed before Kas existed in the demo.
+  const kas_kota_txn: DbKasTxn[] = [
+    kas(-75, 'masuk', null, 'Saldo awal kas', 3000000),
+    kas(-60, 'keluar', lalu2, 'Cetak flyer', 350000),
+    kas(-31, 'keluar', lalu1, 'Sewa sound system', 650000),
+    kas(-30, 'masuk', lalu1, 'Persembahan', 1500000),
+    kas(-24, 'masuk', lalu1, 'Dana support PPHTGD', 1000000),
+    kas(-10, 'keluar', null, 'Konsumsi rapat pengurus', 250000),
+  ]
+
   return {
     v: VERSION,
     seededAt: now.toISOString(),
@@ -370,6 +399,7 @@ export function buildSeed(now: Date = new Date()): DemoDb {
     absen,
     upgrade,
     reimburse,
+    kas_kota_txn,
     log: [{ id: id(), at: now.toISOString(), msg: 'Demo siap — data awal dimuat' }],
     nextId: n,
     session: { idPeserta: null, idPengurus: null, google: null },

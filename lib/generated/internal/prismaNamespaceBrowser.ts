@@ -728,6 +728,7 @@ export const Kas_kota_txnScalarFieldEnum = {
   jumlah: 'jumlah',
   tipe: 'tipe',
   kategori: 'kategori',
+  id_event: 'id_event',
   created_at: 'created_at'
 } as const
 
