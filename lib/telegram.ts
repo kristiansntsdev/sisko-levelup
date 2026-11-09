@@ -32,7 +32,7 @@ export function eventJoinLink(idEvent: number, jenisevent?: string): string {
 }
 
 export function eventApproveLink(idEvent: number): string {
-  return `${publicAppBase()}/dashboard/kota/alk/event/${idEvent}/approve`
+  return `${publicAppBase()}/dashboard/v2/kota/alk/event/${idEvent}/approve`
 }
 
 export function eventBrimApproveLink(idEvent: number): string {
@@ -40,7 +40,7 @@ export function eventBrimApproveLink(idEvent: number): string {
 }
 
 export function eventDetailLink(idEvent: number): string {
-  return `${publicAppBase()}/dashboard/kota/alk/event/${idEvent}`
+  return `${publicAppBase()}/dashboard/v2/kota/alk/event/${idEvent}`
 }
 
 /** Status pengajuan dana satu event (Sekretariat Nasional, read-only tracker). */

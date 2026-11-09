@@ -84,11 +84,11 @@ assert.equal(onlineMaps['Maps'], undefined)
 
 const buttons = eventActionButtons(205, { poster: 'flyer.jpg', longlatevent: '-6.2,106.8' })
 assert.equal(buttons.length, 5)
-assert.ok(buttons[0].url.endsWith('/dashboard/kota/alk/event/205'))
+assert.ok(buttons[0].url.endsWith('/dashboard/v2/kota/alk/event/205'))
 assert.ok(buttons[1].url.includes('/uploads/poster/flyer.jpg'))
 assert.equal(buttons[2].url, 'https://maps.google.com/?q=-6.2,106.8')
 assert.ok(buttons[3].url.endsWith('/alk/event/205/approve'))
-assert.ok(buttons[4].url.endsWith('/brim/event/205/approve'))
+assert.ok(buttons[4].url.endsWith('/dashboard/v2/brim/event/205'))
 
 const onlineButtons = eventActionButtons(205, {
   poster: 'flyer.jpg',
