@@ -1,11 +1,13 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useMemo, useRef, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { addTxnKota, deleteTxnKota, updateTxnKota, type KasKotaData, type TxnKotaItem } from '@/lib/actions/kas-kota'
 import type { EventDashboard } from '@/lib/actions/event'
 import { kasCatatan, kasEventId } from '@/lib/kas-event'
 import { wibToday } from '@/lib/wib'
 import { RupiahInput } from '@/components/ui/rupiah-input'
+import { ID_FONTS } from '@/components/pwa/member-card'
+import { LOGO } from '@/components/pwa/ui'
 import {
   ANTON,
   BTN,
@@ -25,7 +27,7 @@ import {
   TAPE_RIGHT,
 } from '@/components/pwa/paper-ui'
 import { PAGE_SIZE_EVENT, Pager, SearchBox } from './list-tools'
-import { ALK_BASE, DateBlock, Empty, Field, FieldGroup, FLD, Note, Seg, Sheet, SheetHead, Toast } from './ui'
+import { ALK_BASE, DateBlock, Empty, Field, FieldGroup, FLD, Icon, Note, Seg, Sheet, SheetHead, Toast } from './ui'
 
 type Tipe = TxnKotaItem['tipe']
 type Kategori = TxnKotaItem['kategori']
@@ -134,6 +136,7 @@ export function KasV2Client({
   const [page, setPage] = useState(0)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [imageOpen, setImageOpen] = useState(false)
 
   const masuk = useMemo(() => txns.filter((t) => t.tipe === 'masuk').reduce((s, t) => s + t.jumlah, 0), [txns])
   const keluar = useMemo(() => txns.filter((t) => t.tipe === 'keluar').reduce((s, t) => s + t.jumlah, 0), [txns])
@@ -194,6 +197,15 @@ export function KasV2Client({
   }
 
   const exportUrl = exportHref ? `${exportHref}${filter === 'event' && eventId ? `?eventId=${eventId}` : ''}` : null
+  // Laporan gambar = cakupan yang sama dengan Excel: event terpilih di filter Event, selain itu semua transaksi.
+  const reportEvent = filter === 'event' ? (selectedEvent ?? null) : null
+  const reportTxns = useMemo(
+    () =>
+      txns
+        .filter((t) => !reportEvent || eventOf.get(t.id_txn) === reportEvent.id_event)
+        .sort((a, b) => a.tanggal.localeCompare(b.tanggal) || a.id_txn - b.id_txn),
+    [txns, reportEvent, eventOf],
+  )
 
   return (
     <PaperMain>
@@ -328,13 +340,34 @@ export function KasV2Client({
           </div>
         </div>
 
-        {exportUrl && (
-          <a href={exportUrl} className={BTN_OUTLINE}>
-            {filter === 'event' && eventId ? 'Unduh Excel · event ini' : 'Unduh Laporan Excel'}
-          </a>
-        )}
+        <div>
+          <p className={`${LABEL} text-[10px] font-bold text-[#44403c] mb-2`}>
+            Unduh laporan · {reportEvent ? 'event ini' : 'semua transaksi'}
+          </p>
+          <div className={`grid gap-2.5 ${exportUrl ? 'grid-cols-2' : ''}`}>
+            {exportUrl && (
+              <a href={exportUrl} className={BTN_OUTLINE}>
+                <Icon name="grid" className="w-4 h-4" />
+                Excel
+              </a>
+            )}
+            <button type="button" onClick={() => setImageOpen(true)} className={BTN_OUTLINE}>
+              <Icon name="image" className="w-4 h-4" />
+              Gambar
+            </button>
+          </div>
+        </div>
       </div>
 
+      {imageOpen && (
+        <KasImageSheet
+          namaCabang={namaCabang}
+          saldo={kas.saldo}
+          event={reportEvent}
+          txns={reportTxns}
+          onClose={() => setImageOpen(false)}
+        />
+      )}
       {draft && (
         <TxnSheet
           key={draft.id ?? `new-${draft.tipe}`}
@@ -433,6 +466,249 @@ function TxnRow({ txn, label, onClick }: { txn: TxnKotaItem; label: string; onCl
         {rp(txn.jumlah)}
       </span>
     </button>
+  )
+}
+
+const REPORT_BG = '#efe8da'
+// iOS Safari gives up on canvases over 16,777,216 px (blank image), so long reports get a lower pixel ratio.
+const MAX_PIXELS = 16_000_000
+const MAX_SIDE = 16_384
+
+class TooLongError extends Error {}
+
+/** WebKit (Safari, every iOS browser, the iOS PWA) can paint the first pass before embedded fonts and the logo decode. */
+function isWebKit() {
+  const ua = navigator.userAgent
+  return /AppleWebKit/.test(ua) && !/Chrome|Chromium|Android|Edg/.test(ua)
+}
+
+async function renderPng(node: HTMLElement) {
+  const { toBlob } = await import('html-to-image')
+  // The clone copies computed sizes, so an img still loading would be captured at 0px wide.
+  await Promise.all([...node.querySelectorAll('img')].map((i) => i.decode().catch(() => {})))
+  const w = node.offsetWidth
+  const h = node.offsetHeight
+  const pixelRatio = Math.min(2, Math.sqrt(MAX_PIXELS / (w * h)), MAX_SIDE / h)
+  if (pixelRatio < 1) throw new TooLongError()
+  const opts = { pixelRatio, backgroundColor: REPORT_BG }
+  if (isWebKit()) await toBlob(node, opts)
+  const blob = await toBlob(node, opts)
+  if (!blob) throw new Error('toBlob returned null')
+  return blob
+}
+
+function slug(s: string) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)
+}
+
+/** Gambar laporan: lebar tetap, digambar di luar layar lalu diubah ke PNG. */
+function KasReport({
+  namaCabang,
+  saldo,
+  event,
+  txns,
+  dibuat,
+}: {
+  namaCabang: string
+  saldo: number
+  event: EventDashboard | null
+  txns: TxnKotaItem[]
+  dibuat: string
+}) {
+  const masuk = txns.filter((t) => t.tipe === 'masuk').reduce((s, t) => s + t.jumlah, 0)
+  const keluar = txns.filter((t) => t.tipe === 'keluar').reduce((s, t) => s + t.jumlah, 0)
+  const stats: [string, string, boolean][] = event
+    ? [
+        ['Pemasukan', rp(masuk), false],
+        ['Pengeluaran', rp(keluar), true],
+        ['Selisih', rp(masuk - keluar), masuk - keluar < 0],
+      ]
+    : [
+        ['Saldo Kas', rp(saldo), saldo < 0],
+        ['Pemasukan', rp(masuk), false],
+        ['Pengeluaran', rp(keluar), true],
+      ]
+  const first = txns[0]
+  const last = txns[txns.length - 1]
+  const periode = event ? tglShort(event) : first ? `${fmtTgl(first.tanggal)} – ${fmtTgl(last.tanggal)}` : ''
+
+  return (
+    <div className={`${ID_FONTS} ${MONO} w-[540px] p-7 text-[#161616]`} style={{ background: REPORT_BG }}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className={`${LABEL} text-[11px] font-bold text-[#57534e]`}>Laporan Kas · {namaCabang}</p>
+          <p className={`${ANTON} mt-2 text-[34px] leading-[1.05] tracking-[.01em] break-words`}>{event ? event.nama_event : 'Kas Kota'}</p>
+          {periode && <p className={`${MONO} mt-2 text-[12px] text-[#57534e]`}>{periode}</p>}
+        </div>
+        <span className="shrink-0 -rotate-3 bg-[#e02a2f] px-3 py-2">
+          {/* eslint-disable-next-line @next/next/no-img-element -- html-to-image embeds a plain img; next/image adds srcset + lazy loading */}
+          <img src={LOGO} alt="" width={72} height={28} className="block h-7 w-[72px]" />
+        </span>
+      </div>
+
+      <div className="mt-5 grid grid-cols-3 divide-x-2 divide-dotted divide-[#161616]/20 rounded-[14px] bg-[#fffdf7] px-4 py-3.5">
+        {stats.map(([label, value, red], i) => (
+          <div key={label} className={`min-w-0 ${i === 0 ? 'pr-3' : i === 1 ? 'px-3' : 'pl-3'}`}>
+            <p className={`${LABEL} text-[9.5px] text-[#57534e]`}>{label}</p>
+            <p className={`${MONO} mt-1 text-[14px] font-bold break-words ${red ? RED_TEXT : ''}`}>{value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 rounded-[14px] bg-[#fffdf7] overflow-hidden">
+        <div className={`${LABEL} flex items-center justify-between bg-[#161616] px-4 py-2.5 text-[10px] font-bold text-[#ffd83d]`}>
+          <span>Riwayat transaksi</span>
+          <span>{txns.length}</span>
+        </div>
+        {txns.length === 0 ? (
+          <p className={`${LABEL} px-4 py-6 text-center text-[10.5px] text-[#57534e]`}>Belum ada transaksi.</p>
+        ) : (
+          <div className={ROWS}>
+            {txns.map((t, i) => {
+              const isMasuk = t.tipe === 'masuk'
+              const label = event ? kasCatatan(t.keterangan, event.nama_event) || t.keterangan : t.keterangan
+              return (
+                <div key={t.id_txn} className="flex items-start gap-3 px-4 py-2.5">
+                  <span className={`${MONO} w-6 shrink-0 pt-px text-[11px] text-[#57534e]`}>{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className={`${MONO} text-[12.5px] font-bold leading-snug break-words`}>{label}</p>
+                    <p className={`${LABEL} mt-0.5 text-[9.5px] text-[#57534e]`}>
+                      {fmtTgl(t.tanggal)}
+                      {event ? '' : ` · ${t.kategori}`}
+                    </p>
+                  </div>
+                  <span className={`${MONO} shrink-0 text-[12.5px] font-bold ${isMasuk ? '' : RED_TEXT}`}>
+                    {isMasuk ? '+' : '−'}
+                    {rp(t.jumlah)}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      <p className={`${MONO} mt-4 text-center text-[10.5px] text-[#57534e]`}>Dibuat {dibuat} · Sekretariat LevelUP</p>
+    </div>
+  )
+}
+
+function KasImageSheet({
+  namaCabang,
+  saldo,
+  event,
+  txns,
+  onClose,
+}: {
+  namaCabang: string
+  saldo: number
+  event: EventDashboard | null
+  txns: TxnKotaItem[]
+  onClose: () => void
+}) {
+  const reportRef = useRef<HTMLDivElement>(null)
+  const [dibuat] = useState(
+    () =>
+      `${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB`,
+  )
+  const [img, setImg] = useState<{ url: string; file: File } | null>(null)
+  const [canShare, setCanShare] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    let url = ''
+    ;(async () => {
+      try {
+        await document.fonts.ready
+        if (cancelled || !reportRef.current) return
+        const blob = await renderPng(reportRef.current)
+        if (cancelled) return
+        const name = `kas-${slug(namaCabang) || 'kota'}-${event ? slug(event.nama_event) || 'event' : 'semua'}-${wibToday().toISOString().slice(0, 10)}.png`
+        const file = new File([blob], name, { type: 'image/png' })
+        url = URL.createObjectURL(blob)
+        setImg({ url, file })
+        setCanShare(typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] }))
+      } catch (e) {
+        if (cancelled) return
+        if (!(e instanceof TooLongError)) console.error('kas image', e)
+        setError(
+          e instanceof TooLongError
+            ? `Terlalu banyak transaksi untuk satu gambar (${txns.length}). Pilih satu event di filter Event, atau unduh Excel.`
+            : 'Gagal membuat gambar. Tutup lalu coba lagi.',
+        )
+      }
+    })()
+    return () => {
+      cancelled = true
+      if (url) URL.revokeObjectURL(url)
+    }
+  }, [namaCabang, saldo, event, txns])
+
+  function download() {
+    if (!img) return
+    const a = document.createElement('a')
+    a.href = img.url
+    a.download = img.file.name
+    a.click()
+  }
+
+  async function share() {
+    if (!img) return
+    try {
+      await navigator.share({ files: [img.file] })
+    } catch (e) {
+      if ((e as Error).name !== 'AbortError') setError('Gagal membagikan. Pakai Unduh Gambar.')
+    }
+  }
+
+  return (
+    <>
+      <Sheet open onClose={onClose}>
+        <SheetHead title="Laporan Gambar" sub={event ? eventLabel(event) : `Semua transaksi · Kas ${namaCabang}`} />
+        <div className="max-h-[48vh] overflow-y-auto rounded-[10px] ring-1 ring-[#161616]/15" style={{ background: REPORT_BG }}>
+          {img ? (
+            // eslint-disable-next-line @next/next/no-img-element -- blob URL preview
+            <img src={img.url} alt="Pratinjau laporan kas" className="block w-full h-auto" />
+          ) : (
+            !error && <p className={`${LABEL} py-12 text-center text-[11px] text-[#57534e]`}>Membuat gambar…</p>
+          )}
+        </div>
+        {error && (
+          <p role="alert" className={`${ERROR} mt-3`}>
+            {error}
+          </p>
+        )}
+        <div className="mt-4 space-y-2.5">
+          {canShare && (
+            <button type="button" onClick={share} disabled={!img} className={BTN}>
+              <Strip tone="ink" className="py-2.5 text-[16px]">
+                <Icon name="share" className="w-4 h-4" />
+                Bagikan / Simpan
+              </Strip>
+            </button>
+          )}
+          {canShare ? (
+            <button type="button" onClick={download} disabled={!img} className={BTN_OUTLINE}>
+              Unduh Gambar
+            </button>
+          ) : (
+            <button type="button" onClick={download} disabled={!img} className={BTN}>
+              <Strip tone="ink" className="py-2.5 text-[16px]">
+                <Icon name="image" className="w-4 h-4" />
+                Unduh Gambar
+              </Strip>
+            </button>
+          )}
+        </div>
+      </Sheet>
+      {/* Laid out off-screen so html-to-image can measure it; the inner node is captured, so the clone stays static. */}
+      <div aria-hidden className="pointer-events-none fixed top-0 -left-[10000px]">
+        <div ref={reportRef}>
+          <KasReport namaCabang={namaCabang} saldo={saldo} event={event} txns={txns} dibuat={dibuat} />
+        </div>
+      </div>
+    </>
   )
 }
 
