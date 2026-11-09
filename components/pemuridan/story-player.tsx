@@ -82,7 +82,8 @@ function Stage({ story, storageKey }: { story: Story; storageKey: string }) {
     pan.innerHTML = scene.panel()
     pan.scrollTop = 0
     const cleanup = scene.mount?.({
-      svg: art.querySelector('svg')!,
+      // Explicit type: jodit's global HTMLElementTagNameMap maps 'svg' to HTMLElement.
+      svg: art.querySelector<SVGSVGElement>('svg')!,
       panel: pan,
       rm: matchMedia('(prefers-reduced-motion: reduce)').matches,
       done: () => setReadyVisit(visit),

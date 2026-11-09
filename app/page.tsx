@@ -3,6 +3,8 @@ import Image from 'next/image'
 import { connection } from 'next/server'
 import { InstallApp } from '@/components/install-app'
 import { getPublicEvents, type EventListItem } from '@/lib/actions/event'
+import { listArtikelTerbit } from '@/lib/artikel-data'
+import { ArtikelPolaroid } from '@/components/landing/artikel-card'
 import { EventThumb } from '@/components/pwa/ui'
 import { Brush, Crown, CtaButtons, Dot, Heart, LIFT, LOGO, MK, PRESS, Ring, Scribble, Smiley, Strip, Tape, Torn, ZineFooter, ZineHeader, ZinePage, torn } from '@/components/landing/zine'
 
@@ -114,7 +116,7 @@ export default async function LandingPage() {
   // Render per request: event list depends on "today" (WIB) + live DB. Prerendered at build it froze the
   // list until the next deploy and made every build depend on the DB being reachable.
   await connection()
-  const { events } = await getPublicEvents()
+  const [{ events }, artikel] = await Promise.all([getPublicEvents(), listArtikelTerbit(3)])
   const open = events.filter((e) => e.regState === 'OPEN')
   const preview = (open.length ? open : events).slice(0, PREVIEW_N)
 
@@ -287,6 +289,28 @@ export default async function LandingPage() {
           <p className="px-5 sm:px-8 max-w-6xl mx-auto text-[13px] text-stone-600">
             Get Ticket bakal minta kamu masuk dulu, abis itu langsung lanjut ambil tiket.
           </p>
+        </section>
+      )}
+
+      {/* Artikel */}
+      {artikel.length > 0 && (
+        <section className="px-5 sm:px-8 pb-24 max-w-6xl mx-auto">
+          <div className="flex items-end justify-between gap-4">
+            <h2 className={`${MK} relative text-[clamp(2rem,6vw,3.4rem)] leading-none uppercase`}>
+              Baca <span className="text-[#e02a2f]">dulu</span>
+              <Brush className="-bottom-3 h-3" />
+            </h2>
+            <Link href="/artikel" className={`shrink-0 ${LIFT} ${PRESS}`}>
+              <Strip tone="ink" seed={90} className="px-3.5 py-2 text-[13px] -rotate-2">
+                Lihat semua
+              </Strip>
+            </Link>
+          </div>
+          <div className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            {artikel.map((a, i) => (
+              <ArtikelPolaroid key={a.id} a={a} i={i} />
+            ))}
+          </div>
         </section>
       )}
 

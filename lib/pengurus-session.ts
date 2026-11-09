@@ -1,9 +1,11 @@
 import { cookies } from 'next/headers'
 import { db } from '@/lib/db'
+import { isNasionalBrim } from '@/lib/event-cabang'
+import { BRIM_BASE, BRIM_LEGACY } from '@/components/brim-v2/paths'
 
-export function pengurusDest(divisi: string | null | undefined): string | null {
+export function pengurusDest(divisi: string | null | undefined, username?: string | null): string | null {
   if (divisi === 'alk') return '/dashboard/v2/kota/alk'
-  if (divisi === 'brim') return '/dashboard/kota/brim'
+  if (divisi === 'brim') return username && isNasionalBrim(username) ? BRIM_BASE : BRIM_LEGACY
   if (divisi === 'vol') return '/dashboard/kota/vol'
   return null
 }

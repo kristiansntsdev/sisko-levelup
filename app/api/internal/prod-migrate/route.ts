@@ -393,6 +393,65 @@ export async function POST(req: NextRequest) {
     `)
   }
 
+  async function ensureTable(name: string, ddl: string): Promise<boolean> {
+    const rows = await db.$queryRaw<{ TABLE_NAME: string }[]>`
+      SELECT TABLE_NAME FROM information_schema.TABLES
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ${name}
+    `
+    if (rows.length > 0) return false
+    await db.$executeRawUnsafe(ddl)
+    return true
+  }
+
+  const addedArtikel = await ensureTable('artikel', `
+    CREATE TABLE artikel (
+      id_artikel INT NOT NULL AUTO_INCREMENT,
+      slug VARCHAR(160) NOT NULL,
+      judul VARCHAR(200) NOT NULL,
+      ringkasan VARCHAR(300) NOT NULL DEFAULT '',
+      cover_url VARCHAR(500) NOT NULL DEFAULT '',
+      isi LONGTEXT NOT NULL,
+      status VARCHAR(16) NOT NULL DEFAULT 'draft',
+      published_at DATETIME(0) NULL,
+      id_pengurus INT NOT NULL,
+      created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id_artikel),
+      UNIQUE KEY uq_artikel_slug (slug),
+      KEY idx_artikel_status_pub (status, published_at)
+    )
+  `)
+  const addedArtikelView = await ensureTable('artikel_view', `
+    CREATE TABLE artikel_view (
+      id_artikel INT NOT NULL,
+      tanggal DATE NOT NULL,
+      views INT NOT NULL DEFAULT 0,
+      PRIMARY KEY (id_artikel, tanggal)
+    )
+  `)
+  const addedArtikelLike = await ensureTable('artikel_like', `
+    CREATE TABLE artikel_like (
+      id_artikel INT NOT NULL,
+      visitor VARCHAR(36) NOT NULL,
+      created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id_artikel, visitor)
+    )
+  `)
+  const addedArtikelKomentar = await ensureTable('artikel_komentar', `
+    CREATE TABLE artikel_komentar (
+      id_komentar INT NOT NULL AUTO_INCREMENT,
+      id_artikel INT NOT NULL,
+      nama VARCHAR(60) NOT NULL,
+      isi TEXT NOT NULL,
+      visitor VARCHAR(36) NOT NULL,
+      ip_hash VARCHAR(16) NOT NULL,
+      hidden TINYINT NOT NULL DEFAULT 0,
+      created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id_komentar),
+      KEY idx_artikel_komentar (id_artikel, created_at)
+    )
+  `)
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -433,6 +492,10 @@ export async function POST(req: NextRequest) {
     addedRekeningKota,
     addedKasTxnIdEvent,
     addedBetaAkses,
+    addedArtikel,
+    addedArtikelView,
+    addedArtikelLike,
+    addedArtikelKomentar,
     brimUpdated: brim.count,
     brim: row,
   })

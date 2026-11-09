@@ -17,14 +17,14 @@ const ALLOWED_INPUT = new Set(['jpeg', 'png', 'webp', 'heif'])
 export class UnreadablePhotoError extends Error {}
 
 /** Re-encodes to WebP. Sharp drops all metadata by default, so EXIF (GPS location, device) never reaches storage. */
-export async function convertProfilePhoto(input: Buffer): Promise<Buffer> {
+export async function convertProfilePhoto(input: Buffer, maxEdge: number = MAX_EDGE): Promise<Buffer> {
   try {
     const image = sharp(input, { limitInputPixels: MAX_INPUT_PIXELS })
     const { format } = await image.metadata()
     if (!ALLOWED_INPUT.has(format)) throw new Error(`format ${format}`)
     return await image
       .rotate() // applies EXIF orientation before it is stripped
-      .resize({ width: MAX_EDGE, height: MAX_EDGE, fit: 'inside', withoutEnlargement: true })
+      .resize({ width: maxEdge, height: maxEdge, fit: 'inside', withoutEnlargement: true })
       .webp(WEBP)
       .toBuffer()
   } catch {

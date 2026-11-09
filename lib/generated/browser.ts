@@ -283,3 +283,23 @@ export type event_detail = Prisma.event_detailModel
  * route /logs (password LOG_PASSWORD).
  */
 export type app_log = Prisma.app_logModel
+/**
+ * Model artikel
+ * Artikel BRIM Nasional untuk halaman depan (/artikel). `isi` = HTML hasil editor Jodit, disanitasi saat simpan.
+ */
+export type artikel = Prisma.artikelModel
+/**
+ * Model artikel_view
+ * Traffic: satu baris per artikel per hari (tanggal WIB). Ditulis lewat raw SQL supaya tidak masuk app_log.
+ */
+export type artikel_view = Prisma.artikel_viewModel
+/**
+ * Model artikel_like
+ * Like anonim: satu baris per artikel per visitor (cookie lup_vid). Ditulis lewat raw SQL.
+ */
+export type artikel_like = Prisma.artikel_likeModel
+/**
+ * Model artikel_komentar
+ * Komentar publik tanpa login; langsung tampil, BRIM bisa menyembunyikan (hidden=1) atau menghapus.
+ */
+export type artikel_komentar = Prisma.artikel_komentarModel

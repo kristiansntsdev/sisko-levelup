@@ -448,7 +448,11 @@ export const ModelName = {
   kas_kota_txn: 'kas_kota_txn',
   dokumentasi_kota: 'dokumentasi_kota',
   event_detail: 'event_detail',
-  app_log: 'app_log'
+  app_log: 'app_log',
+  artikel: 'artikel',
+  artikel_view: 'artikel_view',
+  artikel_like: 'artikel_like',
+  artikel_komentar: 'artikel_komentar'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -464,7 +468,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "event_lokasi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "feedback_app" | "kesaksian" | "beta_akses" | "reimburse_approval" | "rekening_kota" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "event_lokasi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "feedback_app" | "kesaksian" | "beta_akses" | "reimburse_approval" | "rekening_kota" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log" | "artikel" | "artikel_view" | "artikel_like" | "artikel_komentar"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3900,6 +3904,270 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    artikel: {
+      payload: Prisma.$artikelPayload<ExtArgs>
+      fields: Prisma.artikelFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.artikelFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikelPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.artikelFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikelPayload>
+        }
+        findFirst: {
+          args: Prisma.artikelFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikelPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.artikelFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikelPayload>
+        }
+        findMany: {
+          args: Prisma.artikelFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikelPayload>[]
+        }
+        create: {
+          args: Prisma.artikelCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikelPayload>
+        }
+        createMany: {
+          args: Prisma.artikelCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.artikelDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikelPayload>
+        }
+        update: {
+          args: Prisma.artikelUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikelPayload>
+        }
+        deleteMany: {
+          args: Prisma.artikelDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.artikelUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.artikelUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikelPayload>
+        }
+        aggregate: {
+          args: Prisma.ArtikelAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArtikel>
+        }
+        groupBy: {
+          args: Prisma.artikelGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArtikelGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.artikelCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ArtikelCountAggregateOutputType> | number
+        }
+      }
+    }
+    artikel_view: {
+      payload: Prisma.$artikel_viewPayload<ExtArgs>
+      fields: Prisma.artikel_viewFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.artikel_viewFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_viewPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.artikel_viewFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_viewPayload>
+        }
+        findFirst: {
+          args: Prisma.artikel_viewFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_viewPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.artikel_viewFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_viewPayload>
+        }
+        findMany: {
+          args: Prisma.artikel_viewFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_viewPayload>[]
+        }
+        create: {
+          args: Prisma.artikel_viewCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_viewPayload>
+        }
+        createMany: {
+          args: Prisma.artikel_viewCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.artikel_viewDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_viewPayload>
+        }
+        update: {
+          args: Prisma.artikel_viewUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_viewPayload>
+        }
+        deleteMany: {
+          args: Prisma.artikel_viewDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.artikel_viewUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.artikel_viewUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_viewPayload>
+        }
+        aggregate: {
+          args: Prisma.Artikel_viewAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArtikel_view>
+        }
+        groupBy: {
+          args: Prisma.artikel_viewGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Artikel_viewGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.artikel_viewCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Artikel_viewCountAggregateOutputType> | number
+        }
+      }
+    }
+    artikel_like: {
+      payload: Prisma.$artikel_likePayload<ExtArgs>
+      fields: Prisma.artikel_likeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.artikel_likeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_likePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.artikel_likeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_likePayload>
+        }
+        findFirst: {
+          args: Prisma.artikel_likeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_likePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.artikel_likeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_likePayload>
+        }
+        findMany: {
+          args: Prisma.artikel_likeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_likePayload>[]
+        }
+        create: {
+          args: Prisma.artikel_likeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_likePayload>
+        }
+        createMany: {
+          args: Prisma.artikel_likeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.artikel_likeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_likePayload>
+        }
+        update: {
+          args: Prisma.artikel_likeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_likePayload>
+        }
+        deleteMany: {
+          args: Prisma.artikel_likeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.artikel_likeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.artikel_likeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_likePayload>
+        }
+        aggregate: {
+          args: Prisma.Artikel_likeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArtikel_like>
+        }
+        groupBy: {
+          args: Prisma.artikel_likeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Artikel_likeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.artikel_likeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Artikel_likeCountAggregateOutputType> | number
+        }
+      }
+    }
+    artikel_komentar: {
+      payload: Prisma.$artikel_komentarPayload<ExtArgs>
+      fields: Prisma.artikel_komentarFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.artikel_komentarFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_komentarPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.artikel_komentarFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_komentarPayload>
+        }
+        findFirst: {
+          args: Prisma.artikel_komentarFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_komentarPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.artikel_komentarFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_komentarPayload>
+        }
+        findMany: {
+          args: Prisma.artikel_komentarFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_komentarPayload>[]
+        }
+        create: {
+          args: Prisma.artikel_komentarCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_komentarPayload>
+        }
+        createMany: {
+          args: Prisma.artikel_komentarCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.artikel_komentarDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_komentarPayload>
+        }
+        update: {
+          args: Prisma.artikel_komentarUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_komentarPayload>
+        }
+        deleteMany: {
+          args: Prisma.artikel_komentarDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.artikel_komentarUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.artikel_komentarUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$artikel_komentarPayload>
+        }
+        aggregate: {
+          args: Prisma.Artikel_komentarAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateArtikel_komentar>
+        }
+        groupBy: {
+          args: Prisma.artikel_komentarGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Artikel_komentarGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.artikel_komentarCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Artikel_komentarCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -4605,6 +4873,55 @@ export const App_logScalarFieldEnum = {
 export type App_logScalarFieldEnum = (typeof App_logScalarFieldEnum)[keyof typeof App_logScalarFieldEnum]
 
 
+export const ArtikelScalarFieldEnum = {
+  id_artikel: 'id_artikel',
+  slug: 'slug',
+  judul: 'judul',
+  ringkasan: 'ringkasan',
+  cover_url: 'cover_url',
+  isi: 'isi',
+  status: 'status',
+  published_at: 'published_at',
+  id_pengurus: 'id_pengurus',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ArtikelScalarFieldEnum = (typeof ArtikelScalarFieldEnum)[keyof typeof ArtikelScalarFieldEnum]
+
+
+export const Artikel_viewScalarFieldEnum = {
+  id_artikel: 'id_artikel',
+  tanggal: 'tanggal',
+  views: 'views'
+} as const
+
+export type Artikel_viewScalarFieldEnum = (typeof Artikel_viewScalarFieldEnum)[keyof typeof Artikel_viewScalarFieldEnum]
+
+
+export const Artikel_likeScalarFieldEnum = {
+  id_artikel: 'id_artikel',
+  visitor: 'visitor',
+  created_at: 'created_at'
+} as const
+
+export type Artikel_likeScalarFieldEnum = (typeof Artikel_likeScalarFieldEnum)[keyof typeof Artikel_likeScalarFieldEnum]
+
+
+export const Artikel_komentarScalarFieldEnum = {
+  id_komentar: 'id_komentar',
+  id_artikel: 'id_artikel',
+  nama: 'nama',
+  isi: 'isi',
+  visitor: 'visitor',
+  ip_hash: 'ip_hash',
+  hidden: 'hidden',
+  created_at: 'created_at'
+} as const
+
+export type Artikel_komentarScalarFieldEnum = (typeof Artikel_komentarScalarFieldEnum)[keyof typeof Artikel_komentarScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -5135,6 +5452,35 @@ export const app_logOrderByRelevanceFieldEnum = {
 export type app_logOrderByRelevanceFieldEnum = (typeof app_logOrderByRelevanceFieldEnum)[keyof typeof app_logOrderByRelevanceFieldEnum]
 
 
+export const artikelOrderByRelevanceFieldEnum = {
+  slug: 'slug',
+  judul: 'judul',
+  ringkasan: 'ringkasan',
+  cover_url: 'cover_url',
+  isi: 'isi',
+  status: 'status'
+} as const
+
+export type artikelOrderByRelevanceFieldEnum = (typeof artikelOrderByRelevanceFieldEnum)[keyof typeof artikelOrderByRelevanceFieldEnum]
+
+
+export const artikel_likeOrderByRelevanceFieldEnum = {
+  visitor: 'visitor'
+} as const
+
+export type artikel_likeOrderByRelevanceFieldEnum = (typeof artikel_likeOrderByRelevanceFieldEnum)[keyof typeof artikel_likeOrderByRelevanceFieldEnum]
+
+
+export const artikel_komentarOrderByRelevanceFieldEnum = {
+  nama: 'nama',
+  isi: 'isi',
+  visitor: 'visitor',
+  ip_hash: 'ip_hash'
+} as const
+
+export type artikel_komentarOrderByRelevanceFieldEnum = (typeof artikel_komentarOrderByRelevanceFieldEnum)[keyof typeof artikel_komentarOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -5448,6 +5794,10 @@ export type GlobalOmitConfig = {
   dokumentasi_kota?: Prisma.dokumentasi_kotaOmit
   event_detail?: Prisma.event_detailOmit
   app_log?: Prisma.app_logOmit
+  artikel?: Prisma.artikelOmit
+  artikel_view?: Prisma.artikel_viewOmit
+  artikel_like?: Prisma.artikel_likeOmit
+  artikel_komentar?: Prisma.artikel_komentarOmit
 }
 
 /* Types for Logging */

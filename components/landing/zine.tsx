@@ -163,6 +163,7 @@ export function ZinePage({ children }: { children: ReactNode }) {
 const NAV = [
   ['/about', 'Tentang', 'paper', '-rotate-1'],
   ['/program', 'Program', 'yellow', 'rotate-1'],
+  ['/artikel', 'Artikel', 'red', '-rotate-1'],
 ] as const
 
 export function ZineHeader() {

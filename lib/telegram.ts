@@ -36,7 +36,7 @@ export function eventApproveLink(idEvent: number): string {
 }
 
 export function eventBrimApproveLink(idEvent: number): string {
-  return `${publicAppBase()}/dashboard/kota/brim/event/${idEvent}/approve`
+  return `${publicAppBase()}/dashboard/v2/brim/event/${idEvent}`
 }
 
 export function eventDetailLink(idEvent: number): string {

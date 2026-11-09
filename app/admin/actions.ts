@@ -22,7 +22,7 @@ export async function loginPengurus(
 
   if (!pengurus) return { error: 'Username atau password salah.' }
 
-  const dest = pengurusDest(pengurus.divisi)
+  const dest = pengurusDest(pengurus.divisi, pengurus.username)
   if (!dest) return { error: 'Divisi tidak dikenali.' }
 
   await setPengurusCookie(pengurus.id_pengurus)

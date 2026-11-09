@@ -102,7 +102,11 @@ export const ModelName = {
   kas_kota_txn: 'kas_kota_txn',
   dokumentasi_kota: 'dokumentasi_kota',
   event_detail: 'event_detail',
-  app_log: 'app_log'
+  app_log: 'app_log',
+  artikel: 'artikel',
+  artikel_view: 'artikel_view',
+  artikel_like: 'artikel_like',
+  artikel_komentar: 'artikel_komentar'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -787,6 +791,55 @@ export const App_logScalarFieldEnum = {
 export type App_logScalarFieldEnum = (typeof App_logScalarFieldEnum)[keyof typeof App_logScalarFieldEnum]
 
 
+export const ArtikelScalarFieldEnum = {
+  id_artikel: 'id_artikel',
+  slug: 'slug',
+  judul: 'judul',
+  ringkasan: 'ringkasan',
+  cover_url: 'cover_url',
+  isi: 'isi',
+  status: 'status',
+  published_at: 'published_at',
+  id_pengurus: 'id_pengurus',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ArtikelScalarFieldEnum = (typeof ArtikelScalarFieldEnum)[keyof typeof ArtikelScalarFieldEnum]
+
+
+export const Artikel_viewScalarFieldEnum = {
+  id_artikel: 'id_artikel',
+  tanggal: 'tanggal',
+  views: 'views'
+} as const
+
+export type Artikel_viewScalarFieldEnum = (typeof Artikel_viewScalarFieldEnum)[keyof typeof Artikel_viewScalarFieldEnum]
+
+
+export const Artikel_likeScalarFieldEnum = {
+  id_artikel: 'id_artikel',
+  visitor: 'visitor',
+  created_at: 'created_at'
+} as const
+
+export type Artikel_likeScalarFieldEnum = (typeof Artikel_likeScalarFieldEnum)[keyof typeof Artikel_likeScalarFieldEnum]
+
+
+export const Artikel_komentarScalarFieldEnum = {
+  id_komentar: 'id_komentar',
+  id_artikel: 'id_artikel',
+  nama: 'nama',
+  isi: 'isi',
+  visitor: 'visitor',
+  ip_hash: 'ip_hash',
+  hidden: 'hidden',
+  created_at: 'created_at'
+} as const
+
+export type Artikel_komentarScalarFieldEnum = (typeof Artikel_komentarScalarFieldEnum)[keyof typeof Artikel_komentarScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1315,4 +1368,33 @@ export const app_logOrderByRelevanceFieldEnum = {
 } as const
 
 export type app_logOrderByRelevanceFieldEnum = (typeof app_logOrderByRelevanceFieldEnum)[keyof typeof app_logOrderByRelevanceFieldEnum]
+
+
+export const artikelOrderByRelevanceFieldEnum = {
+  slug: 'slug',
+  judul: 'judul',
+  ringkasan: 'ringkasan',
+  cover_url: 'cover_url',
+  isi: 'isi',
+  status: 'status'
+} as const
+
+export type artikelOrderByRelevanceFieldEnum = (typeof artikelOrderByRelevanceFieldEnum)[keyof typeof artikelOrderByRelevanceFieldEnum]
+
+
+export const artikel_likeOrderByRelevanceFieldEnum = {
+  visitor: 'visitor'
+} as const
+
+export type artikel_likeOrderByRelevanceFieldEnum = (typeof artikel_likeOrderByRelevanceFieldEnum)[keyof typeof artikel_likeOrderByRelevanceFieldEnum]
+
+
+export const artikel_komentarOrderByRelevanceFieldEnum = {
+  nama: 'nama',
+  isi: 'isi',
+  visitor: 'visitor',
+  ip_hash: 'ip_hash'
+} as const
+
+export type artikel_komentarOrderByRelevanceFieldEnum = (typeof artikel_komentarOrderByRelevanceFieldEnum)[keyof typeof artikel_komentarOrderByRelevanceFieldEnum]
 

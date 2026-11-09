@@ -29,7 +29,7 @@ export async function loginEmailPassword(
   })
   if (!pengurus) return { error: 'Email atau password salah.' }
 
-  const dest = pengurusDest(pengurus.divisi)
+  const dest = pengurusDest(pengurus.divisi, pengurus.username)
   if (!dest) return { error: 'Divisi tidak dikenali.' }
 
   await setPengurusCookie(pengurus.id_pengurus)
@@ -50,7 +50,7 @@ export async function loginPengurusFromPwa(
   })
   if (!pengurus) return { error: 'Email atau password salah.' }
 
-  const dest = pengurusDest(pengurus.divisi)
+  const dest = pengurusDest(pengurus.divisi, pengurus.username)
   if (!dest) return { error: 'Divisi tidak dikenali.' }
 
   await setPengurusCookie(pengurus.id_pengurus)
@@ -81,7 +81,7 @@ export async function getActiveSessions() {
           idPengurus: pengurus.id_pengurus,
           nama: pengurus.nama,
           divisi: pengurus.divisi,
-          dest: pengurusDest(pengurus.divisi),
+          dest: pengurusDest(pengurus.divisi, pengurus.username),
         }
       : null,
   }

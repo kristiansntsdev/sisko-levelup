@@ -650,3 +650,52 @@ enum app_log_actor_type {
   system
   unknown
 }
+
+/// Artikel BRIM Nasional untuk halaman depan (/artikel). `isi` = HTML hasil editor Jodit, disanitasi saat simpan.
+model artikel {
+  id_artikel   Int       @id @default(autoincrement())
+  slug         String    @unique(map: "uq_artikel_slug") @db.VarChar(160)
+  judul        String    @db.VarChar(200)
+  ringkasan    String    @default("") @db.VarChar(300)
+  cover_url    String    @default("") @db.VarChar(500)
+  isi          String    @db.LongText
+  status       String    @default("draft") @db.VarChar(16)
+  published_at DateTime? @db.DateTime(0)
+  id_pengurus  Int
+  created_at   DateTime  @default(now()) @db.DateTime(0)
+  updated_at   DateTime  @default(now()) @db.DateTime(0)
+
+  @@index([status, published_at], map: "idx_artikel_status_pub")
+}
+
+/// Traffic: satu baris per artikel per hari (tanggal WIB). Ditulis lewat raw SQL supaya tidak masuk app_log.
+model artikel_view {
+  id_artikel Int
+  tanggal    DateTime @db.Date
+  views      Int      @default(0)
+
+  @@id([id_artikel, tanggal])
+}
+
+/// Like anonim: satu baris per artikel per visitor (cookie lup_vid). Ditulis lewat raw SQL.
+model artikel_like {
+  id_artikel Int
+  visitor    String   @db.VarChar(36)
+  created_at DateTime @default(now()) @db.DateTime(0)
+
+  @@id([id_artikel, visitor])
+}
+
+/// Komentar publik tanpa login; langsung tampil, BRIM bisa menyembunyikan (hidden=1) atau menghapus.
+model artikel_komentar {
+  id_komentar Int      @id @default(autoincrement())
+  id_artikel  Int
+  nama        String   @db.VarChar(60)
+  isi         String   @db.Text
+  visitor     String   @db.VarChar(36)
+  ip_hash     String   @db.VarChar(16)
+  hidden      Int      @default(0) @db.TinyInt
+  created_at  DateTime @default(now()) @db.DateTime(0)
+
+  @@index([id_artikel, created_at], map: "idx_artikel_komentar")
+}

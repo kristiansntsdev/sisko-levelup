@@ -172,6 +172,9 @@ async function listEvents(
   const where = {
     ...cabangWhere,
     tgleventselesai: { gte: today },
+    // Hanya event yang sudah disetujui Sekretariat (ALK) dan Brim Nasional; sama dengan isEventFullyApproved().
+    approvenasional: '1',
+    approvebrimnas: '1',
     ...(includeNasional ? {} : { wwtype: { not: 'nasional' as const } }),
   }
   const [rows, total, cabangs] = await Promise.all([
@@ -1589,6 +1592,7 @@ export async function approveEventBrimNasional(
   })
   revalidatePath('/dashboard/kota/brim')
   revalidatePath(`/dashboard/kota/brim/event/${idEvent}/approve`)
+  revalidatePath('/dashboard/v2/brim', 'layout')
 
   const scope = await telegramScopeForEvent(event)
   void notifyTelegram(
@@ -1629,6 +1633,7 @@ export async function rejectEventBrimNasional(
   })
   revalidatePath('/dashboard/kota/brim')
   revalidatePath(`/dashboard/kota/brim/event/${idEvent}/approve`)
+  revalidatePath('/dashboard/v2/brim', 'layout')
 
   const scope = await telegramScopeForEvent(existing)
   void notifyTelegram(

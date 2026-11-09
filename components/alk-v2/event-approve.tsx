@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   approveEventAlkNasional,
@@ -25,10 +25,13 @@ export function EventApproveV2Client({
   event,
   role,
   backHref = ALK_BASE,
+  qa,
 }: {
   event: ApproveEventData
   role: 'alk' | 'brim'
   backHref?: string
+  /** Extra review panels (QA flyer / berita acara) rendered under the flyer. */
+  qa?: ReactNode
 }) {
   const router = useRouter()
   const [alasan, setAlasan] = useState('')
@@ -113,6 +116,8 @@ export function EventApproveV2Client({
             <p className={`${MONO} py-3 text-center text-[12px] text-[#57534e]`}>Belum ada flyer</p>
           </div>
         )}
+
+        {qa}
 
         {notes ? (
           <Note tone="gold">

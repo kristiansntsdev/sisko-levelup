@@ -13,7 +13,7 @@ const FOCUS = 'rounded-2xl focus-visible:outline-2 focus-visible:outline-[#ffd83
 
 // The Dana form and QA panels are shared with the legacy /dashboard/kota pages and use the app's theme variables.
 // Overriding them here gives them the paper look in Sekretariat without changing those pages.
-const PAPER_VARS = {
+export const PAPER_VARS = {
   '--accent': '#e02a2f',
   '--accent-light': 'rgba(224,42,47,.1)',
   '--accent-dark': '#c21f24',
