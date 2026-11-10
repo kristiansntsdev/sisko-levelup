@@ -1,9 +1,6 @@
-import { redirect } from 'next/navigation'
 import { getEventById } from '@/lib/actions/event'
 import { countActiveRegistrasi, findRegistrasiMine } from '@/lib/actions/registrasi'
 import { auth } from '@/auth'
-import { isOnlineEvent } from '@/lib/event-link'
-import { needsNasionalTicketApproval } from '@/lib/registrasi-status'
 import { JoinClient } from './join-client'
 
 export default async function JoinPage({
@@ -17,16 +14,8 @@ export default async function JoinPage({
     auth(),
   ])
 
-  // Online biasa → absen sekali-scan. Event nasional butuh approve tiket dulu
-  // lewat halaman ini, baru absen dari tiket setelah disetujui.
-  if (
-    event &&
-    isOnlineEvent(event.jenisevent) &&
-    !needsNasionalTicketApproval(event.wwtype)
-  ) {
-    redirect(`/absen/${event.id_event}`)
-  }
-
+  // Event Online juga ambil tiket di sini (tidak lagi redirect ke /absen);
+  // absennya dari tombol Absen Event di halaman tiket.
   const idPeserta = session?.user?.idPeserta
   const [mine, registered] = await Promise.all([
     idPeserta ? findRegistrasiMine(idPeserta, Number(eventId)) : null,

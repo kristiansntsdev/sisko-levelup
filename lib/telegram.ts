@@ -27,8 +27,8 @@ export function isTelegramButtonUrl(url: string): boolean {
   }
 }
 
-export function eventJoinLink(idEvent: number, jenisevent?: string): string {
-  return `${publicAppBase()}${eventEntryPath(idEvent, jenisevent)}`
+export function eventJoinLink(idEvent: number): string {
+  return `${publicAppBase()}${eventEntryPath(idEvent)}`
 }
 
 export function eventApproveLink(idEvent: number): string {

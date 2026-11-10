@@ -81,7 +81,7 @@ components/pwa/paper-ui.tsx           # Kit gaya kertas halaman anggota (warna l
   dashboard/kota/alk/event/[id]/dana/   # ALK Kota: form pengajuan support dana (per event)
   dashboard/kota/brim/event/[id]/approve/ # Brim Nasional: approvebrimnas
   dashboard/kota/brim/wfe-flyer/       # Brim Nasional: flyer pusat WW JFE / WFE serentak
-  absen/[eventId]/                    # Event Online: scan QR -> login+registrasi+absen otomatis
+  absen/[eventId]/                    # Event Online (QR lama saja): login+registrasi+absen otomatis; link baru = /join
 lib/actions/upgrade.ts                # joinVolunteer, joinSquad, approveSquad
 lib/actions/wfe-serentak.ts           # kampanye flyer pusat JFE (range bulan)
 lib/event-sesi.ts                     # multi-sesi absen: wajib, hadirPenuh, dup key
@@ -91,7 +91,7 @@ lib/google-maps.ts                    # ensureGoogleMaps (loader bersama form ev
 components/kota/lokasi-pin-map.tsx    # alamat + peta pin untuk satu lokasi scan
 lib/event-approval.ts                 # append notenasional (ALK/Brim prefixes)
 lib/event-poster.ts                    # resolveEventPosterUrl: posterevent then image_url
-lib/event-link.ts                     # eventEntryPath: Online -> /absen/{id}, Offline -> /join/{id}
+lib/event-link.ts                     # eventEntryPath: semua event -> /join/{id} (link tiket); isOnlineEvent
 lib/event-absen-window.ts             # jendela absen online, hitung WIB eksplisit (bukan TZ proses)
 lib/wib.ts                            # wibToday/wibStartOfMonth: batas hari+bulan WIB utk kolom @db.Date
 instrumentation.ts                    # pin TZ=Asia/Jakarta saat boot (jaring pengaman, bukan penyangga)
@@ -146,6 +146,7 @@ task.md                               # Blocked: approval sampai core
 
 ## Recent Updates [2026-11-10]
 - Telegram notif **Absen** event nasional (`id_cabang=0`, termasuk WW Online) dihapus dari `recordAbsen`: dulu tiap scan / absen online = 1 pesan. Notif Registrasi, Pengajuan Tiket, dan Tiket Disetujui tetap dikirim (sengaja)
+- **Event Online pakai link tiket**, bukan link absen: `eventEntryPath(id)` selalu `/join/{id}` (Link di Detail Event, `linkevent` saat buat/edit, QR Join v2 + legacy). `/join` tidak lagi redirect event Online ke `/absen`; member Get Ticket → My Tickets → absen dari tombol **Absen Event** di tiket. QR absen sekali-scan dihapus (pilihan user); route `/absen/{id}` tetap hidup untuk QR/flyer lama. `linkevent` lama `…/absen/{id}` diganti `…/join/{id}` oleh `prod-migrate` (`linkeventJoinBackfill`, idempotent)
 
 ## Recent Updates [2026-11-10]
 - **Review Sekretariat & BRIM Nasional sebelum Korwil** (pengajuan dana): alur kini ALK Kota → **Sekretariat & BRIM Nasional** (keduanya wajib setuju, urutan bebas) → Korwil PPHTGD → PIC LevelUP Pusat → Keuangan PPHTGD. Stage baru `review` di `lib/reimburse-stage.ts` (label "Review Nasional"; `reimbursePic` = pihak yang belum memutuskan; `DANA_STEPS` 5 langkah, `DANA_DONE` = index cair). Salah satu menolak → `ditolak` (oleh Sekretariat/BRIM Nasional), ALK Kota perbaiki + Ajukan ulang

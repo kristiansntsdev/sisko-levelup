@@ -16,7 +16,7 @@ import type { ReimburseData } from '@/lib/actions/reimburse'
 import { REIMBURSE_STAGE, reimburseStage } from '@/lib/reimburse-stage'
 import { isEventFullyApproved } from '@/lib/event-approval'
 import { NASIONAL_KHUSUS_VALUE } from '@/lib/event-cabang'
-import { eventEntryPath, isOnlineEvent } from '@/lib/event-link'
+import { eventEntryPath } from '@/lib/event-link'
 import { hadirPenuh, parseLocalDate, sesiWajibIds } from '@/lib/event-sesi'
 import { FlyerQaSummary } from '@/components/kota/flyer-qa-summary'
 import { BeritaAcaraQaSummary } from '@/components/kota/berita-acara-qa-summary'
@@ -315,18 +315,15 @@ function JoinQrSheet({
   onClose,
   eventId,
   nama,
-  jenisevent,
 }: {
   open: boolean
   onClose: () => void
   eventId: number
   nama: string
-  jenisevent: string
 }) {
   const [origin, setOrigin] = useState('')
   const [toast, setToast] = useState<string | null>(null)
-  const online = isOnlineEvent(jenisevent)
-  const joinUrl = origin ? `${origin}${eventEntryPath(eventId, jenisevent)}` : ''
+  const joinUrl = origin ? `${origin}${eventEntryPath(eventId)}` : ''
 
   useEffect(() => {
     setOrigin(window.location.origin)
@@ -371,11 +368,7 @@ function JoinQrSheet({
       <Sheet open={open} onClose={onClose}>
         <SheetHead
           title="QR Join Event"
-          sub={
-            online
-              ? 'Peserta scan → daftar + absen langsung (Online)'
-              : 'Peserta scan → ambil tiket event (Offline)'
-          }
+          sub="Peserta scan → ambil tiket event"
         />
         <p className={`${ANTON} text-[17px] tracking-[.01em] text-[#161616] truncate mb-3`}>{nama}</p>
         {joinUrl ? (
@@ -821,7 +814,6 @@ export function EventDetailV2Client({
         onClose={() => setShowJoinQr(false)}
         eventId={event.id_event}
         nama={event.nama_event}
-        jenisevent={event.jenisevent}
       />
     </PaperMain>
   )

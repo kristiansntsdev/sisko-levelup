@@ -414,6 +414,11 @@ export async function POST(req: NextRequest) {
     : 0
   const addedApprovalSekreAt = await ensureColumn('reimburse_approval', 'sekre_at',
     `ALTER TABLE reimburse_approval ADD COLUMN sekre_at DATETIME(0) NULL, ADD COLUMN brim_at DATETIME(0) NULL`)
+  // Event Online dulu menyimpan link sistem /absen/{id}; sekarang semua event = link tiket /join/{id}.
+  // Idempotent: setelah diganti tidak ada lagi yang cocok. Link manual (Zoom dst) tidak berakhiran /absen/{angka}.
+  const linkeventJoinBackfill = await db.$executeRaw(
+    Prisma.sql`UPDATE event SET linkevent = REPLACE(linkevent, '/absen/', '/join/') WHERE linkevent REGEXP '/absen/[0-9]+$'`,
+  )
 
   async function ensureTable(name: string, ddl: string): Promise<boolean> {
     const rows = await db.$queryRaw<{ TABLE_NAME: string }[]>`
@@ -522,6 +527,7 @@ export async function POST(req: NextRequest) {
     addedReimburseBrim,
     reimburseReviewBackfill,
     addedApprovalSekreAt,
+    linkeventJoinBackfill,
     brimUpdated: brim.count,
     brim: row,
   })

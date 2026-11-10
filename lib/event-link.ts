@@ -1,23 +1,23 @@
-/** Entry point yang dituju QR / linkevent, dipilih dari jenis event. */
+/** Entry point yang dituju QR / linkevent. */
 
 export function isOnlineEvent(jenisevent: string | null | undefined): boolean {
   return (jenisevent ?? '').trim().toLowerCase() === 'online'
 }
 
 /**
- * Event Online → halaman absen sekali-scan (`/absen/{id}`): login, registrasi,
- * dan absen jadi satu langkah. Offline tetap ke poster + tombol Join.
+ * Semua event (Online juga) → View Event + Get Ticket (`/join/{id}`). Tiket
+ * masuk My Tickets; event Online diabsen dari tombol Absen Event di tiket.
+ * `/absen/{id}` (daftar + absen sekali scan) hanya untuk QR lama yang sudah tersebar.
  */
-export function eventEntryPath(idEvent: number, jenisevent: string | null | undefined): string {
-  return isOnlineEvent(jenisevent) ? `/absen/${idEvent}` : `/join/${idEvent}`
+export function eventEntryPath(idEvent: number): string {
+  return `/join/${idEvent}`
 }
 
-// ponytail: assert-based self-check — QR salah arah = peserta gagal absen
+// ponytail: assert-based self-check — QR salah arah = peserta gagal dapat tiket
 if (process.env.NODE_ENV !== 'production') {
   console.assert(isOnlineEvent('Online'), 'Online terdeteksi')
   console.assert(isOnlineEvent(' online '), 'Online case/space insensitive')
   console.assert(!isOnlineEvent('Offline'), 'Offline bukan online')
   console.assert(!isOnlineEvent(null), 'null bukan online')
-  console.assert(eventEntryPath(7, 'Online') === '/absen/7', 'online → /absen')
-  console.assert(eventEntryPath(7, 'Offline') === '/join/7', 'offline → /join')
+  console.assert(eventEntryPath(7) === '/join/7', 'semua event → /join')
 }

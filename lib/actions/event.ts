@@ -814,7 +814,7 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
   const baseUrl = (process.env.AUTH_URL ?? '').replace(/\/$/, '')
   await db.event.update({
     where: { id_event: id },
-    data: { linkevent: `${baseUrl}${eventEntryPath(id, payload.jenisevent)}` },
+    data: { linkevent: `${baseUrl}${eventEntryPath(id)}` },
   })
 
   if (idCabang === NASIONAL_EVENT_CABANG && payload.sesi) {
@@ -908,12 +908,12 @@ export async function updateEvent(
   })
   if (!current) throw new Error('Event tidak ditemukan')
 
-  // Link bawaan sistem (/join atau /absen) ikut jenis event kalau diubah.
-  // Link manual dari panitia (mis. Zoom) tidak disentuh.
+  // Link bawaan sistem (/join, atau /absen lama untuk event Online) dinormalkan
+  // ke link tiket. Link manual dari panitia (mis. Zoom) tidak disentuh.
   const baseUrl = (process.env.AUTH_URL ?? '').replace(/\/$/, '')
   const systemLink = /\/(join|absen)\/\d+$/.test(current.linkevent ?? '')
   const linkevent = systemLink
-    ? `${baseUrl}${eventEntryPath(id, payload.jenisevent)}`
+    ? `${baseUrl}${eventEntryPath(id)}`
     : undefined
 
   const wwtype =
