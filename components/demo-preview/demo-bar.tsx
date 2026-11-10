@@ -1,5 +1,6 @@
 'use client'
 // The only chrome that is not in the real app: a slim DEMO tab on the left edge that opens account switch + reset.
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useSyncExternalStore } from 'react'
 import { ANTON, LABEL, MONO, PRESS } from '@/components/pwa/paper-ui'
@@ -7,6 +8,7 @@ import { Sheet } from '@/components/pwa/ui'
 import { logoutAll } from './auth'
 import { getDb, isStorageFailing, resetDb, snapshot, subscribe } from './db'
 import { readSession } from './shim/session'
+import { lompatHari } from './shim/actions/air-hidup'
 
 export function DemoBar() {
   const router = useRouter()
@@ -42,6 +44,18 @@ export function DemoBar() {
         <p className={`${LABEL} mt-4 text-[10px] font-bold text-[#57534e]`}>Masuk sebagai</p>
         <p className={`${MONO} text-[13px] font-bold`}>{who}</p>
         {isStorageFailing() && <p className={`${MONO} mt-2 text-[11px] font-bold text-[#c21f24]`}>Penyimpanan browser penuh/diblokir — demo jalan dari memori dan hilang saat reload.</p>}
+
+        <p className={`${LABEL} mt-4 text-[10px] font-bold text-[#57534e]`}>Simulasi waktu Air Hidup · hari ke +{db.air_hari}</p>
+        <div className="mt-1.5 grid grid-cols-3 gap-2">
+          {[1, 7, 30].map((n) => (
+            <button key={n} type="button" onClick={() => void lompatHari(n)} className={`${ANTON} rounded-sm py-2 text-[15px] tracking-[.03em] ring-2 ring-inset ring-[#161616] ${PRESS}`}>
+              +{n} hari
+            </button>
+          ))}
+        </div>
+        <Link href="/demo-preview/landing" onClick={close} className={`${MONO} mt-2.5 inline-block text-[11.5px] font-bold underline underline-offset-4 decoration-dotted`}>
+          Lihat pratinjau landing
+        </Link>
 
         <p className={`${LABEL} mt-4 text-[10px] font-bold text-[#57534e]`}>Aktivitas terakhir</p>
         <ul className="mt-1 max-h-32 space-y-1 overflow-y-auto">

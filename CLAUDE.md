@@ -141,8 +141,17 @@ lib/artikel-html.ts                   # sanitizeArtikelHtml (sanitize-html): htt
 lib/artikel-data.ts                   # Baca artikel: publik (try/catch → kosong) + admin (views/like/komentar, grafik 30 hari, statistik Beranda)
 lib/actions/artikel.ts                # Admin: saveArtikel, setArtikelStatus, deleteArtikel, uploadArtikelCover, setKomentarHidden, deleteKomentar
 lib/actions/artikel-public.ts         # Publik: catatViewArtikel, toggleLikeArtikel, kirimKomentarArtikel (cookie lup_vid, honeypot, jeda 20 dtk)
+lib/air-hidup.ts                      # Air Hidup (DEMO SAJA): level air kota dari laporan WW terakhir (kering 40 hari), tahap, validasi laporan; murni
+components/air-hidup/                 # Air Hidup UI (props in, callback out): bar, feed, lapor-form, share-card (PNG), beranda-panel + pop-up, pic-dashboard, landing-section
+  demo-preview/dashboard/pic/         # Demo: dashboard PIC (userlevel 4) + /lapor; /dashboard/air-hidup = aliran (Core ke atas); /demo-preview/landing = pratinjau landing
+components/demo-preview/air-hidup.tsx # Container demo Air Hidup (useAir, AirBerandaDemo); shim: shim/actions/air-hidup.ts (tabel ww_laporan/ww_amin di db.ts)
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-11-10]
+- **Air Hidup + Dashboard PIC (DEMO SAJA, belum ada di produksi)**: PIC (userlevel 4) cukup **Lapor WW** (tanggal, jumlah orang, satu kalimat "apa yang kalian terima?", foto opsional) tanpa event/tiket/approval/minimum peserta. Tiap LevelUP Kota punya satu bar air: laporan = penuh, turun linear, **kering di hari ke-40, sama untuk semua kota** (ritme WW tiap kota bebas). Tahap: Melimpah 0-6, Segar 7-29, Haus 30-39 (merah), Kering 40+, "Belum pernah minum" (netral, tanpa pop-up). Pop-up "Airmu mau kering" sekali per tahap per akun: PIC → **Lapor WW**, Core → **Ajak PIC-mu** (salin pesan). Panel bar + pop-up di Beranda hanya Core ke atas; **Kabar Terbaru** (3 laporan WW terbaru + tombol Amin) tampil di Beranda **semua anggota, level apa pun**, dan `/dashboard/air-hidup` terbuka untuk semua (bar air tiap kota hanya Core ke atas). Landing hanya counter + Kabar Terbaru, tanpa bar per kota
+- Setelah lapor: **Bagikan Kartu** (PNG `html-to-image`, pola `kas.tsx`), **Alirkan ke kota lain** (kota terhaus dulu), Amin per laporan di feed `/dashboard/air-hidup`, penghitung nasional 30 hari. Kosakata: **Air Hidup** (Yoh 4:14, 7:37-38); jangan pakai "sumur"/"timba"
+- **Hanya `/demo-preview`** karena preview + produksi satu DB: tidak ada tabel/Prisma/prod-migrate/route asli, `/` dan `app/dashboard/page.tsx` tidak diubah. Beranda demo disisipi `<AirBerandaDemo />` lewat PATCH di `scripts/gen-demo-preview.mjs`. Akun demo baru **PIC** (Esra Londa, level 4); tab DEMO punya Simulasi waktu Air Hidup (+1/+7/+30 hari) dan tautan `/demo-preview/landing`. Kunci localStorage `v8`. Cek: `npx tsx lib/air-hidup.check.ts`. Belum: laporan menyalakan bar otomatis dari WW event bertiket, pokok doa
 
 ## Recent Updates [2026-11-10]
 - Telegram notif **Absen** event nasional (`id_cabang=0`, termasuk WW Online) dihapus dari `recordAbsen`: dulu tiap scan / absen online = 1 pesan. Notif Registrasi, Pengajuan Tiket, dan Tiket Disetujui tetap dikirim (sengaja)

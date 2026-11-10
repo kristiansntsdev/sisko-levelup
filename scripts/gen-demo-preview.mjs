@@ -77,6 +77,20 @@ const PATCHES = {
       "      {level === '0' && pendingVolunteer && (\n        <p className={`${MONO} mt-4 flex items-center gap-2 rounded-[10px] border-2 border-dotted border-[#161616]/50 px-3 py-2.5 text-[12px] font-bold`}>\n          <Icon name=\"clock\" className=\"w-4 h-4 shrink-0\" />\n          Menunggu approval Admin LK\n        </p>\n      )}\n      {level === '0' && !pendingVolunteer && (\n        <>\n",
     ],
     ['            pendingSquad={pendingSquad}\n            joinLoading', '            pendingSquad={pendingSquad}\n            pendingVolunteer={pendingVolunteer}\n            joinLoading'],
+    // Air Hidup (demo only): panel + pop-up after the member card. Core and above only, the component renders nothing otherwise.
+    [
+      "import { ID_FONTS, MemberCard } from '@/components/pwa/member-card'\n",
+      "import { ID_FONTS, MemberCard } from '@/components/pwa/member-card'\nimport { AirBerandaDemo, AirKabarDemo } from '@/components/demo-preview/air-hidup'\n",
+    ],
+    [
+      "        {card && <MemberCard m={card} onClick={() => router.push('/demo-preview/dashboard/kartu')} />}\n",
+      "        {card && <MemberCard m={card} onClick={() => router.push('/demo-preview/dashboard/kartu')} />}\n        <AirBerandaDemo />\n",
+    ],
+    // Kabar Terbaru for every member, right before Tiket Aktif.
+    [
+      '        <section>\n          <SectionHead title="Tiket Aktif"',
+      '        <AirKabarDemo />\n\n        <section>\n          <SectionHead title="Tiket Aktif"',
+    ],
   ],
   'components/alk-v2/approval.tsx': [
     ['import { approveSquad }', 'import { approveSquad, approveVolunteer }'],

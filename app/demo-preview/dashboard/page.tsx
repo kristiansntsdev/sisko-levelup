@@ -15,6 +15,7 @@ import { BETA_WEWORSHIP, WEWORSHIP_URL } from '@/lib/beta'
 import { LEVEL_STEPS, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
 import { PEMURIDAN_AKTIF } from '@/lib/pemuridan'
 import { ID_FONTS, MemberCard } from '@/components/pwa/member-card'
+import { AirBerandaDemo, AirKabarDemo } from '@/components/demo-preview/air-hidup'
 import {
   ANTON,
   BTN,
@@ -315,6 +316,7 @@ export default function DashboardPage() {
 
       <div className="px-5 mt-4 flex flex-col gap-7">
         {card && <MemberCard m={card} onClick={() => router.push('/demo-preview/dashboard/kartu')} />}
+        <AirBerandaDemo />
 
         {at >= 0 && at < 3 && userLevel && (
           <LevelPanel
@@ -332,6 +334,8 @@ export default function DashboardPage() {
             <FeatureTile key={f.t} f={f} tilt={TILT[i]} beta={beta} onSoon={setSoon} />
           ))}
         </div>
+
+        <AirKabarDemo />
 
         <section>
           <SectionHead title="Tiket Aktif" action={{ href: '/demo-preview/dashboard/tiket', label: 'Semua' }} />

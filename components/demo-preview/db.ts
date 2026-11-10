@@ -3,7 +3,7 @@
 // so the shim actions can return exactly what lib/actions/* return and the real UI renders unchanged.
 // State lives in memory + localStorage only. Never import lib/actions/*, next-auth, @/lib/db or prisma here.
 
-export const STORAGE_KEY = 'levelup-demo-preview:v6'
+export const STORAGE_KEY = 'levelup-demo-preview:v9'
 const VERSION = 3
 const DAY = 24 * 60 * 60 * 1000
 const WIB = 7 * 60 * 60 * 1000
@@ -154,6 +154,21 @@ export type DbKasTxn = {
   id_event: number | null
 }
 
+/** Laporan WW (Air Hidup). `tanggal` = hari WIB WW dilaksanakan; `alir_ke` = id_cabang yang dialirkan. */
+export type DbWwLaporan = {
+  id_laporan: number
+  id_cabang: number
+  oleh: string
+  tanggal: string
+  jumlah: number
+  isi: string
+  foto: string
+  alir_ke: number | null
+  /** Amin dari anggota lain yang tidak ada di demo (angka awal seed) */
+  amin_awal: number
+  created_at: string
+}
+
 export type DbSession = {
   idPeserta: number | null
   idPengurus: number | null
@@ -174,6 +189,12 @@ export type DemoDb = {
   upgrade: DbUpgrade[]
   reimburse: DbReimburse[]
   kas_kota_txn: DbKasTxn[]
+  ww_laporan: DbWwLaporan[]
+  ww_amin: { id_laporan: number; id_peserta: number }[]
+  /** Demo-only: lompatan hari untuk melihat air turun (hanya dipakai Air Hidup) */
+  air_hari: number
+  /** `${id_peserta}:${stage}` pop-up "Airmu mau kering" yang sudah ditutup */
+  air_popup: string[]
   log: { id: number; at: string; msg: string }[]
   nextId: number
   session: DbSession
@@ -199,6 +220,7 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
   { key: 'squad', kind: 'peserta', label: 'Squad', note: 'Level 2 · Join Core belum dibuka', email: 'squad@demo.levelup.id', phone: '0812-0000-0003', password: DEMO_PASSWORD },
   { key: 'core', kind: 'peserta', label: 'Core', note: 'Level 3 · bisa lihat event nasional', email: 'core@demo.levelup.id', phone: '0812-0000-0004', password: DEMO_PASSWORD },
   { key: 'baru', kind: 'google-new', label: 'Akun Google baru', note: 'Belum terdaftar · isi Daftar jadi Tamu', email: 'baru@demo.levelup.id', phone: '0812-0000-0005', password: DEMO_PASSWORD },
+  { key: 'pic', kind: 'peserta', label: 'PIC', note: 'Level 4 · dashboard PIC + lapor WW (Air Hidup)', email: 'pic@demo.levelup.id', phone: '0812-0000-0007', password: DEMO_PASSWORD },
   { key: 'admin', kind: 'pengurus', label: 'Admin LK Medan', note: 'Sekretariat · approval volunteer & squad, buat event, scan, reimburse', email: 'admin@demo.levelup.id', phone: '0812-0000-0006', password: DEMO_PASSWORD },
 ]
 
@@ -229,9 +251,9 @@ export type DemoKorwil = { id: number; nama: string; koordinator: string | null;
  * wa is always null: the demo must never open wa.me to a real number.
  */
 export const DEMO_KORWIL: DemoKorwil[] = [
-  { id: 1, nama: 'Korwil Medan', koordinator: 'Pdt. Winsan Iksan, S.Th', kota: 'Medan', wa: null },
-  { id: 2, nama: 'Korwil Binjai', koordinator: 'Pdt. Andreas Harahap', kota: 'Binjai', wa: null },
-  { id: 3, nama: 'Korwil Pematangsiantar', koordinator: 'Pdt. Markus Purba', kota: 'Pematangsiantar', wa: null },
+  { id: 1, nama: 'Korwil Ngawi 2', koordinator: 'Pdt. Priyo Sejahtera', kota: 'Ngawi 2', wa: null },
+  { id: 2, nama: 'Korwil Ngawi', koordinator: 'Pdt. Andreas Harahap', kota: 'Ngawi', wa: null },
+  { id: 3, nama: 'Korwil Ngawi 3', koordinator: 'Pdt. Markus Purba', kota: 'Ngawi 3', wa: null },
 ]
 
 export const HOME_CABANG = '12'
@@ -241,11 +263,11 @@ export function buildSeed(now: Date = new Date()): DemoDb {
   const id = () => n++
 
   const cabang: DbCabang[] = [
-    { id_cabang: 9, namacabang: 'LevelUP Deli Serdang', leadercabang: 'Yohanes Sitepu' },
-    { id_cabang: 12, namacabang: 'LevelUP Medan', leadercabang: 'Esra Londa' },
-    { id_cabang: 14, namacabang: 'LevelUP Binjai', leadercabang: 'Daniel Ginting' },
-    { id_cabang: 17, namacabang: 'LevelUP Pematangsiantar', leadercabang: 'Samuel Simanjuntak' },
-    { id_cabang: 21, namacabang: 'LevelUP Tebing Tinggi', leadercabang: 'Martha Silalahi' },
+    { id_cabang: 9, namacabang: 'LevelUP Ngawi cabang Malang Kota', leadercabang: 'Yohanes Sitepu' },
+    { id_cabang: 12, namacabang: 'LevelUP Ngawi cabang Surabaya', leadercabang: 'Esra Londa' },
+    { id_cabang: 14, namacabang: 'LevelUP Ngawi', leadercabang: 'Daniel Ginting' },
+    { id_cabang: 17, namacabang: 'LevelUP Ngawi cabang Solo', leadercabang: 'Samuel Simanjuntak' },
+    { id_cabang: 21, namacabang: 'LevelUP Ngawi cabang Malkot', leadercabang: 'Martha Silalahi' },
   ]
 
   const mk = (p: Partial<DbPeserta> & Pick<DbPeserta, 'nama' | 'email' | 'userlevel'>): DbPeserta => {
@@ -283,7 +305,8 @@ export function buildSeed(now: Date = new Date()): DemoDb {
   const nadia = mk({ nama: 'Nadia Panjaitan', email: 'nadia@demo.levelup.id', userlevel: '1', gender: 'P', tgllahir: '2003-02-14' })
   const jonathan = mk({ nama: 'Jonathan Marpaung', email: 'jonathan@demo.levelup.id', userlevel: '2', gereja: 'GBI Setiabudi', tgllahir: '2001-07-07' })
   const priska = mk({ nama: 'Priska Siregar', email: 'priska@demo.levelup.id', userlevel: '3', gender: 'P', tgllahir: '1999-03-22' })
-  const peserta = [tamu, volunteer, squad, core, kevin, stefani, andre, nadia, jonathan, priska]
+  const pic = mk({ nama: 'Esra Londa', email: 'pic@demo.levelup.id', nowa: '081200000007', userlevel: '4', gereja: 'GBI Medan Plaza', tgllahir: '1997-09-12' })
+  const peserta = [tamu, volunteer, squad, core, kevin, stefani, andre, nadia, jonathan, priska, pic]
 
   const pengurus: DbPengurus[] = [
     { id_pengurus: 1, nama: 'Admin LK Medan', username: 'admin@demo.levelup.id', password: DEMO_PASSWORD, divisi: 'alk', kotalevelup: HOME_CABANG },
@@ -403,6 +426,20 @@ export function buildSeed(now: Date = new Date()): DemoDb {
     kas(-10, 'keluar', null, 'Konsumsi rapat pengurus', 250000),
   ]
 
+  // Air Hidup: setiap tahap terlihat. Medan Haus (pop-up muncul saat PIC/Core masuk), Binjai Melimpah (mengalirkan ke Medan),
+  // Deli Serdang Segar, Pematangsiantar Kering, Tebing Tinggi belum pernah.
+  const ww = (cabangId: number, oleh: string, days: number, jumlah: number, isi: string, foto: string, alir: number | null = null, amin = 0): DbWwLaporan => ({
+    id_laporan: id(), id_cabang: cabangId, oleh, tanggal: wibDay(-days, now), jumlah, isi, foto, alir_ke: alir, amin_awal: amin, created_at: ago(now, days * DAY),
+  })
+  const ww_laporan: DbWwLaporan[] = [
+    ww(14, 'Daniel Ginting', 2, 22, 'Kami datang capek habis pelayanan, pulang dengan hati yang penuh lagi. Tuhan hadir sangat nyata.', '/about/hero-worship.jpg', 12, 9),
+    ww(9, 'Yohanes Sitepu', 12, 9, 'Sedikit yang datang, tapi doa kami dipecahkan. Ada yang menangis dipulihkan.', '/program/penyembahan.jpg', null, 5),
+    ww(12, 'Esra Londa', 31, 14, 'Lagu terakhir kami nyanyi tanpa musik, dan Tuhan memenuhi ruangan.', '/about/misi-worship.jpg', null, 6),
+    ww(14, 'Daniel Ginting', 33, 18, 'Kami belajar bahwa sebelum melayani, kami perlu diisi dulu.', '/about/visi-pray.jpg', null, 3),
+    ww(17, 'Samuel Simanjuntak', 44, 11, 'Malam yang sederhana di rumah salah satu anggota, tapi penuh hadirat.', '/program/kota.jpg', null, 2),
+    ww(12, 'Esra Londa', 62, 16, 'WW bulan lalu: kami diingatkan bahwa Dia sumber air hidup.', '/about/hero-crowd.jpg', null, 4),
+  ]
+
   return {
     v: VERSION,
     seededAt: now.toISOString(),
@@ -416,6 +453,10 @@ export function buildSeed(now: Date = new Date()): DemoDb {
     upgrade,
     reimburse,
     kas_kota_txn,
+    ww_laporan,
+    ww_amin: [],
+    air_hari: 0,
+    air_popup: [],
     log: [{ id: id(), at: now.toISOString(), msg: 'Demo siap — data awal dimuat' }],
     nextId: n,
     session: { idPeserta: null, idPengurus: null, google: null },
