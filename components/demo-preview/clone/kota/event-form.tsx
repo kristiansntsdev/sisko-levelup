@@ -14,7 +14,7 @@ import {
   type NasionalEventScope,
 } from '@/lib/event-cabang'
 import { parseLocalDate, type EventSesiInput } from '@/lib/event-sesi'
-import { ensureGoogleMaps } from '@/lib/google-maps'
+import { attachPlaceSearch, ensureGoogleMaps } from '@/lib/google-maps'
 import { lokasiNeedsSesi, parseLatLng, type EventLokasiInput } from '@/lib/event-lokasi'
 import { LokasiPinMap } from '@/components/kota/lokasi-pin-map'
 import { ANTON, BTN, ERROR, IconButton, LABEL, MONO, PaperHeader, PaperMain, Strip } from '@/components/pwa/paper-ui'
@@ -228,6 +228,7 @@ export function EventForm({
   const mapInstanceRef = useRef<unknown>(null)
   const markerRef = useRef<unknown>(null)
   const mapsReadyRef = useRef(false)
+  const placeSearchRef = useRef<(() => void) | null>(null)
 
   // Stable setter refs to avoid stale closures
   const setLatLngRef = useRef(setLatLng)
@@ -288,26 +289,14 @@ export function EventForm({
       })
 
       if (alamatRef.current) {
-        try {
-          const ac = new g.places.Autocomplete(alamatRef.current, {
-            fields: ['formatted_address', 'geometry'],
-            componentRestrictions: { country: 'id' },
-          })
-          ac.addListener('place_changed', () => {
-            const place = ac.getPlace()
-            if (place.geometry?.location) {
-              const newPos = {
-                lat: place.geometry.location.lat(),
-                lng: place.geometry.location.lng(),
-              }
-              map.setCenter(newPos)
-              map.setZoom(15)
-              ;(marker as { setPosition: (p: { lat: number; lng: number }) => void }).setPosition(newPos)
-              setLatLngRef.current(newPos)
-            }
-            if (place.formatted_address) setAlamatRef.current(place.formatted_address)
-          })
-        } catch { /* Places API might be restricted */ }
+        placeSearchRef.current = attachPlaceSearch(alamatRef.current, ({ address, lat, lng }) => {
+          const newPos = { lat, lng }
+          map.setCenter(newPos)
+          map.setZoom(15)
+          ;(marker as { setPosition: (p: { lat: number; lng: number }) => void }).setPosition(newPos)
+          setLatLngRef.current(newPos)
+          setAlamatRef.current(address)
+        })
       }
     })()
   }
@@ -330,6 +319,8 @@ export function EventForm({
       })
     return () => {
       cancelled = true
+      placeSearchRef.current?.()
+      placeSearchRef.current = null
     }
   }, [isOnline, mapsApiKey]) // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -87,7 +87,7 @@ lib/actions/wfe-serentak.ts           # kampanye flyer pusat JFE (range bulan)
 lib/event-sesi.ts                     # multi-sesi absen: wajib, hadirPenuh, dup key
 lib/absen-record.ts                   # recordAbsen: tulis absen (server-only, tanpa auth; caller wajib cek)
 lib/event-lokasi.ts                   # multi-lokasi scan event nasional: tipe, parseLatLng, lokasiNeedsSesi
-lib/google-maps.ts                    # ensureGoogleMaps (loader bersama form event + pin lokasi)
+lib/google-maps.ts                    # ensureGoogleMaps (loader bersama form event + pin lokasi) + attachPlaceSearch (cari alamat, Places API New)
 components/kota/lokasi-pin-map.tsx    # alamat + peta pin untuk satu lokasi scan
 lib/event-approval.ts                 # append notenasional (ALK/Brim prefixes)
 lib/event-poster.ts                    # resolveEventPosterUrl: posterevent then image_url
@@ -151,6 +151,10 @@ task.md                               # Blocked: approval sampai core
 - Sekretariat Nasional: Approve/Tolak di `/dashboard/v2/kota/alk/reimburse/{id}` (`decideDanaSekretariat`), filter default **Perlu Review**, todo Beranda + badge tile Reimburse (`countPendingDanaReview('sekre')`). BRIM Nasional: `/dashboard/v2/brim/dana` + `/dana/{id}` (`decideDanaBrim`, tanpa link /dana, tanpa kirim ulang notif, tanpa Cetak Surat), tile + menu Approval Dana di Beranda, baris di Lainnya. ALK Kota: todo "n pengajuan dana siap dikirim ke Korwil" (`countDanaSiapKorwil`, hanya yang `sekre_at` + `brim_at` terisi)
 - Keputusan review membawa `versi` = hash `token_korwil` (`reviewVersi`): ALK Kota ajukan ulang di antara buka halaman dan klik → ditolak "sudah diubah". Tulis kondisional + dibaca ulang di transaksi supaya Telegram "Disetujui Sekretariat & BRIM" hanya sekali. Telegram langkah review punya tombol ✅ Review Sekretariat / ✅ Review BRIM (hanya pihak yang belum)
 - `/dana/{token}` tracker 5 kolom (label pendek "Review Nasional"). Demo: step Review di Status Pencairan + simulasi Sekretariat lalu BRIM (`simulasiReview`), seed pengajuan kedua = Sekretariat sudah setuju, BRIM menunggu; kunci localStorage `v6`
+
+## Recent Updates [2026-11-10]
+- Cari alamat di form event + Lokasi Scan pindah ke **Places API (New)**: `attachPlaceSearch(input, onPick)` di `lib/google-maps.ts` (`AutocompleteSuggestion` + `toPlace().fetchFields`, session token, daftar saran `fixed` di `<body>`, teks saja, panah/Enter/Esc, Enter tidak submit form). `google.maps.places.Autocomplete` lama memanggil Places API legacy yang tidak bisa diaktifkan di project GCP `sisko-levelup` (tertutup untuk customer baru sejak 2025-03-01) → `REQUEST_DENIED`. Input tetap milik app (state React + gaya kertas); `PlaceAutocompleteElement` tidak dipakai karena mengganti input dengan shadow DOM
+- Key `GMAPS_API_KEY` (nama "Maps"): API restrictions wajib **Maps JavaScript API + Places API (New)**, website `https://www.levelupgen.com/*`, `https://levelupgen.com/*`, `https://sisko-v2.vercel.app/*`, `http://localhost:3000/*`. Error console: `RefererNotAllowedMapError` = domain belum di daftar, `ApiTargetBlockedMapError` = API belum dicentang. `google.maps.Marker` deprecated tapi tetap jalan (belum diganti)
 
 ## Recent Updates [2026-11-09]
 - **Dashboard BRIM Nasional v2** di `/dashboard/v2/brim` (`pengurusDest(divisi, username)`: brim + `isNasionalBrim` → v2, BRIM kota tetap `/dashboard/kota/brim`). Tab Beranda / Event / Artikel / Lainnya, gaya kertas seperti Sekretariat (`BrimShell` memakai `PAPER_VARS` yang kini di-export dari `alk-v2/shell.tsx`). Event = daftar semua event + filter Belum Approve (default) / Ditolak / Sudah Approve / Seluruh Kota / Khusus, halaman approve memakai `EventApproveV2Client role="brim"` (prop baru `qa` untuk QA flyer + berita acara). Flyer Generator, Flyer WW JFE, Dokumentasi, Logo masih lewat dashboard lama (tautan di Lainnya). Link Telegram approve Brim → v2; halaman approve legacy tetap hidup

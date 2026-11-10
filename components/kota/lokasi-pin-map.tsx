@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { ensureGoogleMaps } from '@/lib/google-maps'
+import { attachPlaceSearch, ensureGoogleMaps } from '@/lib/google-maps'
 import { parseLatLng } from '@/lib/event-lokasi'
 
 type Pos = { lat: number; lng: number }
@@ -37,6 +37,7 @@ export function LokasiPinMap({
   useEffect(() => {
     if (!apiKey) return
     let cancelled = false
+    let detach: (() => void) | undefined
     void (async () => {
       try {
         await ensureGoogleMaps(apiKey)
@@ -64,25 +65,14 @@ export function LokasiPinMap({
           put(p)
         })
         if (alamatRef.current) {
-          try {
-            const ac = new g.places.Autocomplete(alamatRef.current, {
-              fields: ['formatted_address', 'geometry'],
-              componentRestrictions: { country: 'id' },
-            })
-            ac.addListener('place_changed', () => {
-              const place = ac.getPlace()
-              if (place.geometry?.location) {
-                const p = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() }
-                map.setCenter(p)
-                map.setZoom(15)
-                marker.setPosition(p)
-                put(p)
-              }
-              if (place.formatted_address) onChangeRef.current({ alamat: place.formatted_address })
-            })
-          } catch {
-            /* Places API might be restricted */
-          }
+          detach = attachPlaceSearch(alamatRef.current, ({ address, lat, lng }) => {
+            const p = { lat, lng }
+            map.setCenter(p)
+            map.setZoom(15)
+            marker.setPosition(p)
+            put(p)
+            onChangeRef.current({ alamat: address })
+          })
         }
       } catch {
         /* script/timeout — leave the grey box */
@@ -90,6 +80,7 @@ export function LokasiPinMap({
     })()
     return () => {
       cancelled = true
+      detach?.()
     }
   }, [apiKey, initial])
 
