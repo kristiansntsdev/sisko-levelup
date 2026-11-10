@@ -4,8 +4,10 @@ import { db } from '@/lib/db'
 import { cekVerifikasiHash, parseVerifikasiKode, verifikasiKode, verifikasiUrl, type DanaPeran } from '@/lib/dana-link'
 import {
   reimburseRejection,
+  reimburseReview,
   reimburseStage,
   type ReimburseStage,
+  type ReviewState,
 } from '@/lib/reimburse-stage'
 import {
   buildSuratKeuangan,
@@ -49,6 +51,8 @@ export type DanaView = {
   dana: number
   stage: ReimburseStage
   rejection: { oleh: string; alasan: string } | null
+  /** Review Sekretariat + BRIM Nasional (langkah sebelum Korwil) */
+  review: { sekre: ReviewState; brim: ReviewState }
   reimburse: {
     danausul: string
     danariil: string
@@ -64,6 +68,8 @@ export type DanaView = {
   at: {
     /** Waktu pertama kali diajukan ke Korwil (reimburse_approval.created_at) */
     diajukan: string | null
+    sekre: string | null
+    brim: string | null
     korwil: string | null
     pic: string | null
     cair: string | null
@@ -138,6 +144,7 @@ async function buildView(row: ReimburseRow, approval: ApprovalRow | null): Promi
     dana: danaNumber(row.danausul),
     stage,
     rejection: reimburseRejection(row),
+    review: reimburseReview(row),
     reimburse: {
       danausul: row.danausul,
       danariil: row.danariil,
@@ -151,6 +158,8 @@ async function buildView(row: ReimburseRow, approval: ApprovalRow | null): Promi
     korwil,
     at: {
       diajukan: fmtWib(approval?.created_at),
+      sekre: fmtWib(approval?.sekre_at),
+      brim: fmtWib(approval?.brim_at),
       korwil: fmtWib(approval?.korwil_at),
       pic: fmtWib(approval?.pic_at),
       cair: fmtWib(approval?.cair_at),

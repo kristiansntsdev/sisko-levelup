@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { decideDanaKorwil, decideDanaPic, markDanaCair } from '@/lib/actions/dana-link'
 import type { DanaView } from '@/lib/dana-approval'
 import type { DanaPeran } from '@/lib/dana-link'
-import { DANA_STEPS, danaStepIndex, REIMBURSE_STAGE } from '@/lib/reimburse-stage'
+import { DANA_DONE, DANA_STEPS, danaStepIndex, REIMBURSE_STAGE } from '@/lib/reimburse-stage'
 import { shrinkPhotoForUpload } from '@/lib/shrink-photo'
 import { SuratKeuanganDocument } from '@/components/documents/surat-keuangan'
 import {
@@ -29,9 +29,9 @@ import {
 import { Icon } from '@/components/pwa/ui'
 
 const PERAN: Record<DanaPeran, { sticker: string; title: string; step: number }> = {
-  korwil: { sticker: 'Korwil PPHTGD', title: 'Persetujuan Dana', step: 0 },
-  pic: { sticker: 'PIC LevelUP Pusat', title: 'Review Dana', step: 1 },
-  keuangan: { sticker: 'Keuangan PPHTGD', title: 'Transfer Dana', step: 2 },
+  korwil: { sticker: 'Korwil PPHTGD', title: 'Persetujuan Dana', step: 1 },
+  pic: { sticker: 'PIC LevelUP Pusat', title: 'Review Dana', step: 2 },
+  keuangan: { sticker: 'Keuangan PPHTGD', title: 'Transfer Dana', step: 3 },
 }
 
 const rupiah = (n: number) => (n > 0 ? `Rp ${n.toLocaleString('id-ID')}` : '-')
@@ -68,11 +68,11 @@ function CopyButton({ value, label }: { value: string; label: string }) {
 
 function Tracker({ view }: { view: DanaView }) {
   const current = danaStepIndex(view.stage)
-  const stamps = [view.at.korwil, view.at.pic, view.at.cair, null]
+  const stamps = [null, view.at.korwil, view.at.pic, view.at.cair, null]
   return (
-    <ol className="grid grid-cols-4 gap-1.5">
+    <ol className="grid grid-cols-5 gap-1">
       {DANA_STEPS.map((s, i) => {
-        const done = current > i || (current === 4 && i === 3)
+        const done = current > i
         const active = current === i
         return (
           <li key={s.key} className="text-center">
@@ -83,7 +83,10 @@ function Tracker({ view }: { view: DanaView }) {
             >
               {done ? <Icon name="check" className="w-4 h-4" sw={2.6} /> : i + 1}
             </span>
-            <p className={`${MONO} mt-1.5 text-[10px] font-bold leading-tight ${active ? 'text-[#161616]' : 'text-[#57534e]'}`}>{s.label}</p>
+            <p className={`${MONO} mt-1.5 text-[10px] font-bold leading-tight break-words ${active ? 'text-[#161616]' : 'text-[#57534e]'}`}>
+              {/* 5 kolom di HP: label pendek supaya "Sekretariat" tidak keluar kolom */}
+              {s.key === 'review' ? 'Review Nasional' : s.label}
+            </p>
             {done && stamps[i] ? <p className={`${MONO} mt-0.5 text-[9px] text-[#57534e]`}>{stamps[i]}</p> : null}
           </li>
         )
@@ -293,7 +296,7 @@ function StatusNote({ peran, view }: { peran: DanaPeran; view: DanaView }) {
   let text: string
   if (view.rejection) {
     text = `Pengajuan ditolak ${view.rejection.oleh}. Alasan: ${view.rejection.alasan || '-'}`
-  } else if (current === 4) {
+  } else if (current === DANA_DONE) {
     text = `Dana sudah ditransfer${view.at.cair ? ` · ${view.at.cair}` : ''}. Terima kasih.`
   } else if (current > myStep) {
     text = `Sudah disetujui. Sekarang di ${REIMBURSE_STAGE[view.stage].pic}.`
@@ -302,7 +305,7 @@ function StatusNote({ peran, view }: { peran: DanaPeran; view: DanaView }) {
   }
   return (
     <div className={`${PANEL} flex gap-3 p-4`}>
-      <Icon name={view.rejection ? 'alert' : current === 4 || current > myStep ? 'check' : 'clock'} className="w-7 h-7 shrink-0" sw={2.2} />
+      <Icon name={view.rejection ? 'alert' : current > myStep ? 'check' : 'clock'} className="w-7 h-7 shrink-0" sw={2.2} />
       <p className="text-[17px] font-semibold leading-snug">{text}</p>
     </div>
   )

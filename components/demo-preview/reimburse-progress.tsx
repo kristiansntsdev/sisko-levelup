@@ -1,7 +1,7 @@
 'use client'
-// Demo-only: in the real app Korwil PPHTGD, PIC LevelUP Pusat and Keuangan PPHTGD decide through no-login WhatsApp links.
-// This adds the "who has it now" tracker (ALK Kota → Korwil → PIC LevelUP → Keuangan → Cair), plus Simulasi buttons
-// that stand in for those people.
+// Demo-only: in the real app Sekretariat + BRIM Nasional review in their own dashboards, then Korwil PPHTGD, PIC LevelUP
+// Pusat and Keuangan PPHTGD decide through no-login WhatsApp links. This adds the "who has it now" tracker
+// (ALK Kota → Nasional → Korwil → PIC LevelUP → Keuangan → Cair), plus Simulasi buttons that stand in for those people.
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useSyncExternalStore } from 'react'
@@ -10,9 +10,9 @@ import { Pill, type PillTone } from '@/components/pwa/ui'
 import { Empty, PersonChip } from './clone/alk-v2/ui'
 import { ALK_BASE, ALK_EVENT_BASE } from './clone/alk-v2/paths'
 import { Loading, useAlk } from './alk'
-import { REIMBURSE_STAGE, reimburseRejection, reimburseStage, type ReimburseStage } from '@/lib/reimburse-stage'
+import { REIMBURSE_STAGE, reimbursePic, reimburseRejection, reimburseStage, type ReimburseStage } from '@/lib/reimburse-stage'
 import { snapshot, subscribe, type DbReimburse } from './db'
-import { cairkanReimburse, simulasiKorwil, simulasiPic } from './shim/actions/reimburse'
+import { cairkanReimburse, simulasiKorwil, simulasiPic, simulasiReview } from './shim/actions/reimburse'
 import { fmtShort } from './shim/util'
 
 export type Stage = ReimburseStage
@@ -22,11 +22,10 @@ export function stageOf(r?: DbReimburse): Stage {
 }
 
 const LABEL_OF = Object.fromEntries(Object.entries(REIMBURSE_STAGE).map(([k, v]) => [k, v.label])) as Record<Stage, string>
-const PIC_OF = Object.fromEntries(Object.entries(REIMBURSE_STAGE).map(([k, v]) => [k, v.pic])) as Record<Stage, string>
 const TONE_OF = Object.fromEntries(Object.entries(REIMBURSE_STAGE).map(([k, v]) => [k, v.tone])) as Record<Stage, PillTone>
-const STEPS = ['Diajukan', 'Korwil', 'PIC LevelUP', 'Keuangan', 'Cair'] as const
+const STEPS = ['Diajukan', 'Review', 'Korwil', 'PIC LevelUP', 'Keuangan', 'Cair'] as const
 /** How many steps are done for each stage (the current step is the next one). */
-const DONE: Record<Stage, number> = { belum: 0, tanpa_dana: 0, ditolak: 1, korwil: 1, pusat: 2, keuangan: 3, cair: 5 }
+const DONE: Record<Stage, number> = { belum: 0, tanpa_dana: 0, ditolak: 1, review: 1, korwil: 2, pusat: 3, keuangan: 4, cair: 6 }
 
 function ago(iso: string): string {
   const min = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000))
@@ -44,10 +43,19 @@ export function ReimburseProgress({ idEvent }: { idEvent: number }) {
   const r = db?.reimburse.find((x) => x.id_event === String(idEvent))
   const stage = stageOf(r)
   if (!db || !r || stage === 'belum' || stage === 'tanpa_dana') return null
-  const done = stage === 'ditolak' && r.approvenasional === '0' ? 2 : DONE[stage]
+  // Ditolak: tandai langkah yang menolak (Nasional / Korwil / PIC LevelUP)
+  const done = stage !== 'ditolak' ? DONE[stage] : r.approvenasional === '0' ? 3 : r.approvepphtgd === '0' ? 2 : 1
   const rejection = reimburseRejection(r)
-  const decide = stage === 'korwil' ? simulasiKorwil : simulasiPic
-  const who = stage === 'korwil' ? 'Korwil' : 'PIC LevelUP'
+  // Review Nasional disimulasikan satu per satu: Sekretariat dulu kalau belum, lalu BRIM
+  const pihak = r.approvesekre === '' ? 'sekre' : 'brim'
+  const decide =
+    stage === 'review'
+      ? (id: number, k: 'setuju' | 'tolak', a?: string) => simulasiReview(id, pihak, k, a)
+      : stage === 'korwil'
+        ? simulasiKorwil
+        : simulasiPic
+  const who = stage === 'review' ? (pihak === 'sekre' ? 'Sekretariat' : 'BRIM') : stage === 'korwil' ? 'Korwil' : 'PIC LevelUP'
+  const deciding = stage === 'review' || stage === 'korwil' || stage === 'pusat'
 
   async function reject() {
     const res = await decide(r!.id_reimburse, 'tolak', reason)
@@ -74,7 +82,7 @@ export function ReimburseProgress({ idEvent }: { idEvent: number }) {
         <div className="mt-4 flex items-center justify-between gap-3 rounded-[10px] border-2 border-dotted border-[#161616]/40 px-3 py-2.5">
           <span>
             <span className={`${LABEL} block text-[9.5px] text-[#57534e]`}>PIC sekarang</span>
-            <span className={`${ANTON} text-[18px] leading-tight`}>{PIC_OF[stage]}</span>
+            <span className={`${ANTON} text-[18px] leading-tight`}>{reimbursePic(r)}</span>
           </span>
           <span className="text-right">
             <Pill tone={TONE_OF[stage]}>{LABEL_OF[stage]}</Pill>
@@ -91,13 +99,13 @@ export function ReimburseProgress({ idEvent }: { idEvent: number }) {
         </ul>
       </section>
 
-      {(stage === 'korwil' || stage === 'pusat' || stage === 'keuangan') && (
+      {(deciding || stage === 'keuangan') && (
         <section aria-label="Simulasi demo" className={`border-2 border-dashed border-[#161616]/40 p-4 ${PANEL}`}>
           <p className={`${LABEL} text-[10px] font-bold text-[#57534e]`}>Demo · simulasi pihak lain</p>
           <p className={`${MONO} mt-1 text-[11px] text-[#44403c]`}>
-            Di aplikasi asli Korwil PPHTGD, PIC LevelUP Pusat dan Keuangan PPHTGD memutuskan lewat link WhatsApp tanpa login, bukan ALK Kota.
+            Di aplikasi asli Sekretariat &amp; BRIM Nasional memutuskan di dashboard mereka, lalu Korwil PPHTGD, PIC LevelUP Pusat dan Keuangan PPHTGD lewat link WhatsApp tanpa login, bukan ALK Kota.
           </p>
-          {(stage === 'korwil' || stage === 'pusat') && !rejecting && (
+          {deciding && !rejecting && (
             <div className="mt-3 flex gap-2.5">
               <button type="button" onClick={() => decide(r.id_reimburse, 'setuju')} className={`flex-1 ${BTN}`}>
                 <Strip tone="ink" className="py-2.5 text-[16px]">Setujui ({who})</Strip>
@@ -107,7 +115,7 @@ export function ReimburseProgress({ idEvent }: { idEvent: number }) {
               </button>
             </div>
           )}
-          {(stage === 'korwil' || stage === 'pusat') && rejecting && (
+          {deciding && rejecting && (
             <div className="mt-3 space-y-2.5">
               <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Alasan penolakan" className="w-full rounded-[10px] bg-[#efe8da]/50 px-3.5 py-3 text-[16px] ring-1 ring-[#161616]/15 outline-none focus:bg-white focus:ring-2 focus:ring-[#161616]" />
               {err && <p className={ERROR}>{err}</p>}

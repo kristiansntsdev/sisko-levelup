@@ -2,4 +2,5 @@
 export const BRIM_BASE = '/dashboard/v2/brim'
 export const BRIM_EVENT_BASE = `${BRIM_BASE}/event`
 export const BRIM_ARTIKEL_BASE = `${BRIM_BASE}/artikel`
+export const BRIM_DANA_BASE = `${BRIM_BASE}/dana`
 export const BRIM_LEGACY = '/dashboard/kota/brim'

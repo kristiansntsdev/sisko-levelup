@@ -7,7 +7,7 @@ import { hasBrimRejectNote } from '@/lib/event-approval'
 import { ANTON, LABEL, LIFTED, MONO, PANEL, PaperHeader, PaperMain, PRESS, ROWS, SectionHead } from '@/components/pwa/paper-ui'
 import { PAGE_SIZE_TODO, Pager, SearchBox } from '@/components/alk-v2/list-tools'
 import { Empty, Icon, Row, TINT, type IconName, type Tint } from '@/components/alk-v2/ui'
-import { BRIM_ARTIKEL_BASE, BRIM_EVENT_BASE, BRIM_LEGACY } from './paths'
+import { BRIM_ARTIKEL_BASE, BRIM_DANA_BASE, BRIM_EVENT_BASE, BRIM_LEGACY } from './paths'
 
 const TILT = ['-rotate-1', 'rotate-1', '-rotate-[.5deg]', 'rotate-[.5deg]', '-rotate-1', 'rotate-1']
 
@@ -17,10 +17,13 @@ export function BerandaClient({
   nama,
   events,
   artikel,
+  pendingDana,
 }: {
   nama: string
   events: EventDashboard[]
   artikel: BrimArtikelStats
+  /** Pengajuan dana yang menunggu review BRIM sebelum dikirim ke Korwil */
+  pendingDana: number
 }) {
   const router = useRouter()
   const [q, setQ] = useState('')
@@ -45,6 +48,7 @@ export function BerandaClient({
   const tiles: [IconName, string, number | string, string?][] = [
     ['calendar', 'Belum Approve', pending.length, BRIM_EVENT_BASE],
     ['alert', 'Ditolak Brim', rejected, BRIM_EVENT_BASE],
+    ['receipt', 'Dana Perlu Review', pendingDana, BRIM_DANA_BASE],
     ['megaphone', 'Artikel Terbit', artikel.terbit, BRIM_ARTIKEL_BASE],
     ['eye', 'Views 7 Hari', artikel.views7.toLocaleString('id-ID'), BRIM_ARTIKEL_BASE],
     ['sparkle', 'Total Like', artikel.likes.toLocaleString('id-ID'), BRIM_ARTIKEL_BASE],
@@ -53,6 +57,7 @@ export function BerandaClient({
 
   const menu: Menu[] = [
     { i: 'check', tint: 'red', t: 'Approval Event', href: BRIM_EVENT_BASE, badge: pending.length },
+    { i: 'receipt', tint: 'gold', t: 'Approval Dana', href: BRIM_DANA_BASE, badge: pendingDana },
     { i: 'megaphone', tint: 'gold', t: 'Artikel', href: BRIM_ARTIKEL_BASE },
     { i: 'edit', tint: 'sky', t: 'Tulis Artikel', href: `${BRIM_ARTIKEL_BASE}/baru` },
     { i: 'image', tint: 'gold', t: 'Flyer Generator', href: `${BRIM_LEGACY}/pamflet` },

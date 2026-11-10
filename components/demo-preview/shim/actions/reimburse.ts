@@ -1,7 +1,7 @@
 'use client'
 import type { DanaForm, ReimburseData, ReimburseListItem, ReimburseReview, SubmitReimburseInput } from '@/lib/actions/reimburse'
 import type { DanaView } from '@/lib/dana-approval'
-import { reimburseRejection, reimburseStage } from '@/lib/reimburse-stage'
+import { reimbursePic, reimburseRejection, reimburseReview, reimburseStage } from '@/lib/reimburse-stage'
 import { buildSuratKeuangan, danaNumber, formatTanggalEvent, matchKorwil } from '@/lib/surat-keuangan-data'
 import { levelupKota } from '@/components/documents/_shared/document-header'
 import { addLog, DEMO_KORWIL, getDb, mutate, wibDay, type DbReimburse, type DemoDb } from '../../db'
@@ -12,6 +12,7 @@ export type * from '@/lib/actions/reimburse'
 const toData = (r: DbReimburse): ReimburseData => ({
   id_reimburse: r.id_reimburse, id_event: r.id_event, ajukan: r.ajukan, namabank: r.namabank, norek: r.norek, namarek: r.namarek,
   danausul: r.danausul, danariil: r.danariil, laporan: r.laporan, bukti: r.bukti,
+  approvesekre: r.approvesekre, notesekre: r.notesekre, approvebrim: r.approvebrim, notebrim: r.notebrim,
   approvepphtgd: r.approvepphtgd, notepphtgd: r.notepphtgd, approvenasional: r.approvenasional, notenasional: r.notenasional,
   approvekeuangan: r.approvekeuangan, buktitf: r.buktitf,
 })
@@ -54,12 +55,13 @@ function demoView(d: DemoDb, r: DbReimburse): DanaView | null {
     dana: danaNumber(r.danausul),
     stage: reimburseStage(r),
     rejection: reimburseRejection(r),
+    review: reimburseReview(r),
     reimburse: {
       danausul: r.danausul, danariil: r.danariil, namabank: r.namabank, norek: r.norek, namarek: r.namarek,
       bukti: r.bukti, laporan: r.laporan, buktitf: r.buktitf,
     },
     korwil: r.korwil,
-    at: { diajukan: fmtWib(r.history[0]?.at ?? null), korwil: fmtWib(r.korwil_at), pic: fmtWib(r.pic_at), cair: fmtWib(r.cair_at), notifPic: null, notifKeuangan: null },
+    at: { diajukan: fmtWib(r.history[0]?.at ?? null), sekre: fmtWib(r.sekre_at), brim: fmtWib(r.brim_at), korwil: fmtWib(r.korwil_at), pic: fmtWib(r.pic_at), cair: fmtWib(r.cair_at), notifPic: null, notifKeuangan: null },
     surat: buildSuratKeuangan({
       event: { nama_event: event.nama_event, tglMulai: event.tglevent, tglSelesai: event.tgleventselesai, alamatevent: event.alamatevent, jenisevent: event.jenisevent },
       cabang,
@@ -79,17 +81,18 @@ export async function getReimburseForEvent(idEvent: number): Promise<ReimburseDa
   return r ? toData(r) : null
 }
 
-/** Every save restarts the flow at the Korwil and clears previous decisions, as the real action does. */
+/** Every save restarts the flow at the Sekretariat & BRIM review and clears previous decisions, as the real action does. */
 export async function submitReimburse(idEvent: number, input: SubmitReimburseInput): Promise<void> {
   const korwil = input.ajukan === 'Ajukan' ? DEMO_KORWIL.find((k) => k.id === input.korwilId) ?? null : null
   if (input.ajukan === 'Ajukan' && !korwil) throw new Error('Pilih Korwil PPHTGD dulu')
   const { korwilId: _korwilId, ...fields } = input // eslint-disable-line @typescript-eslint/no-unused-vars
   mutate((d) => {
     const now = new Date().toISOString()
-    const entry = { stage: korwil ? `Diajukan oleh ALK Kota · menunggu ${korwil.nama}` : 'Tidak mengajukan dana', at: now, by: 'Admin LK Medan' }
+    const entry = { stage: korwil ? 'Diajukan oleh ALK Kota · menunggu review Sekretariat & BRIM Nasional' : 'Tidak mengajukan dana', at: now, by: 'Admin LK Medan' }
     const reset = {
+      approvesekre: '', notesekre: '', approvebrim: '', notebrim: '',
       approvepphtgd: '', notepphtgd: '', approvenasional: '', notenasional: '', approvekeuangan: '', notekeuangan: '', buktitf: '',
-      korwil, korwil_at: null, pic_at: null, cair_at: null, at: now,
+      korwil, sekre_at: null, brim_at: null, korwil_at: null, pic_at: null, cair_at: null, at: now,
     }
     const row = d.reimburse.find((x) => x.id_event === String(idEvent))
     if (row) {
@@ -145,9 +148,11 @@ function demoRekening(d: DemoDb, idCabang: string): DanaForm['rekening'] {
 
 export type ReimburseApprovalResult = { ok: true } | { ok: false; error: string }
 
+const STEP_LABEL = { sekre: 'Sekretariat Nasional', brim: 'BRIM Nasional', korwil: 'Korwil PPHTGD', pic: 'PIC LevelUP Pusat' }
+
 function decide(
   idReimburse: number,
-  step: 'korwil' | 'pic',
+  step: 'sekre' | 'brim' | 'korwil' | 'pic',
   keputusan: 'setuju' | 'tolak',
   alasan = '',
 ): ReimburseApprovalResult {
@@ -156,8 +161,17 @@ function decide(
     const r = d.reimburse.find((x) => x.id_reimburse === idReimburse)
     if (!r) return
     const now = new Date().toISOString()
-    const who = step === 'korwil' ? r.korwil?.nama ?? 'Korwil PPHTGD' : 'PIC LevelUP Pusat'
-    if (step === 'korwil') {
+    const label = STEP_LABEL[step]
+    const who = step === 'korwil' ? r.korwil?.nama ?? label : label
+    if (step === 'sekre') {
+      r.approvesekre = keputusan === 'setuju' ? '1' : '0'
+      r.notesekre = keputusan === 'setuju' ? '' : alasan.trim()
+      r.sekre_at = now
+    } else if (step === 'brim') {
+      r.approvebrim = keputusan === 'setuju' ? '1' : '0'
+      r.notebrim = keputusan === 'setuju' ? '' : alasan.trim()
+      r.brim_at = now
+    } else if (step === 'korwil') {
       r.approvepphtgd = keputusan === 'setuju' ? '1' : '0'
       r.notepphtgd = keputusan === 'setuju' ? '' : alasan.trim()
       r.korwil_at = now
@@ -167,15 +181,20 @@ function decide(
       r.pic_at = now
     }
     r.at = now
-    const label = step === 'korwil' ? 'Korwil PPHTGD' : 'PIC LevelUP Pusat'
+    const notif = step === 'korwil' || step === 'pic' ? ' · notif WA ke grup PPHTGD' : ''
     r.history.push(
       keputusan === 'setuju'
-        ? { stage: `Disetujui ${label} · notif WA ke grup PPHTGD`, at: now, by: who }
+        ? { stage: `Disetujui ${label}${notif}`, at: now, by: who }
         : { stage: `Ditolak ${label}`, at: now, by: who, note: alasan.trim() },
     )
     addLog(d, `${label} ${keputusan === 'setuju' ? 'menyetujui' : 'menolak'} pengajuan dana (simulasi)`)
   })
   return { ok: true }
+}
+
+/** Demo-only: stand in for Sekretariat Nasional / BRIM Nasional reviewing in their own dashboard. */
+export async function simulasiReview(idReimburse: number, pihak: 'sekre' | 'brim', keputusan: 'setuju' | 'tolak', alasan?: string) {
+  return decide(idReimburse, pihak, keputusan, alasan)
 }
 
 /** Demo-only: stand in for the Korwil opening their no-login link. */
@@ -222,6 +241,8 @@ export async function listReimburseSekretariat(): Promise<{ isNasional: boolean;
           tglDisplay: fmtShort(e.tglevent),
           namaCabang,
           stage: reimburseStage(r),
+          pic: reimbursePic(r),
+          perluReview: false,
           danausul: r?.danausul ?? '',
           alasanTolak: reimburseRejection(r)?.alasan ?? '',
         }
@@ -236,4 +257,13 @@ export async function getReimburseReview(_idEvent?: number): Promise<ReimburseRe
 
 export async function resendDanaNotif(_idEvent?: number): Promise<ReimburseApprovalResult> { // eslint-disable-line @typescript-eslint/no-unused-vars
   return { ok: false, error: 'Notif WA grup PPHTGD tidak ada di demo' }
+}
+
+/** Review Sekretariat / BRIM Nasional is simulated from the Status Pencairan panel, not these screens. */
+export async function decideDanaSekretariat(..._args: unknown[]): Promise<ReimburseApprovalResult> { // eslint-disable-line @typescript-eslint/no-unused-vars
+  return { ok: false, error: 'Review Sekretariat Nasional tidak ada di demo' }
+}
+
+export async function decideDanaBrim(..._args: unknown[]): Promise<ReimburseApprovalResult> { // eslint-disable-line @typescript-eslint/no-unused-vars
+  return { ok: false, error: 'Review BRIM Nasional tidak ada di demo' }
 }

@@ -10,7 +10,7 @@ import {
   rejectEventBrimNasional,
 } from '@/lib/actions/event'
 import type { ReimburseData } from '@/lib/actions/reimburse'
-import { isAjukan, REIMBURSE_STAGE, reimburseRejection, reimburseStage } from '@/lib/reimburse-stage'
+import { isAjukan, REIMBURSE_STAGE, reimbursePic, reimburseRejection, reimburseStage } from '@/lib/reimburse-stage'
 import { FlyerQaSummary } from '@/components/kota/flyer-qa-summary'
 import { BeritaAcaraQaSummary } from '@/components/kota/berita-acara-qa-summary'
 
@@ -19,7 +19,7 @@ function fmtRp(raw: string): string {
   return Number.isFinite(n) && n > 0 ? `Rp ${n.toLocaleString('id-ID')}` : '-'
 }
 
-/** Read-only: dana disetujui lewat link tanpa login (Korwil PPHTGD → PIC LevelUP Pusat → Keuangan PPHTGD). */
+/** Read-only: review Sekretariat & BRIM Nasional di v2, lalu link tanpa login (Korwil PPHTGD → PIC LevelUP Pusat → Keuangan PPHTGD). */
 function DanaApprovalCard({ reimburse }: { reimburse: ReimburseData }) {
   const stage = reimburseStage(reimburse)
   const rejection = reimburseRejection(reimburse)
@@ -38,7 +38,7 @@ function DanaApprovalCard({ reimburse }: { reimburse: ReimburseData }) {
         <Row label="No Rekening" value={reimburse.norek || '-'} />
         <Row label="Nama Bank" value={reimburse.namabank || '-'} />
         <Row label="Atas Nama" value={reimburse.namarek || '-'} />
-        <Row label="Sekarang di" value={REIMBURSE_STAGE[stage].pic} />
+        <Row label="Sekarang di" value={reimbursePic(reimburse)} />
       </div>
 
       {stage === 'keuangan' || stage === 'cair' ? (

@@ -29,7 +29,7 @@ function cleanAlasan(keputusan: 'setuju' | 'tolak', alasan: string | undefined):
   return reason
 }
 
-/** Korwil PPHTGD: Setujui → link PIC LevelUP Pusat dikirim ke grup WA pphtgd. Tolak → kembali ke ALK Kota. */
+/** Korwil PPHTGD (setelah Sekretariat & BRIM Nasional setuju): Setujui → link PIC LevelUP Pusat ke grup WA pphtgd. Tolak → kembali ke ALK Kota. */
 export async function decideDanaKorwil(
   token: string,
   keputusan: 'setuju' | 'tolak',
@@ -37,7 +37,12 @@ export async function decideDanaKorwil(
 ): Promise<DanaLinkResult> {
   const res = await loadDanaByToken(token)
   if (!res || res.peran !== 'korwil') return { ok: false, error: LINK_MATI }
-  if (res.view.stage !== 'korwil') return { ok: false, error: SUDAH_DIPROSES }
+  if (res.view.stage !== 'korwil') {
+    return {
+      ok: false,
+      error: res.view.stage === 'review' ? 'Pengajuan belum disetujui Sekretariat & BRIM Nasional' : SUDAH_DIPROSES,
+    }
+  }
   const reason = cleanAlasan(keputusan, alasan)
   if (typeof reason !== 'string') return { ok: false, error: reason.error }
 
@@ -48,7 +53,7 @@ export async function decideDanaKorwil(
     const still = await tx.reimburse_approval.findFirst({ where: { id_reimburse: idReimburse, token_korwil: token } })
     if (!still) return 0
     const u = await tx.reimburse.updateMany({
-      where: { id_reimburse: idReimburse, approvepphtgd: '', approvenasional: '' },
+      where: { id_reimburse: idReimburse, approvesekre: '1', approvebrim: '1', approvepphtgd: '', approvenasional: '' },
       data: keputusan === 'setuju' ? { approvepphtgd: '1' } : { approvepphtgd: '0', notepphtgd: reason },
     })
     if (u.count) await tx.reimburse_approval.update({ where: { id_reimburse: idReimburse }, data: { korwil_at: new Date() } })

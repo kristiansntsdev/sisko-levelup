@@ -331,6 +331,12 @@ model reimburse {
   noteadmin       String    @db.Text
   buktitf         String    @db.Text
   laporan_at      DateTime? @db.DateTime(0)
+  /// Review Sekretariat Nasional sebelum Korwil: '' menunggu, '1' setuju, '0' tolak
+  approvesekre    String    @default("") @db.VarChar(1)
+  notesekre       String    @default("") @db.VarChar(1000)
+  /// Review BRIM Nasional sebelum Korwil: '' menunggu, '1' setuju, '0' tolak
+  approvebrim     String    @default("") @db.VarChar(1)
+  notebrim        String    @default("") @db.VarChar(1000)
 }
 
 model siswakelaswp {
@@ -451,6 +457,8 @@ model reimburse_approval {
   token_korwil       String    @unique(map: "uq_reimburse_approval_korwil") @db.VarChar(64)
   token_pic          String    @unique(map: "uq_reimburse_approval_pic") @db.VarChar(64)
   token_keuangan     String    @unique(map: "uq_reimburse_approval_keuangan") @db.VarChar(64)
+  sekre_at           DateTime? @db.DateTime(0)
+  brim_at            DateTime? @db.DateTime(0)
   korwil_at          DateTime? @db.DateTime(0)
   pic_at             DateTime? @db.DateTime(0)
   cair_at            DateTime? @db.DateTime(0)

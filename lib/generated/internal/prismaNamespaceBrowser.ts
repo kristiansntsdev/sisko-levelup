@@ -493,7 +493,11 @@ export const ReimburseScalarFieldEnum = {
   approveadmin: 'approveadmin',
   noteadmin: 'noteadmin',
   buktitf: 'buktitf',
-  laporan_at: 'laporan_at'
+  laporan_at: 'laporan_at',
+  approvesekre: 'approvesekre',
+  notesekre: 'notesekre',
+  approvebrim: 'approvebrim',
+  notebrim: 'notebrim'
 } as const
 
 export type ReimburseScalarFieldEnum = (typeof ReimburseScalarFieldEnum)[keyof typeof ReimburseScalarFieldEnum]
@@ -632,6 +636,8 @@ export const Reimburse_approvalScalarFieldEnum = {
   token_korwil: 'token_korwil',
   token_pic: 'token_pic',
   token_keuangan: 'token_keuangan',
+  sekre_at: 'sekre_at',
+  brim_at: 'brim_at',
   korwil_at: 'korwil_at',
   pic_at: 'pic_at',
   cair_at: 'cair_at',
@@ -1159,7 +1165,11 @@ export const reimburseOrderByRelevanceFieldEnum = {
   bukti: 'bukti',
   approveadmin: 'approveadmin',
   noteadmin: 'noteadmin',
-  buktitf: 'buktitf'
+  buktitf: 'buktitf',
+  approvesekre: 'approvesekre',
+  notesekre: 'notesekre',
+  approvebrim: 'approvebrim',
+  notebrim: 'notebrim'
 } as const
 
 export type reimburseOrderByRelevanceFieldEnum = (typeof reimburseOrderByRelevanceFieldEnum)[keyof typeof reimburseOrderByRelevanceFieldEnum]

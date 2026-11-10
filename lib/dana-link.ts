@@ -53,6 +53,14 @@ export function verifikasiUrl(kode: string): string {
   return `${appOrigin()}/verifikasi/${kode}`
 }
 
+/**
+ * Versi pengajuan untuk review Sekretariat / BRIM Nasional: berubah setiap ALK Kota mengajukan ulang (token baru),
+ * jadi keputusan dari tab lama ditolak. Hash satu arah, aman dikirim ke browser reviewer (tidak membuka link Korwil).
+ */
+export function reviewVersi(tokenKorwil: string): string {
+  return createHash('sha256').update(`dana-review:${tokenKorwil}`).digest('base64url').slice(0, 16)
+}
+
 /** Pesan yang dikirim ALK Kota ke WhatsApp ketua korwil. */
 export function korwilWaText(input: {
   koordinator: string

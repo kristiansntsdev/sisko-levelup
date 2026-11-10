@@ -393,6 +393,28 @@ export async function POST(req: NextRequest) {
     `)
   }
 
+  // Pengajuan dana: review Sekretariat Nasional + BRIM Nasional sebelum Korwil. Pengajuan yang sudah diajukan
+  // sebelum langkah ini ada dianggap lolos review (link Korwil sudah dikirim), jadi backfill '1' hanya sekali,
+  // saat kolom baru dibuat; pengajuan ulang berikutnya mulai lagi dari '' (submitReimburse).
+  async function ensureColumn(table: string, name: string, ddl: string): Promise<boolean> {
+    const cols = await db.$queryRaw<{ COLUMN_NAME: string }[]>`
+      SELECT COLUMN_NAME FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ${table} AND COLUMN_NAME = ${name}
+    `
+    if (cols.length > 0) return false
+    await db.$executeRawUnsafe(ddl)
+    return true
+  }
+  const addedReimburseSekre = await ensureColumn('reimburse', 'approvesekre',
+    `ALTER TABLE reimburse ADD COLUMN approvesekre VARCHAR(1) NOT NULL DEFAULT '', ADD COLUMN notesekre VARCHAR(1000) NOT NULL DEFAULT ''`)
+  const addedReimburseBrim = await ensureColumn('reimburse', 'approvebrim',
+    `ALTER TABLE reimburse ADD COLUMN approvebrim VARCHAR(1) NOT NULL DEFAULT '', ADD COLUMN notebrim VARCHAR(1000) NOT NULL DEFAULT ''`)
+  const reimburseReviewBackfill = addedReimburseSekre || addedReimburseBrim
+    ? await db.$executeRaw(Prisma.sql`UPDATE reimburse SET approvesekre = '1', approvebrim = '1' WHERE ajukan IN ('Ajukan', '1')`)
+    : 0
+  const addedApprovalSekreAt = await ensureColumn('reimburse_approval', 'sekre_at',
+    `ALTER TABLE reimburse_approval ADD COLUMN sekre_at DATETIME(0) NULL, ADD COLUMN brim_at DATETIME(0) NULL`)
+
   async function ensureTable(name: string, ddl: string): Promise<boolean> {
     const rows = await db.$queryRaw<{ TABLE_NAME: string }[]>`
       SELECT TABLE_NAME FROM information_schema.TABLES
@@ -496,6 +518,10 @@ export async function POST(req: NextRequest) {
     addedArtikelView,
     addedArtikelLike,
     addedArtikelKomentar,
+    addedReimburseSekre,
+    addedReimburseBrim,
+    reimburseReviewBackfill,
+    addedApprovalSekreAt,
     brimUpdated: brim.count,
     brim: row,
   })

@@ -22,9 +22,9 @@ function active(pathname: string, match: string) {
   return pathname === match || pathname.startsWith(match + '/')
 }
 
-/** Full-screen subflows: approve detail, article form + detail. */
+/** Full-screen subflows: approve detail, dana review, article form + detail. */
 export function shouldHideBrimNav(pathname: string) {
-  if (/\/event\/\d+/.test(pathname)) return true
+  if (/\/(event|dana)\/\d+/.test(pathname)) return true
   if (pathname.startsWith(`${BRIM_ARTIKEL_BASE}/`)) return true
   return false
 }

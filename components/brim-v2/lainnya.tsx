@@ -4,7 +4,7 @@ import { useTransition } from 'react'
 import { logoutPengurus } from '@/app/admin/actions'
 import { ANTON, MONO, PANEL, PaperHeader, PaperMain, PRESS, ROWS } from '@/components/pwa/paper-ui'
 import { BlackStrip, Icon, Row } from '@/components/alk-v2/ui'
-import { BRIM_LEGACY } from './paths'
+import { BRIM_DANA_BASE, BRIM_LEGACY } from './paths'
 
 export function LainnyaClient({ nama, username }: { nama: string; username: string }) {
   const router = useRouter()
@@ -14,6 +14,7 @@ export function LainnyaClient({ nama, username }: { nama: string; username: stri
       <PaperHeader sticker={`BRIM · ${nama}`} title="Lainnya" />
       <div className="px-5 mt-5 space-y-4 pb-4">
         <div className={`${PANEL} ${ROWS} overflow-hidden`}>
+          <Row icon="receipt" tint="red" title="Pengajuan Dana" sub="Review dana kota sebelum dikirim ke Korwil" onClick={() => router.push(BRIM_DANA_BASE)} />
           <Row icon="image" tint="gold" title="Flyer Generator" sub="Buat pamflet acara dalam hitungan detik" onClick={() => router.push(`${BRIM_LEGACY}/pamflet`)} />
           <Row icon="image" title="Flyer WW JFE serentak" sub="Template pusat WFE per bulan" onClick={() => router.push(`${BRIM_LEGACY}/wfe-flyer`)} />
           <Row icon="link" tint="slate" title="Dokumentasi Kota" sub="Link Drive & akses anggota per event" onClick={() => router.push(`${BRIM_LEGACY}/dokumentasi`)} />

@@ -6,8 +6,9 @@ import { danaLinkUrl } from '@/lib/dana-link'
 import type { DanaTokens, DanaView } from '@/lib/dana-approval'
 import { notifyPphtgdDana, type DanaNotifyResult } from '@/lib/pphtgd-notify'
 import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
-import { danaReviewLink, eventTelegramScope, formatTelegramMessage, notifyTelegram } from '@/lib/telegram'
+import { danaBrimReviewLink, danaReviewLink, eventTelegramScope, formatTelegramMessage, notifyTelegram } from '@/lib/telegram'
 import { ALK_BASE } from '@/components/alk-v2/paths'
+import { BRIM_BASE } from '@/components/brim-v2/paths'
 
 export function revalidateDana(idEvent: number) {
   revalidatePath(`/dashboard/kota/alk/event/${idEvent}`)
@@ -19,6 +20,9 @@ export function revalidateDana(idEvent: number) {
   revalidatePath(`${ALK_BASE}/reimburse/${idEvent}`)
   revalidatePath(`${ALK_BASE}/event/${idEvent}`)
   revalidatePath(`${ALK_BASE}/event/${idEvent}/dana`)
+  revalidatePath(BRIM_BASE)
+  revalidatePath(`${BRIM_BASE}/dana`)
+  revalidatePath(`${BRIM_BASE}/dana/${idEvent}`)
 }
 
 /**
@@ -59,7 +63,10 @@ function rupiah(n: number): string {
   return n > 0 ? `Rp ${n.toLocaleString('id-ID')}` : '-'
 }
 
-/** Status-only Telegram card for the LevelUP ops group; the button opens the Nasional tracker (login), never a /dana link. */
+/**
+ * Status-only Telegram card for the LevelUP ops group; buttons open the Nasional tracker (login), never a /dana link.
+ * While Sekretariat / BRIM Nasional still have to review, each gets its own review button.
+ */
 export async function danaTelegram(view: DanaView, action: string, extra: Record<string, string> = {}) {
   const event = await db.event.findUnique({
     where: { id_event: view.idEvent },
@@ -86,6 +93,14 @@ export async function danaTelegram(view: DanaView, action: string, extra: Record
         ID: view.idEvent,
       },
     }),
-    { buttons: [{ text: '🔎 Status Dana', url: danaReviewLink(view.idEvent) }] },
+    {
+      buttons:
+        view.stage === 'review'
+          ? [
+              ...(view.review.sekre === 'menunggu' ? [{ text: '✅ Review Sekretariat', url: danaReviewLink(view.idEvent) }] : []),
+              ...(view.review.brim === 'menunggu' ? [{ text: '✅ Review BRIM', url: danaBrimReviewLink(view.idEvent) }] : []),
+            ]
+          : [{ text: '🔎 Status Dana', url: danaReviewLink(view.idEvent) }],
+    },
   )
 }

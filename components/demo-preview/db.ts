@@ -3,7 +3,7 @@
 // so the shim actions can return exactly what lib/actions/* return and the real UI renders unchanged.
 // State lives in memory + localStorage only. Never import lib/actions/*, next-auth, @/lib/db or prisma here.
 
-export const STORAGE_KEY = 'levelup-demo-preview:v5'
+export const STORAGE_KEY = 'levelup-demo-preview:v6'
 const VERSION = 3
 const DAY = 24 * 60 * 60 * 1000
 const WIB = 7 * 60 * 60 * 1000
@@ -114,18 +114,26 @@ export type DbReimburse = {
   danariil: string
   laporan: string
   bukti: string
-  /** Korwil PPHTGD (step 1): '' menunggu, '1' setuju, '0' tolak */
+  /** Review Sekretariat Nasional (step 1, bersama BRIM): '' menunggu, '1' setuju, '0' tolak */
+  approvesekre: string
+  notesekre: string
+  /** Review BRIM Nasional (step 1, bersama Sekretariat) */
+  approvebrim: string
+  notebrim: string
+  /** Korwil PPHTGD (step 2): '' menunggu, '1' setuju, '0' tolak */
   approvepphtgd: string
   notepphtgd: string
-  /** PIC LevelUP Pusat (step 2) */
+  /** PIC LevelUP Pusat (step 3) */
   approvenasional: string
   notenasional: string
-  /** Keuangan PPHTGD (step 3) = cair */
+  /** Keuangan PPHTGD (step 4) = cair */
   approvekeuangan: string
   notekeuangan: string
   buktitf: string
   /** Snapshot korwil yang dipilih saat submit (reimburse_approval di app asli) */
   korwil: DemoKorwil | null
+  sekre_at: string | null
+  brim_at: string | null
   korwil_at: string | null
   pic_at: string | null
   cair_at: string | null
@@ -352,11 +360,15 @@ export function buildSeed(now: Date = new Date()): DemoDb {
     {
       id_reimburse: id(), id_event: String(lalu1.id_event), ajukan: 'Ajukan', namabank: 'BCA', norek: '1234567890', namarek: 'ALK LevelUP Medan',
       danausul: '1200000', danariil: '1150000', laporan: 'https://drive.google.com/demo-lpj', bukti: 'https://drive.google.com/demo-dokumentasi',
+      approvesekre: '1', notesekre: '', approvebrim: '1', notebrim: '',
       approvepphtgd: '1', notepphtgd: '', approvenasional: '1', notenasional: '', approvekeuangan: '1', notekeuangan: '', buktitf: '',
-      korwil: DEMO_KORWIL[0], korwil_at: ago(now, 29 * DAY), pic_at: ago(now, 27 * DAY), cair_at: ago(now, 24 * DAY),
+      korwil: DEMO_KORWIL[0], sekre_at: ago(now, 30 * DAY - 6 * 3600000), brim_at: ago(now, 30 * DAY - 4 * 3600000),
+      korwil_at: ago(now, 29 * DAY), pic_at: ago(now, 27 * DAY), cair_at: ago(now, 24 * DAY),
       at: ago(now, 24 * DAY),
       history: [
         { stage: 'Diajukan oleh ALK Kota', at: ago(now, 30 * DAY), by: 'Admin LK Medan' },
+        { stage: 'Disetujui Sekretariat Nasional', at: ago(now, 30 * DAY - 6 * 3600000), by: 'Sekretariat Nasional' },
+        { stage: 'Disetujui BRIM Nasional', at: ago(now, 30 * DAY - 4 * 3600000), by: 'BRIM Nasional' },
         { stage: 'Disetujui Korwil PPHTGD', at: ago(now, 29 * DAY), by: 'Korwil Medan' },
         { stage: 'Disetujui PIC LevelUP Pusat', at: ago(now, 27 * DAY), by: 'PIC LevelUP Pusat' },
         { stage: 'Dana ditransfer', at: ago(now, 24 * DAY), by: 'Keuangan PPHTGD' },
@@ -365,10 +377,14 @@ export function buildSeed(now: Date = new Date()): DemoDb {
     {
       id_reimburse: id(), id_event: String(lalu2.id_event), ajukan: 'Ajukan', namabank: 'BCA', norek: '1234567890', namarek: 'ALK LevelUP Medan',
       danausul: '1200000', danariil: '', laporan: '', bukti: 'https://drive.google.com/demo-dokumentasi-2',
+      approvesekre: '1', notesekre: '', approvebrim: '', notebrim: '',
       approvepphtgd: '', notepphtgd: '', approvenasional: '', notenasional: '', approvekeuangan: '', notekeuangan: '', buktitf: '',
-      korwil: DEMO_KORWIL[0], korwil_at: null, pic_at: null, cair_at: null,
-      at: ago(now, 3 * DAY),
-      history: [{ stage: 'Diajukan oleh ALK Kota · menunggu Korwil', at: ago(now, 3 * DAY), by: 'Admin LK Medan' }],
+      korwil: DEMO_KORWIL[0], sekre_at: ago(now, 2 * DAY), brim_at: null, korwil_at: null, pic_at: null, cair_at: null,
+      at: ago(now, 2 * DAY),
+      history: [
+        { stage: 'Diajukan oleh ALK Kota · menunggu review Sekretariat & BRIM Nasional', at: ago(now, 3 * DAY), by: 'Admin LK Medan' },
+        { stage: 'Disetujui Sekretariat Nasional', at: ago(now, 2 * DAY), by: 'Sekretariat Nasional' },
+      ],
     },
   ]
 

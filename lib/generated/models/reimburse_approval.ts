@@ -47,6 +47,8 @@ export type Reimburse_approvalMinAggregateOutputType = {
   token_korwil: string | null
   token_pic: string | null
   token_keuangan: string | null
+  sekre_at: Date | null
+  brim_at: Date | null
   korwil_at: Date | null
   pic_at: Date | null
   cair_at: Date | null
@@ -64,6 +66,8 @@ export type Reimburse_approvalMaxAggregateOutputType = {
   token_korwil: string | null
   token_pic: string | null
   token_keuangan: string | null
+  sekre_at: Date | null
+  brim_at: Date | null
   korwil_at: Date | null
   pic_at: Date | null
   cair_at: Date | null
@@ -81,6 +85,8 @@ export type Reimburse_approvalCountAggregateOutputType = {
   token_korwil: number
   token_pic: number
   token_keuangan: number
+  sekre_at: number
+  brim_at: number
   korwil_at: number
   pic_at: number
   cair_at: number
@@ -110,6 +116,8 @@ export type Reimburse_approvalMinAggregateInputType = {
   token_korwil?: true
   token_pic?: true
   token_keuangan?: true
+  sekre_at?: true
+  brim_at?: true
   korwil_at?: true
   pic_at?: true
   cair_at?: true
@@ -127,6 +135,8 @@ export type Reimburse_approvalMaxAggregateInputType = {
   token_korwil?: true
   token_pic?: true
   token_keuangan?: true
+  sekre_at?: true
+  brim_at?: true
   korwil_at?: true
   pic_at?: true
   cair_at?: true
@@ -144,6 +154,8 @@ export type Reimburse_approvalCountAggregateInputType = {
   token_korwil?: true
   token_pic?: true
   token_keuangan?: true
+  sekre_at?: true
+  brim_at?: true
   korwil_at?: true
   pic_at?: true
   cair_at?: true
@@ -248,6 +260,8 @@ export type Reimburse_approvalGroupByOutputType = {
   token_korwil: string
   token_pic: string
   token_keuangan: string
+  sekre_at: Date | null
+  brim_at: Date | null
   korwil_at: Date | null
   pic_at: Date | null
   cair_at: Date | null
@@ -288,6 +302,8 @@ export type reimburse_approvalWhereInput = {
   token_korwil?: Prisma.StringFilter<"reimburse_approval"> | string
   token_pic?: Prisma.StringFilter<"reimburse_approval"> | string
   token_keuangan?: Prisma.StringFilter<"reimburse_approval"> | string
+  sekre_at?: Prisma.DateTimeNullableFilter<"reimburse_approval"> | Date | string | null
+  brim_at?: Prisma.DateTimeNullableFilter<"reimburse_approval"> | Date | string | null
   korwil_at?: Prisma.DateTimeNullableFilter<"reimburse_approval"> | Date | string | null
   pic_at?: Prisma.DateTimeNullableFilter<"reimburse_approval"> | Date | string | null
   cair_at?: Prisma.DateTimeNullableFilter<"reimburse_approval"> | Date | string | null
@@ -305,6 +321,8 @@ export type reimburse_approvalOrderByWithRelationInput = {
   token_korwil?: Prisma.SortOrder
   token_pic?: Prisma.SortOrder
   token_keuangan?: Prisma.SortOrder
+  sekre_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  brim_at?: Prisma.SortOrderInput | Prisma.SortOrder
   korwil_at?: Prisma.SortOrderInput | Prisma.SortOrder
   pic_at?: Prisma.SortOrderInput | Prisma.SortOrder
   cair_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -326,6 +344,8 @@ export type reimburse_approvalWhereUniqueInput = Prisma.AtLeast<{
   korwil_nama?: Prisma.StringFilter<"reimburse_approval"> | string
   korwil_koordinator?: Prisma.StringFilter<"reimburse_approval"> | string
   korwil_wa?: Prisma.StringNullableFilter<"reimburse_approval"> | string | null
+  sekre_at?: Prisma.DateTimeNullableFilter<"reimburse_approval"> | Date | string | null
+  brim_at?: Prisma.DateTimeNullableFilter<"reimburse_approval"> | Date | string | null
   korwil_at?: Prisma.DateTimeNullableFilter<"reimburse_approval"> | Date | string | null
   pic_at?: Prisma.DateTimeNullableFilter<"reimburse_approval"> | Date | string | null
   cair_at?: Prisma.DateTimeNullableFilter<"reimburse_approval"> | Date | string | null
@@ -343,6 +363,8 @@ export type reimburse_approvalOrderByWithAggregationInput = {
   token_korwil?: Prisma.SortOrder
   token_pic?: Prisma.SortOrder
   token_keuangan?: Prisma.SortOrder
+  sekre_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  brim_at?: Prisma.SortOrderInput | Prisma.SortOrder
   korwil_at?: Prisma.SortOrderInput | Prisma.SortOrder
   pic_at?: Prisma.SortOrderInput | Prisma.SortOrder
   cair_at?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -368,6 +390,8 @@ export type reimburse_approvalScalarWhereWithAggregatesInput = {
   token_korwil?: Prisma.StringWithAggregatesFilter<"reimburse_approval"> | string
   token_pic?: Prisma.StringWithAggregatesFilter<"reimburse_approval"> | string
   token_keuangan?: Prisma.StringWithAggregatesFilter<"reimburse_approval"> | string
+  sekre_at?: Prisma.DateTimeNullableWithAggregatesFilter<"reimburse_approval"> | Date | string | null
+  brim_at?: Prisma.DateTimeNullableWithAggregatesFilter<"reimburse_approval"> | Date | string | null
   korwil_at?: Prisma.DateTimeNullableWithAggregatesFilter<"reimburse_approval"> | Date | string | null
   pic_at?: Prisma.DateTimeNullableWithAggregatesFilter<"reimburse_approval"> | Date | string | null
   cair_at?: Prisma.DateTimeNullableWithAggregatesFilter<"reimburse_approval"> | Date | string | null
@@ -385,6 +409,8 @@ export type reimburse_approvalCreateInput = {
   token_korwil: string
   token_pic: string
   token_keuangan: string
+  sekre_at?: Date | string | null
+  brim_at?: Date | string | null
   korwil_at?: Date | string | null
   pic_at?: Date | string | null
   cair_at?: Date | string | null
@@ -402,6 +428,8 @@ export type reimburse_approvalUncheckedCreateInput = {
   token_korwil: string
   token_pic: string
   token_keuangan: string
+  sekre_at?: Date | string | null
+  brim_at?: Date | string | null
   korwil_at?: Date | string | null
   pic_at?: Date | string | null
   cair_at?: Date | string | null
@@ -419,6 +447,8 @@ export type reimburse_approvalUpdateInput = {
   token_korwil?: Prisma.StringFieldUpdateOperationsInput | string
   token_pic?: Prisma.StringFieldUpdateOperationsInput | string
   token_keuangan?: Prisma.StringFieldUpdateOperationsInput | string
+  sekre_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  brim_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   korwil_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pic_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cair_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -436,6 +466,8 @@ export type reimburse_approvalUncheckedUpdateInput = {
   token_korwil?: Prisma.StringFieldUpdateOperationsInput | string
   token_pic?: Prisma.StringFieldUpdateOperationsInput | string
   token_keuangan?: Prisma.StringFieldUpdateOperationsInput | string
+  sekre_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  brim_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   korwil_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pic_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cair_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -453,6 +485,8 @@ export type reimburse_approvalCreateManyInput = {
   token_korwil: string
   token_pic: string
   token_keuangan: string
+  sekre_at?: Date | string | null
+  brim_at?: Date | string | null
   korwil_at?: Date | string | null
   pic_at?: Date | string | null
   cair_at?: Date | string | null
@@ -470,6 +504,8 @@ export type reimburse_approvalUpdateManyMutationInput = {
   token_korwil?: Prisma.StringFieldUpdateOperationsInput | string
   token_pic?: Prisma.StringFieldUpdateOperationsInput | string
   token_keuangan?: Prisma.StringFieldUpdateOperationsInput | string
+  sekre_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  brim_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   korwil_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pic_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cair_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -487,6 +523,8 @@ export type reimburse_approvalUncheckedUpdateManyInput = {
   token_korwil?: Prisma.StringFieldUpdateOperationsInput | string
   token_pic?: Prisma.StringFieldUpdateOperationsInput | string
   token_keuangan?: Prisma.StringFieldUpdateOperationsInput | string
+  sekre_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  brim_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   korwil_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pic_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cair_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -510,6 +548,8 @@ export type reimburse_approvalCountOrderByAggregateInput = {
   token_korwil?: Prisma.SortOrder
   token_pic?: Prisma.SortOrder
   token_keuangan?: Prisma.SortOrder
+  sekre_at?: Prisma.SortOrder
+  brim_at?: Prisma.SortOrder
   korwil_at?: Prisma.SortOrder
   pic_at?: Prisma.SortOrder
   cair_at?: Prisma.SortOrder
@@ -532,6 +572,8 @@ export type reimburse_approvalMaxOrderByAggregateInput = {
   token_korwil?: Prisma.SortOrder
   token_pic?: Prisma.SortOrder
   token_keuangan?: Prisma.SortOrder
+  sekre_at?: Prisma.SortOrder
+  brim_at?: Prisma.SortOrder
   korwil_at?: Prisma.SortOrder
   pic_at?: Prisma.SortOrder
   cair_at?: Prisma.SortOrder
@@ -549,6 +591,8 @@ export type reimburse_approvalMinOrderByAggregateInput = {
   token_korwil?: Prisma.SortOrder
   token_pic?: Prisma.SortOrder
   token_keuangan?: Prisma.SortOrder
+  sekre_at?: Prisma.SortOrder
+  brim_at?: Prisma.SortOrder
   korwil_at?: Prisma.SortOrder
   pic_at?: Prisma.SortOrder
   cair_at?: Prisma.SortOrder
@@ -573,6 +617,8 @@ export type reimburse_approvalSelect<ExtArgs extends runtime.Types.Extensions.In
   token_korwil?: boolean
   token_pic?: boolean
   token_keuangan?: boolean
+  sekre_at?: boolean
+  brim_at?: boolean
   korwil_at?: boolean
   pic_at?: boolean
   cair_at?: boolean
@@ -592,6 +638,8 @@ export type reimburse_approvalSelectScalar = {
   token_korwil?: boolean
   token_pic?: boolean
   token_keuangan?: boolean
+  sekre_at?: boolean
+  brim_at?: boolean
   korwil_at?: boolean
   pic_at?: boolean
   cair_at?: boolean
@@ -600,7 +648,7 @@ export type reimburse_approvalSelectScalar = {
   created_at?: boolean
 }
 
-export type reimburse_approvalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_reimburse" | "korwil_id" | "korwil_nama" | "korwil_koordinator" | "korwil_wa" | "token_korwil" | "token_pic" | "token_keuangan" | "korwil_at" | "pic_at" | "cair_at" | "notif_pic_at" | "notif_keuangan_at" | "created_at", ExtArgs["result"]["reimburse_approval"]>
+export type reimburse_approvalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id_reimburse" | "korwil_id" | "korwil_nama" | "korwil_koordinator" | "korwil_wa" | "token_korwil" | "token_pic" | "token_keuangan" | "sekre_at" | "brim_at" | "korwil_at" | "pic_at" | "cair_at" | "notif_pic_at" | "notif_keuangan_at" | "created_at", ExtArgs["result"]["reimburse_approval"]>
 
 export type $reimburse_approvalPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "reimburse_approval"
@@ -614,6 +662,8 @@ export type $reimburse_approvalPayload<ExtArgs extends runtime.Types.Extensions.
     token_korwil: string
     token_pic: string
     token_keuangan: string
+    sekre_at: Date | null
+    brim_at: Date | null
     korwil_at: Date | null
     pic_at: Date | null
     cair_at: Date | null
@@ -997,6 +1047,8 @@ export interface reimburse_approvalFieldRefs {
   readonly token_korwil: Prisma.FieldRef<"reimburse_approval", 'String'>
   readonly token_pic: Prisma.FieldRef<"reimburse_approval", 'String'>
   readonly token_keuangan: Prisma.FieldRef<"reimburse_approval", 'String'>
+  readonly sekre_at: Prisma.FieldRef<"reimburse_approval", 'DateTime'>
+  readonly brim_at: Prisma.FieldRef<"reimburse_approval", 'DateTime'>
   readonly korwil_at: Prisma.FieldRef<"reimburse_approval", 'DateTime'>
   readonly pic_at: Prisma.FieldRef<"reimburse_approval", 'DateTime'>
   readonly cair_at: Prisma.FieldRef<"reimburse_approval", 'DateTime'>

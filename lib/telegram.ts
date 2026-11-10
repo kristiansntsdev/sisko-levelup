@@ -48,6 +48,11 @@ export function danaReviewLink(idEvent: number): string {
   return `${publicAppBase()}/dashboard/v2/kota/alk/reimburse/${idEvent}`
 }
 
+/** Review pengajuan dana satu event di dashboard BRIM Nasional. */
+export function danaBrimReviewLink(idEvent: number): string {
+  return `${publicAppBase()}/dashboard/v2/brim/dana/${idEvent}`
+}
+
 /** Antrian approve tiket event nasional (Sekretariat Nasional). */
 export function tiketNasionalApproveLink(): string {
   return `${publicAppBase()}/dashboard/v2/kota/alk/tiket-nasional`

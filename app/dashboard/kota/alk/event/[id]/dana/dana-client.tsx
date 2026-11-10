@@ -10,7 +10,9 @@ import {
   isReimburseLocked,
   REIMBURSE_STAGE,
   reimburseRejection,
+  reimburseReview,
   reimburseStage,
+  REVIEW_STATE_LABEL,
 } from '@/lib/reimburse-stage'
 import { submitReimburse, type DanaForm, type ReimburseData } from '@/lib/actions/reimburse'
 import type { KorwilOption } from '@/lib/surat-keuangan-data'
@@ -37,13 +39,14 @@ function CopyText({ value, label }: { value: string; label: string }) {
   )
 }
 
-/** Korwil PPHTGD → PIC LevelUP Pusat → Keuangan PPHTGD → Cair */
+/** Sekretariat & BRIM Nasional → Korwil PPHTGD → PIC LevelUP Pusat → Keuangan PPHTGD → Cair */
 function DanaTracker({ reimburse, form }: { reimburse: ReimburseData; form: DanaForm | null }) {
   const stage = reimburseStage(reimburse)
   const current = danaStepIndex(stage)
   const rejection = reimburseRejection(reimburse)
+  const review = reimburseReview(reimburse)
   const at = form?.view?.at
-  const stamps = [at?.korwil, at?.pic, at?.cair, null]
+  const stamps = [null, at?.korwil, at?.pic, at?.cair, null]
   return (
     <div className="bg-surface border border-border rounded-card px-4 py-3">
       <div className="flex items-center justify-between gap-2">
@@ -52,7 +55,7 @@ function DanaTracker({ reimburse, form }: { reimburse: ReimburseData; form: Dana
       </div>
       <ol className="mt-3 flex flex-col gap-2">
         {DANA_STEPS.map((s, i) => {
-          const done = current > i || (current === 4 && i === 3)
+          const done = current > i
           const active = current === i
           return (
             <li key={s.key} className="flex items-center gap-2.5">
@@ -63,7 +66,14 @@ function DanaTracker({ reimburse, form }: { reimburse: ReimburseData; form: Dana
               >
                 {done ? '✓' : i + 1}
               </span>
-              <span className={`text-[13px] ${active ? 'font-semibold text-fg' : 'text-muted'}`}>{s.label}</span>
+              <span className={`text-[13px] ${active ? 'font-semibold text-fg' : 'text-muted'}`}>
+                {s.label}
+                {i === 0 && active ? (
+                  <span className="block text-[11px] font-normal text-muted">
+                    Sekretariat {REVIEW_STATE_LABEL[review.sekre]} · BRIM {REVIEW_STATE_LABEL[review.brim]}
+                  </span>
+                ) : null}
+              </span>
               {done && stamps[i] ? <span className="ml-auto text-[11px] text-muted">{stamps[i]}</span> : null}
             </li>
           )
@@ -80,7 +90,20 @@ function DanaTracker({ reimburse, form }: { reimburse: ReimburseData; form: Dana
   )
 }
 
-/** Setelah Ajukan: ALK Kota kirim link approval ke WhatsApp ketua korwil (wa.me). */
+/** Setelah Ajukan: Sekretariat & BRIM Nasional review dulu, link Korwil belum dibagikan. */
+function MenungguReviewCard() {
+  return (
+    <div className="bg-surface border-2 border-dashed border-border rounded-card px-4 py-4">
+      <p className="text-[14px] font-semibold text-fg">Menunggu review Sekretariat & BRIM Nasional</p>
+      <p className="text-[12px] text-muted mt-1">
+        Pengajuan dicek dulu oleh Sekretariat Nasional dan BRIM Nasional. Setelah keduanya setuju, tombol Kirim ke
+        Korwil muncul di halaman ini. Kalau data diubah lalu disimpan, review mulai lagi dari awal.
+      </p>
+    </div>
+  )
+}
+
+/** Setelah Sekretariat & BRIM setuju: ALK Kota kirim link approval ke WhatsApp ketua korwil (wa.me). */
 function KirimKorwilCard({ share }: { share: NonNullable<DanaForm['share']> }) {
   return (
     <div className="bg-surface border-2 border-accent rounded-card px-4 py-4">
@@ -352,6 +375,8 @@ export function DanaClient({
 
         {reimburse && isAjukan(reimburse.ajukan) ? <DanaTracker reimburse={reimburse} form={form} /> : null}
 
+        {stage === 'review' ? <MenungguReviewCard /> : null}
+
         {form?.share ? <KirimKorwilCard share={form.share} /> : null}
 
         <div className="bg-surface border border-border rounded-card overflow-hidden">
@@ -500,7 +525,11 @@ export function DanaClient({
             disabled={isPending || korwilBlocked}
             className="w-full py-4 bg-accent text-white rounded-btn text-[16px] font-semibold disabled:opacity-60 transition-opacity"
           >
-            {isPending ? 'Menyimpan...' : stage === 'korwil' || stage === 'ditolak' ? 'Simpan & Ajukan Ulang' : 'Ajukan'}
+            {isPending
+              ? 'Menyimpan...'
+              : stage === 'review' || stage === 'korwil' || stage === 'ditolak'
+                ? 'Simpan & Ajukan Ulang'
+                : 'Ajukan'}
           </button>
         )}
       </form>
