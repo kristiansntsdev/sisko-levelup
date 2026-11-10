@@ -145,6 +145,9 @@ task.md                               # Blocked: approval sampai core
 ```
 
 ## Recent Updates [2026-11-10]
+- Telegram notif **Absen** event nasional (`id_cabang=0`, termasuk WW Online) dihapus dari `recordAbsen`: dulu tiap scan / absen online = 1 pesan. Notif Registrasi, Pengajuan Tiket, dan Tiket Disetujui tetap dikirim (sengaja)
+
+## Recent Updates [2026-11-10]
 - **Review Sekretariat & BRIM Nasional sebelum Korwil** (pengajuan dana): alur kini ALK Kota → **Sekretariat & BRIM Nasional** (keduanya wajib setuju, urutan bebas) → Korwil PPHTGD → PIC LevelUP Pusat → Keuangan PPHTGD. Stage baru `review` di `lib/reimburse-stage.ts` (label "Review Nasional"; `reimbursePic` = pihak yang belum memutuskan; `DANA_STEPS` 5 langkah, `DANA_DONE` = index cair). Salah satu menolak → `ditolak` (oleh Sekretariat/BRIM Nasional), ALK Kota perbaiki + Ajukan ulang
 - Kolom baru `reimburse.approvesekre/notesekre/approvebrim/notebrim` (VARCHAR, default '') + `reimburse_approval.sekre_at/brim_at`. `prod-migrate` → `addedReimburseSekre/Brim` + **backfill sekali** `'1'/'1'` untuk semua baris `ajukan` yang sudah ada (link Korwil-nya sudah terkirim, jangan ditahan), `addedApprovalSekreAt`. Field sudah di `schema.prisma` dalam rilis yang sama (dana pages error beberapa detik sampai prod-migrate selesai; hindari dengan memanggil prod-migrate dari preview dulu)
 - Submit ALK Kota mereset kedua review (token tetap dibuat ulang); form tetap bisa diedit selama review/korwil, simpan = review mulai lagi. Kartu **Kirim ke Korwil** baru muncul setelah keduanya setuju (sebelumnya kartu "Menunggu review"). `decideDanaKorwil` menolak kalau belum lolos review (where `approvesekre='1' AND approvebrim='1'`)

@@ -6,11 +6,10 @@
  */
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
-import { NASIONAL_EVENT_CABANG, isNasionalAdmin } from '@/lib/event-cabang'
+import { isNasionalAdmin } from '@/lib/event-cabang'
 import { absenDuplicateWhere } from '@/lib/event-sesi'
 import { canAbsenNasionalTicket, needsNasionalTicketApproval } from '@/lib/registrasi-status'
 import type { QRPayload } from '@/lib/qr'
-import { formatTelegramMessage, notifyTelegram, eventDetailLink } from '@/lib/telegram'
 
 class LokasiConflict extends Error {
   constructor(public lokasi: string) {
@@ -186,25 +185,7 @@ export async function recordAbsen(
       /* ok outside request scope (scripts/tests) */
     }
 
-    const event = await db.event.findUnique({
-      where: { id_event: idEvent },
-      select: { id_cabang: true, nama_event: true },
-    })
-    if (event?.id_cabang === NASIONAL_EVENT_CABANG) {
-      void notifyTelegram(
-        formatTelegramMessage({
-          action: 'Absen',
-          eventName: event.nama_event,
-          fields: {
-            Peserta: peserta?.nama ?? idPeserta,
-            ID: idEvent,
-          },
-          layout: 'peserta',
-        }),
-        { buttons: [{ text: '📋 Detail Event', url: eventDetailLink(idEvent) }] },
-      )
-    }
-
+    // Tanpa Telegram per absen (dulu tiap scan event nasional = 1 pesan).
     try {
       revalidatePath(`/dashboard/v2/kota/alk/event/${idEvent}`)
       revalidatePath('/dashboard/v2/kota/alk')
