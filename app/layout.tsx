@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow_Semi_Condensed, DM_Sans, Space_Grotesk, Instrument_Serif, DM_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import { Toaster } from "@/components/ui";
 import { Providers } from "@/components/providers";
 import "./globals.css";
@@ -46,6 +47,8 @@ const barlow = Barlow_Semi_Condensed({
   display: "swap",
 });
 
+const PPHTGD_ANALYTICS_ID = "b9428f8c-b99a-48af-a958-09c54a19ea7e";
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -84,6 +87,16 @@ export default function RootLayout({
           <Toaster />
         </Providers>
         <Analytics />
+        <Script
+          src="https://analytics.pphtgd.org/script.js"
+          data-website-id={PPHTGD_ANALYTICS_ID}
+          strategy="afterInteractive"
+        />
+        <Script
+          src="https://analytics.pphtgd.org/recorder.js"
+          data-website-id={PPHTGD_ANALYTICS_ID}
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
