@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Docker/VPS: BUILD_STANDALONE=1 → server mandiri .next/standalone. Vercel tidak memakainya.
+  ...(process.env.BUILD_STANDALONE ? { output: 'standalone' as const } : {}),
   experimental: {
     serverActions: {
       bodySizeLimit: '4mb',

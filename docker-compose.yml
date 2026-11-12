@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      TZ: Asia/Jakarta
+    # Tidak ada port yang dibuka ke host: hanya cloudflared yang mengakses lewat jaringan Docker.
+    expose:
+      - "38417"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:38417/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?isi TUNNEL_TOKEN di .env (token dari Cloudflare Zero Trust)}
+    depends_on:
+      app:
+        condition: service_healthy

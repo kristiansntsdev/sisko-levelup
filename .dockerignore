@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.github
+.vercel
+.claude
+.cursor
+.env*
+*.tsbuildinfo
+.DS_Store
+template

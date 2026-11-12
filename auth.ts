@@ -61,6 +61,25 @@ async function resolveAuthUser(
   return { ...authUser, isNew: true, needsRegistration: true }
 }
 
+// MySQL Hostinger jarak jauh kadang gagal buka koneksi (cold start / batas
+// koneksi per user) → "pool timeout" (kode 45028 / P2024). Satu percobaan ulang
+// cukup supaya login Google tidak gagal karena satu koneksi lambat.
+async function withDbRetry<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn()
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : ''
+    const transient =
+      msg.includes('pool timeout') ||
+      msg.includes('45028') ||
+      (e as { code?: string })?.code === 'P2024'
+    if (!transient) throw e
+    console.error('[auth] DB pool timeout, retrying once')
+    await new Promise((r) => setTimeout(r, 500))
+    return fn()
+  }
+}
+
 async function resolveCredentials(email: string, password: string) {
   const peserta = await db.peserta.findFirst({
     where: { email, password },
@@ -132,10 +151,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user, account, trigger, session }) {
       if (account?.provider === 'google' && user?.email) {
-        const authUser = await resolveAuthUser(
-          user.email,
-          user.name ?? '',
-          user.image ?? null,
+        const authUser = await withDbRetry(() =>
+          resolveAuthUser(user.email!, user.name ?? '', user.image ?? null),
         )
         token.authUserId = authUser.id
         token.idPeserta = authUser.id_peserta
