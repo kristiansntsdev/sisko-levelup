@@ -19,7 +19,7 @@ jobs:
     runs-on: [self-hosted, Linux, sisko]
     timeout-minutes: 30
     steps:
-      # Deploy langsung di APP_DIR (bukan workspace runner) supaya .env dan .env.production
+      # Deploy langsung di APP_DIR (bukan workspace runner) supaya .env.production
       # yang hanya ada di VPS tetap dipakai. --ff-only: gagal kalau ada perubahan lokal yang
       # bentrok, tidak pernah menimpa pekerjaan yang belum di-commit di VPS.
       - name: Pull latest code
@@ -28,12 +28,10 @@ jobs:
           git fetch origin
           git merge --ff-only "$GITHUB_SHA"
 
-      - name: Check env files
+      - name: Check env file
         run: |
           cd "$APP_DIR"
-          for f in .env .env.production; do
-            [ -s "$f" ] || { echo "::error::$APP_DIR/$f belum ada di VPS"; exit 1; }
-          done
+          [ -s .env.production ] || { echo "::error::$APP_DIR/.env.production belum ada di VPS"; exit 1; }
 
       # Build dulu, baru ganti container: kalau build gagal, versi lama tetap jalan.
       - name: Build image
