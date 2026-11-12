@@ -12,12 +12,57 @@ concurrency:
 
 env:
   APP_DIR: /var/www/sisko-levelup
+  # Harus huruf kecil semua (aturan GHCR) dan sama dengan `image:` di docker-compose.yml.
+  IMAGE: ghcr.io/kristiansntsdev/sisko-levelup
 
 jobs:
+  # Build di runner GitHub, bukan di VPS: VPS 3.8 GB tanpa swap dan berbagi dengan pphtgd,
+  # `next build` di sana dibunuh OOM killer ("failed to execute bake: signal: killed").
+  build:
+    name: Build & push image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Tag SHA = yang di-deploy job berikutnya; `latest` = default compose kalau dijalankan manual di VPS.
+      # Label source: mengaitkan package ke repo ini (akses GITHUB_TOKEN) dan dipakai filter prune di VPS.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          provenance: false
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   deploy:
     name: Deploy to VPS
+    needs: build
     runs-on: [self-hosted, Linux, sisko]
-    timeout-minutes: 30
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
+    env:
+      # Dibaca docker-compose.yml: deploy persis image hasil build commit ini.
+      IMAGE_TAG: ${{ github.sha }}
     steps:
       # Deploy langsung di APP_DIR (bukan workspace runner) supaya .env.production
       # yang hanya ada di VPS tetap dipakai. --ff-only: gagal kalau ada perubahan lokal yang
@@ -33,11 +78,22 @@ jobs:
           cd "$APP_DIR"
           [ -s .env.production ] || { echo "::error::$APP_DIR/.env.production belum ada di VPS"; exit 1; }
 
-      # Build dulu, baru ganti container: kalau build gagal, versi lama tetap jalan.
-      - name: Build image
+      # Login pakai GITHUB_TOKEN job ini (tidak perlu PAT). Kredensial ditaruh di folder temp
+      # runner, bukan ~/.docker, jadi tidak tersisa di VPS setelah job selesai.
+      - name: Login to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export DOCKER_CONFIG="$RUNNER_TEMP/docker-ghcr"
+          mkdir -p "$DOCKER_CONFIG"
+          echo "DOCKER_CONFIG=$DOCKER_CONFIG" >> "$GITHUB_ENV"
+          echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      # Pull dulu, baru ganti container: kalau pull gagal, versi lama tetap jalan.
+      - name: Pull image
         run: |
           cd "$APP_DIR"
-          docker compose build app
+          docker compose pull app
 
       # --wait: tunggu healthcheck app (GET /login) lolos; gagal = job merah.
       - name: Start containers
@@ -68,5 +124,13 @@ jobs:
           docker compose ps
           docker compose logs --tail 40 app || true
 
+      # Hanya image sisko-levelup yang tidak dipakai container (versi lama); image project lain
+      # di VPS ini tidak disentuh. Versi lama tetap ada di GHCR kalau perlu rollback.
       - name: Prune old images
-        run: docker image prune -f
+        run: |
+          docker image prune -af --filter "label=org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY"
+          docker image prune -f
+
+      - name: Logout from GHCR
+        if: always()
+        run: docker logout ghcr.io || true

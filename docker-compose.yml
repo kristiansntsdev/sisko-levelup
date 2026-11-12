@@ -1,6 +1,8 @@
 services:
   app:
-    build: .
+    # Image di-build GitHub Actions (deploy-vps.yml) dan di-push ke GHCR; VPS hanya pull.
+    # Jangan build di VPS: RAM-nya tidak cukup untuk `next build`.
+    image: ghcr.io/kristiansntsdev/sisko-levelup:${IMAGE_TAG:-latest}
     restart: unless-stopped
     env_file: .env.production
     environment:
