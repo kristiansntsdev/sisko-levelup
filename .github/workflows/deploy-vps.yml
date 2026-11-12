@@ -1,0 +1,74 @@
+name: Deploy VPS (Production)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Satu deploy dalam satu waktu; push berikutnya antre, tidak memotong build yang sedang jalan.
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
+
+env:
+  APP_DIR: /var/www/sisko-levelup
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: [self-hosted, Linux, sisko]
+    timeout-minutes: 30
+    steps:
+      # Deploy langsung di APP_DIR (bukan workspace runner) supaya .env dan .env.production
+      # yang hanya ada di VPS tetap dipakai. --ff-only: gagal kalau ada perubahan lokal yang
+      # bentrok, tidak pernah menimpa pekerjaan yang belum di-commit di VPS.
+      - name: Pull latest code
+        run: |
+          cd "$APP_DIR"
+          git fetch origin
+          git merge --ff-only "$GITHUB_SHA"
+
+      - name: Check env files
+        run: |
+          cd "$APP_DIR"
+          for f in .env .env.production; do
+            [ -s "$f" ] || { echo "::error::$APP_DIR/$f belum ada di VPS"; exit 1; }
+          done
+
+      # Build dulu, baru ganti container: kalau build gagal, versi lama tetap jalan.
+      - name: Build image
+        run: |
+          cd "$APP_DIR"
+          docker compose build app
+
+      # --wait: tunggu healthcheck app (GET /login) lolos; gagal = job merah.
+      - name: Start containers
+        run: |
+          cd "$APP_DIR"
+          docker compose up -d --remove-orphans --wait --wait-timeout 300
+
+      # Migrasi DB idempotent, sama dengan production.yml tapi dipanggil dari dalam container
+      # (tanpa lewat domain publik). INTERNAL_API_SECRET dibaca dari .env.production.
+      - name: Run prod-migrate
+        run: |
+          cd "$APP_DIR"
+          docker compose exec -T app node -e '
+            fetch("http://127.0.0.1:38417/api/internal/prod-migrate", {
+              method: "POST",
+              headers: { Authorization: "Bearer " + process.env.INTERNAL_API_SECRET },
+              signal: AbortSignal.timeout(90000),
+            }).then(async (r) => {
+              console.log(await r.text());
+              if (r.status !== 200) { console.log("::error::prod-migrate HTTP " + r.status); process.exit(1); }
+            }).catch((e) => { console.log("::error::prod-migrate " + e.message); process.exit(1); });
+          '
+
+      - name: Show status
+        if: always()
+        run: |
+          cd "$APP_DIR"
+          docker compose ps
+          docker compose logs --tail 40 app || true
+
+      - name: Prune old images
+        run: docker image prune -f
