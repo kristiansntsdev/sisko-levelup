@@ -1,25 +1,18 @@
 services:
   app:
-    build: .
+    # Image di-build GitHub Actions (deploy-vps.yml) dan di-push ke GHCR; VPS hanya pull.
+    # Jangan build di VPS: RAM-nya tidak cukup untuk `next build`.
+    image: ghcr.io/kristiansntsdev/sisko-levelup:${IMAGE_TAG:-latest}
     restart: unless-stopped
     env_file: .env.production
     environment:
       TZ: Asia/Jakarta
-    # Tidak ada port yang dibuka ke host: hanya cloudflared yang mengakses lewat jaringan Docker.
-    expose:
-      - "38417"
+    # Hanya di localhost: diakses cloudflared milik host (published route → http://localhost:38417),
+    # tidak terbuka ke internet.
+    ports:
+      - "127.0.0.1:38417:38417"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:38417/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?isi TUNNEL_TOKEN di .env (token dari Cloudflare Zero Trust)}
-    depends_on:
-      app:
-        condition: service_healthy

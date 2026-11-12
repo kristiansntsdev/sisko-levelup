@@ -15,7 +15,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Tidak ada query DB saat build; env runtime tidak perlu di sini.
 ENV BUILD_STANDALONE=1
-RUN pnpm build
+# lib/db.ts mem-parse DATABASE_URL saat modul di-import ("Collecting page data"), jadi build butuh
+# URL yang valid walau tidak pernah dikoneksi. Placeholder hanya untuk perintah ini, tidak ikut ke
+# image runner; nilai asli datang dari .env.production saat container jalan.
+RUN DATABASE_URL="mysql://build:build@127.0.0.1:3306/build" pnpm build
 
 FROM node:24-slim AS runner
 WORKDIR /app
