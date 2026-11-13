@@ -28,8 +28,13 @@ function pathMatches(pathname: string, match: string[]) {
   return match.some((m) => pathname === m || (m !== '/dashboard' && pathname.startsWith(m + '/')))
 }
 
+/** Dashboard pengurus (ALK/BRIM kota + v2, BRIM Nasional): shell sendiri, tanpa nav anggota. */
 function isKotaAdminPath(pathname: string) {
-  return pathname.startsWith('/dashboard/kota') || pathname.startsWith('/dashboard/v2/kota')
+  return (
+    pathname.startsWith('/dashboard/kota') ||
+    pathname.startsWith('/dashboard/v2/kota') ||
+    pathname.startsWith('/dashboard/v2/brim')
+  )
 }
 
 /** Hide bottom nav on full-screen flows and admin kota dashboards. */

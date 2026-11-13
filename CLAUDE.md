@@ -37,7 +37,7 @@ app/
 components/landing/zine.tsx           # Design system landing (kertas lecek, torn, Strip, Tape, doodle, ZineHeader/Footer) dipakai / + /about
   login/page.tsx                      # PWA login: email+password (peserta lalu pengurus) + Google
   daftar/page.tsx                     # Pendaftaran v2 Gen Z (intro → form live MemberCard → kartu jadi); Google baru → completeRegistration
-  dashboard/layout.tsx                # MemberShell bottom nav (skip /dashboard/kota + /dashboard/v2/kota)
+  dashboard/layout.tsx                # MemberShell bottom nav (skip /dashboard/kota, /dashboard/v2/kota, /dashboard/v2/brim)
   dashboard/page.tsx                  # Beranda PWA warna landing (kertas, hitam, merah, kuning) + font kartu: MemberCard, level, menu, tiket
 lib/beta.ts                           # BETA_WEWORSHIP ('weworship') + WEWORSHIP_URL (tile WeWorship)
 lib/actions/beta.ts                   # getBetaAksesSaya: fitur beta anggota login dari tabel beta_akses (diisi developer langsung di DB)
