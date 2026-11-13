@@ -5,6 +5,7 @@ import { auth } from '@/auth'
 import { db } from '@/lib/db'
 import { isNasionalAdmin, NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
 import { resolveEventPosterUrl } from '@/lib/event-poster'
+import { ownPesertaId, requireOwnPeserta } from '@/lib/peserta-session'
 import {
   needsNasionalTicketApproval,
   ticketStatusOnRequest,
@@ -41,8 +42,10 @@ export async function updatePesertaProfile(
     alamat?: string
   },
 ) {
+  // Server Action = endpoint publik; id dari client wajib = peserta login (VA-001).
+  const self = await requireOwnPeserta(idPeserta)
   await db.peserta.update({
-    where: { id_peserta: idPeserta },
+    where: { id_peserta: self },
     data: {
       nama: data.nama,
       nowa: data.nowa,
@@ -78,6 +81,8 @@ export type CreateRegistrasiResult =
 const LIVE_TICKET = ['pending', 'confirmed', 'attend', 'absence'] as const
 
 export async function createRegistrasi(idPeserta: number, idEvent: number): Promise<CreateRegistrasiResult> {
+  // Juga dipanggil dari onlineCheckin dengan id sesi; cek ini tetap lolos di sana.
+  await requireOwnPeserta(idPeserta)
   const event = await db.event.findUnique({
     where: { id_event: idEvent },
     select: { id_cabang: true, nama_event: true, wwtype: true, targetjumlah: true },
@@ -147,6 +152,7 @@ export async function checkRegistrasi(idPeserta: number, idEvent: number): Promi
 
 /** Any non-cancelled ticket for this event (confirmed / attend / absence). */
 export async function findRegistrasiId(idPeserta: number, idEvent: number): Promise<number | null> {
+  if ((await ownPesertaId(idPeserta)) == null) return null
   const row = await db.registrasi.findFirst({
     where: {
       id_peserta: idPeserta,
@@ -167,6 +173,7 @@ export async function findRegistrasiMine(
   idPeserta: number,
   idEvent: number,
 ): Promise<RegistrasiMine | null> {
+  if ((await ownPesertaId(idPeserta)) == null) return null
   const row = await db.registrasi.findFirst({
     where: {
       id_peserta: idPeserta,
@@ -383,6 +390,8 @@ export async function getRegistrasiDetail(idRegistrasi: number) {
     },
   })
   if (!row) return null
+  // Tiket orang lain tidak boleh terbaca lewat id_registrasi (VA-001).
+  if ((await ownPesertaId(row.id_peserta)) == null) return null
   const tgl = row.event?.tglevent
   const tglSelesai = row.event?.tgleventselesai
   return {
@@ -419,6 +428,7 @@ export async function getRegistrasiDetail(idRegistrasi: number) {
 }
 
 export async function getRegistrasiByPeserta(idPeserta: number) {
+  if ((await ownPesertaId(idPeserta)) == null) return []
   // tgleventselesai is DATE (UTC midnight tanggal WIB). Bandingkan dengan
   // tanggal WIB hari ini supaya hari-H event belum dianggap lewat.
   await db.registrasi.updateMany({

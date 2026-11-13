@@ -67,6 +67,7 @@ lib/alk-auth.ts                       # requireAlkPengurus for v2 kota ALK
 lib/actions/pengurus-kota.ts          # list/create/update pengurus per kota (Anggota tab)
 lib/actions/pwa-auth.ts               # loginEmailPassword, completeRegistration, dual session
 lib/pengurus-session.ts               # pengurus cookie helpers; alk dest → /dashboard/v2/kota/alk
+lib/peserta-session.ts                # sessionPesertaId / ownPesertaId / requireOwnPeserta: id peserta dari client wajib = sesi login (VA-001 BOLA)
 lib/pwa-member.ts                     # tier labels + MemberCardData
 components/alk-v2/                    # Sekretariat v2 shell + screens (gaya kertas, real data); event-approve = Approval Event; event-detail = Detail Event
   dashboard/v2/kota/alk/event/[id]/   # Detail Event v2 (EventDetailV2Client, proto KEventScreen)
@@ -147,6 +148,10 @@ components/air-hidup/                 # Air Hidup UI (props in, callback out): b
 components/demo-preview/air-hidup.tsx # Container demo Air Hidup (useAir, AirBerandaDemo); shim: shim/actions/air-hidup.ts (tabel ww_laporan/ww_amin di db.ts)
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-11-13]
+- **Fix VA-001 (BOLA) pentest**: Server Action anggota yang menerima `idPeserta` dari client dulu tanpa cek pemilik, jadi anggota login bisa membaca/mengubah data anggota lain dengan mengganti id (`updatePesertaProfile`, `getPesertaById`, `getMemberCardForPeserta`, `createRegistrasi`, `findRegistrasiId`, `findRegistrasiMine`, `getRegistrasiByPeserta`, `getRegistrasiDetail` lewat `id_registrasi`). Sekarang semua lewat `lib/peserta-session.ts`: pembaca → `null`/`[]`, penulis → throw kalau id ≠ sesi. Signature tidak berubah (halaman + demo shim tetap). Aturan: action baru yang menerima id anggota wajib pakai helper ini, atau jangan terima id sama sekali (pola `updateFotoPeserta`)
+- Belum diubah (di luar VA-001): `updatePesertaProfile` masih menerima `kotalevelup` untuk alur `/daftar`, jadi anggota bisa mengganti kotanya sendiri lewat action ini tanpa approval pindah kota
 
 ## Recent Updates [2026-11-12]
 - **CI/CD ke VPS**: `.github/workflows/deploy-vps.yml`, push ke `main` (atau Run workflow manual) = deploy production di VPS (alasan pindah: Vercel kena limit Fluid Active CPU). Runner self-hosted khusus repo ini di `~/actions-runner-sisko` (label `sisko`; runner `~/actions-runner` milik pphtgd-official, tidak bisa dipakai repo lain). Deploy di tempat, `/var/www/sisko-levelup`: `git merge --ff-only` (gagal kalau ada perubahan lokal yang bentrok, tidak menimpa) → `docker compose pull app` → `up -d --wait` (healthcheck `/login`) → prod-migrate dipanggil dari dalam container → prune image. Image TIDAK di-build di VPS: job `build` (runner GitHub `ubuntu-latest`) build + push ke `ghcr.io/kristiansntsdev/sisko-levelup` (tag `<sha>` dan `latest`), job `deploy` (runner `sisko`) login GHCR pakai `GITHUB_TOKEN` (tanpa PAT, kredensial di folder temp runner) lalu pull tag `IMAGE_TAG=<sha>`. `docker-compose.yml` pakai `image:` (default `latest`), tanpa `build:`

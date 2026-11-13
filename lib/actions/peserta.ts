@@ -1,10 +1,14 @@
 'use server'
 import { db } from '@/lib/db'
+import { ownPesertaId } from '@/lib/peserta-session'
 import { memberCardFromPeserta } from '@/lib/pwa-member'
 
+/** Hanya data anggota yang login sendiri; id milik orang lain → null (VA-001). */
 export async function getPesertaById(idPeserta: number) {
+  const self = await ownPesertaId(idPeserta)
+  if (self == null) return null
   return db.peserta.findUnique({
-    where: { id_peserta: idPeserta },
+    where: { id_peserta: self },
     select: {
       id_peserta: true,
       usercode: true,
@@ -30,9 +34,12 @@ export async function getPesertaById(idPeserta: number) {
   })
 }
 
+/** Kartu anggota yang login sendiri; id milik orang lain → null (VA-001). */
 export async function getMemberCardForPeserta(idPeserta: number) {
+  const self = await ownPesertaId(idPeserta)
+  if (self == null) return null
   const p = await db.peserta.findUnique({
-    where: { id_peserta: idPeserta },
+    where: { id_peserta: self },
     select: {
       usercode: true,
       nama: true,
