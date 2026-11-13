@@ -10,8 +10,14 @@
  * Di Vercel bisa juga di-set lewat environment variable `TZ`; pin di sini
  * supaya perilakunya sama di lokal tanpa perlu ingat setting dashboard.
  */
-export function register() {
+export async function register() {
   process.env.TZ = 'Asia/Jakarta'
+
+  const [Sentry, { sentryOptions }] = await Promise.all([
+    import('@sentry/nextjs'),
+    import('@/lib/sentry'),
+  ])
+  Sentry.init(sentryOptions)
 }
 
 /**
@@ -36,6 +42,9 @@ export async function onRequestError(
     revalidateReason?: string
   },
 ) {
+  const Sentry = await import('@sentry/nextjs')
+  Sentry.captureRequestError(error, request, context)
+
   if (process.env.NEXT_RUNTIME !== 'nodejs') return
   if ((error as { __appLogWritten?: boolean } | null)?.__appLogWritten) return
 
