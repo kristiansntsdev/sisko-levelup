@@ -149,6 +149,9 @@ components/demo-preview/air-hidup.tsx # Container demo Air Hidup (useAir, AirBer
 task.md                               # Blocked: approval sampai core
 ```
 
+## Recent Updates [2026-11-16]
+- Form Monitoring Teknis: kolom baru **Total Hadir** (kolom J, setelah Absensi SISKO) = peserta unik di tabel `absen` per event (bukan registrasi; multi-sesi tidak dihitung dobel, sama dengan `countHadirUnik`). Kolom ID tersembunyi pindah P → Q. Tab lama dimigrasi otomatis oleh `migrateLayout_` di Apps Script; **paste ulang `scripts/monitoring-sheet.gs`** ke spreadsheet, lalu Run `syncSisko`
+
 ## Recent Updates [2026-11-13]
 - **Fix VA-001 (BOLA) pentest**: Server Action anggota yang menerima `idPeserta` dari client dulu tanpa cek pemilik, jadi anggota login bisa membaca/mengubah data anggota lain dengan mengganti id (`updatePesertaProfile`, `getPesertaById`, `getMemberCardForPeserta`, `createRegistrasi`, `findRegistrasiId`, `findRegistrasiMine`, `getRegistrasiByPeserta`, `getRegistrasiDetail` lewat `id_registrasi`). Sekarang semua lewat `lib/peserta-session.ts`: pembaca → `null`/`[]`, penulis → throw kalau id ≠ sesi. Signature tidak berubah (halaman + demo shim tetap). Aturan: action baru yang menerima id anggota wajib pakai helper ini, atau jangan terima id sama sekali (pola `updateFotoPeserta`)
 - Belum diubah (di luar VA-001): `updatePesertaProfile` masih menerima `kotalevelup` untuk alur `/daftar`, jadi anggota bisa mengganti kotanya sendiri lewat action ini tanpa approval pindah kota

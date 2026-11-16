@@ -58,12 +58,15 @@ export async function GET(req: NextRequest) {
 
   const [cabangRows, absenInt, absenLegacy, reimburseRows, dokRows] = await Promise.all([
     db.cabang.findMany({ where: { id_cabang: { in: cabangIds } }, select: { id_cabang: true, namacabang: true } }),
-    db.absen.groupBy({ by: ['id_event_int'], where: { id_event_int: { in: ids } }, _count: { _all: true } }),
+    // Peserta unik per event (multi-sesi = banyak baris absen per peserta), bukan registrasi
+    db.absen.findMany({
+      where: { id_event_int: { in: ids } },
+      select: { id_event_int: true, id_peserta: true, id_peserta_int: true },
+    }),
     // Baris absen lama hanya punya id_event (TEXT)
-    db.absen.groupBy({
-      by: ['id_event'],
+    db.absen.findMany({
       where: { id_event_int: null, id_event: { in: idStrs } },
-      _count: { _all: true },
+      select: { id_event: true, id_peserta: true, id_peserta_int: true },
     }),
     db.reimburse.findMany({ where: { id_event: { in: idStrs } }, select: { id_event: true, laporan: true, laporan_at: true } }),
     db.dokumentasi_kota.findMany({
@@ -73,14 +76,16 @@ export async function GET(req: NextRequest) {
   ])
 
   const cabangName = new Map(cabangRows.map((c) => [String(c.id_cabang), c.namacabang]))
-  const absenCount = new Map<number, number>()
-  for (const r of absenInt) {
-    if (r.id_event_int != null) absenCount.set(r.id_event_int, r._count._all)
+  const hadirSet = new Map<number, Set<number>>()
+  const addHadir = (idEvent: number, r: { id_peserta: string; id_peserta_int: number | null }) => {
+    const pid = r.id_peserta_int ?? parseInt(r.id_peserta, 10)
+    if (Number.isNaN(pid)) return
+    const set = hadirSet.get(idEvent)
+    if (set) set.add(pid)
+    else hadirSet.set(idEvent, new Set([pid]))
   }
-  for (const r of absenLegacy) {
-    const id = Number(r.id_event)
-    absenCount.set(id, (absenCount.get(id) ?? 0) + r._count._all)
-  }
+  for (const r of absenInt) if (r.id_event_int != null) addHadir(r.id_event_int, r)
+  for (const r of absenLegacy) addHadir(Number(r.id_event), r)
   const lpjByEvent = new Map<number, { link: string; at: Date | null }>()
   for (const r of reimburseRows) {
     const id = Number(r.id_event)
@@ -101,7 +106,7 @@ export async function GET(req: NextRequest) {
         created_at: e.created_at,
         suratpemberitahuan: e.suratpemberitahuan,
         flyerUrl: resolveEventPosterUrl(e.posterevent, e.image_url),
-        jumlahAbsen: absenCount.get(e.id_event) ?? 0,
+        jumlahAbsen: hadirSet.get(e.id_event)?.size ?? 0,
         lpj: lpjByEvent.get(e.id_event) ?? null,
         dokumentasi: dokByEvent.get(e.id_event) ?? null,
       },

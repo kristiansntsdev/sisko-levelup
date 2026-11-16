@@ -13,17 +13,17 @@
  *   Tahun berjalan + tahun depan dibuat otomatis kalau ada event; tahun lalu disinkron
  *   selama tabnya ada. Tahun lain: menu SISKO → Sinkron tab tahun…
  * - Kolom manual — Berita Acara ☑, Flyer ☑, Keterangan — disimpan per ID event
- *   (kolom P, tersembunyi), jadi tidak hilang walau baris bergeser.
+ *   (kolom Q, tersembunyi), jadi tidak hilang walau baris bergeser.
  * - Ketepatan upload (H-14) / laporan (H+14) yang tidak tercatat di SISKO (event lama)
  *   juga dipertahankan dari centang manual.
  * - Sheet hanya ditulis kalau datanya berubah (version history tidak penuh).
  */
 
 var FIRST_ROW = 4; // baris 1 judul, 2-3 header
-var NCOLS = 16;
+var NCOLS = 17;
 var C = {
   NO: 1, KOTA: 2, TANGGAL: 3, UPLOAD: 4, LINK_BA: 5, BA: 6, LINK_FLYER: 7, FLYER: 8,
-  ABSEN: 9, LAPORAN: 10, LPJ: 11, DOK: 12, LINK_DOK: 13, KET: 14, CATATAN: 15, ID: 16,
+  ABSEN: 9, HADIR: 10, LAPORAN: 11, LPJ: 12, DOK: 13, LINK_DOK: 14, KET: 15, CATATAN: 16, ID: 17,
 };
 var CHECKBOX_COLS = [C.UPLOAD, C.BA, C.FLYER, C.ABSEN, C.LAPORAN, C.LPJ, C.DOK];
 var TEXT_COLS = [C.KOTA, C.TANGGAL, C.LINK_BA, C.LINK_FLYER, C.LINK_DOK, C.KET, C.CATATAN];
@@ -102,8 +102,9 @@ function syncYear_(year, allowCreate) {
     if (!sections.length) return;
     sheet = ss.insertSheet(String(year));
     setupSheet_(sheet, year);
-  } else if (sheet.getRange(2, C.ID).getValue() !== MARKER) {
-    throw new Error('Tab "' + year + '" sudah ada tapi bukan buatan script ini. Ganti nama tab lama dulu.');
+  } else {
+    migrateLayout_(sheet);
+    if (sheet.getRange(2, C.ID).getValue() !== MARKER) throw new Error('Tab "' + year + '" sudah ada tapi bukan buatan script ini. Ganti nama tab lama dulu.');
   }
 
   var lastRow = sheet.getLastRow();
@@ -136,6 +137,7 @@ function syncYear_(year, allowCreate) {
         e.linkFlyer,
         keep(C.FLYER),
         e.absensi,
+        e.totalHadir,
         e.laporanTepatWaktu === null ? keep(C.LAPORAN) : e.laporanTepatWaktu,
         e.lpj,
         e.dokumentasi,
@@ -153,6 +155,24 @@ function syncYear_(year, allowCreate) {
   sheet.getRange(1, C.CATATAN).setValue(
     'Diperbarui ' + Utilities.formatDate(new Date(), 'Asia/Jakarta', 'dd/MM/yyyy HH:mm') + ' WIB'
   );
+}
+
+// Tab lama (16 kolom, tanpa Total Hadir): sisipkan kolom Total Hadir setelah Absensi SISKO
+function migrateLayout_(sheet) {
+  if (sheet.getRange(2, C.ID - 1).getValue() !== MARKER) return;
+  sheet.insertColumnAfter(C.ABSEN);
+  sheet.getRange(2, C.HADIR, 2, 1)
+    .merge()
+    .setValue('Total Hadir')
+    .setFontFamily('Arial')
+    .setFontWeight('bold')
+    .setFontSize(9)
+    .setBackground('#d9d9d9')
+    .setHorizontalAlignment('center')
+    .setVerticalAlignment('middle')
+    .setWrap(true)
+    .setBorder(true, true, true, true, true, true);
+  sheet.setColumnWidth(C.HADIR, 70);
 }
 
 function sameGrid_(a, b) {
@@ -211,7 +231,7 @@ function writeGrid_(sheet, grid, isMonth) {
     .setVerticalAlignment('middle')
     .setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP)
     .setBorder(true, true, true, true, true, true);
-  [C.NO].concat(CHECKBOX_COLS).forEach(function (c) {
+  [C.NO, C.HADIR].concat(CHECKBOX_COLS).forEach(function (c) {
     sheet.getRange(FIRST_ROW, c, n, 1).setHorizontalAlignment('center');
   });
   sheet.getRange(FIRST_ROW, C.KET, n, 1).setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP);
@@ -235,12 +255,12 @@ function setupSheet_(sheet, year) {
 
   var h2 = [
     'No', 'LevelUP Kota', 'Tanggal Event', 'Ketepatan waktu pengunggahan event (minimal H-14)',
-    'Kelengkapan dokumen yang diunggah', '', '', '', 'Absensi SISKO',
+    'Kelengkapan dokumen yang diunggah', '', '', '', 'Absensi SISKO', 'Total Hadir',
     'Ketepatan waktu dan kelengkapan laporan pasca acara (maksimal H+14)',
     'Kelengkapan dokumen yang diunggah', '', '', 'Keterangan', 'Catatan Sistem', MARKER,
   ];
   var h3 = [
-    '', '', '', '', 'Link Berita Acara', 'Berita Acara', 'Flyer', 'Flyer', '', '',
+    '', '', '', '', 'Link Berita Acara', 'Berita Acara', 'Flyer', 'Flyer', '', '', '',
     'LPJ', 'Dokumentasi', 'Link Dokumentasi', '', '', '',
   ];
   sheet.getRange(2, 1, 2, NCOLS)
@@ -253,7 +273,7 @@ function setupSheet_(sheet, year) {
     .setVerticalAlignment('middle')
     .setWrap(true)
     .setBorder(true, true, true, true, true, true);
-  [C.NO, C.KOTA, C.TANGGAL, C.UPLOAD, C.ABSEN, C.LAPORAN, C.KET, C.CATATAN, C.ID].forEach(function (c) {
+  [C.NO, C.KOTA, C.TANGGAL, C.UPLOAD, C.ABSEN, C.HADIR, C.LAPORAN, C.KET, C.CATATAN, C.ID].forEach(function (c) {
     sheet.getRange(2, c, 2, 1).merge();
   });
   sheet.getRange(2, C.LINK_BA, 1, 4).merge();
@@ -262,7 +282,7 @@ function setupSheet_(sheet, year) {
   var widths = {};
   widths[C.NO] = 35; widths[C.KOTA] = 130; widths[C.TANGGAL] = 140; widths[C.UPLOAD] = 110;
   widths[C.LINK_BA] = 120; widths[C.BA] = 75; widths[C.LINK_FLYER] = 120; widths[C.FLYER] = 60;
-  widths[C.ABSEN] = 75; widths[C.LAPORAN] = 130; widths[C.LPJ] = 60; widths[C.DOK] = 85;
+  widths[C.ABSEN] = 75; widths[C.HADIR] = 70; widths[C.LAPORAN] = 130; widths[C.LPJ] = 60; widths[C.DOK] = 85;
   widths[C.LINK_DOK] = 120; widths[C.KET] = 180; widths[C.CATATAN] = 320; widths[C.ID] = 70;
   Object.keys(widths).forEach(function (c) { sheet.setColumnWidth(Number(c), widths[c]); });
   sheet.setFrozenRows(3);

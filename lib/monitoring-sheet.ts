@@ -25,6 +25,7 @@ export type MonitoringInput = {
   created_at: Date | null
   suratpemberitahuan: string
   flyerUrl: string
+  /** Peserta unik yang absen (bukan registrasi) */
   jumlahAbsen: number
   lpj: { link: string; at: Date | null } | null
   dokumentasi: { link: string; at: Date | null } | null
@@ -39,6 +40,8 @@ export type MonitoringRow = {
   linkBeritaAcara: string
   linkFlyer: string
   absensi: boolean
+  /** Total hadir = peserta unik di tabel absen */
+  totalHadir: number
   laporanTepatWaktu: boolean | null
   lpj: boolean
   dokumentasi: boolean
@@ -88,7 +91,7 @@ export function buildMonitoringRow(input: MonitoringInput, now: Date = new Date(
   }
 
   const selesai = daysBetween(input.tgleventselesai, today) > 0
-  if (input.jumlahAbsen > 0) catatan.push(`${input.jumlahAbsen} absen`)
+  if (input.jumlahAbsen > 0) catatan.push(`${input.jumlahAbsen} hadir`)
   else if (selesai) catatan.push('Belum ada absensi')
 
   const lpjLink = input.lpj?.link.trim() ?? ''
@@ -125,6 +128,7 @@ export function buildMonitoringRow(input: MonitoringInput, now: Date = new Date(
     linkBeritaAcara: input.suratpemberitahuan.trim(),
     linkFlyer: input.flyerUrl,
     absensi: input.jumlahAbsen > 0,
+    totalHadir: input.jumlahAbsen,
     laporanTepatWaktu,
     lpj: !!lpjLink,
     dokumentasi: !!dokLink,
