@@ -157,22 +157,14 @@ function syncYear_(year, allowCreate) {
   );
 }
 
-// Tab lama (16 kolom, tanpa Total Hadir): sisipkan kolom Total Hadir setelah Absensi SISKO
+// Tab lama (16 kolom, tanpa Total Hadir): sisipkan kolom, lalu tulis ulang header supaya
+// merge + judul pasti sejajar dengan kolom (tidak bergantung pada geseran merge lama)
 function migrateLayout_(sheet) {
-  if (sheet.getRange(2, C.ID - 1).getValue() !== MARKER) return;
-  sheet.insertColumnAfter(C.ABSEN);
-  sheet.getRange(2, C.HADIR, 2, 1)
-    .merge()
-    .setValue('Total Hadir')
-    .setFontFamily('Arial')
-    .setFontWeight('bold')
-    .setFontSize(9)
-    .setBackground('#d9d9d9')
-    .setHorizontalAlignment('center')
-    .setVerticalAlignment('middle')
-    .setWrap(true)
-    .setBorder(true, true, true, true, true, true);
-  sheet.setColumnWidth(C.HADIR, 70);
+  if (sheet.getRange(2, C.ID - 1).getValue() === MARKER) sheet.insertColumnAfter(C.ABSEN);
+  if (sheet.getRange(2, C.ID).getValue() !== MARKER) return;
+  if (sheet.getRange(2, C.HADIR).getValue() === 'Total Hadir' &&
+      sheet.getRange(2, C.LAPORAN).getValue() !== 'Total Hadir') return;
+  writeHeader_(sheet);
 }
 
 function sameGrid_(a, b) {
@@ -253,6 +245,27 @@ function setupSheet_(sheet, year) {
     .setHorizontalAlignment('center');
   sheet.getRange(1, C.CATATAN).setFontSize(8).setFontStyle('italic').setFontColor('#666666');
 
+  writeHeader_(sheet);
+
+  var widths = {};
+  widths[C.NO] = 35; widths[C.KOTA] = 130; widths[C.TANGGAL] = 140; widths[C.UPLOAD] = 110;
+  widths[C.LINK_BA] = 120; widths[C.BA] = 75; widths[C.LINK_FLYER] = 120; widths[C.FLYER] = 60;
+  widths[C.ABSEN] = 75; widths[C.HADIR] = 70; widths[C.LAPORAN] = 130; widths[C.LPJ] = 60; widths[C.DOK] = 85;
+  widths[C.LINK_DOK] = 120; widths[C.KET] = 180; widths[C.CATATAN] = 320; widths[C.ID] = 70;
+  Object.keys(widths).forEach(function (c) { sheet.setColumnWidth(Number(c), widths[c]); });
+  sheet.setFrozenRows(3);
+  sheet.hideColumns(C.ID);
+
+  // Kolom otomatis: peringatan kalau diedit manual (akan tertimpa sync berikutnya)
+  var protection = sheet.protect().setDescription('Diisi otomatis dari SISKO').setWarningOnly(true);
+  protection.setUnprotectedRanges(MANUAL_COLS.map(function (c) {
+    return sheet.getRange(FIRST_ROW, c, sheet.getMaxRows() - FIRST_ROW + 1, 1);
+  }));
+}
+
+function writeHeader_(sheet) {
+  var hdr = sheet.getRange(2, 1, 2, NCOLS);
+  hdr.breakApart();
   var h2 = [
     'No', 'LevelUP Kota', 'Tanggal Event', 'Ketepatan waktu pengunggahan event (minimal H-14)',
     'Kelengkapan dokumen yang diunggah', '', '', '', 'Absensi SISKO', 'Total Hadir',
@@ -278,19 +291,7 @@ function setupSheet_(sheet, year) {
   });
   sheet.getRange(2, C.LINK_BA, 1, 4).merge();
   sheet.getRange(2, C.LPJ, 1, 3).merge();
-
   var widths = {};
-  widths[C.NO] = 35; widths[C.KOTA] = 130; widths[C.TANGGAL] = 140; widths[C.UPLOAD] = 110;
-  widths[C.LINK_BA] = 120; widths[C.BA] = 75; widths[C.LINK_FLYER] = 120; widths[C.FLYER] = 60;
-  widths[C.ABSEN] = 75; widths[C.HADIR] = 70; widths[C.LAPORAN] = 130; widths[C.LPJ] = 60; widths[C.DOK] = 85;
-  widths[C.LINK_DOK] = 120; widths[C.KET] = 180; widths[C.CATATAN] = 320; widths[C.ID] = 70;
+  widths[C.HADIR] = 70;
   Object.keys(widths).forEach(function (c) { sheet.setColumnWidth(Number(c), widths[c]); });
-  sheet.setFrozenRows(3);
-  sheet.hideColumns(C.ID);
-
-  // Kolom otomatis: peringatan kalau diedit manual (akan tertimpa sync berikutnya)
-  var protection = sheet.protect().setDescription('Diisi otomatis dari SISKO').setWarningOnly(true);
-  protection.setUnprotectedRanges(MANUAL_COLS.map(function (c) {
-    return sheet.getRange(FIRST_ROW, c, sheet.getMaxRows() - FIRST_ROW + 1, 1);
-  }));
 }

@@ -91,8 +91,7 @@ export function buildMonitoringRow(input: MonitoringInput, now: Date = new Date(
   }
 
   const selesai = daysBetween(input.tgleventselesai, today) > 0
-  if (input.jumlahAbsen > 0) catatan.push(`${input.jumlahAbsen} hadir`)
-  else if (selesai) catatan.push('Belum ada absensi')
+  if (input.jumlahAbsen === 0 && selesai) catatan.push('Belum ada absensi')
 
   const lpjLink = input.lpj?.link.trim() ?? ''
   const dokLink = input.dokumentasi?.link.trim() ?? ''
