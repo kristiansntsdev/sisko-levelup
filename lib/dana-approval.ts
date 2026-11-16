@@ -23,11 +23,16 @@ import { levelupKota } from '@/components/documents/_shared/document-header'
 export async function countHadirUnik(idEvent: number): Promise<number> {
   const absen = await db.absen.findMany({
     where: { OR: [{ id_event_int: idEvent }, { id_event: String(idEvent) }] },
-    select: { id_peserta: true, id_peserta_int: true },
+    select: { id_peserta: true, id_peserta_int: true, email: true },
   })
-  return new Set(
-    absen.map((a) => a.id_peserta_int ?? parseInt(a.id_peserta, 10)).filter((n) => n != null && !isNaN(n)),
-  ).size
+  const keys = new Set<string>()
+  for (const a of absen) {
+    // id peserta 0/kosong ("PESERTA #0") dibedakan lewat email
+    const pid = a.id_peserta_int ?? parseInt(a.id_peserta, 10)
+    const key = Number.isInteger(pid) && pid > 0 ? `p${pid}` : `e${a.email.trim().toLowerCase()}`
+    if (key !== 'e') keys.add(key)
+  }
+  return keys.size
 }
 
 export type DanaTokens = { token_korwil: string; token_pic: string; token_keuangan: string }

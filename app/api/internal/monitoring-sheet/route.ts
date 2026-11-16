@@ -61,12 +61,12 @@ export async function GET(req: NextRequest) {
     // Peserta unik per event (multi-sesi = banyak baris absen per peserta), bukan registrasi
     db.absen.findMany({
       where: { id_event_int: { in: ids } },
-      select: { id_event_int: true, id_peserta: true, id_peserta_int: true },
+      select: { id_event_int: true, id_peserta: true, id_peserta_int: true, email: true },
     }),
     // Baris absen lama hanya punya id_event (TEXT)
     db.absen.findMany({
       where: { id_event_int: null, id_event: { in: idStrs } },
-      select: { id_event: true, id_peserta: true, id_peserta_int: true },
+      select: { id_event: true, id_peserta: true, id_peserta_int: true, email: true },
     }),
     db.reimburse.findMany({ where: { id_event: { in: idStrs } }, select: { id_event: true, laporan: true, laporan_at: true } }),
     db.dokumentasi_kota.findMany({
@@ -76,13 +76,15 @@ export async function GET(req: NextRequest) {
   ])
 
   const cabangName = new Map(cabangRows.map((c) => [String(c.id_cabang), c.namacabang]))
-  const hadirSet = new Map<number, Set<number>>()
-  const addHadir = (idEvent: number, r: { id_peserta: string; id_peserta_int: number | null }) => {
+  const hadirSet = new Map<number, Set<string>>()
+  const addHadir = (idEvent: number, r: { id_peserta: string; id_peserta_int: number | null; email: string }) => {
+    // Baris absen tanpa id peserta valid (0/kosong, tampil "PESERTA #0") dibedakan lewat email
     const pid = r.id_peserta_int ?? parseInt(r.id_peserta, 10)
-    if (Number.isNaN(pid)) return
+    const key = Number.isInteger(pid) && pid > 0 ? `p${pid}` : `e${r.email.trim().toLowerCase()}`
+    if (key === 'e') return
     const set = hadirSet.get(idEvent)
-    if (set) set.add(pid)
-    else hadirSet.set(idEvent, new Set([pid]))
+    if (set) set.add(key)
+    else hadirSet.set(idEvent, new Set([key]))
   }
   for (const r of absenInt) if (r.id_event_int != null) addHadir(r.id_event_int, r)
   for (const r of absenLegacy) addHadir(Number(r.id_event), r)
