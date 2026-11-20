@@ -14,8 +14,8 @@ export type PenggunaPush = {
   peran: string
   perangkat: Partial<Record<Platform, number>>
   jumlah: number
-  sejak: string
-  terakhir: string
+  /** Epoch ms; ditampilkan di zona perangkat oleh <Waktu>. */
+  sejakMs: number
   terakhirMs: number
 }
 
@@ -32,11 +32,8 @@ export const PENGGUNA_PER_HALAMAN = 50
 
 const PERAN_LABEL = { sekretariat: 'Sekretariat Nasional', 'brim-nasional': 'BRIM Nasional', 'alk-kota': 'ALK Kota', 'brim-kota': 'BRIM Kota' } as const
 
-type Grup = { id: number; n: bigint | number; sejak: Date; terakhir: Date; ua: string | null }
-
-function wib(d: Date): string {
-  return new Date(d).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-}
+/** sejak / terakhir = UNIX_TIMESTAMP(): kolom DATETIME diisi jam dinding server MySQL (WIB), driver membacanya sebagai UTC. */
+type Grup = { id: number; n: bigint | number; sejak: bigint | number; terakhir: bigint | number; ua: string | null }
 
 function hitungPlatform(ua: string | null): Partial<Record<Platform, number>> {
   const out: Partial<Record<Platform, number>> = {}
@@ -73,11 +70,11 @@ export async function daftarPengguna(f: FilterPengguna): Promise<{
   try {
     const [gp, gg, ringkasan, cabang] = await Promise.all([
       db.$queryRaw<Grup[]>`
-        SELECT id_peserta AS id, COUNT(*) AS n, MIN(created_at) AS sejak, MAX(updated_at) AS terakhir,
+        SELECT id_peserta AS id, COUNT(*) AS n, UNIX_TIMESTAMP(MIN(created_at)) AS sejak, UNIX_TIMESTAMP(MAX(updated_at)) AS terakhir,
                GROUP_CONCAT(user_agent SEPARATOR '\n') AS ua
         FROM push_subscription WHERE id_peserta IS NOT NULL GROUP BY id_peserta`,
       db.$queryRaw<Grup[]>`
-        SELECT id_pengurus AS id, COUNT(*) AS n, MIN(created_at) AS sejak, MAX(updated_at) AS terakhir,
+        SELECT id_pengurus AS id, COUNT(*) AS n, UNIX_TIMESTAMP(MIN(created_at)) AS sejak, UNIX_TIMESTAMP(MAX(updated_at)) AS terakhir,
                GROUP_CONCAT(user_agent SEPARATOR '\n') AS ua
         FROM push_subscription WHERE id_pengurus IS NOT NULL GROUP BY id_pengurus`,
       ringkasanPush(),
@@ -114,9 +111,8 @@ export async function daftarPengguna(f: FilterPengguna): Promise<{
         peran: USERLEVEL_LABEL[p.userlevel] ?? 'Tamu',
         perangkat: hitungPlatform(g.ua),
         jumlah: Number(g.n),
-        sejak: wib(g.sejak),
-        terakhir: wib(g.terakhir),
-        terakhirMs: new Date(g.terakhir).getTime(),
+        sejakMs: Number(g.sejak) * 1000,
+        terakhirMs: Number(g.terakhir) * 1000,
       })
     }
     for (const g of gg) {
@@ -135,9 +131,8 @@ export async function daftarPengguna(f: FilterPengguna): Promise<{
         peran: peran ? PERAN_LABEL[peran] : (p.divisi ?? 'Pengurus').toUpperCase(),
         perangkat: hitungPlatform(g.ua),
         jumlah: Number(g.n),
-        sejak: wib(g.sejak),
-        terakhir: wib(g.terakhir),
-        terakhirMs: new Date(g.terakhir).getTime(),
+        sejakMs: Number(g.sejak) * 1000,
+        terakhirMs: Number(g.terakhir) * 1000,
       })
     }
 

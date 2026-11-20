@@ -226,14 +226,17 @@ export type ItemPengumuman = {
   perangkat: number
   terkirim: number
   gagal: number
-  waktu: string
+  /** Epoch ms (waktu sebenarnya); ditampilkan di zona perangkat oleh <Waktu>. */
+  waktuMs: number
 }
 
 export const PER_HALAMAN = 20
 
-function waktuWib(d: Date): string {
-  return new Date(d).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-}
+/**
+ * created_at diisi DEFAULT CURRENT_TIMESTAMP = jam dinding zona server MySQL (WIB), tapi driver membacanya sebagai
+ * UTC (meleset 7 jam). UNIX_TIMESTAMP() menafsirkan nilai itu dengan zona server, jadi hasilnya epoch yang benar.
+ */
+const epochMs = (ts: bigint | number | string | null) => Number(ts ?? 0) * 1000
 
 /** Daftar pengumuman terbaru dulu. `siap: false` = tabel belum ada (sebelum prod-migrate). */
 export async function daftarPengumuman(halaman: number): Promise<{ siap: boolean; items: ItemPengumuman[]; total: number }> {
@@ -244,9 +247,10 @@ export async function daftarPengumuman(halaman: number): Promise<{ siap: boolean
       db.$queryRaw<
         {
           id_pengumuman: number; judul: string; isi: string; image_url: string; url: string; target_tipe: string; target_nilai: string
-          cocok: number; perangkat: number; terkirim: number; gagal: number; created_at: Date
+          cocok: number; perangkat: number; terkirim: number; gagal: number; ts: bigint | number
         }[]
-      >`SELECT id_pengumuman, judul, isi, image_url, url, target_tipe, target_nilai, cocok, perangkat, terkirim, gagal, created_at
+      >`SELECT id_pengumuman, judul, isi, image_url, url, target_tipe, target_nilai, cocok, perangkat, terkirim, gagal,
+               UNIX_TIMESTAMP(created_at) AS ts
         FROM pengumuman WHERE target_tipe <> ${TIPE_AKTIVASI}
         ORDER BY id_pengumuman DESC LIMIT ${PER_HALAMAN} OFFSET ${offset}`,
       db.$queryRaw<{ n: bigint | number }[]>`SELECT COUNT(*) AS n FROM pengumuman WHERE target_tipe <> ${TIPE_AKTIVASI}`,
@@ -266,7 +270,7 @@ export async function daftarPengumuman(halaman: number): Promise<{ siap: boolean
         perangkat: Number(r.perangkat),
         terkirim: Number(r.terkirim),
         gagal: Number(r.gagal),
-        waktu: waktuWib(r.created_at),
+        waktuMs: epochMs(r.ts),
       })),
     }
   } catch (err) {
@@ -310,12 +314,13 @@ export type PengumumanAnggota = {
   gambar: string | null
   /** Tautan lanjutan yang diisi pengirim; null = tidak ada. */
   url: string | null
-  waktu: string
+  /** Epoch ms; ditampilkan di zona perangkat oleh <Waktu>. */
+  waktuMs: number
   /** Dikirim kurang dari 3 hari lalu. */
   baru: boolean
 }
 
-type RowAnggota = { id_pengumuman: number; judul: string; isi: string; image_url: string; url: string; target_tipe: string; target_json: string | null; created_at: Date }
+type RowAnggota = { id_pengumuman: number; judul: string; isi: string; image_url: string; url: string; target_tipe: string; target_json: string | null; ts: bigint | number }
 
 function bolehLihat(r: RowAnggota, v: PembacaPengumuman): boolean {
   if (v.admin) return true
@@ -332,14 +337,15 @@ function bolehLihat(r: RowAnggota, v: PembacaPengumuman): boolean {
 }
 
 function keAnggota(r: RowAnggota): PengumumanAnggota {
+  const ms = epochMs(r.ts)
   return {
     id: Number(r.id_pengumuman),
     judul: r.judul,
     isi: r.isi,
     gambar: r.image_url || null,
     url: r.url || null,
-    waktu: new Date(r.created_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-    baru: Date.now() - new Date(r.created_at).getTime() < 3 * 24 * 60 * 60 * 1000,
+    waktuMs: ms,
+    baru: Date.now() - ms < 3 * 24 * 60 * 60 * 1000,
   }
 }
 
@@ -347,7 +353,7 @@ function keAnggota(r: RowAnggota): PengumumanAnggota {
 export async function pengumumanUntuk(v: PembacaPengumuman, limit = 30): Promise<PengumumanAnggota[]> {
   try {
     const rows = await db.$queryRaw<RowAnggota[]>`
-      SELECT id_pengumuman, judul, isi, image_url, url, target_tipe, target_json, created_at
+      SELECT id_pengumuman, judul, isi, image_url, url, target_tipe, target_json, UNIX_TIMESTAMP(created_at) AS ts
       FROM pengumuman ORDER BY id_pengumuman DESC LIMIT 300`
     return rows.filter((r) => bolehLihat(r, v)).slice(0, limit).map(keAnggota)
   } catch (err) {
@@ -361,7 +367,7 @@ export async function pengumumanDetail(id: number, v: PembacaPengumuman): Promis
   if (!Number.isInteger(id) || id <= 0) return null
   try {
     const rows = await db.$queryRaw<RowAnggota[]>`
-      SELECT id_pengumuman, judul, isi, image_url, url, target_tipe, target_json, created_at
+      SELECT id_pengumuman, judul, isi, image_url, url, target_tipe, target_json, UNIX_TIMESTAMP(created_at) AS ts
       FROM pengumuman WHERE id_pengumuman = ${id} LIMIT 1`
     const r = rows[0]
     return r && bolehLihat(r, v) ? keAnggota(r) : null

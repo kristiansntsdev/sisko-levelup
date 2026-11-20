@@ -74,6 +74,7 @@ const PATCHES = {
   ],
   'components/pwa/pengumuman.tsx': [
     ["from './pengumuman-dibaca'", "from '@/components/pwa/pengumuman-dibaca'"],
+    ["from './waktu'", "from '@/components/pwa/waktu'"],
   ],
   'app/dashboard/page.tsx': [
     ['import { getPendingSquadForMe, joinSquad, joinVolunteer }', 'import { getPendingSquadForMe, getPendingVolunteerForMe, joinSquad, joinVolunteer }'],

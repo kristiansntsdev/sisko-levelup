@@ -9,6 +9,7 @@ import type { PengumumanAnggota } from '@/lib/push/pengumuman'
 import { ANTON, BackBar, BTN, Chip, IconButton, LABEL, LIFTED, MONO, PANEL, PaperHeader, PaperMain, PRESS, Strip } from '@/components/pwa/paper-ui'
 import { Icon, Sheet } from '@/components/pwa/ui'
 import { useDibaca } from '@/components/pwa/pengumuman-dibaca'
+import { Waktu } from '@/components/pwa/waktu'
 
 const detailHref = (id: number) => `/demo-preview/dashboard/pengumuman/${id}`
 
@@ -31,7 +32,7 @@ function Baris({ p, belum, onOpen }: { p: PengumumanAnggota; belum: boolean; onO
       <Chip name="megaphone" className={belum ? 'bg-[#e02a2f] text-white' : 'bg-[#161616]/[.07]'} />
       <span className="min-w-0 flex-1">
         <span className="flex items-center justify-between gap-2">
-          <span className={`${LABEL} min-w-0 truncate text-[9px] text-[#57534e]`}>{p.waktu}</span>
+          <Waktu ms={p.waktuMs} className={`${LABEL} min-w-0 truncate text-[9px] text-[#57534e]`} />
           {p.baru && <span className={`${LABEL} shrink-0 -rotate-3 bg-[#161616] text-[#ffd83d] px-1.5 py-0.5 text-[8px] font-bold`}>Baru</span>}
         </span>
         <span className="mt-1 flex items-start gap-1.5">
@@ -209,8 +210,8 @@ export function PengumumanDetailView({ item, pembaca }: { item: PengumumanAnggot
             </figure>
           )}
           <div className="px-5 pt-5 space-y-4">
-            <p className={`${LABEL} text-[10px] font-bold text-[#57534e]`}>{item.waktu} WIB</p>
-            <h1 className={`${ANTON} text-[32px] leading-[1.05] tracking-[.01em] break-words`}>{item.judul}</h1>
+            <Waktu ms={item.waktuMs} gaya="panjang" className={`${LABEL} block text-[10px] font-bold text-[#57534e]`} />
+            <h1 className={`${ANTON} text-[32px] leading-[1.05] tracking-[.01em] break-words text-[#161616]`}>{item.judul}</h1>
             <section className={`${PANEL} p-4`}>
               <p className={`${MONO} text-[14px] leading-relaxed whitespace-pre-line break-words`}>{item.isi}</p>
             </section>

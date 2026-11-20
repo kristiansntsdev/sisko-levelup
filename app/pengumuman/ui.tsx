@@ -11,6 +11,7 @@ import {
   ANTON, BTN_SHELL, ERROR, LABEL, LIFTED, LogoChip, MONO, PANEL, PAPER_INPUT, PaperNote, RED, StickerLabel, Strip, TORN_EDGE,
 } from '@/components/pwa/paper-ui'
 import { Icon } from '@/components/pwa/ui'
+import { Waktu } from '@/components/pwa/waktu'
 
 /** Halaman admin desktop-first (tetap responsif): lebar penuh sampai 6xl, bukan kolom HP 430px. */
 export const WRAP = 'mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8'
@@ -221,7 +222,7 @@ export function DaftarPengumuman({
               const persen = p.perangkat ? Math.round((p.terkirim / p.perangkat) * 100) : 0
               return (
                 <li key={p.id} className={`${KOLOM_PENGUMUMAN} px-5 py-4 flex flex-col gap-3 hover:bg-[#efe8da]/40 transition`}>
-                  <p className={`${MONO} text-[12px] text-[#57534e] lg:pt-1`}>{p.waktu}</p>
+                  <Waktu ms={p.waktuMs} className={`${MONO} block text-[12px] text-[#57534e] lg:pt-1`} />
                   <div className="flex gap-4 min-w-0">
                     {p.gambar && (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -408,11 +409,11 @@ export function PenggunaAktif({
                 </div>
                 <p className={`${MONO} text-[11.5px] text-[#57534e]`}>
                   <span className="lg:hidden">Sejak </span>
-                  {u.sejak}
+                  <Waktu ms={u.sejakMs} />
                 </p>
                 <p className={`${MONO} text-[11.5px] text-[#57534e]`}>
                   <span className="lg:hidden">Terakhir </span>
-                  {u.terakhir}
+                  <Waktu ms={u.terakhirMs} />
                 </p>
                 <div className="col-span-2 lg:col-span-1 lg:text-right">
                   {u.tipe === 'anggota' ? (
