@@ -71,9 +71,16 @@ export function PengumumanBell() {
       if (document.visibilityState === 'visible') muat()
     }
     document.addEventListener('visibilitychange', saatTampil)
+    // Push masuk saat app terbuka (service worker mengirim 'push-received'): angka lonceng langsung bertambah.
+    const saatPush = (e: MessageEvent) => {
+      if ((e.data as { type?: string } | null)?.type === 'push-received') muat()
+    }
+    const sw = 'serviceWorker' in navigator ? navigator.serviceWorker : null
+    sw?.addEventListener('message', saatPush)
     return () => {
       batal = true
       document.removeEventListener('visibilitychange', saatTampil)
+      sw?.removeEventListener('message', saatPush)
     }
   }, [])
 

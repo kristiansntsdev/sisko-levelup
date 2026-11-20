@@ -14,5 +14,5 @@ export async function pembacaSaatIni(): Promise<PembacaPengumuman | null> {
   if (!idPeserta && !pengurus && !admin) return null
   const p = idPeserta ? await db.peserta.findUnique({ where: { id_peserta: idPeserta }, select: { kotalevelup: true } }) : null
   const kunci = idPeserta ? `p${idPeserta}` : pengurus ? `g${pengurus.id_pengurus}` : 'admin'
-  return { idPeserta, kota: p?.kotalevelup ?? null, pengurus: Boolean(pengurus), admin, kunci }
+  return { idPeserta, kota: p?.kotalevelup ?? null, pengurus: Boolean(pengurus), idPengurus: pengurus?.id_pengurus ?? null, admin, kunci }
 }

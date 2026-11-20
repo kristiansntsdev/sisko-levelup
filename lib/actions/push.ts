@@ -2,11 +2,10 @@
 import { cookies } from 'next/headers'
 import { db } from '@/lib/db'
 import { sessionPesertaId } from '@/lib/peserta-session'
-import { getPengurusFromCookie, pengurusDest } from '@/lib/pengurus-session'
+import { getPengurusFromCookie } from '@/lib/pengurus-session'
 import { endpointDiizinkan } from '@/lib/push/endpoint'
 import { lepasPeserta, PUSH_COOKIE } from '@/lib/push/lepas'
-import { kirimKeIdSub } from '@/lib/push/send'
-import { pesanAktif } from '@/lib/push/target'
+import { kirimPengumumanAktivasi } from '@/lib/push/pengumuman'
 
 /** Kunci publik VAPID dibaca saat runtime (image di-build tanpa env produksi, jadi bukan NEXT_PUBLIC_*). */
 export async function getPushConfig(): Promise<{ publicKey: string | null }> {
@@ -59,9 +58,8 @@ export async function simpanPush(input: SimpanPushInput, opts?: { uji?: boolean 
       const nama = idPeserta
         ? ((await db.peserta.findUnique({ where: { id_peserta: idPeserta }, select: { nama: true } }))?.nama ?? '')
         : (pengurus?.nama ?? '')
-      const url = idPeserta ? '/dashboard' : (pengurusDest(pengurus?.divisi, pengurus?.username) ?? '/dashboard')
-      const hasil = await kirimKeIdSub(Number(idSub), { ...pesanAktif(nama), url, tag: 'notifikasi-aktif', renotify: true })
-      uji = hasil.terkirim > 0
+      // Disimpan sebagai pengumuman pribadi: muncul di lonceng + daftar, tap membuka halamannya.
+      uji = await kirimPengumumanAktivasi({ idSub: Number(idSub), idPeserta, idPengurus, nama })
     } catch (err) {
       console.error('[push] notifikasi percobaan gagal', err)
     }

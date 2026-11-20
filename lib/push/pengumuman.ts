@@ -1,8 +1,8 @@
 /** Pengumuman push manual (halaman /pengumuman): pilih penerima (gabungan), kirim, catat. Hanya server. */
 import { db } from '@/lib/db'
 import { Prisma } from '@/lib/generated/client'
-import { berlangganan, kirimPush, TTL_BIASA } from './send'
-import { nomorInti, nomorSama } from './target'
+import { berlangganan, kirimKeIdSub, kirimPush, TTL_BIASA } from './send'
+import { nomorInti, nomorSama, pesanAktif } from './target'
 export { MAKS_ISI, MAKS_JUDUL } from './target'
 
 /** Penerima gabungan (union, tanpa dobel). `semua` mengabaikan yang lain dan juga mencakup perangkat pengurus. */
@@ -36,7 +36,10 @@ export function halamanPengumuman(id: number): string {
 }
 
 /** Disimpan di pengumuman.target_json: siapa yang boleh melihat halaman pengumuman. */
-type TargetTersimpan = { semua: boolean; kota: string[]; peserta: number[] }
+type TargetTersimpan = { semua: boolean; kota: string[]; peserta: number[]; pengurus?: number[] }
+
+/** Pengumuman pribadi otomatis saat notifikasi diaktifkan: tidak tampil di daftar admin. */
+export const TIPE_AKTIVASI = 'aktivasi'
 
 export type AnggotaOpsi = { id: number; label: string; punyaPerangkat: boolean }
 
@@ -187,6 +190,30 @@ function ringkasTarget(t: TargetPengumuman): { tipe: string; nilai: string } {
   return { tipe: 'pilihan', nilai: bagian.join(', ') }
 }
 
+/**
+ * Notifikasi percobaan saat pengguna menekan Aktifkan, disimpan sebagai pengumuman pribadi: muncul di lonceng +
+ * daftar pengumuman orang itu, dan tap notifikasinya membuka halamannya. Dikirim ke HP itu saja (idSub).
+ * Anggota → target peserta; HP yang hanya membawa sesi pengurus → target pengurus.
+ */
+export async function kirimPengumumanAktivasi(a: { idSub: number; idPeserta: number | null; idPengurus: number | null; nama: string }): Promise<boolean> {
+  const pesan = pesanAktif(a.nama)
+  const tersimpan: TargetTersimpan = a.idPeserta
+    ? { semua: false, kota: [], peserta: [a.idPeserta] }
+    : { semua: false, kota: [], peserta: [], pengurus: a.idPengurus ? [a.idPengurus] : [] }
+  const id = await db.$transaction(async (tx) => {
+    await tx.$executeRaw`
+      INSERT INTO pengumuman (judul, isi, image_url, url, target_tipe, target_nilai, target_json, cocok)
+      VALUES (${pesan.title}, ${pesan.body}, '', '', ${TIPE_AKTIVASI}, '', ${JSON.stringify(tersimpan)}, 1)`
+    const r = await tx.$queryRaw<{ id: bigint | number }[]>`SELECT LAST_INSERT_ID() AS id`
+    return Number(r[0]?.id)
+  })
+  const hasil = await kirimKeIdSub(a.idSub, { ...pesan, url: halamanPengumuman(id), tag: 'notifikasi-aktif', renotify: true })
+  await db.$executeRaw`
+    UPDATE pengumuman SET perangkat = ${hasil.terkirim + hasil.gagal}, terkirim = ${hasil.terkirim}, gagal = ${hasil.gagal}
+    WHERE id_pengumuman = ${id}`.catch((e: unknown) => console.error('[pengumuman] catat aktivasi gagal', e))
+  return hasil.terkirim > 0
+}
+
 export type ItemPengumuman = {
   id: number
   judul: string
@@ -220,8 +247,9 @@ export async function daftarPengumuman(halaman: number): Promise<{ siap: boolean
           cocok: number; perangkat: number; terkirim: number; gagal: number; created_at: Date
         }[]
       >`SELECT id_pengumuman, judul, isi, image_url, url, target_tipe, target_nilai, cocok, perangkat, terkirim, gagal, created_at
-        FROM pengumuman ORDER BY id_pengumuman DESC LIMIT ${PER_HALAMAN} OFFSET ${offset}`,
-      db.$queryRaw<{ n: bigint | number }[]>`SELECT COUNT(*) AS n FROM pengumuman`,
+        FROM pengumuman WHERE target_tipe <> ${TIPE_AKTIVASI}
+        ORDER BY id_pengumuman DESC LIMIT ${PER_HALAMAN} OFFSET ${offset}`,
+      db.$queryRaw<{ n: bigint | number }[]>`SELECT COUNT(*) AS n FROM pengumuman WHERE target_tipe <> ${TIPE_AKTIVASI}`,
     ])
     return {
       siap: true,
@@ -269,6 +297,7 @@ export type PembacaPengumuman = {
   idPeserta: number | null
   kota: string | null
   pengurus: boolean
+  idPengurus: number | null
   admin: boolean
   /** Kunci status dibaca di HP: p{id peserta}, g{id pengurus}, atau admin. */
   kunci: string
@@ -297,8 +326,9 @@ function bolehLihat(r: RowAnggota, v: PembacaPengumuman): boolean {
     t = null
   }
   if (r.target_tipe === 'semua' || t?.semua) return v.idPeserta != null || v.pengurus
-  if (!t || v.idPeserta == null) return false
-  return t.peserta.includes(v.idPeserta) || (v.kota != null && t.kota.includes(kotaKey(v.kota)))
+  if (!t) return false
+  if (v.idPeserta != null && (t.peserta.includes(v.idPeserta) || (v.kota != null && t.kota.includes(kotaKey(v.kota))))) return true
+  return v.idPengurus != null && (t.pengurus ?? []).includes(v.idPengurus)
 }
 
 function keAnggota(r: RowAnggota): PengumumanAnggota {

@@ -104,7 +104,7 @@ export function usePush(): PushApi {
       }
       setInfo(
         uji
-          ? 'Notifikasi percobaan sudah dikirim ke HP ini. Kalau tidak muncul dalam 1 menit, matikan lalu aktifkan lagi.'
+          ? 'Notifikasi percobaan sudah dikirim ke HP ini dan tersimpan di Pengumuman (lonceng Beranda). Kalau tidak muncul dalam 1 menit, matikan lalu aktifkan lagi.'
           : 'Notifikasi aktif, tapi notifikasi percobaan belum terkirim. Coba matikan lalu aktifkan lagi.',
       )
       setState('on')
