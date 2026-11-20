@@ -11,6 +11,8 @@ import {
   ticketStatusOnRequest,
 } from '@/lib/registrasi-status'
 import { setActor } from '@/lib/request-context'
+import { pushAlert } from '@/lib/push/events'
+import { BRIM_BASE } from '@/components/brim-v2/paths'
 import {
   formatTelegramMessage,
   notifyTelegram,
@@ -122,6 +124,18 @@ export async function createRegistrasi(idPeserta: number, idEvent: number): Prom
       select: { nama: true },
     })
     const pending = status === 'pending'
+    // Satu event = satu notifikasi yang terus diganti (tag), bukan satu per pendaftar.
+    void pushAlert({
+      judul: pending ? 'Pengajuan Tiket' : 'Registrasi',
+      isi: `${peserta?.nama ?? 'Peserta'} · ${event.nama_event}`,
+      tag: `reg-${idEvent}`,
+      url: (peran) =>
+        pending && peran === 'sekretariat'
+          ? '/dashboard/v2/kota/alk/tiket-nasional'
+          : peran === 'brim-nasional'
+            ? `${BRIM_BASE}/event/${idEvent}`
+            : `/dashboard/v2/kota/alk/event/${idEvent}`,
+    })
     void notifyTelegram(
       formatTelegramMessage({
         action: pending ? 'Pengajuan Tiket' : 'Registrasi',
@@ -320,6 +334,13 @@ export async function approveTiketNasional(idRegistrasi: number): Promise<Result
     data: { status: 'confirmed' },
   })
 
+  void pushAlert({
+    judul: 'Tiket Disetujui',
+    isi: `${row.peserta?.nama ?? row.id_peserta} · ${row.event?.nama_event ?? ''}`,
+    tag: `reg-${row.id_event}`,
+    url: (peran) =>
+      peran === 'brim-nasional' ? `${BRIM_BASE}/event/${row.id_event}` : `/dashboard/v2/kota/alk/event/${row.id_event}`,
+  })
   void notifyTelegram(
     formatTelegramMessage({
       action: 'Tiket Disetujui',

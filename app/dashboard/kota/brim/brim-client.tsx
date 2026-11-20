@@ -7,6 +7,7 @@ import { logoutPengurus } from '@/app/admin/actions'
 import { savePengaturanKota } from '@/lib/actions/brim'
 import type { EventDashboard } from '@/lib/actions/event'
 import { hasBrimRejectNote } from '@/lib/event-approval'
+import { PUSH_LABEL, PushSheet, usePush } from '@/components/pwa/push'
 
 interface Pengaturan {
   logo: string
@@ -309,6 +310,8 @@ function SettingsTab({ pengaturan }: { pengaturan: Pengaturan | null }) {
   const [state, action, pending] = useActionState(savePengaturanKota, null)
   const [logoutPending, startLogout] = useTransition()
   const [logo, setLogo] = useState(pengaturan?.logo ?? '')
+  const push = usePush()
+  const [pushOpen, setPushOpen] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { setLogo(pengaturan?.logo ?? '') }, [pengaturan])
@@ -377,6 +380,16 @@ function SettingsTab({ pengaturan }: { pengaturan: Pengaturan | null }) {
         >
           {pending ? 'Menyimpan…' : 'Simpan'}
         </button>
+
+        <button
+          type="button"
+          onClick={() => setPushOpen(true)}
+          className="w-full py-3.5 px-4 rounded-2xl border border-border flex items-center justify-between text-sm font-semibold"
+        >
+          <span>Notifikasi HP</span>
+          <span className="text-muted font-medium">{PUSH_LABEL[push.state]}</span>
+        </button>
+        <PushSheet push={push} open={pushOpen} onClose={() => setPushOpen(false)} />
 
         <div className="pt-2 border-t border-border">
           <button

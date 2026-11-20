@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signOut, useSession } from '@/components/demo-preview/shim/session'
 import { getPesertaById, getMemberCardForPeserta } from '@/components/demo-preview/shim/actions/peserta'
+import { lepasPushPeserta } from '@/components/demo-preview/shim/actions/push'
+import { PUSH_LABEL, PushSheet, usePush } from '@/components/demo-preview/clone/pwa/push'
 import { getActiveSessions, loginPengurusFromPwa, logoutPengurusKeepMember } from '@/components/demo-preview/shim/actions/pwa-auth'
 import { USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
 import { ANTON, BTN, Chip, InfoRow, LABEL, LIFTED, MONO, PANEL, PaperMain, PRESS, ROWS, StickerLabel, Strip } from '@/components/pwa/paper-ui'
@@ -37,6 +39,8 @@ export default function ProfilPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [soon, setSoon] = useState<string | null>(null)
+  const push = usePush()
+  const [pushOpen, setPushOpen] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -156,6 +160,18 @@ export default function ProfilPage() {
             <span className={`${ANTON} flex-1 text-[16px] tracking-[.02em]`}>Feedback App</span>
             <Icon name="chevron" className="w-5 h-5 shrink-0" sw={2} />
           </button>
+          <button
+            type="button"
+            onClick={() => setPushOpen(true)}
+            className="w-full flex items-center gap-3 py-3 text-left"
+          >
+            <Chip name="bell" className="bg-[#161616] text-[#ffd83d]" />
+            <span className="flex-1 min-w-0">
+              <span className={`${ANTON} block text-[16px] tracking-[.02em]`}>Notifikasi HP</span>
+              <span className={`${MONO} block text-[11px] text-[#44403c] mt-0.5`}>{PUSH_LABEL[push.state]}</span>
+            </span>
+            <Icon name="chevron" className="w-5 h-5 shrink-0" sw={2} />
+          </button>
           {soonMenu.map((m) => (
             <button
               key={m.t}
@@ -172,13 +188,19 @@ export default function ProfilPage() {
 
         <button
           type="button"
-          onClick={() => void signOut({ callbackUrl: pengurusOn && pengurusDest ? pengurusDest : '/demo-preview/login' })}
+          onClick={() =>
+            void lepasPushPeserta()
+              .catch(() => {})
+              .finally(() => signOut({ callbackUrl: pengurusOn && pengurusDest ? pengurusDest : '/demo-preview/login' }))
+          }
           className={`w-full px-4 py-3 flex items-center gap-3 text-left ${PANEL} ${PRESS}`}
         >
           <Chip name="logout" className="ring-2 ring-[#c21f24] text-[#c21f24]" />
           <span className={`${ANTON} flex-1 text-[16px] tracking-[.02em] text-[#c21f24]`}>Keluar akun anggota</span>
         </button>
       </div>
+
+      <PushSheet push={push} open={pushOpen} onClose={() => setPushOpen(false)} />
 
       <Sheet open={pengurusSheet} onClose={() => setPengurusSheet(false)}>
         <form onSubmit={submitPengurus}>

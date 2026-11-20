@@ -4,6 +4,7 @@
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { logoutPengurus } from '@/components/demo-preview/shim/admin-actions'
+import { PUSH_LABEL, PushSheet, usePush } from '@/components/demo-preview/clone/pwa/push'
 import { BTN, MONO, PANEL, PaperHeader, PaperMain, PRESS, ROWS, Strip, ANTON } from '@/components/pwa/paper-ui'
 import { ALK_BASE, BlackStrip, Icon, Row, Sheet, SheetHead, SoonTag, Toast } from './ui'
 
@@ -19,6 +20,8 @@ export function LainnyaClient({
   const router = useRouter()
   const [soon, setSoon] = useState<string | null>(null)
   const [regOpen, setRegOpen] = useState(false)
+  const push = usePush()
+  const [pushOpen, setPushOpen] = useState(false)
   const [pending, startLogout] = useTransition()
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
   const regLink = `${origin}/daftar`
@@ -36,6 +39,7 @@ export function LainnyaClient({
           <Row icon="box" title="Nama PIC" sub="Alokasi stok & klaim" right={<SoonTag />} onClick={() => flash('Alokasi stok & klaim')} />
           <Row icon="receipt" tint="gold" title="ALK" sub="Status dana per kegiatan" onClick={() => router.push(`${ALK_BASE}/reimburse`)} />
           <Row icon="box" title="Kas Kota" sub="Catat pemasukan & pengeluaran" onClick={() => router.push(`${ALK_BASE}/kas`)} />
+          <Row icon="bell" tint="gold" title="Notifikasi HP" sub={PUSH_LABEL[push.state]} onClick={() => setPushOpen(true)} />
           <Row icon="link" title="VOL" sub="Pendaftaran anggota baru" onClick={() => setRegOpen(true)} />
           <Row icon="chat" tint="gold" title="Pengaduan ke Pusat" sub="Laporkan kendala ke admin pusat" right={<SoonTag />} onClick={() => flash('Pengaduan ke Pusat')} />
         </div>
@@ -69,6 +73,7 @@ export function LainnyaClient({
           <Strip>Salin Link</Strip>
         </button>
       </Sheet>
+      <PushSheet push={push} open={pushOpen} onClose={() => setPushOpen(false)} />
       <Toast msg={soon ? (soon.startsWith('Link') ? soon : `Fitur belum tersedia: ${soon}`) : null} />
     </PaperMain>
   )

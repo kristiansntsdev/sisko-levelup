@@ -13,6 +13,7 @@ import { BETA_WEWORSHIP, WEWORSHIP_URL } from '@/lib/beta'
 import { LEVEL_STEPS, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
 import { PEMURIDAN_AKTIF } from '@/lib/pemuridan'
 import { ID_FONTS, MemberCard } from '@/components/pwa/member-card'
+import { PushCard } from '@/components/pwa/push'
 import {
   ANTON,
   BTN,
@@ -312,6 +313,8 @@ export default function DashboardPage() {
             onSquad={() => setSquadOpen(true)}
           />
         )}
+
+        <PushCard />
 
         <div className="grid grid-cols-3 gap-2.5">
           {FEATURES.map((f, i) => (

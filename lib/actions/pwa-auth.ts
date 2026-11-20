@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { db } from '@/lib/db'
+import { lepasPengurus } from '@/lib/push/lepas'
 import {
   clearPengurusCookie,
   getPengurusFromCookie,
@@ -59,6 +60,7 @@ export async function loginPengurusFromPwa(
 
 /** Logout pengurus cookie; stay on member home if peserta session exists. */
 export async function logoutPengurusKeepMember() {
+  await lepasPengurus()
   await clearPengurusCookie()
   const session = await auth()
   if (session?.user?.idPeserta) redirect('/dashboard')

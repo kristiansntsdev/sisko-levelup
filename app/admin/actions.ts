@@ -1,6 +1,7 @@
 'use server'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
+import { lepasPengurus } from '@/lib/push/lepas'
 import {
   clearPengurusCookie,
   pengurusDest,
@@ -30,6 +31,7 @@ export async function loginPengurus(
 }
 
 export async function logoutPengurus() {
+  await lepasPengurus()
   await clearPengurusCookie()
   redirect('/login')
 }

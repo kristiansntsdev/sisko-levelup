@@ -66,6 +66,12 @@ export async function getAirKotaSaya(): Promise<{ kota: KotaAir; isPic: boolean;
   return { kota, isPic: me.userlevel === '4', popup }
 }
 
+/** Bar air tiap kota hanya untuk LevelUP Pusat (userlevel 5). */
+export async function bolehLihatAirTiapKota(): Promise<boolean> {
+  const me = sessionPeserta()
+  return !!me && String(me.userlevel) === '5'
+}
+
 export async function tandaiPopup(stage: AirStage): Promise<void> {
   const me = sessionPeserta()
   if (!me) return

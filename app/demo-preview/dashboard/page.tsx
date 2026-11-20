@@ -16,6 +16,7 @@ import { LEVEL_STEPS, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-mem
 import { PEMURIDAN_AKTIF } from '@/lib/pemuridan'
 import { ID_FONTS, MemberCard } from '@/components/pwa/member-card'
 import { AirBerandaDemo, AirKabarDemo } from '@/components/demo-preview/air-hidup'
+import { PushCard } from '@/components/demo-preview/clone/pwa/push'
 import {
   ANTON,
   BTN,
@@ -328,6 +329,8 @@ export default function DashboardPage() {
             onSquad={() => setSquadOpen(true)}
           />
         )}
+
+        <PushCard />
 
         <div className="grid grid-cols-3 gap-2.5">
           {FEATURES.map((f, i) => (

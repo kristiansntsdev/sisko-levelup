@@ -11,8 +11,11 @@ import {
   isNasionalAdmin,
   isNasionalBrim,
   NASIONAL_EVENT_CABANG,
+  NASIONAL_MIN_USERLEVEL,
 } from '@/lib/event-cabang'
 import { appendNotenasional } from '@/lib/event-approval'
+import { pushAlert, pushEventTayang, pushFeedbackKota } from '@/lib/push/events'
+import { aktorPengurusId } from '@/lib/push/pengurus'
 import { eventEntryPath } from '@/lib/event-link'
 import { resolveEventPosterUrl } from '@/lib/event-poster'
 import {
@@ -130,9 +133,6 @@ function fmtEventRange(start: Date, end: Date) {
   const a = start.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', timeZone: 'UTC' })
   return `${a} - ${fmtEventDay(end)}`
 }
-
-/** Event wwtype=nasional hanya untuk Core ke atas (Core, PIC, LevelUP Pusat). */
-const NASIONAL_MIN_USERLEVEL = 3
 
 async function viewerSeesNasional() {
   const idPeserta = (await auth())?.user?.idPeserta
@@ -844,6 +844,17 @@ export async function createEvent(payload: EventFormPayload, flyer?: File | null
   if (flyerRev || jfeRev) await kickoffFlyerReview(id)
   if (baRev) await kickoffBeritaAcaraReview(id)
   if (!flyerRev && !jfeRev && !baRev) {
+    void aktorPengurusId().then((aktorId) =>
+      pushAlert({
+        judul: isNasionalEvent ? 'Event Nasional dibuat' : 'Event Kota dibuat',
+        isi: payload.nama_event,
+        tag: `alert-event-${id}`,
+        idEvent: id,
+        idCabang,
+        kotaJuga: true,
+        aktorId,
+      }),
+    )
     void notifyTelegram(
       formatTelegramMessage({
         tag: isNasionalEvent ? 'Event Nasional' : 'Event Kota',
@@ -971,6 +982,20 @@ export async function updateEvent(
   if (baRev && suratChanged) await kickoffBeritaAcaraReview(id)
 
   if (!flyerRev && !jfeRev && !baRev && isNasional) {
+    void Promise.all([
+      aktorPengurusId(),
+      db.event.findUnique({ where: { id_event: id }, select: { id_cabang: true } }),
+    ]).then(([aktorId, ev]) =>
+      pushAlert({
+        judul: 'Event Nasional diedit',
+        isi: payload.nama_event,
+        tag: `alert-event-${id}`,
+        idEvent: id,
+        idCabang: ev?.id_cabang,
+        kotaJuga: true,
+        aktorId,
+      }),
+    )
     void notifyTelegram(
       formatTelegramMessage({
         tag: 'Event Nasional',
@@ -1287,6 +1312,17 @@ export async function ajukanEvent(
   const poster = resolveEventPosterUrl(event.posterevent, event.image_url)
   const flyerStatus = flyerRec?.review?.status
   const baStatus = baRec?.review?.status
+  void aktorPengurusId().then((aktorId) =>
+    pushAlert({
+      judul: isNasionalEvent ? 'Event Nasional diajukan' : 'Event Kota diajukan',
+      isi: event.nama_event,
+      tag: `alert-event-${id}`,
+      idEvent: id,
+      idCabang: event.id_cabang,
+      kotaJuga: true,
+      aktorId,
+    }),
+  )
   void notifyTelegram(
     formatTelegramMessage({
       tag: isNasionalEvent ? 'Event Nasional' : 'Event Kota',
@@ -1554,6 +1590,16 @@ export async function approveEventAlkNasional(
     }),
     { buttons: eventActionButtons(idEvent) },
   )
+  const aktor = await aktorPengurusId()
+  void pushFeedbackKota({
+    idEvent,
+    idCabang: event.id_cabang,
+    namaEvent: event.nama_event,
+    oleh: 'Sekretariat Nasional',
+    keputusan: 'Disetujui',
+    aktorId: aktor,
+  })
+  void pushEventTayang(idEvent, aktor)
   return { ok: true }
 }
 
@@ -1604,6 +1650,16 @@ export async function approveEventBrimNasional(
     }),
     { buttons: eventActionButtons(idEvent) },
   )
+  const aktor = await aktorPengurusId()
+  void pushFeedbackKota({
+    idEvent,
+    idCabang: event.id_cabang,
+    namaEvent: event.nama_event,
+    oleh: 'BRIM Nasional',
+    keputusan: 'Disetujui',
+    aktorId: aktor,
+  })
+  void pushEventTayang(idEvent, aktor)
   return { ok: true }
 }
 
@@ -1645,6 +1701,16 @@ export async function rejectEventBrimNasional(
     }),
     { buttons: eventActionButtons(idEvent) },
   )
+  const aktor = await aktorPengurusId()
+  void pushFeedbackKota({
+    idEvent,
+    idCabang: existing.id_cabang,
+    namaEvent: existing.nama_event,
+    oleh: 'BRIM Nasional',
+    keputusan: 'Ditolak',
+    alasan: reason,
+    aktorId: aktor,
+  })
   return { ok: true }
 }
 
@@ -1685,5 +1751,15 @@ export async function rejectEventAlkNasional(
     }),
     { buttons: eventActionButtons(idEvent) },
   )
+  const aktor = await aktorPengurusId()
+  void pushFeedbackKota({
+    idEvent,
+    idCabang: existing.id_cabang,
+    namaEvent: existing.nama_event,
+    oleh: 'Sekretariat Nasional',
+    keputusan: 'Ditolak',
+    alasan: reason,
+    aktorId: aktor,
+  })
   return { ok: true }
 }

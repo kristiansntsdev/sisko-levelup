@@ -65,7 +65,7 @@ export function AirFeed({
   onAmin,
 }: {
   nasional: { orang: number; kota: number }
-  /** bar air tiap kota; hanya Core ke atas, kosong untuk anggota lain */
+  /** bar air tiap kota; hanya LevelUP Pusat (userlevel 5), kosong untuk anggota lain */
   kota?: KotaAir[]
   laporan: WwLaporan[]
   onAmin: (id: number) => void

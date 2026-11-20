@@ -479,6 +479,33 @@ export async function POST(req: NextRequest) {
     )
   `)
 
+  const addedPushSubscription = await ensureTable('push_subscription', `
+    CREATE TABLE push_subscription (
+      id_sub INT NOT NULL AUTO_INCREMENT,
+      endpoint VARCHAR(1024) CHARACTER SET ascii NOT NULL,
+      p256dh VARCHAR(255) NOT NULL,
+      auth VARCHAR(255) NOT NULL,
+      encoding VARCHAR(20) NOT NULL DEFAULT 'aes128gcm',
+      id_peserta INT NULL,
+      id_pengurus INT NULL,
+      user_agent VARCHAR(255) NOT NULL DEFAULT '',
+      created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id_sub),
+      UNIQUE KEY uq_push_endpoint (endpoint(512)),
+      KEY idx_push_peserta (id_peserta),
+      KEY idx_push_pengurus (id_pengurus)
+    )
+  `)
+  const addedPushKirim = await ensureTable('push_kirim', `
+    CREATE TABLE push_kirim (
+      kunci VARCHAR(160) NOT NULL,
+      created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (kunci),
+      KEY idx_push_kirim_created (created_at)
+    )
+  `)
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -523,6 +550,8 @@ export async function POST(req: NextRequest) {
     addedArtikelView,
     addedArtikelLike,
     addedArtikelKomentar,
+    addedPushSubscription,
+    addedPushKirim,
     addedReimburseSekre,
     addedReimburseBrim,
     reimburseReviewBackfill,

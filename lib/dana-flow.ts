@@ -8,6 +8,8 @@ import { notifyPphtgdDana, type DanaNotifyResult } from '@/lib/pphtgd-notify'
 import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
 import { danaBrimReviewLink, danaReviewLink, eventTelegramScope, formatTelegramMessage, notifyTelegram } from '@/lib/telegram'
 import { ALK_BASE } from '@/components/alk-v2/paths'
+import { pushAlert } from '@/lib/push/events'
+import { aktorPengurusId } from '@/lib/push/pengurus'
 import { BRIM_BASE } from '@/components/brim-v2/paths'
 
 export function revalidateDana(idEvent: number) {
@@ -80,6 +82,19 @@ export async function danaTelegram(view: DanaView, action: string, extra: Record
     tglevent: event.tglevent,
     tgleventselesai: event.tgleventselesai,
   })
+  // Padanan push untuk Sekretariat + BRIM Nasional. Push dana ke pengurus kota: lihat backlog.md.
+  void aktorPengurusId().then((aktorId) =>
+    pushAlert({
+      judul: `Dana: ${action}`,
+      isi: `${view.namaEvent} · ${rupiah(view.dana)}`,
+      tag: `dana-${view.idEvent}`,
+      aktorId,
+      url: (peran) =>
+        peran === 'brim-nasional'
+          ? `${BRIM_BASE}/dana/${view.idEvent}`
+          : `${ALK_BASE}/reimburse/${view.idEvent}`,
+    }),
+  )
   void notifyTelegram(
     formatTelegramMessage({
       tag: scope.tag,

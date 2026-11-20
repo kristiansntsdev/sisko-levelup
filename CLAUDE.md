@@ -50,6 +50,14 @@ lib/actions/kesaksian.ts              # kirimKesaksian + listKesaksianSaya (pese
   dashboard/pemuridan/                # Daftar seri Pemuridan (progres per perangkat) + [slug] cerita interaktif fullscreen
 components/pemuridan/                 # Cerita Pemuridan: story-player (kartu 9:16), kit.ts (gambar SVG + kelas Tailwind literal), satu file per seri, stories.ts (slug → cerita)
 lib/pemuridan.ts                      # PEMURIDAN_AKTIF (sakelar tampil), PEMURIDAN (daftar seri, bagian = jumlah scene), findSeri, progressKey
+public/sw.js                          # Service worker: hanya Web Push (showNotification + badge ikon + klik notif), tanpa fetch/cache
+components/pwa/push.tsx               # usePush (state unsupported/ios-install/denied/on/off), PushCard (Beranda), PushSheet (Profil + Lainnya), PUSH_LABEL
+components/pwa/push-client.ts         # Helper browser: daftar SW, langganan, deteksi iOS/standalone/Safari, reset badge, tujuan notifikasi
+components/pwa/push-bridge.tsx        # Di Providers: sinkron perangkat ke sesi, reset badge saat app tampil, buka tujuan notifikasi (no-op di /demo-preview)
+lib/actions/push.ts                   # getPushConfig (kunci publik runtime), simpanPush, hapusPush, lepasPushPeserta; id selalu dari sesi
+lib/push/                             # send (kirimPush, klaimPush), pengurus (pushPengurus), events (pushEventTayang/FeedbackKota/Alert), jobs (cron), rules + rules.check.ts, endpoint (allowlist), lepas (logout)
+app/api/internal/push-cron/           # POST (Bearer PUSH_CRON_SECRET) dipanggil service `cron` di docker-compose tiap 15 menit; ?dry=1 hitung penerima saja
+backlog.md                            # Backlog fitur (push dana per step ke ALK Kota, push Air Hidup)
   dashboard/profil/                   # Profil + masuk pengurus sheet
   dashboard/profil/edit/              # Perubahan Data v2; ajukan pindah LevelUP Kota (nasional approve)
   dashboard/profil/feedback/          # Feedback App: pertanyaan "butuh apa tiap hari" + chip ide → tabel feedback_app
@@ -148,6 +156,18 @@ components/air-hidup/                 # Air Hidup UI (props in, callback out): b
 components/demo-preview/air-hidup.tsx # Container demo Air Hidup (useAir, AirBerandaDemo); shim: shim/actions/air-hidup.ts (tabel ww_laporan/ww_amin di db.ts)
 task.md                               # Blocked: approval sampai core
 ```
+
+## Recent Updates [2026-11-20]
+- **Web Push (iOS + Android)**: Profil → **Notifikasi HP** (+ kartu **Aktifkan notifikasi** di Beranda, Lainnya Sekretariat / BRIM Nasional, tab Pengaturan BRIM Kota). iOS hanya mengizinkan push untuk app yang dipasang ke Layar Utama (iOS 16.4+): di tab Safari kartu menampilkan langkah Bagikan → Tambah ke Layar Utama, di browser iOS lain "buka di Safari". Izin harus diminta sinkron di dalam tap (`Notification.requestPermission()` sebelum `await` apa pun), jangan dipindah setelah fetch. Tiap push wajib `showNotification` (iOS mencabut izin kalau ada push tak tampil)
+- **Badge ikon dihitung di HP** (seperti pphtgd): SW +1 per push (Cache Storage `push-badge`) lalu `setAppBadge`, di-reset saat app tampil (`PushBridge`). Tanpa tabel inbox, angka bisa beda antar HP; lonceng Beranda tetap Soon. Android: notifikasi biasa (Badging API belum jalan di Android)
+- Tabel `push_subscription` (satu baris per endpoint, `id_peserta` + `id_pengurus` nullable: satu HP bisa membawa sesi peserta DAN pengurus) + `push_kirim` (kunci dedup, `INSERT IGNORE`), dibuat `prod-migrate`, **tanpa model Prisma**: semua baca/tulis raw SQL supaya `app_log` tidak kebanjiran. Cookie httpOnly `push_sub` = id baris perangkat; logout melepas sesinya (`lib/push/lepas.ts`, baris tanpa sesi dihapus). Cookie pengurus hanya 8 jam, jadi `id_pengurus` bisa basi sampai logout / sync berikutnya
+- Penerima: **event baru** (setelah Sekretariat + BRIM Nasional keduanya approve, sekali per event): level 0-4 event kotanya + cabang 0 (nasional hanya Core ke atas, `pesertaLihatEvent` meniru `listEvents`), level 5 semua, pengurus kota event "sudah tayang". **Ulang tahun** (cron 07-12 WIB, satu push per hari; 0-3 sekota, PIC sekota + PIC kota lain, Pusat semua dengan nama kota; `tgllahir` teks campuran ISO / d/m/yyyy, 29 Feb → 28 Feb). **Pengingat** H-1 (18-21 WIB), hari-H (2 jam sebelum mulai), absen online dibuka: pendaftar `confirmed`; PIC dapat semua event kotanya; Pusat dapat ringkasan "Acara hari ini" 06-10 WIB. **Pengurus pusat**: padanan semua alert Telegram (`pushAlert`); **pengurus kota**: Dibuat / Diedit / Diajukan event kotanya + feedback Sekretariat / BRIM (`pushFeedbackKota`, urgency high). Pelaku tidak dikirimi. Registrasi nasional memakai `tag: reg-{idEvent}` (satu notifikasi per event, bukan satu per pendaftar)
+- **Cron**: tidak ada scheduler sebelumnya. Service `cron` di `docker-compose.yml` (image sama dengan app, `node -e` loop 15 menit → `POST http://app:38417/api/internal/push-cron`, Bearer `PUSH_CRON_SECRET`). Jendela jam WIB tiap job + `push_kirim` = tick telat / dobel aman. `?dry=1` hanya menghitung penerima
+- **Wajib sebelum push jalan di produksi**: `npx web-push generate-vapid-keys`, isi `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT=mailto:…` (wajib untuk Apple), `PUSH_CRON_SECRET` di `.env.production` VPS. Kunci publik dibaca runtime lewat `getPushConfig` (bukan `NEXT_PUBLIC_*`: image di-build di GitHub tanpa env produksi). **Jangan ganti VAPID** setelah dipakai (semua langganan mati). Env kosong = `console.error` sekali + push mati, tanpa default
+- Preview + produksi satu DB: jangan jalankan `push-cron` dari lokal / preview (bisa memicu push ke anggota sungguhan dan memakai kunci dedup). Dev lokal: VAPID + DB sendiri
+- Demo: `components/pwa/push.tsx` ikut generator (`clone/pwa/push.tsx`), shim `push` mengembalikan `publicKey: null` → "Belum tersedia"; `PushBridge` tidak aktif di `/demo-preview`
+- `NASIONAL_MIN_USERLEVEL` pindah ke `lib/event-cabang.ts` (file `'use server'` tidak boleh meng-export const). Cek: `npx tsx lib/push/rules.check.ts`
+- Backlog (`backlog.md`): push dana per step ke ALK Kota, push Air Hidup + Kabar Terbaru (Air Hidup masih demo-only)
 
 ## Recent Updates [2026-11-16]
 - Form Monitoring Teknis: kolom baru **Total Hadir** (kolom J, setelah Absensi SISKO) = peserta unik di tabel `absen` per event (bukan registrasi; multi-sesi tidak dihitung dobel, sama dengan `countHadirUnik`). Kolom ID tersembunyi pindah P → Q. Tab lama dimigrasi otomatis oleh `migrateLayout_` di Apps Script; **paste ulang `scripts/monitoring-sheet.gs`** ke spreadsheet, lalu Run `syncSisko`

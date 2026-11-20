@@ -2,6 +2,9 @@
 export const NASIONAL_EVENT_CABANG = '0'
 export const NASIONAL_KHUSUS_VALUE = '1'
 
+/** Event wwtype=nasional hanya untuk Core ke atas (Core, PIC, LevelUP Pusat). */
+export const NASIONAL_MIN_USERLEVEL = 3
+
 const NASIONAL_ADMIN_USERNAMES = new Set(['sekretariatnasional@gmail.com'])
 const NASIONAL_BRIM_USERNAMES = new Set(['brimnasional@gmail.com'])
 
