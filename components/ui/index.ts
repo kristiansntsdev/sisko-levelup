@@ -5,6 +5,7 @@ export { Button } from './button';
 export type { ButtonProps, ButtonVariant, ButtonSize } from './button';
 
 export { Input } from './input';
+export { PasswordInput } from './password-input';
 export type { InputProps } from './input';
 
 export { Select } from './select';

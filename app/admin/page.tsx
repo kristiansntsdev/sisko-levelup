@@ -1,7 +1,7 @@
 'use client'
 import { useActionState } from 'react'
 import Image from 'next/image'
-import { Button, Input } from '@/components/ui'
+import { Button, Input, PasswordInput } from '@/components/ui'
 import { loginPengurus } from './actions'
 
 export default function AdminLoginPage() {
@@ -31,10 +31,9 @@ export default function AdminLoginPage() {
             autoComplete="username"
             required
           />
-          <Input
+          <PasswordInput
             label="Password"
             name="password"
-            type="password"
             placeholder="••••••••"
             autoComplete="current-password"
             required

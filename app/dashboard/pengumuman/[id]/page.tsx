@@ -11,5 +11,5 @@ export default async function PengumumanDetailPage({ params }: { params: Promise
   const pembaca = await pembacaSaatIni()
   if (!pembaca) redirect(`/login?callbackUrl=/dashboard/pengumuman/${encodeURIComponent(id)}`)
   const item = await pengumumanDetail(Number(id), pembaca)
-  return <PengumumanDetailView item={item} />
+  return <PengumumanDetailView item={item} pembaca={pembaca.kunci} />
 }

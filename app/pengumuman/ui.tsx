@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { useActionState, type ReactNode } from 'react'
+import { useActionState, useState, type ReactNode } from 'react'
 import { loginPengumuman, logoutPengumuman } from '@/lib/actions/pengumuman'
 import type { ItemPengumuman } from '@/lib/push/pengumuman'
 import type { PenggunaPush, RingkasanPush } from '@/lib/push/pengguna'
@@ -26,6 +26,7 @@ function Halaman({ children }: { children: ReactNode }) {
 
 export function LoginForm() {
   const [state, action, pending] = useActionState(loginPengumuman, null)
+  const [lihat, setLihat] = useState(false)
   return (
     <Halaman>
       <div className="min-h-screen flex items-center justify-center px-4 py-12">
@@ -42,7 +43,18 @@ export function LoginForm() {
             </div>
             <label className="block">
               <span className={`${LABEL} block mb-1.5 text-[10px] font-bold text-[#44403c]`}>Password</span>
-              <input name="password" type="password" autoComplete="current-password" required autoFocus className={INPUT} />
+              <span className="relative block">
+                <input name="password" type={lihat ? 'text' : 'password'} autoComplete="current-password" required autoFocus className={`${INPUT} pr-12`} />
+                <button
+                  type="button"
+                  onClick={() => setLihat((v) => !v)}
+                  aria-label={lihat ? 'Sembunyikan password' : 'Tampilkan password'}
+                  aria-pressed={lihat}
+                  className="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-[#57534e] hover:text-[#161616]"
+                >
+                  <Icon name={lihat ? 'eyeOff' : 'eye'} className="w-5 h-5" />
+                </button>
+              </span>
             </label>
             {state?.error && <p role="alert" className={ERROR}>{state.error}</p>}
             <button type="submit" disabled={pending} className={`block w-full ${BTN_SHELL}`}>

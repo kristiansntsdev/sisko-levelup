@@ -13,5 +13,6 @@ export async function pembacaSaatIni(): Promise<PembacaPengumuman | null> {
   const admin = verifyPengumumanCookie(jar.get(PENGUMUMAN_COOKIE)?.value)
   if (!idPeserta && !pengurus && !admin) return null
   const p = idPeserta ? await db.peserta.findUnique({ where: { id_peserta: idPeserta }, select: { kotalevelup: true } }) : null
-  return { idPeserta, kota: p?.kotalevelup ?? null, pengurus: Boolean(pengurus), admin }
+  const kunci = idPeserta ? `p${idPeserta}` : pengurus ? `g${pengurus.id_pengurus}` : 'admin'
+  return { idPeserta, kota: p?.kotalevelup ?? null, pengurus: Boolean(pengurus), admin, kunci }
 }

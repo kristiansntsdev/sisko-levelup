@@ -525,6 +525,31 @@ export async function POST(req: NextRequest) {
     )
   `)
 
+  // Tabel pengumuman versi awal (rilis web push pertama): tanpa target_json, isi VARCHAR(255), url default '/dashboard'.
+  // ensureTable tidak mengubah tabel yang sudah ada, jadi kolomnya disusulkan di sini (idempotent).
+  const addedPengumumanTargetJson = await ensureColumn('pengumuman', 'target_json',
+    `ALTER TABLE pengumuman ADD COLUMN target_json TEXT NULL AFTER target_nilai`)
+  const pengumumanCols = await db.$queryRaw<{ COLUMN_NAME: string; DATA_TYPE: string; COLUMN_DEFAULT: string | null }[]>`
+    SELECT COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pengumuman' AND COLUMN_NAME IN ('isi', 'url')
+  `
+  const isiCol = pengumumanCols.find((c) => c.COLUMN_NAME === 'isi')
+  const urlCol = pengumumanCols.find((c) => c.COLUMN_NAME === 'url')
+  let pengumumanIsiText = false
+  if (isiCol && isiCol.DATA_TYPE.toLowerCase() !== 'text') {
+    await db.$executeRawUnsafe(`ALTER TABLE pengumuman MODIFY isi TEXT NOT NULL`)
+    pengumumanIsiText = true
+  }
+  let pengumumanUrlDefault = false
+  if (urlCol && (urlCol.COLUMN_DEFAULT ?? '').replace(/'/g, '') !== '') {
+    await db.$executeRawUnsafe(`ALTER TABLE pengumuman ALTER COLUMN url SET DEFAULT ''`)
+    pengumumanUrlDefault = true
+  }
+  // Baris lama tanpa tautan khusus tersimpan '/dashboard': sekarang '' = buka halaman pengumuman.
+  const pengumumanUrlBackfill = addedPengumumanTargetJson
+    ? await db.$executeRaw`UPDATE pengumuman SET url = '' WHERE url = '/dashboard' AND target_json IS NULL`
+    : 0
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -572,6 +597,10 @@ export async function POST(req: NextRequest) {
     addedPushSubscription,
     addedPushKirim,
     addedPengumuman,
+    addedPengumumanTargetJson,
+    pengumumanIsiText,
+    pengumumanUrlDefault,
+    pengumumanUrlBackfill,
     addedReimburseSekre,
     addedReimburseBrim,
     reimburseReviewBackfill,

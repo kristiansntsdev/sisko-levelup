@@ -14,10 +14,10 @@ import { LEVEL_STEPS, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-mem
 import { PEMURIDAN_AKTIF } from '@/lib/pemuridan'
 import { ID_FONTS, MemberCard } from '@/components/pwa/member-card'
 import { PushCard } from '@/components/pwa/push'
+import { PengumumanBell } from '@/components/pwa/pengumuman'
 import {
   ANTON,
   BTN,
-  IconButton,
   LABEL,
   LIFTED,
   MONO,
@@ -285,7 +285,7 @@ export default function DashboardPage() {
       <PaperHeader
         sticker="Selamat datang,"
         title={first}
-        action={<IconButton icon="bell" label="Pengumuman" onClick={() => router.push('/dashboard/pengumuman')} />}
+        action={<PengumumanBell />}
       >
         {pengurusDest && (
           <div className="mt-4 grid grid-cols-2 gap-1 p-1 rounded-full bg-[#fffdf7] text-[13px] font-semibold text-[#161616]">

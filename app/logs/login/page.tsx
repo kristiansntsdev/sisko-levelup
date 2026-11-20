@@ -1,7 +1,7 @@
 'use client'
 import { useActionState } from 'react'
 import Image from 'next/image'
-import { Button, Input } from '@/components/ui'
+import { Button, PasswordInput } from '@/components/ui'
 import { loginLogs } from '../actions'
 
 export default function LogsLoginPage() {
@@ -22,10 +22,9 @@ export default function LogsLoginPage() {
         </div>
 
         <form action={action} className="flex flex-col gap-4">
-          <Input
+          <PasswordInput
             label="Password"
             name="password"
-            type="password"
             placeholder="••••••••"
             autoComplete="current-password"
             required

@@ -9,5 +9,5 @@ export default async function PengumumanAnggotaPage() {
   const pembaca = await pembacaSaatIni()
   if (!pembaca) redirect('/login?callbackUrl=/dashboard/pengumuman')
   const items = await pengumumanUntuk(pembaca)
-  return <PengumumanListView items={items} />
+  return <PengumumanListView items={items} pembaca={pembaca.kunci} />
 }

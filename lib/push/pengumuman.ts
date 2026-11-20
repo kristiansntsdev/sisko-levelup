@@ -265,7 +265,14 @@ export async function anggotaOpsiByIds(ids: number[]): Promise<AnggotaOpsi[]> {
 // ───────────────────────── halaman anggota ─────────────────────────
 
 /** Siapa yang membuka halaman: anggota (id + kota), pengurus, atau admin /pengumuman (boleh lihat semua). */
-export type PembacaPengumuman = { idPeserta: number | null; kota: string | null; pengurus: boolean; admin: boolean }
+export type PembacaPengumuman = {
+  idPeserta: number | null
+  kota: string | null
+  pengurus: boolean
+  admin: boolean
+  /** Kunci status dibaca di HP: p{id peserta}, g{id pengurus}, atau admin. */
+  kunci: string
+}
 
 export type PengumumanAnggota = {
   id: number

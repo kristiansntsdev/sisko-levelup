@@ -11,7 +11,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
 const ROOT = new URL('..', import.meta.url).pathname
-const SHIM_ACTIONS = ['absen', 'beta', 'event', 'feedback-app', 'jobs-place', 'kesaksian', 'kas-kota', 'peserta', 'pengurus-kota', 'pindah-kota', 'push', 'pwa-auth', 'registrasi', 'reimburse', 'upgrade', 'wfe-serentak', 'wilayah']
+const SHIM_ACTIONS = ['absen', 'beta', 'event', 'feedback-app', 'jobs-place', 'kesaksian', 'kas-kota', 'peserta', 'pengurus-kota', 'pengumuman-saya', 'pindah-kota', 'push', 'pwa-auth', 'registrasi', 'reimburse', 'upgrade', 'wfe-serentak', 'wilayah']
 
 /** [source, destination] */
 const FILES = [
@@ -34,6 +34,7 @@ const FILES = [
   ['app/daftar/page.tsx', 'app/demo-preview/daftar/page.tsx'],
   ['components/pwa/shell.tsx', 'components/demo-preview/clone/pwa/shell.tsx'],
   ['components/pwa/push.tsx', 'components/demo-preview/clone/pwa/push.tsx'],
+  ['components/pwa/pengumuman.tsx', 'components/demo-preview/clone/pwa/pengumuman.tsx'],
   // Sekretariat v2 (event-approve, pindah-kota, tiket-nasional are Sekretariat Nasional only: not in the demo)
   ...['anggota', 'approval', 'beranda', 'event-detail', 'events', 'kas', 'lainnya', 'list-tools', 'reimburse', 'scan', 'shell', 'ui'].map((n) => [`components/alk-v2/${n}.tsx`, `components/demo-preview/clone/alk-v2/${n}.tsx`]),
   ['components/alk-v2/paths.ts', 'components/demo-preview/clone/alk-v2/paths.ts'],
@@ -52,6 +53,7 @@ function transform(src) {
   t = t.replaceAll("'@/components/alk-v2/", `'${C}/alk-v2/`)
   t = t.replaceAll("'@/components/pwa/shell'", `'${C}/pwa/shell'`)
   t = t.replaceAll("'@/components/pwa/push'", `'${C}/pwa/push'`)
+  t = t.replaceAll("'@/components/pwa/pengumuman'", `'${C}/pwa/pengumuman'`)
   t = t.replaceAll("'@/components/kota/event-form'", `'${C}/kota/event-form'`)
   t = t.replaceAll("'@/app/dashboard/kota/alk/event/[id]/dana/dana-client'", `'${C}/kota/dana-client'`)
   // route strings: '/dashboard...', "/events", `/join/${id}`, callbackUrl=/dashboard
@@ -69,6 +71,9 @@ const PATCHES = {
   ],
   'components/pwa/push.tsx': [
     ["from './push-client'", "from '@/components/pwa/push-client'"],
+  ],
+  'components/pwa/pengumuman.tsx': [
+    ["from './pengumuman-dibaca'", "from '@/components/pwa/pengumuman-dibaca'"],
   ],
   'app/dashboard/page.tsx': [
     ['import { getPendingSquadForMe, joinSquad, joinVolunteer }', 'import { getPendingSquadForMe, getPendingVolunteerForMe, joinSquad, joinVolunteer }'],
