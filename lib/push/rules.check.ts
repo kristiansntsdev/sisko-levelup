@@ -1,6 +1,7 @@
 // Jalankan: npx tsx lib/push/rules.check.ts
 import assert from 'node:assert/strict'
 import { endpointDiizinkan } from './endpoint'
+import { nomorInti, nomorSama, pathAman, pesanAktif, platformDari } from './target'
 import { daftarNama, dobBulanTanggal, ingatH0Aktif, jendelaBuka, pesertaLihatEvent, ultahHariIni, wibBesokIso } from './rules'
 
 const d = (s: string) => new Date(s)
@@ -61,5 +62,30 @@ assert.equal(endpointDiizinkan('https://fcm.googleapis.com.evil.com/x'), false)
 assert.equal(endpointDiizinkan('https://127.0.0.1/x'), false)
 assert.equal(endpointDiizinkan('https://user:p@fcm.googleapis.com/x'), false)
 assert.equal(endpointDiizinkan(42), false)
+
+// nomor HP
+assert.equal(nomorInti('0812-3456-789'), '81234567' + '89')
+assert.equal(nomorInti('+62 812 3456 789'), '8123456789')
+assert.equal(nomorInti('628123456789'), '8123456789')
+assert.equal(nomorInti('2'), null)
+assert.equal(nomorSama('08123456789', '+62 812-3456-789'), true)
+assert.equal(nomorSama('08123456789', '08123456780'), false)
+assert.equal(nomorSama('', ''), false)
+assert.equal(pathAman('/events'), '/events')
+assert.equal(pathAman('//evil.com'), '/dashboard')
+assert.equal(pathAman('https://evil.com'), '/dashboard')
+assert.equal(pathAman(''), '/dashboard')
+
+// platform perangkat
+assert.equal(platformDari('Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15'), 'iOS')
+assert.equal(platformDari('Mozilla/5.0 (Linux; Android 14; SM-A546E) AppleWebKit/537.36 Chrome/131 Mobile'), 'Android')
+assert.equal(platformDari('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131'), 'Desktop')
+assert.equal(platformDari('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605'), 'Desktop')
+assert.equal(platformDari(''), 'Lainnya')
+
+// notifikasi percobaan
+assert.equal(pesanAktif('Esra Londa').body, 'Selamat Fitur Notifikasi LevelUP telah berhasil diaktifkan, Semangat Melayani Selalu di LevelUP - Esra Londa')
+assert.equal(pesanAktif('  ').body.endsWith('- Sahabat LevelUP'), true)
+assert.ok(pesanAktif('Kristian Epa Froditus Santoso').body.length <= 180)
 
 console.log('push rules ok')

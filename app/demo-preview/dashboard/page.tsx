@@ -299,7 +299,7 @@ export default function DashboardPage() {
       <PaperHeader
         sticker="Selamat datang,"
         title={first}
-        action={<IconButton icon="bell" label="Notifikasi" onClick={() => setSoon('Pengumuman')} />}
+        action={<IconButton icon="bell" label="Pengumuman" onClick={() => router.push('/demo-preview/dashboard/pengumuman')} />}
       >
         {pengurusDest && (
           <div className="mt-4 grid grid-cols-2 gap-1 p-1 rounded-full bg-[#fffdf7] text-[13px] font-semibold text-[#161616]">

@@ -22,29 +22,36 @@ export type PushApi = {
   state: PushState
   busy: boolean
   error: string | null
+  /** Pesan setelah berhasil diaktifkan (notifikasi percobaan). */
+  info: string | null
   ios: boolean
   safari: boolean
   aktifkan: () => Promise<void>
   matikan: () => Promise<void>
 }
 
-async function kirimLangganan(sub: PushSubscription): Promise<boolean> {
+/** Dari tombol Aktifkan: simpan + minta notifikasi percobaan. null = gagal simpan, true/false = percobaan terkirim. */
+async function kirimLangganan(sub: PushSubscription): Promise<boolean | null> {
   const j = sub.toJSON()
   const enc = (typeof PushManager !== 'undefined' && PushManager.supportedContentEncodings?.[0]) || 'aes128gcm'
-  const res = await simpanPush({
-    endpoint: sub.endpoint,
-    p256dh: j.keys?.p256dh ?? '',
-    auth: j.keys?.auth ?? '',
-    encoding: enc,
-    userAgent: navigator.userAgent,
-  })
-  return res.ok
+  const res = await simpanPush(
+    {
+      endpoint: sub.endpoint,
+      p256dh: j.keys?.p256dh ?? '',
+      auth: j.keys?.auth ?? '',
+      encoding: enc,
+      userAgent: navigator.userAgent,
+    },
+    { uji: true },
+  )
+  return res.ok ? res.uji : null
 }
 
 export function usePush(): PushApi {
   const [state, setState] = useState<PushState>('memuat')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
   const [dev, setDev] = useState({ ios: false, safari: false })
   const key = useRef<string | null>(null)
 
@@ -90,10 +97,16 @@ export function usePush(): PushApi {
       const sub =
         (await reg.pushManager.getSubscription()) ??
         (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uKeUint8(key.current) }))
-      if (!(await kirimLangganan(sub))) {
+      const uji = await kirimLangganan(sub)
+      if (uji === null) {
         await sub.unsubscribe().catch(() => {})
         throw new Error('Gagal menyimpan. Masuk lagi lalu coba lagi.')
       }
+      setInfo(
+        uji
+          ? 'Notifikasi percobaan sudah dikirim ke HP ini. Kalau tidak muncul dalam 1 menit, matikan lalu aktifkan lagi.'
+          : 'Notifikasi aktif, tapi notifikasi percobaan belum terkirim. Coba matikan lalu aktifkan lagi.',
+      )
       setState('on')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Gagal mengaktifkan notifikasi.')
@@ -106,6 +119,7 @@ export function usePush(): PushApi {
     if (busy) return
     setBusy(true)
     setError(null)
+    setInfo(null)
     try {
       const sub = await ambilLangganan()
       if (sub) {
@@ -120,7 +134,7 @@ export function usePush(): PushApi {
     }
   }, [busy])
 
-  return { state, busy, error, ios: dev.ios, safari: dev.safari, aktifkan, matikan }
+  return { state, busy, error, info, ios: dev.ios, safari: dev.safari, aktifkan, matikan }
 }
 
 const STEP = `${MONO} text-[12.5px] leading-snug text-[#161616]`
@@ -172,6 +186,9 @@ export function PushSheet({ push, open, onClose }: { push: PushApi; open: boolea
       <SheetHead title="Notifikasi HP" sub={`Status: ${PUSH_LABEL[push.state]}`} />
       <PushPenjelasan push={push} />
       {push.error && <p className={`${MONO} mt-3 text-[12px] font-bold text-[#c21f24]`}>{push.error}</p>}
+      {push.info && push.state === 'on' && (
+        <p className={`${MONO} mt-3 rounded-[10px] bg-[#ffd83d]/60 px-3 py-2.5 text-[12px] font-bold leading-snug`}>{push.info}</p>
+      )}
       {(push.state === 'off' || push.state === 'on') && (
         <button
           type="button"
@@ -200,6 +217,27 @@ export function PushCard() {
     }
   })
   const [help, setHelp] = useState(false)
+  const tutupKartu = () => {
+    setTutup(true)
+    try {
+      localStorage.setItem(CTA_KEY, '1')
+    } catch {}
+  }
+  // Baru saja diaktifkan dari kartu ini: tunjukkan hasilnya sampai ditutup.
+  if (push.state === 'on' && push.info && !tutup) {
+    return (
+      <section role="status" className={`${PANEL} p-4 flex items-start gap-3`}>
+        <Chip name="check" className="bg-[#161616] text-[#ffd83d]" />
+        <div className="flex-1 min-w-0">
+          <p className={`${ANTON} text-[17px] leading-tight tracking-[.02em]`}>Notifikasi aktif</p>
+          <p className={`${MONO} mt-1 text-[11.5px] leading-snug text-[#44403c]`}>{push.info}</p>
+        </div>
+        <button type="button" aria-label="Tutup" className={`${PRESS} ${MONO} shrink-0 text-[18px] leading-none px-1 text-[#57534e]`} onClick={tutupKartu}>
+          ×
+        </button>
+      </section>
+    )
+  }
   const tampil = !tutup && (push.state === 'off' || push.state === 'ios-install')
   if (!tampil) return null
   return (
@@ -224,12 +262,7 @@ export function PushCard() {
         type="button"
         aria-label="Tutup"
         className={`${PRESS} ${MONO} shrink-0 text-[18px] leading-none px-1 text-[#57534e]`}
-        onClick={() => {
-          setTutup(true)
-          try {
-            localStorage.setItem(CTA_KEY, '1')
-          } catch {}
-        }}
+        onClick={tutupKartu}
       >
         ×
       </button>

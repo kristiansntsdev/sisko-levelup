@@ -505,6 +505,25 @@ export async function POST(req: NextRequest) {
       KEY idx_push_kirim_created (created_at)
     )
   `)
+  const addedPengumuman = await ensureTable('pengumuman', `
+    CREATE TABLE pengumuman (
+      id_pengumuman INT NOT NULL AUTO_INCREMENT,
+      judul VARCHAR(80) NOT NULL,
+      isi TEXT NOT NULL,
+      image_url VARCHAR(500) NOT NULL DEFAULT '',
+      url VARCHAR(200) NOT NULL DEFAULT '',
+      target_tipe VARCHAR(10) NOT NULL,
+      target_nilai VARCHAR(40) NOT NULL DEFAULT '',
+      target_json TEXT NULL,
+      cocok INT NOT NULL DEFAULT 0,
+      perangkat INT NOT NULL DEFAULT 0,
+      terkirim INT NOT NULL DEFAULT 0,
+      gagal INT NOT NULL DEFAULT 0,
+      created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id_pengumuman),
+      KEY idx_pengumuman_created (created_at)
+    )
+  `)
 
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
@@ -552,6 +571,7 @@ export async function POST(req: NextRequest) {
     addedArtikelKomentar,
     addedPushSubscription,
     addedPushKirim,
+    addedPengumuman,
     addedReimburseSekre,
     addedReimburseBrim,
     reimburseReviewBackfill,

@@ -16,6 +16,8 @@ export type PushPayload = {
   tag?: string
   /** Bunyi lagi walau menggantikan notifikasi bertag sama. */
   renotify?: boolean
+  /** URL gambar besar (Android Chrome menampilkan; iOS mengabaikan). */
+  image?: string
 }
 
 export type PushOpts = { ttl?: number; urgency?: 'very-low' | 'low' | 'normal' | 'high' }
@@ -88,14 +90,26 @@ export async function kirimPush(to: Penerima, payload: PushPayload, opts: PushOp
     console.error('[push] baca subscription gagal', err)
     return KOSONG
   }
-  if (!subs.length) return KOSONG
+  return kirimKeSubs(subs, payload, opts)
+}
 
+/** Kirim ke satu perangkat (baris push_subscription), mis. notifikasi percobaan saat baru diaktifkan. */
+export async function kirimKeIdSub(idSub: number, payload: PushPayload, opts: PushOpts = {}): Promise<HasilKirim> {
+  if (!pushAktif()) return KOSONG
+  const subs = await db.$queryRaw<SubRow[]>`
+    SELECT id_sub, endpoint, p256dh, auth, encoding FROM push_subscription WHERE id_sub = ${idSub} LIMIT 1`
+  return kirimKeSubs(subs, payload, opts)
+}
+
+async function kirimKeSubs(subs: SubRow[], payload: PushPayload, opts: PushOpts): Promise<HasilKirim> {
+  if (!subs.length) return KOSONG
   const body = JSON.stringify({
     title: payload.title.slice(0, 80),
     body: payload.body.slice(0, 180),
     icon: '/icons/icon-192.png',
     badge: '/icons/push-badge.png',
     tag: payload.tag,
+    image: payload.image,
     // renotify tanpa tag melempar TypeError di showNotification.
     renotify: payload.renotify && payload.tag ? true : undefined,
     data: { url: payload.url },

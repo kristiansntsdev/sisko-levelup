@@ -2,9 +2,11 @@
 import { cookies } from 'next/headers'
 import { db } from '@/lib/db'
 import { sessionPesertaId } from '@/lib/peserta-session'
-import { getPengurusFromCookie } from '@/lib/pengurus-session'
+import { getPengurusFromCookie, pengurusDest } from '@/lib/pengurus-session'
 import { endpointDiizinkan } from '@/lib/push/endpoint'
 import { lepasPeserta, PUSH_COOKIE } from '@/lib/push/lepas'
+import { kirimKeIdSub } from '@/lib/push/send'
+import { pesanAktif } from '@/lib/push/target'
 
 /** Kunci publik VAPID dibaca saat runtime (image di-build tanpa env produksi, jadi bukan NEXT_PUBLIC_*). */
 export async function getPushConfig(): Promise<{ publicKey: string | null }> {
@@ -14,8 +16,12 @@ export async function getPushConfig(): Promise<{ publicKey: string | null }> {
 export type SimpanPushInput = { endpoint: string; p256dh: string; auth: string; encoding?: string; userAgent?: string }
 type Hasil = { ok: true } | { ok: false; error: string }
 
-/** Simpan / sinkron perangkat ini ke sesi yang sedang login. Semua id dari sesi, tidak pernah dari client. */
-export async function simpanPush(input: SimpanPushInput): Promise<Hasil> {
+/**
+ * Simpan / sinkron perangkat ini ke sesi yang sedang login. Semua id dari sesi, tidak pernah dari client.
+ * `opts.uji`: dipanggil dari tombol Aktifkan (bukan sync saat app dibuka) → kirim notifikasi percobaan ke HP ini saja.
+ * `uji` di hasil = percobaan diterima layanan push (belum tentu sudah tampil di HP).
+ */
+export async function simpanPush(input: SimpanPushInput, opts?: { uji?: boolean }): Promise<{ ok: true; uji: boolean } | { ok: false; error: string }> {
   if (!endpointDiizinkan(input?.endpoint)) return { ok: false, error: 'Endpoint tidak dikenali.' }
   const p256dh = String(input.p256dh ?? '')
   const auth = String(input.auth ?? '')
@@ -33,6 +39,7 @@ export async function simpanPush(input: SimpanPushInput): Promise<Hasil> {
     VALUES (${input.endpoint}, ${p256dh}, ${auth}, ${encoding}, ${idPeserta}, ${idPengurus}, ${ua})
     ON DUPLICATE KEY UPDATE
       p256dh = VALUES(p256dh), auth = VALUES(auth), encoding = VALUES(encoding), user_agent = VALUES(user_agent),
+      updated_at = CURRENT_TIMESTAMP,
       id_peserta = COALESCE(VALUES(id_peserta), id_peserta),
       id_pengurus = COALESCE(VALUES(id_pengurus), id_pengurus)`
   const rows = await db.$queryRaw<{ id_sub: number }[]>`SELECT id_sub FROM push_subscription WHERE endpoint = ${input.endpoint} LIMIT 1`
@@ -45,7 +52,21 @@ export async function simpanPush(input: SimpanPushInput): Promise<Hasil> {
       maxAge: 60 * 60 * 24 * 365,
     })
   }
-  return { ok: true }
+
+  let uji = false
+  if (opts?.uji === true && idSub) {
+    try {
+      const nama = idPeserta
+        ? ((await db.peserta.findUnique({ where: { id_peserta: idPeserta }, select: { nama: true } }))?.nama ?? '')
+        : (pengurus?.nama ?? '')
+      const url = idPeserta ? '/dashboard' : (pengurusDest(pengurus?.divisi, pengurus?.username) ?? '/dashboard')
+      const hasil = await kirimKeIdSub(Number(idSub), { ...pesanAktif(nama), url, tag: 'notifikasi-aktif', renotify: true })
+      uji = hasil.terkirim > 0
+    } catch (err) {
+      console.error('[push] notifikasi percobaan gagal', err)
+    }
+  }
+  return { ok: true, uji }
 }
 
 /** Matikan notifikasi di perangkat ini: hanya baris milik sesi yang sedang login. */
