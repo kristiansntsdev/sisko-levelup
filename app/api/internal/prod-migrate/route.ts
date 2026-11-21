@@ -535,8 +535,30 @@ export async function POST(req: NextRequest) {
       updated_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id_ucapan),
       UNIQUE KEY uq_ultah_ucapan (id_pengumuman, id_dari)
-    )
+    ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `)
+  const addedUltahLike = await ensureTable('ultah_like', `
+    CREATE TABLE ultah_like (
+      id_pengumuman INT NOT NULL,
+      id_target INT NOT NULL,
+      id_peserta INT NOT NULL,
+      created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id_pengumuman, id_target, id_peserta)
+    ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `)
+  // Emoji (4 byte) ditolak kolom utf8/latin1 ("Incorrect string value"): pastikan tabel yang menyimpan teks
+  // pengumuman + ucapan utf8mb4. Tabel yang sudah utf8mb4 dilewati (idempotent).
+  const utf8mb4Dikonversi: string[] = []
+  for (const t of ['pengumuman', 'ultah_ucapan']) {
+    const lama = await db.$queryRaw<{ n: bigint | number }[]>`
+      SELECT COUNT(*) AS n FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ${t}
+        AND CHARACTER_SET_NAME IS NOT NULL AND CHARACTER_SET_NAME <> 'utf8mb4'`
+    if (Number(lama[0]?.n ?? 0) > 0) {
+      await db.$executeRawUnsafe(`ALTER TABLE ${t} CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`)
+      utf8mb4Dikonversi.push(t)
+    }
+  }
 
   // Tabel pengumuman versi awal (rilis web push pertama): tanpa target_json, isi VARCHAR(255), url default '/dashboard'.
   // ensureTable tidak mengubah tabel yang sudah ada, jadi kolomnya disusulkan di sini (idempotent).
@@ -611,6 +633,8 @@ export async function POST(req: NextRequest) {
     addedPushKirim,
     addedPengumuman,
     addedUltahUcapan,
+    addedUltahLike,
+    utf8mb4Dikonversi,
     addedPengumumanTargetJson,
     pengumumanIsiText,
     pengumumanUrlDefault,

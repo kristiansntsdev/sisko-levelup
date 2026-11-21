@@ -4,11 +4,11 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { kirimUcapanUltah } from '@/components/demo-preview/shim/actions/ultah-ucapan'
+import { kirimUcapanUltah, sukaiUltah } from '@/components/demo-preview/shim/actions/ultah-ucapan'
 import { getPengumumanSaya } from '@/components/demo-preview/shim/actions/pengumuman-saya'
 import type { PengumumanAnggota } from '@/lib/push/pengumuman'
 import { MAKS_UCAPAN } from '@/lib/push/target'
-import type { UcapanUltah } from '@/lib/push/ultah'
+import type { SukaPostingan, UcapanUltah } from '@/lib/push/ultah'
 import { ANTON, BackBar, BTN, Chip, IconButton, LABEL, LIFTED, MONO, PANEL, PAPER_INPUT, PaperHeader, PaperMain, PRESS, Strip } from '@/components/pwa/paper-ui'
 import { Icon, Sheet } from '@/components/pwa/ui'
 import { useBersih, useDibaca } from '@/components/pwa/pengumuman-dibaca'
@@ -226,8 +226,9 @@ export function PengumumanListView({ items: semua, pembaca }: { items: Pengumuma
 const UCAPAN_CEPAT = ['Selamat ulang tahun! 🎉', 'Tuhan Yesus memberkati 🙏', 'Sehat & semangat melayani terus! 💛']
 
 /** Ucapan teman sekota: daftar + (untuk teman) form ucapkan selamat. Yang berulang tahun hanya membaca. */
-function UcapanUltahView({ item, ucapan, bolehKirim, idSaya }: { item: PengumumanAnggota; ucapan: UcapanUltah[]; bolehKirim: boolean; idSaya: number | null }) {
+function UcapanUltahView({ item, ucapan, post, bolehKirim, idSaya }: { item: PengumumanAnggota; ucapan: UcapanUltah[]; post: SukaPostingan; bolehKirim: boolean; idSaya: number | null }) {
   const router = useRouter()
+  const [sibuk, setSibuk] = useState(false)
   const milikku = ucapan.find((u) => u.idDari === idSaya)
   const [teks, setTeks] = useState('')
   const [edit, setEdit] = useState(false)
@@ -235,6 +236,22 @@ function UcapanUltahView({ item, ucapan, bolehKirim, idSaya }: { item: Pengumuma
   const [kirim, setKirim] = useState(false)
   const diri = item.ultah?.diri ?? false
   const tampilForm = bolehKirim && (!milikku || edit)
+
+  /** idTarget 0 = postingan (teman), selain itu = ucapan dari anggota itu (yang berulang tahun). */
+  async function suka(idTarget: number) {
+    if (sibuk) return
+    setSibuk(true)
+    setError(null)
+    try {
+      const r = await sukaiUltah(item.id, idTarget)
+      if (!r.ok) return setError(r.error)
+      router.refresh()
+    } catch {
+      setError('Gagal, coba lagi')
+    } finally {
+      setSibuk(false)
+    }
+  }
 
   async function submit() {
     setKirim(true)
@@ -280,6 +297,23 @@ function UcapanUltahView({ item, ucapan, bolehKirim, idSaya }: { item: Pengumuma
           {error && <p className={`${MONO} text-[12px] text-[#c21f24]`}>{error}</p>}
         </section>
       )}
+      {(!diri || post.jumlah > 0) && (
+        <div className="flex items-center gap-2">
+          {diri ? (
+            <p className={`${MONO} text-[13px]`}>❤️ <b>{post.jumlah}</b> teman menyukai ini</p>
+          ) : (
+            <button
+              type="button"
+              disabled={sibuk || idSaya == null}
+              onClick={() => suka(0)}
+              aria-pressed={post.saya}
+              className={`${MONO} rounded-full px-3.5 py-1.5 text-[13px] ${PRESS} ${post.saya ? 'bg-[#e02a2f]/15 ring-2 ring-[#e02a2f]' : 'bg-[#161616]/[.07]'} disabled:opacity-60`}
+            >
+              {post.saya ? '❤️' : '🤍'} Suka{post.jumlah > 0 && <b> · {post.jumlah}</b>}
+            </button>
+          )}
+        </div>
+      )}
       <section className="space-y-2.5">
         <div className="flex items-center justify-between gap-3">
           <h2 className={`${ANTON} text-[20px] leading-none tracking-[.02em]`}>{diri ? 'Ucapan dari teman-teman kotamu' : 'Ucapan teman-teman'}</h2>
@@ -298,6 +332,19 @@ function UcapanUltahView({ item, ucapan, bolehKirim, idSaya }: { item: Pengumuma
             {ucapan.map((u) => (
               <li key={u.idDari} className={`${PANEL} p-3.5 ${u.idDari === idSaya ? 'ring-2 ring-[#ffd83d]' : ''}`}>
                 <p className={`${MONO} text-[13.5px] leading-snug whitespace-pre-line break-words`}>{u.isi}</p>
+                {diri ? (
+                  <button
+                    type="button"
+                    disabled={sibuk}
+                    onClick={() => suka(u.idDari)}
+                    aria-pressed={u.sukaDiri}
+                    className={`${MONO} mt-2 rounded-full px-3 py-1 text-[12px] ${PRESS} ${u.sukaDiri ? 'bg-[#e02a2f]/15 ring-2 ring-[#e02a2f]' : 'bg-[#161616]/[.07]'} disabled:opacity-60`}
+                  >
+                    {u.sukaDiri ? '❤️ Kamu menyukai' : '🤍 Suka'}
+                  </button>
+                ) : (
+                  u.sukaDiri && <p className={`${MONO} mt-2 text-[12px] ${u.idDari === idSaya ? 'font-bold text-[#c21f24]' : 'text-[#57534e]'}`}>❤️ {item.ultah?.nama} menyukai ini</p>
+                )}
                 <p className={`${LABEL} mt-2 flex items-center justify-between gap-2 text-[9px] text-[#57534e]`}>
                   <b className="truncate text-[#161616]">{u.idDari === idSaya ? 'Kamu' : u.nama}</b>
                   <Waktu ms={u.waktuMs} className="shrink-0" />
@@ -315,11 +362,13 @@ export function PengumumanDetailView({
   item,
   pembaca,
   ucapan = [],
+  post = { jumlah: 0, saya: false },
   idSaya = null,
 }: {
   item: PengumumanAnggota | null
   pembaca: string
   ucapan?: UcapanUltah[]
+  post?: SukaPostingan
   /** id anggota yang membuka halaman (null = pengurus / admin: hanya membaca ucapan). */
   idSaya?: number | null
 }) {
@@ -358,7 +407,7 @@ export function PengumumanDetailView({
               <Icon name="megaphone" className="w-4 h-4" />
               Dikirim oleh <b className="text-[#161616]">LevelUP Pusat</b>
             </p>
-            {item.ultah && <UcapanUltahView item={item} ucapan={ucapan} bolehKirim={idSaya != null && !item.ultah.diri} idSaya={idSaya} />}
+            {item.ultah && <UcapanUltahView item={item} ucapan={ucapan} post={post} bolehKirim={idSaya != null && !item.ultah.diri} idSaya={idSaya} />}
             {item.url && (
               <Link href={item.url} className={BTN}>
                 <Strip>
