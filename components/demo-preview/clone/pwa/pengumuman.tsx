@@ -4,11 +4,14 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { kirimUcapanUltah } from '@/components/demo-preview/shim/actions/ultah-ucapan'
 import { getPengumumanSaya } from '@/components/demo-preview/shim/actions/pengumuman-saya'
 import type { PengumumanAnggota } from '@/lib/push/pengumuman'
-import { ANTON, BackBar, BTN, Chip, IconButton, LABEL, LIFTED, MONO, PANEL, PaperHeader, PaperMain, PRESS, Strip } from '@/components/pwa/paper-ui'
+import { MAKS_UCAPAN } from '@/lib/push/target'
+import type { UcapanUltah } from '@/lib/push/ultah'
+import { ANTON, BackBar, BTN, Chip, IconButton, LABEL, LIFTED, MONO, PANEL, PAPER_INPUT, PaperHeader, PaperMain, PRESS, Strip } from '@/components/pwa/paper-ui'
 import { Icon, Sheet } from '@/components/pwa/ui'
-import { useDibaca } from '@/components/pwa/pengumuman-dibaca'
+import { useBersih, useDibaca } from '@/components/pwa/pengumuman-dibaca'
 import { Waktu } from '@/components/pwa/waktu'
 
 const detailHref = (id: number) => `/demo-preview/dashboard/pengumuman/${id}`
@@ -25,11 +28,34 @@ function TandaiSemua({ onClick }: { onClick: () => void }) {
   )
 }
 
+/** Tap pertama minta konfirmasi (label berubah 4 detik), tap kedua menghapus. */
+function HapusSemua({ onHapus }: { onHapus: () => void }) {
+  const [yakin, setYakin] = useState(false)
+  useEffect(() => {
+    if (!yakin) return
+    const t = setTimeout(() => setYakin(false), 4000)
+    return () => clearTimeout(t)
+  }, [yakin])
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (!yakin) return setYakin(true)
+        setYakin(false)
+        onHapus()
+      }}
+      className={`${LABEL} shrink-0 rounded-full px-3 py-1.5 text-[9.5px] font-bold ${PRESS} ${yakin ? 'bg-[#e02a2f] text-white' : 'bg-[#161616]/[.07] text-[#161616]'}`}
+    >
+      {yakin ? 'Yakin hapus?' : 'Hapus semua'}
+    </button>
+  )
+}
+
 /** Satu baris pengumuman: belum dibaca = latar kuning tipis + titik merah. */
 function Baris({ p, belum, onOpen }: { p: PengumumanAnggota; belum: boolean; onOpen: () => void }) {
   return (
     <button type="button" onClick={onOpen} className={`w-full flex items-start gap-3 px-5 py-3.5 text-left transition ${belum ? 'bg-[#ffd83d]/20' : ''}`}>
-      <Chip name="megaphone" className={belum ? 'bg-[#e02a2f] text-white' : 'bg-[#161616]/[.07]'} />
+      <Chip name={p.ultah ? 'cake' : 'megaphone'} className={belum ? 'bg-[#e02a2f] text-white' : p.ultah ? 'bg-[#ffd83d]' : 'bg-[#161616]/[.07]'} />
       <span className="min-w-0 flex-1">
         <span className="flex items-center justify-between gap-2">
           <Waktu ms={p.waktuMs} className={`${LABEL} min-w-0 truncate text-[9px] text-[#57534e]`} />
@@ -58,6 +84,7 @@ export function PengumumanBell() {
   const [data, setData] = useState<{ pembaca: string; items: PengumumanAnggota[] } | null>(null)
   const [open, setOpen] = useState(false)
   const { siap, dibaca, tandai } = useDibaca(data?.pembaca ?? null)
+  const { batas, bersihkan } = useBersih(data?.pembaca ?? null)
 
   useEffect(() => {
     let batal = false
@@ -87,8 +114,9 @@ export function PengumumanBell() {
     }
   }, [])
 
-  const items = data?.items ?? []
+  const items = (data?.items ?? []).filter((p) => p.id > batas)
   const belum = siap ? items.filter((p) => !dibaca.has(p.id)) : []
+  const hapusSemua = () => bersihkan(items.map((p) => p.id))
 
   return (
     <>
@@ -112,7 +140,10 @@ export function PengumumanBell() {
               {belum.length > 0 && <b className="text-[#c21f24]">{belum.length} belum dibaca · </b>}
             </p>
           </div>
-          {belum.length > 0 && <TandaiSemua onClick={() => tandai(belum.map((p) => p.id))} />}
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            {belum.length > 0 && <TandaiSemua onClick={() => tandai(belum.map((p) => p.id))} />}
+            {items.length > 0 && <HapusSemua onHapus={hapusSemua} />}
+          </div>
         </div>
         <div className="-mx-5 divide-y-2 divide-dotted divide-[#161616]/15">
           {items.length === 0 ? (
@@ -146,9 +177,11 @@ export function PengumumanBell() {
   )
 }
 
-export function PengumumanListView({ items, pembaca }: { items: PengumumanAnggota[]; pembaca: string }) {
+export function PengumumanListView({ items: semua, pembaca }: { items: PengumumanAnggota[]; pembaca: string }) {
   const router = useRouter()
   const { siap, dibaca, tandai } = useDibaca(pembaca)
+  const { batas, bersihkan } = useBersih(pembaca)
+  const items = semua.filter((p) => p.id > batas)
   const belum = siap ? items.filter((p) => !dibaca.has(p.id)) : []
   return (
     <PaperMain>
@@ -156,7 +189,14 @@ export function PengumumanListView({ items, pembaca }: { items: PengumumanAnggot
         sticker={belum.length ? `${belum.length} belum dibaca` : 'Kabar dari LevelUP'}
         title="Pengumuman"
         leading={<IconButton icon="chevronLeft" label="Kembali" onClick={() => router.push('/demo-preview/dashboard')} className="-rotate-3" />}
-        action={belum.length > 0 ? <TandaiSemua onClick={() => tandai(belum.map((p) => p.id))} /> : undefined}
+        action={
+          items.length > 0 ? (
+            <div className="flex flex-col items-end gap-1.5">
+              {belum.length > 0 && <TandaiSemua onClick={() => tandai(belum.map((p) => p.id))} />}
+              <HapusSemua onHapus={() => bersihkan(items.map((p) => p.id))} />
+            </div>
+          ) : undefined
+        }
       />
       <div className="px-5 mt-5 pb-6">
         {items.length === 0 ? (
@@ -183,7 +223,106 @@ export function PengumumanListView({ items, pembaca }: { items: PengumumanAnggot
   )
 }
 
-export function PengumumanDetailView({ item, pembaca }: { item: PengumumanAnggota | null; pembaca: string }) {
+const UCAPAN_CEPAT = ['Selamat ulang tahun! 🎉', 'Tuhan Yesus memberkati 🙏', 'Sehat & semangat melayani terus! 💛']
+
+/** Ucapan teman sekota: daftar + (untuk teman) form ucapkan selamat. Yang berulang tahun hanya membaca. */
+function UcapanUltahView({ item, ucapan, bolehKirim, idSaya }: { item: PengumumanAnggota; ucapan: UcapanUltah[]; bolehKirim: boolean; idSaya: number | null }) {
+  const router = useRouter()
+  const milikku = ucapan.find((u) => u.idDari === idSaya)
+  const [teks, setTeks] = useState('')
+  const [edit, setEdit] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [kirim, setKirim] = useState(false)
+  const diri = item.ultah?.diri ?? false
+  const tampilForm = bolehKirim && (!milikku || edit)
+
+  async function submit() {
+    setKirim(true)
+    setError(null)
+    try {
+      const r = await kirimUcapanUltah(item.id, teks)
+      if (!r.ok) return setError(r.error)
+      setEdit(false)
+      setTeks('')
+      router.refresh()
+    } catch {
+      setError('Gagal mengirim, coba lagi')
+    } finally {
+      setKirim(false)
+    }
+  }
+
+  return (
+    <>
+      {tampilForm && (
+        <section className={`${PANEL} p-4 space-y-3`}>
+          <p className={`${LABEL} text-[10px] font-bold`}>Ucapkan selamat untuk {item.ultah?.nama}</p>
+          <div className="flex flex-wrap gap-2">
+            {UCAPAN_CEPAT.map((c) => (
+              <button key={c} type="button" onClick={() => setTeks(c)} className={`${MONO} rounded-full bg-[#ffd83d]/60 px-3 py-1.5 text-[12px] ${PRESS}`}>
+                {c}
+              </button>
+            ))}
+          </div>
+          <textarea
+            value={teks}
+            onChange={(e) => setTeks(e.target.value.slice(0, MAKS_UCAPAN))}
+            rows={3}
+            placeholder="Tulis ucapanmu…"
+            className={`${PAPER_INPUT} resize-none`}
+          />
+          <div className="flex items-center justify-between gap-3">
+            <span className={`${MONO} text-[11px] text-[#57534e]`}>{teks.length}/{MAKS_UCAPAN}</span>
+            <button type="button" disabled={kirim || !teks.trim()} onClick={submit} className={`${LABEL} rounded-full bg-[#161616] text-[#ffd83d] px-4 py-2 text-[10.5px] font-bold disabled:opacity-40 ${PRESS}`}>
+              {kirim ? 'Mengirim…' : milikku ? 'Ganti ucapan' : 'Kirim ucapan'}
+            </button>
+          </div>
+          {error && <p className={`${MONO} text-[12px] text-[#c21f24]`}>{error}</p>}
+        </section>
+      )}
+      <section className="space-y-2.5">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className={`${ANTON} text-[20px] leading-none tracking-[.02em]`}>{diri ? 'Ucapan dari teman-teman kotamu' : 'Ucapan teman-teman'}</h2>
+          {milikku && !edit && bolehKirim && (
+            <button type="button" onClick={() => { setTeks(milikku.isi); setEdit(true) }} className={`${LABEL} text-[9.5px] font-bold underline underline-offset-4 decoration-dotted`}>
+              Ubah ucapanku
+            </button>
+          )}
+        </div>
+        {ucapan.length === 0 ? (
+          <p className={`${LABEL} rounded-[14px] border-2 border-dotted border-[#161616]/30 text-center text-[10.5px] text-[#57534e] py-7 px-4`}>
+            {diri ? 'Belum ada ucapan. Teman-temanmu akan menulis di sini' : 'Belum ada ucapan, jadilah yang pertama'}
+          </p>
+        ) : (
+          <ul className="space-y-2.5">
+            {ucapan.map((u) => (
+              <li key={u.idDari} className={`${PANEL} p-3.5 ${u.idDari === idSaya ? 'ring-2 ring-[#ffd83d]' : ''}`}>
+                <p className={`${MONO} text-[13.5px] leading-snug whitespace-pre-line break-words`}>{u.isi}</p>
+                <p className={`${LABEL} mt-2 flex items-center justify-between gap-2 text-[9px] text-[#57534e]`}>
+                  <b className="truncate text-[#161616]">{u.idDari === idSaya ? 'Kamu' : u.nama}</b>
+                  <Waktu ms={u.waktuMs} className="shrink-0" />
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </>
+  )
+}
+
+export function PengumumanDetailView({
+  item,
+  pembaca,
+  ucapan = [],
+  idSaya = null,
+}: {
+  item: PengumumanAnggota | null
+  pembaca: string
+  ucapan?: UcapanUltah[]
+  /** id anggota yang membuka halaman (null = pengurus / admin: hanya membaca ucapan). */
+  idSaya?: number | null
+}) {
   const router = useRouter()
   const { tandai } = useDibaca(pembaca)
   // Dibuka dari tap notifikasi / link langsung: tetap dihitung sudah dibaca.
@@ -219,6 +358,7 @@ export function PengumumanDetailView({ item, pembaca }: { item: PengumumanAnggot
               <Icon name="megaphone" className="w-4 h-4" />
               Dikirim oleh <b className="text-[#161616]">LevelUP Pusat</b>
             </p>
+            {item.ultah && <UcapanUltahView item={item} ucapan={ucapan} bolehKirim={idSaya != null && !item.ultah.diri} idSaya={idSaya} />}
             {item.url && (
               <Link href={item.url} className={BTN}>
                 <Strip>

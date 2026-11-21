@@ -65,3 +65,40 @@ export function useDibaca(pembaca: string | null) {
 
   return { siap: raw !== null, dibaca, tandai }
 }
+
+/**
+ * "Hapus semua": pengumuman dengan id sampai batas itu disembunyikan dari lonceng + daftar di HP ini (per akun,
+ * localStorage). Pengumuman itu milik bersama, jadi tidak dihapus dari DB; yang baru masuk setelahnya tetap muncul.
+ */
+const EVT_BERSIH = 'levelup-pengumuman-bersih'
+const kunciBersih = (pembaca: string) => `levelup-pengumuman-bersih:${pembaca}`
+
+export function useBersih(pembaca: string | null) {
+  const k = pembaca ? kunciBersih(pembaca) : null
+  const raw = useSyncExternalStore(
+    (cb) => {
+      window.addEventListener('storage', cb)
+      window.addEventListener(EVT_BERSIH, cb)
+      return () => {
+        window.removeEventListener('storage', cb)
+        window.removeEventListener(EVT_BERSIH, cb)
+      }
+    },
+    () => (k ? baca(k) : ''),
+    () => '',
+  )
+  const batas = Number(raw) || 0
+  const bersihkan = useCallback(
+    (ids: number[]) => {
+      if (!k || !ids.length) return
+      try {
+        localStorage.setItem(k, String(Math.max(batas, ...ids)))
+      } catch {
+        return
+      }
+      window.dispatchEvent(new Event(EVT_BERSIH))
+    },
+    [k, batas],
+  )
+  return { batas, bersihkan }
+}

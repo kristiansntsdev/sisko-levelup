@@ -1,6 +1,8 @@
 /** Batas pengumuman: judul tampil penuh di notifikasi; isi lengkap di halaman pengumuman, notifikasi hanya awalnya. */
 export const MAKS_JUDUL = 80
 export const MAKS_ISI = 1000
+/** Ucapan selamat ulang tahun dari teman sekota. */
+export const MAKS_UCAPAN = 200
 
 /** Normalisasi nomor HP untuk mencocokkan peserta.nowa (teks bebas: 0812-34.., +62 812.., 62812..). Murni. */
 

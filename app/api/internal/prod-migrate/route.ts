@@ -525,6 +525,19 @@ export async function POST(req: NextRequest) {
     )
   `)
 
+  const addedUltahUcapan = await ensureTable('ultah_ucapan', `
+    CREATE TABLE ultah_ucapan (
+      id_ucapan INT NOT NULL AUTO_INCREMENT,
+      id_pengumuman INT NOT NULL,
+      id_dari INT NOT NULL,
+      isi VARCHAR(200) NOT NULL,
+      created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id_ucapan),
+      UNIQUE KEY uq_ultah_ucapan (id_pengumuman, id_dari)
+    )
+  `)
+
   // Tabel pengumuman versi awal (rilis web push pertama): tanpa target_json, isi VARCHAR(255), url default '/dashboard'.
   // ensureTable tidak mengubah tabel yang sudah ada, jadi kolomnya disusulkan di sini (idempotent).
   const addedPengumumanTargetJson = await ensureColumn('pengumuman', 'target_json',
@@ -597,6 +610,7 @@ export async function POST(req: NextRequest) {
     addedPushSubscription,
     addedPushKirim,
     addedPengumuman,
+    addedUltahUcapan,
     addedPengumumanTargetJson,
     pengumumanIsiText,
     pengumumanUrlDefault,

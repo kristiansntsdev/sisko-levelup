@@ -12,10 +12,12 @@ import {
   bersihkanKlaim, berlangganan, kirimPush, klaimPush, pushAktif, TTL_PENGINGAT,
   type Penerima, type PushOpts, type PushPayload,
 } from './send'
+import { halamanPengumuman, pastikanBarisUltah, teksUltahDiri, type OrangUltah } from './pengumuman'
 import { daftarNama, ingatH0Aktif, jendelaBuka, ultahHariIni, wibIso } from './rules'
 
 type Pesan = { to: Penerima; payload: PushPayload; opts?: PushOpts }
-type Grup = { kunci: string; pesan: () => Promise<Pesan[]> }
+/** `tulis` false = dry run: hitung penerima saja, jangan menulis apa pun ke DB. */
+type Grup = { kunci: string; pesan: (tulis: boolean) => Promise<Pesan[]> }
 export type LaporanGrup = { kunci: string; status: 'sudah' | 'kosong' | 'siap' | 'terkirim'; penerima: number; terkirim: number }
 export type LaporanJob = { job: string; status: 'di-luar-jendela' | 'ok'; grup: LaporanGrup[] }
 
@@ -32,7 +34,7 @@ async function sudahKlaim(kunci: string): Promise<boolean> {
 
 async function jalankanGrup(g: Grup, dry: boolean): Promise<LaporanGrup> {
   if (await sudahKlaim(g.kunci)) return { kunci: g.kunci, status: 'sudah', penerima: 0, terkirim: 0 }
-  const pesan = (await g.pesan()).filter((m) => hitung(m.to) > 0)
+  const pesan = (await g.pesan(!dry)).filter((m) => hitung(m.to) > 0)
   const penerima = pesan.reduce((n, m) => n + hitung(m.to), 0)
   if (dry) return { kunci: g.kunci, status: pesan.length ? 'siap' : 'kosong', penerima, terkirim: 0 }
   if (!(await klaimPush(g.kunci))) return { kunci: g.kunci, status: 'sudah', penerima: 0, terkirim: 0 }
@@ -61,14 +63,34 @@ const kotaKey = (k: string) => String(Number(k))
 
 // ───────────────────────── ulang tahun ─────────────────────────
 
-async function pesanUltah(now: Date): Promise<Pesan[]> {
-  const subs = await pesertaBerlangganan()
-  if (!subs.length) return []
+async function orangUltahHariIni(now: Date): Promise<OrangUltah[]> {
   const semua = await db.peserta.findMany({
     where: { tgllahir: { not: '' } },
     select: { id_peserta: true, nama: true, tgllahir: true, kotalevelup: true, userlevel: true },
   })
-  const ultah = semua.filter((p) => ultahHariIni(p.tgllahir, now))
+  return semua.filter((p) => ultahHariIni(p.tgllahir, now))
+}
+
+/**
+ * Yang berulang tahun: baris di halaman pengumuman (dibuat sekali per orang per hari, juga bagi yang belum
+ * mengaktifkan notifikasi) + push ucapan dari LevelUP Pusat ke dirinya. Satu kunci per orang, jadi tanggal lahir
+ * yang diubah setelah tick pagi tetap terkirim di tick berikutnya selama jendela buka.
+ */
+async function pesanUltahDiri(u: OrangUltah, now: Date, tulis: boolean): Promise<Pesan[]> {
+  const id = tulis ? await pastikanBarisUltah(u, wibIso(now)) : 0
+  const teks = teksUltahDiri(u.nama)
+  return [{
+    to: { peserta: [u.id_peserta] },
+    payload: { ...teks, url: id ? halamanPengumuman(id) : '/dashboard/pengumuman', tag: `ultah-diri-${u.id_peserta}-${wibIso(now)}` },
+    opts: DEKAT,
+  }]
+}
+
+/** Push ke teman: satu pesan per hari per penerima, nama yang berulang tahun digabung. */
+async function pesanUltah(now: Date): Promise<Pesan[]> {
+  const subs = await pesertaBerlangganan()
+  if (!subs.length) return []
+  const ultah = await orangUltahHariIni(now)
   if (!ultah.length) return []
   const kota = await petaKota()
   const namaKota = (p: { kotalevelup: string }) => kota.get(kotaKey(p.kotalevelup)) ?? 'LevelUP'
@@ -93,7 +115,7 @@ async function pesanUltah(now: Date): Promise<Pesan[]> {
   }
   return [...bucket.values()].map((b) => ({
     to: { peserta: b.ids },
-    payload: { title: 'Ulang tahun hari ini 🎂', body: `Doakan & ucapkan selamat untuk ${b.teks}`, url: '/dashboard', tag: `ultah-${wibIso(now)}` },
+    payload: { title: 'Ulang tahun hari ini 🎂', body: `Doakan & ucapkan selamat untuk ${b.teks}`, url: '/dashboard/pengumuman', tag: `ultah-${wibIso(now)}` },
     opts: DEKAT,
   }))
 }
@@ -160,7 +182,13 @@ async function eventHariIni(now: Date): Promise<EventPush[]> {
 // ───────────────────────── daftar job ─────────────────────────
 
 async function grupUltah(now: Date): Promise<Grup[]> {
-  return [{ kunci: `ultah:${wibIso(now)}`, pesan: () => pesanUltah(now) }]
+  const tgl = wibIso(now)
+  const diri: Grup[] = (await orangUltahHariIni(now)).map((u) => ({
+    kunci: `ultah-diri:${tgl}:${u.id_peserta}`,
+    pesan: (tulis) => pesanUltahDiri(u, now, tulis),
+  }))
+  // Baris halaman dibuat dulu (grup `diri`), baru push ke teman.
+  return [...diri, { kunci: `ultah:${tgl}`, pesan: () => pesanUltah(now) }]
 }
 
 async function grupAcaraHariIni(now: Date): Promise<Grup[]> {

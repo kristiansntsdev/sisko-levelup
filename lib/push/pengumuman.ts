@@ -36,10 +36,19 @@ export function halamanPengumuman(id: number): string {
 }
 
 /** Disimpan di pengumuman.target_json: siapa yang boleh melihat halaman pengumuman. */
-type TargetTersimpan = { semua: boolean; kota: string[]; peserta: number[]; pengurus?: number[] }
+type TargetTersimpan = {
+  semua: boolean
+  kota: string[]
+  peserta: number[]
+  pengurus?: number[]
+  /** Baris ulang tahun: siapa yang berulang tahun (kota + level menentukan siapa yang boleh melihat). */
+  ultah?: { id: number; nama: string; kota: string; level: string }
+}
 
 /** Pengumuman pribadi otomatis saat notifikasi diaktifkan: tidak tampil di daftar admin. */
 export const TIPE_AKTIVASI = 'aktivasi'
+/** Satu baris per orang yang berulang tahun per hari (target_nilai = "{id}:{yyyy-mm-dd}"): tidak tampil di daftar admin. */
+export const TIPE_ULTAH = 'ultah'
 
 export type AnggotaOpsi = { id: number; label: string; punyaPerangkat: boolean }
 
@@ -251,9 +260,9 @@ export async function daftarPengumuman(halaman: number): Promise<{ siap: boolean
         }[]
       >`SELECT id_pengumuman, judul, isi, image_url, url, target_tipe, target_nilai, cocok, perangkat, terkirim, gagal,
                UNIX_TIMESTAMP(created_at) AS ts
-        FROM pengumuman WHERE target_tipe <> ${TIPE_AKTIVASI}
+        FROM pengumuman WHERE target_tipe NOT IN (${TIPE_AKTIVASI}, ${TIPE_ULTAH})
         ORDER BY id_pengumuman DESC LIMIT ${PER_HALAMAN} OFFSET ${offset}`,
-      db.$queryRaw<{ n: bigint | number }[]>`SELECT COUNT(*) AS n FROM pengumuman WHERE target_tipe <> ${TIPE_AKTIVASI}`,
+      db.$queryRaw<{ n: bigint | number }[]>`SELECT COUNT(*) AS n FROM pengumuman WHERE target_tipe NOT IN (${TIPE_AKTIVASI}, ${TIPE_ULTAH})`,
     ])
     return {
       siap: true,
@@ -302,6 +311,8 @@ export type PembacaPengumuman = {
   kota: string | null
   pengurus: boolean
   idPengurus: number | null
+  /** userlevel anggota (0-5); null kalau bukan anggota. */
+  level: number | null
   admin: boolean
   /** Kunci status dibaca di HP: p{id peserta}, g{id pengurus}, atau admin. */
   kunci: string
@@ -318,34 +329,62 @@ export type PengumumanAnggota = {
   waktuMs: number
   /** Dikirim kurang dari 3 hari lalu. */
   baru: boolean
+  /** Baris ulang tahun: `diri` = pembaca sendiri yang berulang tahun (tampil sebagai ucapan LevelUP Pusat). */
+  ultah?: { id: number; diri: boolean; nama: string }
 }
 
 type RowAnggota = { id_pengumuman: number; judul: string; isi: string; image_url: string; url: string; target_tipe: string; target_json: string | null; ts: bigint | number }
 
+function bacaTarget(r: RowAnggota): TargetTersimpan | null {
+  try {
+    return r.target_json ? (JSON.parse(r.target_json) as TargetTersimpan) : null
+  } catch {
+    return null
+  }
+}
+
+/** Aturan sama dengan penerima push ulang tahun: Pusat semua; PIC sekota + PIC lain; level 0-3 sekota. Yang berulang tahun selalu boleh. */
+function bolehLihatUltah(u: NonNullable<TargetTersimpan['ultah']>, v: PembacaPengumuman): boolean {
+  if (v.idPeserta == null) return false
+  if (v.idPeserta === u.id) return true
+  const level = v.level ?? 0
+  if (level >= 5) return true
+  const sekota = v.kota != null && kotaKey(v.kota) === u.kota
+  return level === 4 ? sekota || u.level === '4' : sekota
+}
+
 function bolehLihat(r: RowAnggota, v: PembacaPengumuman): boolean {
   if (v.admin) return true
-  let t: TargetTersimpan | null = null
-  try {
-    t = r.target_json ? (JSON.parse(r.target_json) as TargetTersimpan) : null
-  } catch {
-    t = null
-  }
+  const t = bacaTarget(r)
+  if (r.target_tipe === TIPE_ULTAH) return t?.ultah ? bolehLihatUltah(t.ultah, v) : false
   if (r.target_tipe === 'semua' || t?.semua) return v.idPeserta != null || v.pengurus
   if (!t) return false
   if (v.idPeserta != null && (t.peserta.includes(v.idPeserta) || (v.kota != null && t.kota.includes(kotaKey(v.kota))))) return true
   return v.idPengurus != null && (t.pengurus ?? []).includes(v.idPengurus)
 }
 
-function keAnggota(r: RowAnggota): PengumumanAnggota {
+/** Isi ucapan dari LevelUP Pusat untuk yang berulang tahun (otomatis). */
+export function teksUltahDiri(nama: string): { title: string; body: string } {
+  return {
+    title: `Selamat ulang tahun, ${nama}! 🎂`,
+    body: 'Tuhan Yesus memberkati di usia barumu. Selamat ulang tahun dari LevelUP Pusat! Teman-teman sekotamu juga bisa menuliskan ucapan di sini.',
+  }
+}
+
+function keAnggota(r: RowAnggota, v: PembacaPengumuman): PengumumanAnggota {
   const ms = epochMs(r.ts)
+  const u = r.target_tipe === TIPE_ULTAH ? bacaTarget(r)?.ultah : undefined
+  const diri = Boolean(u && v.idPeserta === u.id)
+  const teks = u && diri ? teksUltahDiri(u.nama) : null
   return {
     id: Number(r.id_pengumuman),
-    judul: r.judul,
-    isi: r.isi,
+    judul: teks?.title ?? r.judul,
+    isi: teks?.body ?? r.isi,
     gambar: r.image_url || null,
     url: r.url || null,
     waktuMs: ms,
     baru: Date.now() - ms < 3 * 24 * 60 * 60 * 1000,
+    ultah: u ? { id: u.id, diri, nama: u.nama } : undefined,
   }
 }
 
@@ -355,7 +394,7 @@ export async function pengumumanUntuk(v: PembacaPengumuman, limit = 30): Promise
     const rows = await db.$queryRaw<RowAnggota[]>`
       SELECT id_pengumuman, judul, isi, image_url, url, target_tipe, target_json, UNIX_TIMESTAMP(created_at) AS ts
       FROM pengumuman ORDER BY id_pengumuman DESC LIMIT 300`
-    return rows.filter((r) => bolehLihat(r, v)).slice(0, limit).map(keAnggota)
+    return rows.filter((r) => bolehLihat(r, v)).slice(0, limit).map((r) => keAnggota(r, v))
   } catch (err) {
     console.error('[pengumuman] daftar anggota gagal', err)
     return []
@@ -370,9 +409,39 @@ export async function pengumumanDetail(id: number, v: PembacaPengumuman): Promis
       SELECT id_pengumuman, judul, isi, image_url, url, target_tipe, target_json, UNIX_TIMESTAMP(created_at) AS ts
       FROM pengumuman WHERE id_pengumuman = ${id} LIMIT 1`
     const r = rows[0]
-    return r && bolehLihat(r, v) ? keAnggota(r) : null
+    return r && bolehLihat(r, v) ? keAnggota(r, v) : null
   } catch (err) {
     console.error('[pengumuman] detail gagal', err)
     return null
   }
+}
+
+// ───────────────────────── ulang tahun ─────────────────────────
+
+export type OrangUltah = { id_peserta: number; nama: string; kotalevelup: string; userlevel: string }
+
+/**
+ * Baris ulang tahun untuk satu orang pada satu hari (WIB); dibuat sekali (idempotent) dan dipakai bersama:
+ * yang berulang tahun melihat ucapan LevelUP Pusat + ucapan teman, teman sekota melihat tombol Ucapkan selamat.
+ * Mengembalikan id pengumuman.
+ */
+export async function pastikanBarisUltah(u: OrangUltah, tanggalWib: string): Promise<number> {
+  const nilai = `${u.id_peserta}:${tanggalWib}`
+  const ada = await db.$queryRaw<{ id: number }[]>`
+    SELECT id_pengumuman AS id FROM pengumuman WHERE target_tipe = ${TIPE_ULTAH} AND target_nilai = ${nilai} LIMIT 1`
+  if (ada[0]) return Number(ada[0].id)
+  const tersimpan: TargetTersimpan = {
+    semua: false,
+    kota: [],
+    peserta: [],
+    ultah: { id: u.id_peserta, nama: u.nama, kota: kotaKey(u.kotalevelup), level: u.userlevel },
+  }
+  const judul = `${u.nama} ulang tahun hari ini 🎂`.slice(0, 80)
+  return db.$transaction(async (tx) => {
+    await tx.$executeRaw`
+      INSERT INTO pengumuman (judul, isi, image_url, url, target_tipe, target_nilai, target_json, cocok)
+      VALUES (${judul}, ${`Doakan dan ucapkan selamat untuk ${u.nama}.`}, '', '', ${TIPE_ULTAH}, ${nilai}, ${JSON.stringify(tersimpan)}, 0)`
+    const r = await tx.$queryRaw<{ id: bigint | number }[]>`SELECT LAST_INSERT_ID() AS id`
+    return Number(r[0]?.id)
+  })
 }
