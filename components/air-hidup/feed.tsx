@@ -31,12 +31,6 @@ export function LaporanCard({ l, onAmin }: { l: WwLaporan; onAmin?: (id: number)
         </p>
         <p className={`${ANTON} mt-1 text-[21px] leading-tight tracking-[.01em]`}>{l.namaKota}</p>
         <p className={`${MONO} mt-2 text-[13px] leading-relaxed`}>“{l.isi}”</p>
-        {l.alirKe && (
-          <p className={`${MONO} mt-2.5 flex items-start gap-1.5 text-[11.5px] font-bold`} style={{ color: WATER }}>
-            <DropIcon className="mt-px h-3.5 w-3.5 shrink-0" />
-            Mengalirkan Air Hidup ke {l.alirKe.namaKota}
-          </p>
-        )}
         <div className="mt-3 flex items-center justify-between">
           <span className={`${LABEL} text-[9.5px] text-[#57534e]`}>oleh {l.oleh}</span>
           {onAmin ? (

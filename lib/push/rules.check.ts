@@ -88,4 +88,8 @@ assert.equal(pesanAktif('Esra Londa').body, 'Selamat Fitur Notifikasi LevelUP te
 assert.equal(pesanAktif('  ').body.endsWith('- Sahabat LevelUP'), true)
 assert.ok(pesanAktif('Kristian Epa Froditus Santoso').body.length <= 180)
 
+assert.equal(jendelaBuka('air', d('2026-08-27T01:59:00Z')), false) // 08:59 WIB
+assert.equal(jendelaBuka('air', d('2026-08-27T02:00:00Z')), true) // 09:00 WIB
+assert.equal(jendelaBuka('air', d('2026-08-27T05:00:00Z')), false) // 12:00 WIB
+
 console.log('push rules ok')

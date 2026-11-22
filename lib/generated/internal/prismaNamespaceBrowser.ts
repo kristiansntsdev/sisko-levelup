@@ -106,7 +106,8 @@ export const ModelName = {
   artikel: 'artikel',
   artikel_view: 'artikel_view',
   artikel_like: 'artikel_like',
-  artikel_komentar: 'artikel_komentar'
+  artikel_komentar: 'artikel_komentar',
+  ww_laporan: 'ww_laporan'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -846,6 +847,20 @@ export const Artikel_komentarScalarFieldEnum = {
 export type Artikel_komentarScalarFieldEnum = (typeof Artikel_komentarScalarFieldEnum)[keyof typeof Artikel_komentarScalarFieldEnum]
 
 
+export const Ww_laporanScalarFieldEnum = {
+  id_laporan: 'id_laporan',
+  id_cabang: 'id_cabang',
+  id_peserta: 'id_peserta',
+  tanggal: 'tanggal',
+  jumlah: 'jumlah',
+  isi: 'isi',
+  foto_url: 'foto_url',
+  created_at: 'created_at'
+} as const
+
+export type Ww_laporanScalarFieldEnum = (typeof Ww_laporanScalarFieldEnum)[keyof typeof Ww_laporanScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1407,4 +1422,12 @@ export const artikel_komentarOrderByRelevanceFieldEnum = {
 } as const
 
 export type artikel_komentarOrderByRelevanceFieldEnum = (typeof artikel_komentarOrderByRelevanceFieldEnum)[keyof typeof artikel_komentarOrderByRelevanceFieldEnum]
+
+
+export const ww_laporanOrderByRelevanceFieldEnum = {
+  isi: 'isi',
+  foto_url: 'foto_url'
+} as const
+
+export type ww_laporanOrderByRelevanceFieldEnum = (typeof ww_laporanOrderByRelevanceFieldEnum)[keyof typeof ww_laporanOrderByRelevanceFieldEnum]
 

@@ -9,6 +9,10 @@ import { getRegistrasiByPeserta } from '@/lib/actions/registrasi'
 import { getPendingSquadForMe, joinSquad, joinVolunteer } from '@/lib/actions/upgrade'
 import { getActiveSessions } from '@/lib/actions/pwa-auth'
 import { getBetaAksesSaya } from '@/lib/actions/beta'
+import { getAirBeranda, toggleAmin } from '@/lib/actions/air-hidup'
+import type { AirBeranda } from '@/lib/air-hidup'
+import { AirBerandaKota } from '@/components/air-hidup/beranda-panel'
+import { KabarBeranda } from '@/components/air-hidup/screens'
 import { BETA_WEWORSHIP, WEWORSHIP_URL } from '@/lib/beta'
 import { LEVEL_STEPS, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
 import { PEMURIDAN_AKTIF } from '@/lib/pemuridan'
@@ -199,6 +203,7 @@ export default function DashboardPage() {
   const [toast, setToast] = useState<string | null>(null)
   const [soon, setSoon] = useState<string | null>(null)
   const [beta, setBeta] = useState<string[]>([])
+  const [air, setAir] = useState<AirBeranda | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -237,6 +242,12 @@ export default function DashboardPage() {
       setPengurusDest(sessions.pengurus?.dest ?? null)
       setLoading(false)
     })
+  }, [session?.user?.idPeserta])
+
+  // Air Hidup dimuat terpisah: lambat atau gagal tidak menahan Beranda.
+  useEffect(() => {
+    if (!session?.user?.idPeserta) return
+    getAirBeranda().then(setAir)
   }, [session?.user?.idPeserta])
 
   function flash(msg: string) {
@@ -304,6 +315,10 @@ export default function DashboardPage() {
       <div className="px-5 mt-4 flex flex-col gap-7">
         {card && <MemberCard m={card} onClick={() => router.push('/dashboard/kartu')} />}
 
+        {air?.kota && (
+          <AirBerandaKota kota={air.kota} isPic={air.isPic} pembaca={air.pembaca} feedHref="/dashboard/air-hidup" picHref="/dashboard/pic" laporHref="/dashboard/pic/lapor" />
+        )}
+
         {at >= 0 && at < 3 && userLevel && (
           <LevelPanel
             level={userLevel}
@@ -321,6 +336,8 @@ export default function DashboardPage() {
             <FeatureTile key={f.t} f={f} tilt={TILT[i]} beta={beta} onSoon={setSoon} />
           ))}
         </div>
+
+        {air && <KabarBeranda laporan={air.laporan} feedHref="/dashboard/air-hidup" toggleAmin={toggleAmin} />}
 
         <section>
           <SectionHead title="Tiket Aktif" action={{ href: '/dashboard/tiket', label: 'Semua' }} />

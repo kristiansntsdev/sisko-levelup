@@ -17,6 +17,12 @@ export const AIR_STAGE_LABEL: Record<AirStage, string> = {
   belum: 'Belum pernah minum',
 }
 
+export const PIC_USERLEVEL = '4'
+/** Core ke atas melihat bar air kotanya di Beranda. */
+export const AIR_MIN_USERLEVEL = 3
+/** Push "Airmu mau kering" berhenti di sini supaya pembersihan push_kirim (90 hari) tidak membuatnya terulang. */
+export const AIR_PUSH_MAX_HARI = 69
+
 export type WwLaporan = {
   id: number
   idCabang: number
@@ -27,7 +33,6 @@ export type WwLaporan = {
   isi: string
   foto: string
   oleh: string
-  alirKe: { idCabang: number; namaKota: string } | null
   amin: number
   aminSaya: boolean
 }
@@ -35,14 +40,19 @@ export type WwLaporan = {
 export type KotaAir = {
   idCabang: number
   namaKota: string
+  /** laporan WW terakhir (yyyy-mm-dd); null = belum ada laporan */
   terakhir: string | null
-  /** hari sejak laporan terakhir; null = belum pernah */
+  /** awal siklus air: laporan terakhir atau hari mulai kota, mana yang lebih baru */
+  sejak: string | null
+  /** hari sejak `sejak`; null = belum pernah minum */
   hari: number | null
+  /** hari sejak laporan sungguhan; null = belum ada laporan */
+  hariLapor: number | null
   level: number
   stage: AirStage
 }
 
-export type LaporanInput = { tanggal: string; jumlah: number; isi: string; foto?: string }
+export type LaporanInput = { tanggal: string; jumlah: number; isi: string }
 
 const DAY = 24 * 60 * 60 * 1000
 
@@ -69,15 +79,25 @@ export function airStage(hari: number | null): AirStage {
   return 'melimpah'
 }
 
-/** Status satu kota dari tanggal laporan terakhirnya; `today` = hari WIB sekarang. */
-export function kotaAir(idCabang: number, namaKota: string, terakhir: string | null, today: string): KotaAir {
-  const hari = terakhir ? Math.max(0, daysBetween(terakhir, today)) : null
-  return { idCabang, namaKota, terakhir, hari, level: airLevel(hari), stage: airStage(hari) }
+/**
+ * Status satu kota. Air mulai penuh di `mulai` (hari kota masuk sistem), lalu tiap laporan WW mengisi penuh lagi:
+ * siklus dihitung dari yang paling baru di antara keduanya. `today` = hari WIB sekarang.
+ */
+export function kotaAir(idCabang: number, namaKota: string, terakhir: string | null, today: string, mulai: string | null = null): KotaAir {
+  const sejak = [terakhir, mulai].filter((d): d is string => !!d).sort().at(-1) ?? null
+  const dari = (d: string | null) => (d ? Math.max(0, daysBetween(d, today)) : null)
+  const hari = dari(sejak)
+  return { idCabang, namaKota, terakhir, sejak, hari, hariLapor: dari(terakhir), level: airLevel(hari), stage: airStage(hari) }
 }
 
 /** Pop-up "Airmu mau kering" hanya di dua tahap ini. */
 export function perluPopup(stage: AirStage): boolean {
   return stage === 'haus' || stage === 'kering'
+}
+
+/** Push "Airmu mau kering": Haus sampai AIR_PUSH_MAX_HARI, sekali per tahap per siklus. */
+export function perluPush(kota: Pick<KotaAir, 'hari'>): boolean {
+  return kota.hari != null && kota.hari >= AIR_HAUS_HARI && kota.hari <= AIR_PUSH_MAX_HARI
 }
 
 /** Terhaus dulu: kota yang paling lama tidak lapor (belum pernah = paling atas), lalu nama. */
@@ -113,4 +133,20 @@ export function hitungNasional(laporan: Pick<WwLaporan, 'idCabang' | 'tanggal' |
     return d >= 0 && d < window
   })
   return { orang: recent.reduce((s, l) => s + l.jumlah, 0), kota: new Set(recent.map((l) => l.idCabang)).size }
+}
+
+/** kota = null untuk anggota di bawah Core (hanya Kabar Terbaru) */
+export type AirBeranda = { kota: KotaAir | null; isPic: boolean; pembaca: string; laporan: WwLaporan[] }
+export type PicData = { today: string; kota: KotaAir; namaKota: string; laporanKota: WwLaporan[] }
+export type AliranData = {
+  today: string
+  nasional: { orang: number; kota: number }
+  /** bar air tiap kota: hanya LevelUP Pusat (userlevel 5) */
+  kota?: KotaAir[]
+  laporan: WwLaporan[]
+}
+
+/** Mengurai FormData Lapor WW (action asli dan shim demo memakai ini). */
+export function laporanDari(fd: FormData): LaporanInput {
+  return { tanggal: String(fd.get('tanggal') ?? ''), jumlah: Number(fd.get('jumlah')), isi: String(fd.get('isi') ?? '') }
 }

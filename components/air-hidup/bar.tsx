@@ -58,7 +58,7 @@ export function AirBar({ kota, size = 'sm', showName = true }: { kota: KotaAir; 
           <span className={`${MONO} absolute inset-y-0 right-3 flex items-center font-bold ${lg ? 'text-[13px]' : 'text-[10px]'} ${pct > 85 ? 'text-white' : 'text-[#161616]'}`}>{pct}%</span>
         )}
       </div>
-      <p className={`${LABEL} mt-1.5 text-[9.5px] text-[#57534e]`}>Terakhir minum: {hariLabel(kota.hari)}</p>
+      <p className={`${LABEL} mt-1.5 text-[9.5px] text-[#57534e]`}>Terakhir minum: {hariLabel(kota.hariLapor)}</p>
     </div>
   )
 }

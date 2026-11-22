@@ -327,3 +327,9 @@ export type artikel_like = Prisma.artikel_likeModel
  * Komentar publik tanpa login; langsung tampil, BRIM bisa menyembunyikan (hidden=1) atau menghapus.
  */
 export type artikel_komentar = Prisma.artikel_komentarModel
+/**
+ * Model ww_laporan
+ * Laporan WW dari PIC (Air Hidup). `tanggal` = hari WIB WW dilaksanakan. Dibuat lewat Prisma (tercatat di app_log);
+ * ww_amin (Amin per anggota) dan ww_kota (hari kota mulai penuh) ditulis lewat raw SQL tanpa model.
+ */
+export type ww_laporan = Prisma.ww_laporanModel

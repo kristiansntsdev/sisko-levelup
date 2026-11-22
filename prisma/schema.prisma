@@ -707,3 +707,19 @@ model artikel_komentar {
 
   @@index([id_artikel, created_at], map: "idx_artikel_komentar")
 }
+
+/// Laporan WW dari PIC (Air Hidup). `tanggal` = hari WIB WW dilaksanakan. Dibuat lewat Prisma (tercatat di app_log);
+/// ww_amin (Amin per anggota) dan ww_kota (hari kota mulai penuh) ditulis lewat raw SQL tanpa model.
+model ww_laporan {
+  id_laporan Int      @id @default(autoincrement())
+  id_cabang  Int
+  id_peserta Int
+  tanggal    DateTime @db.Date
+  jumlah     Int
+  isi        String   @db.VarChar(280)
+  foto_url   String   @default("") @db.VarChar(500)
+  created_at DateTime @default(now()) @db.DateTime(0)
+
+  @@index([id_cabang, tanggal], map: "idx_ww_laporan_cabang")
+  @@index([tanggal], map: "idx_ww_laporan_tanggal")
+}

@@ -1,7 +1,9 @@
 'use client'
+import { useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { ANTON, BTN, BTN_OUTLINE, LABEL, MONO, PANEL, PRESS, Strip, TAPE } from '@/components/pwa/paper-ui'
-import { AIR_STAGE_LABEL, type KotaAir } from '@/lib/air-hidup'
+import { AIR_STAGE_LABEL, perluPopup, type KotaAir } from '@/lib/air-hidup'
+import { PaperToast } from '@/components/pwa/paper-ui'
 import { AirBar, DropIcon } from './bar'
 
 /** Panel di Beranda untuk Core ke atas: bar air kota sendiri + tautan ke aliran dan (PIC) dashboard PIC. */
@@ -88,4 +90,64 @@ export function AirPopup({
 
 export function popupText(namaKota: string): string {
   return `Kak, air hidup ${namaKota} mau kering nih. Yuk kita WW lagi, terus lapor di aplikasi LevelUP supaya kota lain ikut minum juga.`
+}
+
+// Pop-up sekali per tahap per siklus air, per HP per akun (localStorage, pola lonceng Pengumuman).
+const POPUP_EVT = 'levelup-air-popup'
+const popupKey = (pembaca: string) => `levelup-air-popup:${pembaca}`
+const popupTanda = (k: KotaAir) => `${k.stage}:${k.sejak ?? ''}`
+
+function bacaPopup(pembaca: string): string {
+  try {
+    return localStorage.getItem(popupKey(pembaca)) ?? ''
+  } catch {
+    return ''
+  }
+}
+
+function subscribePopup(cb: () => void) {
+  window.addEventListener('storage', cb)
+  window.addEventListener(POPUP_EVT, cb)
+  return () => {
+    window.removeEventListener('storage', cb)
+    window.removeEventListener(POPUP_EVT, cb)
+  }
+}
+
+/** Panel + pop-up di Beranda (Core ke atas). Data dari server; pop-up tertutup disimpan di HP ini. */
+export function AirBerandaKota({ kota, isPic, pembaca, feedHref, picHref, laporHref }: { kota: KotaAir; isPic: boolean; pembaca: string; feedHref: string; picHref: string; laporHref: string }) {
+  const [toast, setToast] = useState<string | null>(null)
+  // null di render server: pop-up tidak ikut HTML awal, jadi tidak berkedip.
+  const tersimpan = useSyncExternalStore(subscribePopup, () => bacaPopup(pembaca), () => null)
+  const tanda = popupTanda(kota)
+  const tampil = perluPopup(kota.stage) && tersimpan !== null && tersimpan !== tanda
+
+  function tutup() {
+    try {
+      localStorage.setItem(popupKey(pembaca), tanda)
+    } catch {
+      /* penyimpanan diblokir: pop-up muncul lagi pada pembukaan berikutnya */
+    }
+    window.dispatchEvent(new Event(POPUP_EVT))
+  }
+
+  async function ajak() {
+    const text = popupText(kota.namaKota)
+    try {
+      await navigator.clipboard.writeText(text)
+      setToast('Pesan disalin. Kirim ke PIC-mu lewat WhatsApp.')
+    } catch {
+      setToast('Salin manual: ' + text)
+    }
+    setTimeout(() => setToast(null), 3200)
+    tutup()
+  }
+
+  return (
+    <>
+      <AirBerandaPanel kota={kota} isPic={isPic} feedHref={feedHref} picHref={picHref} />
+      {tampil && <AirPopup kota={kota} isPic={isPic} laporHref={laporHref} onClose={tutup} onAjak={ajak} />}
+      <PaperToast msg={toast} />
+    </>
+  )
 }

@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { AirHidupLanding } from '@/components/air-hidup/landing-section'
 import { Brush, LIFT, MK, PRESS, Strip, ZinePage } from '@/components/landing/zine'
 import { useAir } from '@/components/demo-preview/air-hidup'
-import { getAirHidupFeed } from '@/components/demo-preview/shim/actions/air-hidup'
+import { getAliranData } from '@/components/demo-preview/shim/actions/air-hidup'
 
 // Preview of the Air Hidup section on the landing page. The real landing (/) is untouched: it reads the production DB.
 export default function AirHidupLandingPreview() {
-  const feed = useAir(getAirHidupFeed)
+  const feed = useAir(getAliranData)
   return (
     <ZinePage>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 pt-[max(1.1rem,env(safe-area-inset-top))] sm:px-8">

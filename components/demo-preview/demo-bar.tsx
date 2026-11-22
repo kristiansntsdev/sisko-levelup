@@ -48,7 +48,7 @@ export function DemoBar() {
         <p className={`${LABEL} mt-4 text-[10px] font-bold text-[#57534e]`}>Simulasi waktu Air Hidup · hari ke +{db.air_hari}</p>
         <div className="mt-1.5 grid grid-cols-3 gap-2">
           {[1, 7, 30].map((n) => (
-            <button key={n} type="button" onClick={() => void lompatHari(n)} className={`${ANTON} rounded-sm py-2 text-[15px] tracking-[.03em] ring-2 ring-inset ring-[#161616] ${PRESS}`}>
+            <button key={n} type="button" onClick={() => void lompatHari(n).then(() => window.location.reload())} className={`${ANTON} rounded-sm py-2 text-[15px] tracking-[.03em] ring-2 ring-inset ring-[#161616] ${PRESS}`}>
               +{n} hari
             </button>
           ))}

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { addDays, airLevel, airStage, daysBetween, hariLabel, hitungNasional, kotaAir, perluPopup, urutKotaHaus, validateLaporan } from './air-hidup'
+import { addDays, airLevel, airStage, daysBetween, hariLabel, hitungNasional, kotaAir, perluPopup, perluPush, urutKotaHaus, validateLaporan } from './air-hidup'
 
 assert.equal(airStage(null), 'belum')
 assert.equal(airStage(0), 'melimpah')
@@ -38,6 +38,23 @@ const urut = urutKotaHaus([
   { namaKota: 'C', hari: null },
 ])
 assert.deepEqual(urut.map((x) => x.namaKota), ['C', 'A', 'B'], 'belum pernah dulu, lalu terhaus')
+
+// mulai = air penuh di hari kota masuk sistem, laporan yang lebih baru menggantikannya
+const m = kotaAir(1, 'X', null, '2026-11-10', '2026-11-01')
+assert.equal(m.hari, 9)
+assert.equal(m.hariLapor, null, 'belum ada laporan sungguhan')
+assert.equal(m.stage, 'segar')
+const m2 = kotaAir(1, 'X', '2026-11-05', '2026-11-10', '2026-11-01')
+assert.equal(m2.sejak, '2026-11-05', 'laporan lebih baru dari mulai')
+assert.equal(m2.hariLapor, 5)
+const m3 = kotaAir(1, 'X', '2026-09-01', '2026-11-10', '2026-11-01')
+assert.equal(m3.sejak, '2026-11-01', 'mulai lebih baru dari laporan lama')
+assert.equal(kotaAir(1, 'X', null, '2026-11-10', '2026-12-01').hari, 0, 'mulai di masa depan tidak negatif')
+assert.equal(perluPush({ hari: 29 }), false)
+assert.equal(perluPush({ hari: 30 }), true)
+assert.equal(perluPush({ hari: 69 }), true)
+assert.equal(perluPush({ hari: 70 }), false)
+assert.equal(perluPush({ hari: null }), false)
 
 assert.equal(hariLabel(null), 'belum ada laporan')
 assert.equal(hariLabel(0), 'hari ini')

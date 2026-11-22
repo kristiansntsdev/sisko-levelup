@@ -585,6 +585,41 @@ export async function POST(req: NextRequest) {
     ? await db.$executeRaw`UPDATE pengumuman SET url = '' WHERE url = '/dashboard' AND target_json IS NULL`
     : 0
 
+  // Air Hidup (laporan WW PIC). Hanya tabel baru, jadi aman satu rilis dengan kodenya.
+  const addedWwLaporan = await ensureTable('ww_laporan', `
+    CREATE TABLE ww_laporan (
+      id_laporan INT NOT NULL AUTO_INCREMENT,
+      id_cabang INT NOT NULL,
+      id_peserta INT NOT NULL,
+      tanggal DATE NOT NULL,
+      jumlah INT NOT NULL,
+      isi VARCHAR(280) NOT NULL,
+      foto_url VARCHAR(500) NOT NULL DEFAULT '',
+      created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id_laporan),
+      KEY idx_ww_laporan_cabang (id_cabang, tanggal),
+      KEY idx_ww_laporan_tanggal (tanggal)
+    ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `)
+  const addedWwAmin = await ensureTable('ww_amin', `
+    CREATE TABLE ww_amin (
+      id_laporan INT NOT NULL,
+      id_peserta INT NOT NULL,
+      created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id_laporan, id_peserta)
+    ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `)
+  const addedWwKota = await ensureTable('ww_kota', `
+    CREATE TABLE ww_kota (
+      id_cabang INT NOT NULL,
+      mulai DATE NOT NULL,
+      PRIMARY KEY (id_cabang)
+    )
+  `)
+  // Air tiap kota mulai penuh di hari kota itu pertama masuk sistem (MySQL berzona WIB, jadi CURDATE() = hari WIB).
+  // INSERT IGNORE: kota yang sudah punya hari mulai tidak diubah; kota baru kelak ikut mulai penuh.
+  const wwKotaDiisi = await db.$executeRaw`INSERT IGNORE INTO ww_kota (id_cabang, mulai) SELECT id_cabang, CURDATE() FROM cabang`
+
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
     data: { divisi: 'brim' },
@@ -635,6 +670,10 @@ export async function POST(req: NextRequest) {
     addedUltahUcapan,
     addedUltahLike,
     utf8mb4Dikonversi,
+    addedWwLaporan,
+    addedWwAmin,
+    addedWwKota,
+    wwKotaDiisi,
     addedPengumumanTargetJson,
     pengumumanIsiText,
     pengumumanUrlDefault,

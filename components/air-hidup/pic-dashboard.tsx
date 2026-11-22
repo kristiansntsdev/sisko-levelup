@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { ANTON, BTN, LABEL, LIFTED, MONO, PANEL, PRESS, SectionHead, Strip } from '@/components/pwa/paper-ui'
 import { Icon, type IconName } from '@/components/pwa/ui'
 import type { KotaAir, WwLaporan } from '@/lib/air-hidup'
-import { AirBar, DropIcon, WATER } from './bar'
-import { fmtTanggal, LaporanCard } from './feed'
+import { AirBar, DropIcon } from './bar'
+import { LaporanCard } from './feed'
 
 const SOON_TOOLS: { i: IconName; t: string }[] = [
   { i: 'users', t: 'Anggota' },
@@ -15,7 +15,6 @@ const SOON_TOOLS: { i: IconName; t: string }[] = [
 /** Dashboard PIC (userlevel 4). Satu-satunya alat aktif untuk sekarang: Pelaporan WW. */
 export function PicDashboard({
   kota,
-  masuk,
   laporanKota,
   laporHref,
   feedHref,
@@ -23,8 +22,6 @@ export function PicDashboard({
   onSoon,
 }: {
   kota: KotaAir
-  /** laporan kota lain yang mengalirkan Air Hidup ke kota ini (terbaru), kalau ada */
-  masuk: WwLaporan | null
   laporanKota: WwLaporan[]
   laporHref: string
   feedHref: string
@@ -45,19 +42,6 @@ export function PicDashboard({
           WW tanpa tiket cukup dilaporkan. Tidak ada minimum peserta dan tidak perlu approval.
         </p>
       </section>
-
-      {masuk && (
-        <section className={`relative px-4 py-4 ${PANEL}`} style={{ boxShadow: `inset 4px 0 0 ${WATER}` }}>
-          <p className={`${LABEL} text-[9.5px] font-bold`} style={{ color: WATER }}>
-            Air Hidup mengalir ke kalian
-          </p>
-          <p className={`${ANTON} mt-1 text-[20px] leading-tight`}>{masuk.namaKota} mengalirkan ke {kota.namaKota}</p>
-          <p className={`${MONO} mt-1.5 text-[12.5px] leading-relaxed`}>“{masuk.isi}”</p>
-          <p className={`${LABEL} mt-1.5 text-[9.5px] text-[#57534e]`}>
-            {fmtTanggal(masuk.tanggal)} · {masuk.jumlah} orang · giliran kalian minum
-          </p>
-        </section>
-      )}
 
       <section>
         <SectionHead title="Alat PIC" />

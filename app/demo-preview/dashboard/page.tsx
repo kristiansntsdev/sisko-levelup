@@ -11,11 +11,14 @@ import { getRegistrasiByPeserta } from '@/components/demo-preview/shim/actions/r
 import { getPendingSquadForMe, getPendingVolunteerForMe, joinSquad, joinVolunteer } from '@/components/demo-preview/shim/actions/upgrade'
 import { getActiveSessions } from '@/components/demo-preview/shim/actions/pwa-auth'
 import { getBetaAksesSaya } from '@/components/demo-preview/shim/actions/beta'
+import { getAirBeranda, toggleAmin } from '@/components/demo-preview/shim/actions/air-hidup'
+import type { AirBeranda } from '@/lib/air-hidup'
+import { AirBerandaKota } from '@/components/air-hidup/beranda-panel'
+import { KabarBeranda } from '@/components/air-hidup/screens'
 import { BETA_WEWORSHIP, WEWORSHIP_URL } from '@/lib/beta'
 import { LEVEL_STEPS, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
 import { PEMURIDAN_AKTIF } from '@/lib/pemuridan'
 import { ID_FONTS, MemberCard } from '@/components/pwa/member-card'
-import { AirBerandaDemo, AirKabarDemo } from '@/components/demo-preview/air-hidup'
 import { PushCard } from '@/components/demo-preview/clone/pwa/push'
 import { PengumumanBell } from '@/components/demo-preview/clone/pwa/pengumuman'
 import {
@@ -211,6 +214,7 @@ export default function DashboardPage() {
   const [toast, setToast] = useState<string | null>(null)
   const [soon, setSoon] = useState<string | null>(null)
   const [beta, setBeta] = useState<string[]>([])
+  const [air, setAir] = useState<AirBeranda | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -251,6 +255,12 @@ export default function DashboardPage() {
       setPengurusDest(sessions.pengurus?.dest ?? null)
       setLoading(false)
     })
+  }, [session?.user?.idPeserta])
+
+  // Air Hidup dimuat terpisah: lambat atau gagal tidak menahan Beranda.
+  useEffect(() => {
+    if (!session?.user?.idPeserta) return
+    getAirBeranda().then(setAir)
   }, [session?.user?.idPeserta])
 
   function flash(msg: string) {
@@ -317,7 +327,10 @@ export default function DashboardPage() {
 
       <div className="px-5 mt-4 flex flex-col gap-7">
         {card && <MemberCard m={card} onClick={() => router.push('/demo-preview/dashboard/kartu')} />}
-        <AirBerandaDemo />
+
+        {air?.kota && (
+          <AirBerandaKota kota={air.kota} isPic={air.isPic} pembaca={air.pembaca} feedHref="/demo-preview/dashboard/air-hidup" picHref="/demo-preview/dashboard/pic" laporHref="/demo-preview/dashboard/pic/lapor" />
+        )}
 
         {at >= 0 && at < 3 && userLevel && (
           <LevelPanel
@@ -338,7 +351,7 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        <AirKabarDemo />
+        {air && <KabarBeranda laporan={air.laporan} feedHref="/demo-preview/dashboard/air-hidup" toggleAmin={toggleAmin} />}
 
         <section>
           <SectionHead title="Tiket Aktif" action={{ href: '/demo-preview/dashboard/tiket', label: 'Semua' }} />

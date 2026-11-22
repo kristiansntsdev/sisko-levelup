@@ -4,7 +4,7 @@ import { convertProfilePhoto } from '@/lib/profile-photo'
 export const ARTIKEL_IMG_MAX_BYTES = 4 * 1024 * 1024
 const ARTIKEL_IMG_EDGE = 1600
 
-export type ArtikelBlobKind = 'cover' | 'img' | 'push'
+export type ArtikelBlobKind = 'cover' | 'img' | 'push' | 'ww'
 
 /** Re-encodes to WebP (EXIF stripped) and stores under artikel/{kind}/. Throws UnreadablePhotoError for non-photos. */
 export async function putArtikelImage(file: File, kind: ArtikelBlobKind): Promise<string> {

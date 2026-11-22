@@ -452,7 +452,8 @@ export const ModelName = {
   artikel: 'artikel',
   artikel_view: 'artikel_view',
   artikel_like: 'artikel_like',
-  artikel_komentar: 'artikel_komentar'
+  artikel_komentar: 'artikel_komentar',
+  ww_laporan: 'ww_laporan'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -468,7 +469,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "event_lokasi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "feedback_app" | "kesaksian" | "beta_akses" | "reimburse_approval" | "rekening_kota" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log" | "artikel" | "artikel_view" | "artikel_like" | "artikel_komentar"
+    modelProps: "sequelizeMeta" | "absen" | "absenwp" | "admin" | "bacanotifikasi" | "bahanmateriwp" | "cabang" | "dokumentasikelaswp" | "event" | "event_sesi" | "event_lokasi" | "feedback" | "gereja" | "kelaswp" | "materiwp" | "media" | "mou" | "notifikasi" | "pengajar" | "pengaturan" | "pengaturan_kota" | "wfe_serentak" | "pengurus" | "peserta" | "playlist_teams" | "playlists" | "reimburse" | "siswakelaswp" | "song_tags" | "songs" | "spjmateriwp" | "tags" | "transaksi" | "upgrade" | "pindah_kota" | "feedback_app" | "kesaksian" | "beta_akses" | "reimburse_approval" | "rekening_kota" | "wilayah_desa" | "wilayah_kabupaten" | "wilayah_kecamatan" | "wilayah_provinsi" | "auth_users" | "registrasi" | "jobs_place" | "kas_kota" | "kas_kota_txn" | "dokumentasi_kota" | "event_detail" | "app_log" | "artikel" | "artikel_view" | "artikel_like" | "artikel_komentar" | "ww_laporan"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -4168,6 +4169,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ww_laporan: {
+      payload: Prisma.$ww_laporanPayload<ExtArgs>
+      fields: Prisma.ww_laporanFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ww_laporanFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ww_laporanPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ww_laporanFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ww_laporanPayload>
+        }
+        findFirst: {
+          args: Prisma.ww_laporanFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ww_laporanPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ww_laporanFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ww_laporanPayload>
+        }
+        findMany: {
+          args: Prisma.ww_laporanFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ww_laporanPayload>[]
+        }
+        create: {
+          args: Prisma.ww_laporanCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ww_laporanPayload>
+        }
+        createMany: {
+          args: Prisma.ww_laporanCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.ww_laporanDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ww_laporanPayload>
+        }
+        update: {
+          args: Prisma.ww_laporanUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ww_laporanPayload>
+        }
+        deleteMany: {
+          args: Prisma.ww_laporanDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ww_laporanUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.ww_laporanUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ww_laporanPayload>
+        }
+        aggregate: {
+          args: Prisma.Ww_laporanAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWw_laporan>
+        }
+        groupBy: {
+          args: Prisma.ww_laporanGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Ww_laporanGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ww_laporanCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Ww_laporanCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -4928,6 +4995,20 @@ export const Artikel_komentarScalarFieldEnum = {
 export type Artikel_komentarScalarFieldEnum = (typeof Artikel_komentarScalarFieldEnum)[keyof typeof Artikel_komentarScalarFieldEnum]
 
 
+export const Ww_laporanScalarFieldEnum = {
+  id_laporan: 'id_laporan',
+  id_cabang: 'id_cabang',
+  id_peserta: 'id_peserta',
+  tanggal: 'tanggal',
+  jumlah: 'jumlah',
+  isi: 'isi',
+  foto_url: 'foto_url',
+  created_at: 'created_at'
+} as const
+
+export type Ww_laporanScalarFieldEnum = (typeof Ww_laporanScalarFieldEnum)[keyof typeof Ww_laporanScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -5491,6 +5572,14 @@ export const artikel_komentarOrderByRelevanceFieldEnum = {
 export type artikel_komentarOrderByRelevanceFieldEnum = (typeof artikel_komentarOrderByRelevanceFieldEnum)[keyof typeof artikel_komentarOrderByRelevanceFieldEnum]
 
 
+export const ww_laporanOrderByRelevanceFieldEnum = {
+  isi: 'isi',
+  foto_url: 'foto_url'
+} as const
+
+export type ww_laporanOrderByRelevanceFieldEnum = (typeof ww_laporanOrderByRelevanceFieldEnum)[keyof typeof ww_laporanOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -5808,6 +5897,7 @@ export type GlobalOmitConfig = {
   artikel_view?: Prisma.artikel_viewOmit
   artikel_like?: Prisma.artikel_likeOmit
   artikel_komentar?: Prisma.artikel_komentarOmit
+  ww_laporan?: Prisma.ww_laporanOmit
 }
 
 /* Types for Logging */
