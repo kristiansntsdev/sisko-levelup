@@ -10,7 +10,9 @@ import type { PembacaPengumuman } from './pengumuman'
 export async function pembacaSaatIni(): Promise<PembacaPengumuman | null> {
   const [session, pengurus, jar] = await Promise.all([auth(), getPengurusFromCookie(), cookies()])
   const idPeserta = session?.user?.idPeserta ?? null
-  const admin = verifyPengumumanCookie(jar.get(PENGUMUMAN_COOKIE)?.value)
+  // Cookie admin /pengumuman (8 jam) hanya berlaku kalau tidak sedang login sebagai anggota/pengurus. Kalau tidak,
+  // admin yang juga anggota melihat pengumuman pribadi orang lain (aktivasi, ulang tahun) di lonceng sendiri.
+  const admin = verifyPengumumanCookie(jar.get(PENGUMUMAN_COOKIE)?.value) && !idPeserta && !pengurus
   if (!idPeserta && !pengurus && !admin) return null
   const p = idPeserta ? await db.peserta.findUnique({ where: { id_peserta: idPeserta }, select: { kotalevelup: true, userlevel: true } }) : null
   const kunci = idPeserta ? `p${idPeserta}` : pengurus ? `g${pengurus.id_pengurus}` : 'admin'
