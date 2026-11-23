@@ -110,3 +110,63 @@ export async function pushAlert(input: {
     url: input.url ?? ((peran) => urlEventPengurus(peran, input.idEvent ?? 0, 'approve')),
   })
 }
+
+/**
+ * Laporan WW baru (Air Hidup): kabar terbaru untuk semua anggota yang mengaktifkan notifikasi, kecuali pelapornya.
+ * Sekali per laporan (klaimPush). Tap → Aliran Air Hidup. Fire-and-forget, tidak pernah melempar.
+ */
+export async function pushLaporanWw(input: { idLaporan: number; idKota: number; idPelapor: number; jumlah: number; isi: string; foto?: string }): Promise<void> {
+  try {
+    if (!pushAktif()) return
+    if (!(await klaimPush(`ww-laporan:${input.idLaporan}`))) return
+    const kota = await namaKota(String(input.idKota))
+    const subs = await berlangganan()
+    const ids = subs.peserta.filter((id) => id !== input.idPelapor)
+    if (!ids.length) return
+    const isi = input.isi.trim().replace(/\s+/g, ' ')
+    await kirimPush(
+      { peserta: ids },
+      {
+        title: `Kabar WW · ${kota}`,
+        body: `${input.jumlah} orang minum Air Hidup — “${isi.length > 120 ? `${isi.slice(0, 117)}…` : isi}”`,
+        url: '/dashboard/air-hidup',
+        tag: `ww-laporan-${input.idLaporan}`,
+        ...(input.foto ? { image: input.foto } : {}),
+      },
+      { ttl: TTL_BIASA },
+    )
+  } catch (err) {
+    console.error('[push] pushLaporanWw gagal', err)
+  }
+}
+
+/**
+ * Amin baru di laporan WW: kabari pelapornya. Sekali per (laporan, pemberi Amin) supaya batal-lalu-Amin lagi tidak
+ * mengirim ulang; tag per laporan membuat Amin berikutnya menggantikan notifikasi sebelumnya. Tidak untuk Amin ke laporan
+ * sendiri. Fire-and-forget, tidak pernah melempar.
+ */
+export async function pushAminWw(input: { idLaporan: number; idPemberi: number; namaPemberi: string }): Promise<void> {
+  try {
+    if (!pushAktif()) return
+    const [lap] = await db.$queryRaw<{ id_peserta: number; id_cabang: number }[]>`
+      SELECT id_peserta, id_cabang FROM ww_laporan WHERE id_laporan = ${input.idLaporan} LIMIT 1`
+    if (!lap) return
+    const pelapor = Number(lap.id_peserta)
+    if (pelapor === input.idPemberi) return
+    if (!(await klaimPush(`ww-amin:${input.idLaporan}:${input.idPemberi}`))) return
+    const kota = await namaKota(String(lap.id_cabang))
+    await kirimPush(
+      { peserta: [pelapor] },
+      {
+        title: `${input.namaPemberi} mengaminkan laporan WW-mu 🙏`,
+        body: `Laporan WW ${kota} kamu mendapat Amin.`,
+        url: '/dashboard/air-hidup',
+        tag: `ww-amin-${input.idLaporan}`,
+        renotify: true,
+      },
+      { ttl: TTL_BIASA },
+    )
+  } catch (err) {
+    console.error('[push] pushAminWw gagal', err)
+  }
+}

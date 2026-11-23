@@ -24,7 +24,13 @@ export function NasionalCounter({ orang, kota }: { orang: number; kota: number }
 export function LaporanCard({ l, onAmin }: { l: WwLaporan; onAmin?: (id: number) => void }) {
   return (
     <article className={`overflow-hidden ${PANEL}`}>
-      <Poster src={l.foto} className="h-40 w-full" />
+      {l.foto ? (
+        // Foto WW tinggi alami (bukan crop 16:10 ala poster event); batas tinggi hanya untuk foto sangat tinggi.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={l.foto} alt="" className="block h-auto max-h-[30rem] w-full bg-[#e02a2f] object-cover" />
+      ) : (
+        <Poster src="" className="h-40 w-full" />
+      )}
       <div className="px-4 py-3.5">
         <p className={`${LABEL} text-[9.5px] text-[#57534e]`}>
           {fmtTanggal(l.tanggal)} · {l.jumlah} orang

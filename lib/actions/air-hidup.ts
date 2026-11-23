@@ -7,6 +7,7 @@ import { UnreadablePhotoError } from '@/lib/profile-photo'
 import { anggotaAir, dataBeranda, hariIni } from '@/lib/air-hidup-data'
 import { laporanDari, PIC_USERLEVEL, validateLaporan, type AirBeranda } from '@/lib/air-hidup'
 import { sessionPesertaId } from '@/lib/peserta-session'
+import { pushAminWw, pushLaporanWw } from '@/lib/push/events'
 
 /** Untuk Beranda: gagal baca (mis. tabel belum ada di jeda deploy → prod-migrate) = null, Beranda tetap jalan. */
 export async function getAirBeranda(): Promise<AirBeranda | null> {
@@ -63,6 +64,7 @@ export async function kirimLaporanWw(fd: FormData): Promise<KirimLaporanResult> 
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/pic')
     revalidatePath('/dashboard/air-hidup')
+    void pushLaporanWw({ idLaporan: row.id_laporan, idKota: me.cabang, idPelapor: me.id, jumlah: input.jumlah, isi, foto })
     return { ok: true, id: row.id_laporan }
   } catch (e) {
     console.error('kirimLaporanWw', e)
@@ -83,6 +85,10 @@ export async function toggleAmin(idLaporan: number): Promise<AminResult> {
     const hapus = await db.$executeRaw`DELETE FROM ww_amin WHERE id_laporan = ${lap} AND id_peserta = ${id}`
     if (hapus === 0) await db.$executeRaw`INSERT IGNORE INTO ww_amin (id_laporan, id_peserta) VALUES (${lap}, ${id})`
     const [r] = await db.$queryRaw<{ n: bigint | number }[]>`SELECT COUNT(*) AS n FROM ww_amin WHERE id_laporan = ${lap}`
+    if (hapus === 0) {
+      const p = await db.peserta.findUnique({ where: { id_peserta: id }, select: { nama: true } })
+      void pushAminWw({ idLaporan: lap, idPemberi: id, namaPemberi: p?.nama ?? 'Seseorang' })
+    }
     return { ok: true, amin: Number(r?.n ?? 0), aminSaya: hapus === 0 }
   } catch (e) {
     console.error('toggleAmin', e)
