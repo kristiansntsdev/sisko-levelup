@@ -601,6 +601,10 @@ export async function POST(req: NextRequest) {
       KEY idx_ww_laporan_tanggal (tanggal)
     ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `)
+  // Titik fokus foto laporan (0-100 persen). Sengaja TIDAK ada di schema.prisma: Prisma membaca semua kolom, jadi field
+  // + migrasi dalam satu rilis membuat query error sampai migrasi selesai. Dibaca/ditulis lewat raw SQL.
+  const addedWwFotoFokus = await ensureColumn('ww_laporan', 'foto_x',
+    `ALTER TABLE ww_laporan ADD COLUMN foto_x TINYINT UNSIGNED NOT NULL DEFAULT 50, ADD COLUMN foto_y TINYINT UNSIGNED NOT NULL DEFAULT 50`)
   const addedWwAmin = await ensureTable('ww_amin', `
     CREATE TABLE ww_amin (
       id_laporan INT NOT NULL,
@@ -671,6 +675,7 @@ export async function POST(req: NextRequest) {
     addedUltahLike,
     utf8mb4Dikonversi,
     addedWwLaporan,
+    addedWwFotoFokus,
     addedWwAmin,
     addedWwKota,
     wwKotaDiisi,

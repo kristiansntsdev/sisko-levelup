@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { ANTON, LABEL, MONO, PANEL, Poster, PRESS, ROWS, SectionHead } from '@/components/pwa/paper-ui'
 import { AirBar, DropIcon, WATER } from './bar'
 import { urutKotaHaus, type KotaAir, type WwLaporan } from '@/lib/air-hidup'
@@ -21,36 +22,48 @@ export function NasionalCounter({ orang, kota }: { orang: number; kota: number }
   )
 }
 
-export function LaporanCard({ l, onAmin }: { l: WwLaporan; onAmin?: (id: number) => void }) {
+export function LaporanCard({ l, onAmin, compact, editHref }: { l: WwLaporan; onAmin?: (id: number) => void; compact?: boolean; editHref?: string }) {
   return (
-    <article className={`overflow-hidden ${PANEL}`}>
+    <article className={`flex flex-col overflow-hidden ${PANEL} ${compact ? 'h-full' : ''}`}>
       {l.foto ? (
-        // Foto WW tinggi alami (bukan crop 16:10 ala poster event); batas tinggi hanya untuk foto sangat tinggi.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={l.foto} alt="" className="block h-auto max-h-[30rem] w-full bg-[#e02a2f] object-cover" />
+        <img
+          src={l.foto}
+          alt=""
+          // Kompak (Beranda): 4:3 dengan titik fokus pilihan PIC. Penuh (Aliran, dashboard PIC): tinggi alami.
+          className={compact ? 'block aspect-[4/3] w-full bg-[#e02a2f] object-cover' : 'block h-auto max-h-[30rem] w-full bg-[#e02a2f] object-cover'}
+          style={compact ? { objectPosition: `${l.fotoX}% ${l.fotoY}%` } : undefined}
+        />
       ) : (
-        <Poster src="" className="h-40 w-full" />
+        <Poster src="" className={compact ? 'aspect-[4/3] w-full' : 'h-40 w-full'} />
       )}
-      <div className="px-4 py-3.5">
+      <div className="flex flex-1 flex-col px-4 py-3.5">
         <p className={`${LABEL} text-[9.5px] text-[#57534e]`}>
           {fmtTanggal(l.tanggal)} · {l.jumlah} orang
         </p>
         <p className={`${ANTON} mt-1 text-[21px] leading-tight tracking-[.01em]`}>{l.namaKota}</p>
-        <p className={`${MONO} mt-2 text-[13px] leading-relaxed`}>“{l.isi}”</p>
-        <div className="mt-3 flex items-center justify-between">
-          <span className={`${LABEL} text-[9.5px] text-[#57534e]`}>oleh {l.oleh}</span>
-          {onAmin ? (
-            <button
-              type="button"
-              aria-pressed={l.aminSaya}
-              onClick={() => onAmin(l.id)}
-              className={`${MONO} rounded-full px-3.5 py-1.5 text-[12px] font-bold ring-2 ring-[#161616] ${PRESS} ${l.aminSaya ? 'bg-[#161616] text-[#ffd83d]' : 'bg-[#fffdf7]'}`}
-            >
-              Amin · {l.amin}
-            </button>
-          ) : (
-            <span className={`${MONO} text-[12px] font-bold`}>Amin · {l.amin}</span>
-          )}
+        <p className={`${MONO} mt-2 text-[13px] leading-relaxed ${compact ? 'line-clamp-3' : ''}`}>“{l.isi}”</p>
+        <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+          <span className={`${LABEL} min-w-0 truncate text-[9.5px] text-[#57534e]`}>oleh {l.oleh}</span>
+          <div className="flex shrink-0 items-center gap-2">
+            {editHref && (
+              <Link href={editHref} className={`${MONO} rounded-full px-3 py-1.5 text-[12px] font-bold ring-2 ring-[#161616]/40 ${PRESS}`}>
+                Edit
+              </Link>
+            )}
+            {onAmin ? (
+              <button
+                type="button"
+                aria-pressed={l.aminSaya}
+                onClick={() => onAmin(l.id)}
+                className={`${MONO} rounded-full px-3.5 py-1.5 text-[12px] font-bold ring-2 ring-[#161616] ${PRESS} ${l.aminSaya ? 'bg-[#161616] text-[#ffd83d]' : 'bg-[#fffdf7]'}`}
+              >
+                Amin · {l.amin}
+              </button>
+            ) : (
+              <span className={`${MONO} text-[12px] font-bold`}>Amin · {l.amin}</span>
+            )}
+          </div>
         </div>
       </div>
     </article>
@@ -93,12 +106,21 @@ export function AirFeed({
 }
 
 /** Kabar Terbaru: laporan WW tiap kota + tombol Amin. Tampil di Beranda semua anggota (apa pun level) dan di aliran. */
-export function KabarTerbaru({ laporan, onAmin, action }: { laporan: WwLaporan[]; onAmin: (id: number) => void; action?: { href: string; label: string } }) {
+export function KabarTerbaru({ laporan, onAmin, action, carousel }: { laporan: WwLaporan[]; onAmin: (id: number) => void; action?: { href: string; label: string }; carousel?: boolean }) {
   return (
     <section>
       <SectionHead title="Kabar Terbaru" action={action} />
       {laporan.length === 0 ? (
         <p className={`${LABEL} rounded-[14px] border-2 border-dotted border-[#161616]/30 py-7 px-4 text-center text-[11px] text-[#57534e]`}>Belum ada laporan</p>
+      ) : carousel ? (
+        // Beranda: geser ke samping; kartu berikutnya mengintip. -mx-5/px-5 = tembus ke tepi layar (kontainer halaman px-5).
+        <div className="-mx-5 flex snap-x snap-mandatory items-stretch gap-3 overflow-x-auto px-5 pb-5 pt-1 -mb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {laporan.map((l) => (
+            <div key={l.id} className={`shrink-0 snap-center first:snap-start ${laporan.length === 1 ? 'w-full' : 'w-[82%]'}`}>
+              <LaporanCard l={l} onAmin={onAmin} compact />
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="space-y-4">
           {laporan.map((l) => (

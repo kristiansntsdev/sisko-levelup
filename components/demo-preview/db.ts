@@ -163,6 +163,9 @@ export type DbWwLaporan = {
   jumlah: number
   isi: string
   foto: string
+  /** Titik fokus foto 0-100 (kosong = tengah) */
+  foto_x?: number
+  foto_y?: number
   /** Amin dari anggota lain yang tidak ada di demo (angka awal seed) */
   amin_awal: number
   created_at: string

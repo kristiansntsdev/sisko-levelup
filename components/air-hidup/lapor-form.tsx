@@ -2,9 +2,10 @@
 import { useEffect, useState } from 'react'
 import { ANTON, BTN, BTN_OUTLINE, ERROR, LABEL, MONO, PAPER_INPUT, PaperField, PANEL, PRESS, Strip } from '@/components/pwa/paper-ui'
 import { Icon } from '@/components/pwa/ui'
-import { AIR_ISI_MAX, AIR_JUMLAH_MAX, AIR_SEGAR_HARI, daysBetween, validateLaporan } from '@/lib/air-hidup'
+import { AIR_ISI_MAX, AIR_JUMLAH_MAX, AIR_SEGAR_HARI, daysBetween, FOTO_FOKUS_TENGAH, validateLaporan, type LaporanEdit } from '@/lib/air-hidup'
 import { shrinkPhotoForUpload } from '@/lib/shrink-photo'
 import { DropIcon, WATER } from './bar'
+import { FotoFokus, type Fokus } from './foto-fokus'
 import { ShareSheet, type ShareData } from './share-card'
 
 type Props = {
@@ -14,22 +15,27 @@ type Props = {
   /** FormData: tanggal, jumlah, isi, foto (opsional). Mengembalikan id laporan, atau pesan error. */
   onSubmit: (fd: FormData) => Promise<{ ok: true; id: number } | { ok: false; error: string }>
   onDone: () => void
+  /** Ada = mode edit: form terisi dari laporan ini, tombol Simpan Perubahan, tanpa kartu bagikan. */
+  awal?: LaporanEdit
 }
 
 /** Lapor WW: satu foto, tanggal, jumlah orang, satu kalimat. Sesudahnya: kartu bagikan. */
-export function LaporForm({ namaKota, today, onSubmit, onDone }: Props) {
-  const [tanggal, setTanggal] = useState(today)
-  const [jumlah, setJumlah] = useState('')
-  const [isi, setIsi] = useState('')
-  const [foto, setFoto] = useState<{ blob: Blob; url: string } | null>(null)
+export function LaporForm({ namaKota, today, onSubmit, onDone, awal }: Props) {
+  const [tanggal, setTanggal] = useState(awal?.tanggal ?? today)
+  const [jumlah, setJumlah] = useState(awal ? String(awal.jumlah) : '')
+  const [isi, setIsi] = useState(awal?.isi ?? '')
+  // blob null = foto lama dari server (belum diganti)
+  const [foto, setFoto] = useState<{ blob: Blob | null; url: string } | null>(awal?.foto ? { blob: null, url: awal.foto } : null)
+  const [fokus, setFokus] = useState<Fokus>({ x: awal?.fotoX ?? FOTO_FOKUS_TENGAH, y: awal?.fotoY ?? FOTO_FOKUS_TENGAH })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState<{ share: ShareData; penuh: boolean } | null>(null)
   const [shareOpen, setShareOpen] = useState(false)
 
   useEffect(() => {
-    if (!foto) return
-    return () => URL.revokeObjectURL(foto.url)
+    if (!foto?.blob) return
+    const url = foto.url
+    return () => URL.revokeObjectURL(url)
   }, [foto])
 
   async function pickFoto(e: React.ChangeEvent<HTMLInputElement>) {
@@ -39,6 +45,7 @@ export function LaporForm({ namaKota, today, onSubmit, onDone }: Props) {
     try {
       const blob = await shrinkPhotoForUpload(f)
       setFoto({ blob, url: URL.createObjectURL(blob) })
+      setFokus({ x: FOTO_FOKUS_TENGAH, y: FOTO_FOKUS_TENGAH })
     } catch {
       setError('Foto ini tidak bisa dibuka. Coba foto JPG atau PNG.')
     }
@@ -56,7 +63,12 @@ export function LaporForm({ namaKota, today, onSubmit, onDone }: Props) {
     fd.set('tanggal', tanggal)
     fd.set('jumlah', String(input.jumlah))
     fd.set('isi', isi.trim())
-    if (foto) fd.set('foto', foto.blob, 'foto.jpg')
+    if (foto?.blob) fd.set('foto', foto.blob, 'foto.jpg')
+    if (foto) {
+      fd.set('foto_x', String(fokus.x))
+      fd.set('foto_y', String(fokus.y))
+    }
+    if (awal?.foto && !foto) fd.set('hapusFoto', '1')
     let res: Awaited<ReturnType<Props['onSubmit']>>
     try {
       res = await onSubmit(fd)
@@ -65,6 +77,7 @@ export function LaporForm({ namaKota, today, onSubmit, onDone }: Props) {
     }
     setBusy(false)
     if (!res.ok) return setError(res.error)
+    if (awal) return onDone()
     setDone({
       penuh: daysBetween(tanggal, today) < AIR_SEGAR_HARI,
       share: { namaKota, jumlah: input.jumlah, isi: input.isi.trim(), tanggal, foto: foto?.url ?? '' },
@@ -123,20 +136,23 @@ export function LaporForm({ namaKota, today, onSubmit, onDone }: Props) {
           {isi.length}/{AIR_ISI_MAX}
         </span>
       </PaperField>
-      <div>
-        <span className={`${LABEL} mb-1.5 block text-[10px] font-bold text-[#44403c]`}>Foto (opsional)</span>
+      <div className="space-y-3">
+        <span className={`${LABEL} block text-[10px] font-bold text-[#44403c]`}>Foto (opsional)</span>
         <label className={`flex cursor-pointer items-center gap-3 rounded-[10px] border-2 border-dotted border-[#161616]/30 p-2.5 ${PRESS}`}>
           <input type="file" accept="image/*" onChange={pickFoto} className="sr-only" />
-          {foto ? (
-            // eslint-disable-next-line @next/next/no-img-element -- local blob URL preview
-            <img src={foto.url} alt="Pratinjau foto WW" className="h-16 w-16 shrink-0 rounded-[8px] object-cover" />
-          ) : (
-            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[8px] bg-[#161616]/[.07]">
-              <Icon name="camera" className="h-6 w-6" />
-            </span>
-          )}
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[8px] bg-[#161616]/[.07]">
+            <Icon name="camera" className="h-6 w-6" />
+          </span>
           <span className={`${MONO} text-[12px] font-bold`}>{foto ? 'Ganti foto' : 'Pilih foto WW'}</span>
         </label>
+        {foto && (
+          <>
+            <FotoFokus src={foto.url} fokus={fokus} onChange={setFokus} />
+            <button type="button" onClick={() => setFoto(null)} className={`${MONO} text-[12px] font-bold text-[#b91c1c] underline decoration-dotted underline-offset-4`}>
+              Hapus foto
+            </button>
+          </>
+        )}
       </div>
       {error && (
         <p role="alert" className={ERROR}>
@@ -144,7 +160,7 @@ export function LaporForm({ namaKota, today, onSubmit, onDone }: Props) {
         </p>
       )}
       <button type="submit" disabled={busy} className={BTN}>
-        <Strip>{busy ? 'Mengirim…' : 'Kirim Laporan'}</Strip>
+        <Strip>{busy ? (awal ? 'Menyimpan…' : 'Mengirim…') : awal ? 'Simpan Perubahan' : 'Kirim Laporan'}</Strip>
       </button>
     </form>
   )

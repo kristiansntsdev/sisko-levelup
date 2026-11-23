@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { BackBar, BTN, PaperHeader, PaperMain, Strip } from '@/components/pwa/paper-ui'
 import { Sheet, SheetHead } from '@/components/pwa/ui'
-import type { AliranData, PicData, WwLaporan } from '@/lib/air-hidup'
+import type { AliranData, EditData, PicData, WwLaporan } from '@/lib/air-hidup'
 import { AirFeed, KabarTerbaru } from './feed'
 import { LaporForm } from './lapor-form'
 import { PicDashboard } from './pic-dashboard'
@@ -12,6 +12,7 @@ import { PicDashboard } from './pic-dashboard'
 export type AminResult = { ok: true; amin: number; aminSaya: boolean } | { ok: false }
 export type ToggleAmin = (idLaporan: number) => Promise<AminResult>
 export type LaporSubmit = (fd: FormData) => Promise<{ ok: true; id: number } | { ok: false; error: string }>
+export type EditSubmit = (idLaporan: number, fd: FormData) => Promise<{ ok: true; id: number } | { ok: false; error: string }>
 
 /** Amin berubah seketika, lalu memakai angka dari server; gagal = kembali seperti semula. */
 function useAmin(initial: WwLaporan[], toggle: ToggleAmin) {
@@ -40,10 +41,10 @@ function useAmin(initial: WwLaporan[], toggle: ToggleAmin) {
 export function KabarBeranda({ laporan, feedHref, toggleAmin }: { laporan: WwLaporan[]; feedHref: string; toggleAmin: ToggleAmin }) {
   const { list, onAmin } = useAmin(laporan, toggleAmin)
   if (!list.length) return null
-  return <KabarTerbaru laporan={list} onAmin={onAmin} action={{ href: feedHref, label: 'Semua' }} />
+  return <KabarTerbaru laporan={list} onAmin={onAmin} action={{ href: feedHref, label: 'Semua' }} carousel />
 }
 
-export function PicScreen({ data, berandaHref, laporHref, feedHref, toggleAmin }: { data: PicData; berandaHref: string; laporHref: string; feedHref: string; toggleAmin: ToggleAmin }) {
+export function PicScreen({ data, berandaHref, laporHref, feedHref, editHref, toggleAmin }: { data: PicData; berandaHref: string; laporHref: string; feedHref: string; editHref: (idLaporan: number) => string; toggleAmin: ToggleAmin }) {
   const router = useRouter()
   const { list, onAmin } = useAmin(data.laporanKota, toggleAmin)
   const [soon, setSoon] = useState<string | null>(null)
@@ -52,7 +53,7 @@ export function PicScreen({ data, berandaHref, laporHref, feedHref, toggleAmin }
       <BackBar title="Dashboard PIC" onBack={() => router.push(berandaHref)} />
       <PaperHeader sticker="Dashboard PIC" title={data.namaKota} />
       <div className="mt-4 px-5 pb-8">
-        <PicDashboard kota={data.kota} laporanKota={list} laporHref={laporHref} feedHref={feedHref} onAmin={onAmin} onSoon={setSoon} />
+        <PicDashboard kota={data.kota} laporanKota={list} laporHref={laporHref} feedHref={feedHref} onAmin={onAmin} onSoon={setSoon} editHref={editHref} />
       </div>
       <Sheet open={Boolean(soon)} onClose={() => setSoon(null)}>
         <SheetHead title={soon ?? ''} sub="Alat ini segera hadir." />
@@ -77,6 +78,29 @@ export function LaporScreen({ namaKota, today, picHref, onSubmit }: { namaKota: 
           onSubmit={async (fd) => {
             const r = await onSubmit(fd)
             if (r.ok) router.refresh() // Dashboard PIC + Aliran dibaca ulang
+            return r
+          }}
+          onDone={() => router.push(picHref)}
+        />
+      </div>
+    </PaperMain>
+  )
+}
+
+export function EditLaporScreen({ data, picHref, onSubmit }: { data: EditData; picHref: string; onSubmit: EditSubmit }) {
+  const router = useRouter()
+  return (
+    <PaperMain>
+      <BackBar title="Edit Laporan WW" onBack={() => router.push(picHref)} />
+      <PaperHeader sticker="Edit laporan" title={data.namaKota} />
+      <div className="mt-4 px-5 pb-8">
+        <LaporForm
+          namaKota={data.namaKota}
+          today={data.today}
+          awal={data.laporan}
+          onSubmit={async (fd) => {
+            const r = await onSubmit(data.laporan.id, fd)
+            if (r.ok) router.refresh()
             return r
           }}
           onDone={() => router.push(picHref)}

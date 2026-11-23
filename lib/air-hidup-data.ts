@@ -5,7 +5,7 @@ import { sessionPesertaId } from '@/lib/peserta-session'
 import { wibToday } from '@/lib/wib'
 import {
   addDays, AIR_MIN_USERLEVEL, hitungNasional, kotaAir, PIC_USERLEVEL,
-  type AirBeranda, type AliranData, type KotaAir, type PicData, type WwLaporan,
+  type AirBeranda, type AliranData, type EditData, type KotaAir, type PicData, type WwLaporan,
 } from '@/lib/air-hidup'
 
 export type AnggotaAir = { id: number; nama: string; level: number; userlevel: string; cabang: number | null }
@@ -40,14 +40,14 @@ export async function daftarKotaAir(today: string, idCabang?: number): Promise<K
 
 type LaporanRow = {
   id_laporan: number; id_cabang: number; namacabang: string; tanggal: string; jumlah: number; isi: string
-  foto_url: string; nama: string | null; amin: bigint | number; saya: bigint | number
+  foto_url: string; foto_x: number; foto_y: number; nama: string | null; amin: bigint | number; saya: bigint | number
 }
 
 export async function daftarLaporan(idSaya: number, limit: number, idCabang?: number): Promise<WwLaporan[]> {
   const where = idCabang != null ? Prisma.sql`WHERE l.id_cabang = ${idCabang}` : Prisma.empty
   const rows = await db.$queryRaw<LaporanRow[]>`
     SELECT l.id_laporan, l.id_cabang, c.namacabang, DATE_FORMAT(l.tanggal, '%Y-%m-%d') AS tanggal,
-           l.jumlah, l.isi, l.foto_url, p.nama,
+           l.jumlah, l.isi, l.foto_url, l.foto_x, l.foto_y, p.nama,
            (SELECT COUNT(*) FROM ww_amin a WHERE a.id_laporan = l.id_laporan) AS amin,
            (SELECT COUNT(*) FROM ww_amin a WHERE a.id_laporan = l.id_laporan AND a.id_peserta = ${idSaya}) AS saya
     FROM ww_laporan l
@@ -58,7 +58,7 @@ export async function daftarLaporan(idSaya: number, limit: number, idCabang?: nu
     LIMIT ${limit}`
   return rows.map((r) => ({
     id: Number(r.id_laporan), idCabang: Number(r.id_cabang), namaKota: r.namacabang, tanggal: r.tanggal,
-    jumlah: Number(r.jumlah), isi: r.isi, foto: r.foto_url, oleh: r.nama ?? 'PIC',
+    jumlah: Number(r.jumlah), isi: r.isi, foto: r.foto_url, fotoX: Number(r.foto_x), fotoY: Number(r.foto_y), oleh: r.nama ?? 'PIC',
     amin: Number(r.amin), aminSaya: Number(r.saya) > 0,
   }))
 }
@@ -98,5 +98,20 @@ export async function dataAliran(me: AnggotaAir): Promise<AliranData> {
     nasional: hitungNasional(baru.map((r) => ({ idCabang: Number(r.id_cabang), tanggal: r.tanggal, jumlah: Number(r.jumlah) })), today),
     kota,
     laporan,
+  }
+}
+
+/** Laporan untuk diedit: hanya PIC kota pemilik laporan. null = bukan PIC kota itu / tidak ada. */
+export async function dataEditLaporan(me: AnggotaAir, idLaporan: number): Promise<EditData | null> {
+  if (me.userlevel !== PIC_USERLEVEL || !me.cabang || !Number.isInteger(idLaporan) || idLaporan <= 0) return null
+  const [r] = await db.$queryRaw<{ id_laporan: number; id_cabang: number; namacabang: string; tanggal: string; jumlah: number; isi: string; foto_url: string; foto_x: number; foto_y: number }[]>`
+    SELECT l.id_laporan, l.id_cabang, c.namacabang, DATE_FORMAT(l.tanggal, '%Y-%m-%d') AS tanggal, l.jumlah, l.isi, l.foto_url, l.foto_x, l.foto_y
+    FROM ww_laporan l JOIN cabang c ON c.id_cabang = l.id_cabang
+    WHERE l.id_laporan = ${idLaporan} AND l.id_cabang = ${me.cabang} LIMIT 1`
+  if (!r) return null
+  return {
+    today: hariIni(),
+    namaKota: r.namacabang,
+    laporan: { id: Number(r.id_laporan), tanggal: r.tanggal, jumlah: Number(r.jumlah), isi: r.isi, foto: r.foto_url, fotoX: Number(r.foto_x), fotoY: Number(r.foto_y) },
   }
 }

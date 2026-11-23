@@ -7,6 +7,7 @@ export const AIR_BERANDA = '/demo-preview/dashboard'
 export const AIR_FEED = '/demo-preview/dashboard/air-hidup'
 export const AIR_PIC = '/demo-preview/dashboard/pic'
 export const AIR_LAPOR = '/demo-preview/dashboard/pic/lapor'
+export const airEdit = (id: number) => `/demo-preview/dashboard/pic/edit/${id}`
 
 /** Re-runs `load` whenever the demo store changes, the way revalidatePath re-renders the real page after a write. */
 export function useAir<T>(load: () => Promise<T>): T | undefined {

@@ -20,6 +20,7 @@ export function PicDashboard({
   feedHref,
   onAmin,
   onSoon,
+  editHref,
 }: {
   kota: KotaAir
   laporanKota: WwLaporan[]
@@ -27,6 +28,8 @@ export function PicDashboard({
   feedHref: string
   onAmin: (id: number) => void
   onSoon: (t: string) => void
+  /** Halaman edit laporan (PIC kota ini boleh mengubah laporan kotanya). */
+  editHref: (idLaporan: number) => string
 }) {
   return (
     <div className="flex flex-col gap-7">
@@ -82,7 +85,7 @@ export function PicDashboard({
         ) : (
           <div className="space-y-4">
             {laporanKota.map((l) => (
-              <LaporanCard key={l.id} l={l} onAmin={onAmin} />
+              <LaporanCard key={l.id} l={l} onAmin={onAmin} editHref={editHref(l.id)} />
             ))}
           </div>
         )}

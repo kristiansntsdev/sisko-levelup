@@ -4,8 +4,8 @@
 import { addLog, getDb, mutate, wibDay, type DbWwLaporan, type DemoDb } from '../../db'
 import { fileToDataUrl, sessionPeserta } from '../util'
 import {
-  hitungNasional, kotaAir, laporanDari, validateLaporan,
-  type AirBeranda, type AliranData, type KotaAir, type PicData, type WwLaporan,
+  fokusDari, hitungNasional, kotaAir, laporanDari, validateLaporan,
+  type AirBeranda, type AliranData, type EditData, type KotaAir, type PicData, type WwLaporan,
 } from '@/lib/air-hidup'
 
 const todayOf = (d: DemoDb) => wibDay(d.air_hari)
@@ -28,6 +28,8 @@ function toLaporan(d: DemoDb, l: DbWwLaporan, meId: number | null): WwLaporan {
     jumlah: l.jumlah,
     isi: l.isi,
     foto: l.foto,
+    fotoX: l.foto_x ?? 50,
+    fotoY: l.foto_y ?? 50,
     oleh: l.oleh,
     amin: l.amin_awal + aminRows.length,
     aminSaya: meId != null && aminRows.some((a) => a.id_peserta === meId),
@@ -86,13 +88,53 @@ export async function kirimLaporanWw(fd: FormData): Promise<{ ok: true; id: numb
   if (d.ww_laporan.some((l) => l.id_cabang === cabang && l.tanggal === input.tanggal && l.isi === isi && l.jumlah === input.jumlah)) return { ok: false, error: 'Laporan ini sudah terkirim.' }
   const file = fd.get('foto')
   const foto = file instanceof Blob && file.size > 0 ? await fileToDataUrl(new File([file], 'foto.jpg', { type: file.type }), 900, 0.78) : ''
+  const fokus = fokusDari(fd)
   let id = 0
   mutate((x) => {
     id = x.nextId++
-    x.ww_laporan.push({ id_laporan: id, id_cabang: cabang, oleh: me.nama, tanggal: input.tanggal, jumlah: input.jumlah, isi, foto, amin_awal: 0, created_at: new Date().toISOString() })
+    x.ww_laporan.push({ id_laporan: id, id_cabang: cabang, oleh: me.nama, tanggal: input.tanggal, jumlah: input.jumlah, isi, foto, foto_x: fokus.x, foto_y: fokus.y, amin_awal: 0, created_at: new Date().toISOString() })
     addLog(x, `${me.nama} melaporkan WW (${input.jumlah} orang)`)
   })
   return { ok: true, id }
+}
+
+/** Laporan untuk diedit: hanya PIC kota pemilik laporan. */
+export async function getEditLaporan(idLaporan: number): Promise<EditData | null> {
+  const d = getDb()
+  const me = sessionPeserta()
+  if (!me || me.userlevel !== '4') return null
+  const l = d.ww_laporan.find((x) => x.id_laporan === idLaporan && String(x.id_cabang) === me.kotalevelup)
+  if (!l) return null
+  const kota = d.cabang.find((c) => c.id_cabang === l.id_cabang)
+  return {
+    today: todayOf(d),
+    namaKota: kota?.namacabang ?? `Kota ${l.id_cabang}`,
+    laporan: { id: l.id_laporan, tanggal: l.tanggal, jumlah: l.jumlah, isi: l.isi, foto: l.foto, fotoX: l.foto_x ?? 50, fotoY: l.foto_y ?? 50 },
+  }
+}
+
+export async function perbaruiLaporanWw(idLaporan: number, fd: FormData): Promise<{ ok: true; id: number } | { ok: false; error: string }> {
+  const d = getDb()
+  const me = sessionPeserta()
+  if (!me || me.userlevel !== '4') return { ok: false, error: 'Hanya PIC yang bisa mengubah laporan.' }
+  const lama = d.ww_laporan.find((l) => l.id_laporan === idLaporan && String(l.id_cabang) === me.kotalevelup)
+  if (!lama) return { ok: false, error: 'Laporan tidak ditemukan.' }
+  const input = laporanDari(fd)
+  const err = validateLaporan(input, todayOf(d))
+  if (err) return { ok: false, error: err }
+  const isi = input.isi.trim()
+  if (d.ww_laporan.some((l) => l.id_laporan !== idLaporan && l.id_cabang === lama.id_cabang && l.tanggal === input.tanggal && l.isi === isi && l.jumlah === input.jumlah)) return { ok: false, error: 'Laporan yang sama sudah ada.' }
+  const file = fd.get('foto')
+  const fotoBaru = file instanceof Blob && file.size > 0 ? await fileToDataUrl(new File([file], 'foto.jpg', { type: file.type }), 900, 0.78) : ''
+  const foto = fotoBaru || (fd.get('hapusFoto') === '1' ? '' : lama.foto)
+  const fokus = foto ? fokusDari(fd) : { x: 50, y: 50 }
+  mutate((x) => {
+    const l = x.ww_laporan.find((r) => r.id_laporan === idLaporan)
+    if (!l) return
+    Object.assign(l, { tanggal: input.tanggal, jumlah: input.jumlah, isi, foto, foto_x: fokus.x, foto_y: fokus.y })
+    addLog(x, `${me.nama} mengubah laporan WW (${input.jumlah} orang)`)
+  })
+  return { ok: true, id: idLaporan }
 }
 
 export async function toggleAmin(idLaporan: number): Promise<{ ok: true; amin: number; aminSaya: boolean } | { ok: false }> {

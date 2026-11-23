@@ -32,6 +32,9 @@ export type WwLaporan = {
   jumlah: number
   isi: string
   foto: string
+  /** Titik fokus foto (0-100, persen dari kiri / atas): bagian yang dipertahankan saat foto dipotong di kartu kompak. */
+  fotoX: number
+  fotoY: number
   oleh: string
   amin: number
   aminSaya: boolean
@@ -53,6 +56,19 @@ export type KotaAir = {
 }
 
 export type LaporanInput = { tanggal: string; jumlah: number; isi: string }
+
+export const FOTO_FOKUS_TENGAH = 50
+const klem = (n: number) => (Number.isFinite(n) ? Math.min(100, Math.max(0, Math.round(n))) : FOTO_FOKUS_TENGAH)
+
+/** Titik fokus foto dari FormData (`foto_x`, `foto_y`); kosong / rusak = tengah. Action asli dan shim demo memakai ini. */
+export function fokusDari(fd: FormData): { x: number; y: number } {
+  const baca = (k: string) => (fd.get(k) == null || fd.get(k) === '' ? FOTO_FOKUS_TENGAH : klem(Number(fd.get(k))))
+  return { x: baca('foto_x'), y: baca('foto_y') }
+}
+
+/** Data laporan yang dibuka untuk diedit. */
+export type LaporanEdit = { id: number; tanggal: string; jumlah: number; isi: string; foto: string; fotoX: number; fotoY: number }
+export type EditData = { today: string; namaKota: string; laporan: LaporanEdit }
 
 const DAY = 24 * 60 * 60 * 1000
 
