@@ -3,7 +3,7 @@ import { db } from '@/lib/db'
 import { NASIONAL_EVENT_CABANG } from '@/lib/event-cabang'
 import { isEventFullyApproved } from '@/lib/event-approval'
 import { wibToday } from '@/lib/wib'
-import { berlangganan, kirimPush, klaimPush, pushAktif, TTL_BIASA } from './send'
+import { berlangganan, kirimPush, klaimPush, pushAktif, TTL_BIASA, type HasilKirim } from './send'
 import { pushPengurus, urlEventPengurus } from './pengurus'
 import { pesertaLihatEvent } from './rules'
 
@@ -115,16 +115,16 @@ export async function pushAlert(input: {
  * Laporan WW baru (Air Hidup): kabar terbaru untuk semua anggota yang mengaktifkan notifikasi, kecuali pelapornya.
  * Sekali per laporan (klaimPush). Tap → Aliran Air Hidup. Fire-and-forget, tidak pernah melempar.
  */
-export async function pushLaporanWw(input: { idLaporan: number; idKota: number; idPelapor: number; jumlah: number; isi: string; foto?: string }): Promise<void> {
+export async function pushLaporanWw(input: { idLaporan: number; idKota: number; idPelapor: number; jumlah: number; isi: string; foto?: string }): Promise<HasilKirim | null> {
   try {
-    if (!pushAktif()) return
-    if (!(await klaimPush(`ww-laporan:${input.idLaporan}`))) return
+    if (!pushAktif()) return null
+    if (!(await klaimPush(`ww-laporan:${input.idLaporan}`))) return null
     const kota = await namaKota(String(input.idKota))
     const subs = await berlangganan()
     const ids = subs.peserta.filter((id) => id !== input.idPelapor)
-    if (!ids.length) return
+    if (!ids.length) return null
     const isi = input.isi.trim().replace(/\s+/g, ' ')
-    await kirimPush(
+    return await kirimPush(
       { peserta: ids },
       {
         title: `Kabar WW · ${kota}`,
@@ -137,6 +137,7 @@ export async function pushLaporanWw(input: { idLaporan: number; idKota: number; 
     )
   } catch (err) {
     console.error('[push] pushLaporanWw gagal', err)
+    return null
   }
 }
 
