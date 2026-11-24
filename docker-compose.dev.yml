@@ -1,0 +1,60 @@
+# Dev (dev.levelupgen.com): VPS yang sama dengan production, folder /var/www/sisko-levelup-dev.
+# Di-deploy deploy-vps.yml tiap push ke main. Image sama dengan production (env dibaca saat runtime), bedanya:
+# env .env.dev (DB levelupgen-dev, PPHTGD = pphtgd-dev), port host 38418, nama project sendiri, RAM dibatasi, cron push mati kecuali diaktifkan.
+# Manual di VPS: cd /var/www/sisko-levelup-dev && docker compose -f docker-compose.dev.yml <perintah>
+name: sisko-levelup-dev
+
+services:
+  app:
+    # Default `dev` = build terakhir dari main; deploy-vps.yml selalu mengisi IMAGE_TAG=<sha>.
+    image: ghcr.io/kristiansntsdev/sisko-levelup:${IMAGE_TAG:-dev}
+    restart: unless-stopped
+    env_file: .env.dev
+    environment:
+      TZ: Asia/Jakarta
+    # Hanya di localhost: cloudflared milik host, published route dev.levelupgen.com → http://localhost:38418.
+    # Port di dalam container tetap 38417 (Dockerfile), jadi healthcheck + prod-migrate sama dengan production.
+    ports:
+      - "127.0.0.1:38418:38417"
+    # pphtgd-dev (compose pphtgd-dev, port host 8080) dipanggil lewat host: PPHTGD_API_URL=http://host.docker.internal:8080
+    # di .env.dev. Sengaja tidak join network pphtgd-dev_default: deploy pphtgd-dev menjalankan `compose down` tiap push,
+    # dan network yang masih ditempeli container sisko tidak bisa dihapus.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # VPS 3.8 GB tanpa swap, berbagi dengan sisko production + pphtgd: dev yang bocor RAM tidak boleh menjatuhkan production.
+    mem_limit: 768m
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:38417/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Pemicu push terjadwal, sama dengan production. Mati secara default (profile `cron`): selama .env.dev memakai
+  # VAPID production dan DB dev berisi salinan push_subscription production, tick dev mengirim push sungguhan ke anggota.
+  # Aktifkan lewat variable GitHub DEV_PUSH_CRON=true (deploy-vps.yml), setelah dev punya VAPID sendiri.
+  cron:
+    profiles: [cron]
+    image: ghcr.io/kristiansntsdev/sisko-levelup:${IMAGE_TAG:-dev}
+    restart: unless-stopped
+    env_file: .env.dev
+    environment:
+      TZ: Asia/Jakarta
+    mem_limit: 128m
+    depends_on:
+      app:
+        condition: service_healthy
+    command:
+      - node
+      - -e
+      - |
+        const url = 'http://app:38417/api/internal/push-cron'
+        const tick = () =>
+          fetch(url, {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + (process.env.PUSH_CRON_SECRET || '') },
+            signal: AbortSignal.timeout(120000),
+          })
+            .then(async (r) => console.log(new Date().toISOString(), r.status, (await r.text()).slice(0, 400)))
+            .catch((e) => console.error(new Date().toISOString(), e.message))
+        setTimeout(tick, 60000)
+        setInterval(tick, 15 * 60 * 1000)

@@ -1,33 +1,40 @@
-name: Deploy VPS (Production)
+name: Deploy VPS
+
+# Satu VPS, dua target:
+#   push ke main        → dev        (dev.levelupgen.com, /var/www/sisko-levelup-dev, docker-compose.dev.yml)
+#   push tag release-v* → production (www.levelupgen.com, /var/www/sisko-levelup,     docker-compose.yml)
+# Run workflow manual: pilih branch main (= dev) atau tag release-v* (= production, juga untuk rollback ke rilis lama).
+run-name: ${{ startsWith(github.ref, 'refs/tags/release-v') && 'Production' || 'Dev' }} · ${{ github.ref_name }}
 
 on:
   push:
     branches: [main]
+    tags: ['release-v*']
   workflow_dispatch:
 
-# Satu deploy dalam satu waktu; push berikutnya antre, tidak memotong build yang sedang jalan.
+# Antrean per target: push main tidak pernah membatalkan / menahan rilis production yang sedang menunggu, dan sebaliknya.
 concurrency:
-  group: deploy-vps
+  group: deploy-vps-${{ startsWith(github.ref, 'refs/tags/release-v') && 'production' || 'dev' }}
   cancel-in-progress: false
 
 env:
-  APP_DIR: /var/www/sisko-levelup
-  # Harus huruf kecil semua (aturan GHCR) dan sama dengan `image:` di docker-compose.yml.
+  # Harus huruf kecil semua (aturan GHCR) dan sama dengan `image:` di kedua file compose.
   IMAGE: ghcr.io/kristiansntsdev/sisko-levelup
+  PRODUCTION: ${{ startsWith(github.ref, 'refs/tags/release-v') }}
 
 jobs:
   # Build di runner GitHub, bukan di VPS: VPS 3.8 GB tanpa swap dan berbagi dengan pphtgd,
   # `next build` di sana dibunuh OOM killer ("failed to execute bake: signal: killed").
   build:
     name: Build & push image
+    # Run workflow dari branch lain: tidak ada target, tidak jalan.
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/release-v')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
-
       - uses: docker/setup-buildx-action@v3
 
       - uses: docker/login-action@v3
@@ -36,16 +43,48 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Tag SHA = yang di-deploy job berikutnya; `latest` = default compose kalau dijalankan manual di VPS.
+      # Tag SHA = yang di-deploy job berikutnya. Tag kanal = default compose kalau dijalankan manual di VPS:
+      # `dev` (docker-compose.dev.yml) untuk main, `latest` + nama tag rilis (docker-compose.yml) untuk production.
+      - name: Image tags
+        id: tags
+        run: |
+          if [ "$PRODUCTION" = true ]; then
+            echo "extra=$IMAGE:latest,$IMAGE:$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          else
+            echo "extra=$IMAGE:dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Rilis = promosi image yang sudah jalan di dev untuk commit yang sama: bit yang persis sama, tanpa build ulang
+      # (image tidak bergantung env, semua env dibaca saat runtime). Belum ada (mis. commit tengah dari satu push
+      # berisi beberapa commit, atau tag dibuat sebelum build main selesai) → build biasa di langkah berikutnya.
+      - name: Promote dev image
+        id: promote
+        if: env.PRODUCTION == 'true'
+        env:
+          EXTRA: ${{ steps.tags.outputs.extra }}
+        run: |
+          if docker buildx imagetools inspect "$IMAGE:$GITHUB_SHA" > /dev/null 2>&1; then
+            args=()
+            IFS=',' read -ra extra <<< "$EXTRA"
+            for t in "${extra[@]}"; do args+=(-t "$t"); done
+            docker buildx imagetools create "${args[@]}" "$IMAGE:$GITHUB_SHA"
+            echo "done=true" >> "$GITHUB_OUTPUT"
+            echo "Image $GITHUB_SHA sudah ada, dipromosikan tanpa build ulang"
+          else
+            echo "Image $GITHUB_SHA belum ada di GHCR, build dulu"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.promote.outputs.done != 'true'
+
       # Label source: mengaitkan package ke repo ini (akses GITHUB_TOKEN) dan dipakai filter prune di VPS.
       - uses: docker/build-push-action@v6
+        if: steps.promote.outputs.done != 'true'
         with:
           context: .
           push: true
           provenance: false
-          tags: |
-            ${{ env.IMAGE }}:${{ github.sha }}
-            ${{ env.IMAGE }}:latest
+          tags: ${{ env.IMAGE }}:${{ github.sha }},${{ steps.tags.outputs.extra }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
@@ -53,7 +92,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy:
-    name: Deploy to VPS
+    name: Deploy ${{ startsWith(github.ref, 'refs/tags/release-v') && 'production' || 'dev' }}
     needs: build
     runs-on: [self-hosted, Linux, sisko]
     timeout-minutes: 15
@@ -61,22 +100,49 @@ jobs:
       contents: read
       packages: read
     env:
-      # Dibaca docker-compose.yml: deploy persis image hasil build commit ini.
+      # Dibaca file compose: deploy persis image hasil build / promosi commit ini.
       IMAGE_TAG: ${{ github.sha }}
+      # Variable repo (Settings → Secrets and variables → Actions → Variables): `true` = cron push ikut jalan di dev.
+      DEV_PUSH_CRON: ${{ vars.DEV_PUSH_CRON }}
     steps:
-      # Deploy langsung di APP_DIR (bukan workspace runner) supaya .env.production
-      # yang hanya ada di VPS tetap dipakai. --ff-only: gagal kalau ada perubahan lokal yang
-      # bentrok, tidak pernah menimpa pekerjaan yang belum di-commit di VPS.
+      # Semua langkah berikutnya memakai `docker compose` biasa: COMPOSE_FILE memilih file compose target,
+      # nama project (sisko-levelup / sisko-levelup-dev) memisahkan container kedua target.
+      - name: Select target
+        run: |
+          if [ "$PRODUCTION" = true ]; then
+            {
+              echo "APP_DIR=/var/www/sisko-levelup"
+              echo "COMPOSE_FILE=docker-compose.yml"
+              echo "ENV_FILE=.env.production"
+            } >> "$GITHUB_ENV"
+          else
+            {
+              echo "APP_DIR=/var/www/sisko-levelup-dev"
+              echo "COMPOSE_FILE=docker-compose.dev.yml"
+              echo "ENV_FILE=.env.dev"
+            } >> "$GITHUB_ENV"
+            if [ "$DEV_PUSH_CRON" = true ]; then
+              echo "COMPOSE_PROFILES=cron" >> "$GITHUB_ENV"
+            fi
+          fi
+
+      # Folder + env hanya ada di VPS, tidak dari secret GitHub. Folder dev dibuat sekali secara manual.
+      - name: Check folder and env file
+        run: |
+          [ -d "$APP_DIR/.git" ] || {
+            echo "::error::$APP_DIR belum ada. Sekali saja di VPS: git clone \"\$(git -C /var/www/sisko-levelup remote get-url origin)\" $APP_DIR"
+            exit 1
+          }
+          [ -s "$APP_DIR/$ENV_FILE" ] || { echo "::error::$APP_DIR/$ENV_FILE belum ada di VPS"; exit 1; }
+
+      # Deploy langsung di APP_DIR (bukan workspace runner) supaya file env yang hanya ada di VPS tetap dipakai.
+      # --ff-only: gagal kalau ada perubahan lokal yang bentrok, tidak pernah menimpa pekerjaan yang belum di-commit
+      # di VPS. Rollback (tag lama) = "Already up to date": file compose tetap yang terbaru, image ikut tag lama.
       - name: Pull latest code
         run: |
           cd "$APP_DIR"
           git fetch origin
           git merge --ff-only "$GITHUB_SHA"
-
-      - name: Check env file
-        run: |
-          cd "$APP_DIR"
-          [ -s .env.production ] || { echo "::error::$APP_DIR/.env.production belum ada di VPS"; exit 1; }
 
       # Login pakai GITHUB_TOKEN job ini (tidak perlu PAT). Kredensial ditaruh di folder temp
       # runner, bukan ~/.docker, jadi tidak tersisa di VPS setelah job selesai.
@@ -96,13 +162,17 @@ jobs:
           docker compose pull app
 
       # --wait: tunggu healthcheck app (GET /login) lolos; gagal = job merah.
+      # Cron dev dimatikan (DEV_PUSH_CRON bukan true) → container cron lama ikut dihapus, bukan dibiarkan jalan.
       - name: Start containers
         run: |
           cd "$APP_DIR"
+          if [ "$PRODUCTION" != true ] && [ "$DEV_PUSH_CRON" != true ]; then
+            docker compose --profile cron rm -sf cron
+          fi
           docker compose up -d --remove-orphans --wait --wait-timeout 300
 
-      # Migrasi DB idempotent, sama dengan production.yml tapi dipanggil dari dalam container
-      # (tanpa lewat domain publik). INTERNAL_API_SECRET dibaca dari .env.production.
+      # Migrasi DB idempotent, dipanggil dari dalam container (tanpa lewat domain publik). Dev = DB dev, jadi
+      # migrasi selalu dicoba di dev dulu sebelum rilis. INTERNAL_API_SECRET dibaca dari file env target.
       - name: Run prod-migrate
         run: |
           cd "$APP_DIR"
@@ -120,12 +190,12 @@ jobs:
       - name: Show status
         if: always()
         run: |
-          cd "$APP_DIR"
+          cd "$APP_DIR" 2>/dev/null || exit 0
           docker compose ps
           docker compose logs --tail 40 app || true
 
-      # Hanya image sisko-levelup yang tidak dipakai container (versi lama); image project lain
-      # di VPS ini tidak disentuh. Versi lama tetap ada di GHCR kalau perlu rollback.
+      # Hanya image sisko-levelup yang tidak dipakai container mana pun (dev maupun production tetap aman);
+      # image project lain di VPS ini tidak disentuh. Versi lama tetap ada di GHCR kalau perlu rollback.
       - name: Prune old images
         run: |
           docker image prune -af --filter "label=org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY"
