@@ -13,7 +13,13 @@ const todayOf = (d: DemoDb) => wibDay(d.air_hari)
 function kotaList(d: DemoDb): KotaAir[] {
   const today = todayOf(d)
   return d.cabang.map((c) => {
-    const terakhir = d.ww_laporan.filter((l) => l.id_cabang === c.id_cabang).reduce<string | null>((m, l) => (!m || l.tanggal > m ? l.tanggal : m), null)
+    // Sama dengan produksi: air terisi di hari laporan dikirim, bukan tanggal WW.
+    const terakhir = d.ww_laporan
+      .filter((l) => l.id_cabang === c.id_cabang)
+      .reduce<string | null>((m, l) => {
+        const hari = l.dikirim ?? l.tanggal
+        return !m || hari > m ? hari : m
+      }, null)
     return kotaAir(c.id_cabang, c.namacabang, terakhir, today, d.air_mulai[c.id_cabang] ?? null)
   })
 }
@@ -92,7 +98,7 @@ export async function kirimLaporanWw(fd: FormData): Promise<{ ok: true; id: numb
   let id = 0
   mutate((x) => {
     id = x.nextId++
-    x.ww_laporan.push({ id_laporan: id, id_cabang: cabang, oleh: me.nama, tanggal: input.tanggal, jumlah: input.jumlah, isi, foto, foto_x: fokus.x, foto_y: fokus.y, amin_awal: 0, created_at: new Date().toISOString() })
+    x.ww_laporan.push({ id_laporan: id, id_cabang: cabang, oleh: me.nama, tanggal: input.tanggal, jumlah: input.jumlah, isi, foto, foto_x: fokus.x, foto_y: fokus.y, amin_awal: 0, created_at: new Date().toISOString(), dikirim: todayOf(d) })
     addLog(x, `${me.nama} melaporkan WW (${input.jumlah} orang)`)
   })
   return { ok: true, id }

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { addDays, airLevel, airStage, daysBetween, hariLabel, hitungNasional, kotaAir, perluPopup, perluPush, urutKotaHaus, validateLaporan } from './air-hidup'
+import { addDays, AIR_ISI_MAX, AIR_ISI_PRATINJAU, airLevel, airStage, daysBetween, hariLabel, hitungNasional, kotaAir, perluPopup, perluPush, pratinjauIsi, urutKotaHaus, validateLaporan } from './air-hidup'
 
 assert.equal(airStage(null), 'belum')
 assert.equal(airStage(0), 'melimpah')
@@ -67,7 +67,12 @@ assert.ok(validateLaporan({ tanggal: '2026-11-11', jumlah: 3, isi: 'x' }, today)
 assert.ok(validateLaporan({ tanggal: today, jumlah: 0, isi: 'x' }, today), 'jumlah 0 ditolak')
 assert.ok(validateLaporan({ tanggal: today, jumlah: 1.5, isi: 'x' }, today), 'jumlah desimal ditolak')
 assert.ok(validateLaporan({ tanggal: today, jumlah: 3, isi: '   ' }, today), 'isi kosong ditolak')
-assert.ok(validateLaporan({ tanggal: today, jumlah: 3, isi: 'a'.repeat(281) }, today), 'isi terlalu panjang')
+assert.equal(validateLaporan({ tanggal: today, jumlah: 3, isi: 'a'.repeat(AIR_ISI_MAX) }, today), null)
+assert.ok(validateLaporan({ tanggal: today, jumlah: 3, isi: 'a'.repeat(AIR_ISI_MAX + 1) }, today), 'isi terlalu panjang')
+assert.deepEqual(pratinjauIsi('  pendek  '), { teks: 'pendek', terpotong: false })
+assert.equal(pratinjauIsi('a'.repeat(AIR_ISI_PRATINJAU)).terpotong, false)
+const panjang = pratinjauIsi('kata '.repeat(200))
+assert.ok(panjang.terpotong && panjang.teks.length <= AIR_ISI_PRATINJAU + 1 && panjang.teks.endsWith('…'), 'pratinjau dipotong di batas kata')
 assert.ok(validateLaporan({ tanggal: 'kemarin', jumlah: 3, isi: 'x' }, today), 'format tanggal salah')
 
 const n = hitungNasional(

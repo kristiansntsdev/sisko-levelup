@@ -43,12 +43,16 @@ type TargetTersimpan = {
   pengurus?: number[]
   /** Baris ulang tahun: siapa yang berulang tahun (kota + level menentukan siapa yang boleh melihat). */
   ultah?: { id: number; nama: string; kota: string; level: string }
+  /** Baris ringkasan harian LevelUP Pusat (acara + ulang tahun): hanya level 5. */
+  ringkasan?: boolean
 }
 
 /** Pengumuman pribadi otomatis saat notifikasi diaktifkan: tidak tampil di daftar admin. */
 export const TIPE_AKTIVASI = 'aktivasi'
 /** Satu baris per orang yang berulang tahun per hari (target_nilai = "{id}:{yyyy-mm-dd}"): tidak tampil di daftar admin. */
 export const TIPE_ULTAH = 'ultah'
+/** Satu baris per hari untuk LevelUP Pusat (target_nilai = yyyy-mm-dd): ringkasan acara + ulang tahun. Tidak tampil di daftar admin. */
+export const TIPE_RINGKASAN = 'ringkasan'
 
 export type AnggotaOpsi = { id: number; label: string; punyaPerangkat: boolean }
 
@@ -260,9 +264,9 @@ export async function daftarPengumuman(halaman: number): Promise<{ siap: boolean
         }[]
       >`SELECT id_pengumuman, judul, isi, image_url, url, target_tipe, target_nilai, cocok, perangkat, terkirim, gagal,
                UNIX_TIMESTAMP(created_at) AS ts
-        FROM pengumuman WHERE target_tipe NOT IN (${TIPE_AKTIVASI}, ${TIPE_ULTAH})
+        FROM pengumuman WHERE target_tipe NOT IN (${TIPE_AKTIVASI}, ${TIPE_ULTAH}, ${TIPE_RINGKASAN})
         ORDER BY id_pengumuman DESC LIMIT ${PER_HALAMAN} OFFSET ${offset}`,
-      db.$queryRaw<{ n: bigint | number }[]>`SELECT COUNT(*) AS n FROM pengumuman WHERE target_tipe NOT IN (${TIPE_AKTIVASI}, ${TIPE_ULTAH})`,
+      db.$queryRaw<{ n: bigint | number }[]>`SELECT COUNT(*) AS n FROM pengumuman WHERE target_tipe NOT IN (${TIPE_AKTIVASI}, ${TIPE_ULTAH}, ${TIPE_RINGKASAN})`,
     ])
     return {
       siap: true,
@@ -343,12 +347,12 @@ function bacaTarget(r: RowAnggota): TargetTersimpan | null {
   }
 }
 
-/** Aturan sama dengan penerima push ulang tahun: Pusat semua; PIC sekota + PIC lain; level 0-3 sekota. Yang berulang tahun selalu boleh. */
+/** PIC sekota + PIC lain; level 0-3 sekota. Yang berulang tahun selalu boleh. LevelUP Pusat tidak per orang: mereka membaca baris ringkasan harian. */
 function bolehLihatUltah(u: NonNullable<TargetTersimpan['ultah']>, v: PembacaPengumuman): boolean {
   if (v.idPeserta == null) return false
   if (v.idPeserta === u.id) return true
   const level = v.level ?? 0
-  if (level >= 5) return true
+  if (level >= 5) return false
   const sekota = v.kota != null && kotaKey(v.kota) === u.kota
   return level === 4 ? sekota || u.level === '4' : sekota
 }
@@ -356,6 +360,7 @@ function bolehLihatUltah(u: NonNullable<TargetTersimpan['ultah']>, v: PembacaPen
 function bolehLihat(r: RowAnggota, v: PembacaPengumuman): boolean {
   if (v.admin) return true
   const t = bacaTarget(r)
+  if (r.target_tipe === TIPE_RINGKASAN) return v.idPeserta != null && (v.level ?? 0) >= 5
   if (r.target_tipe === TIPE_ULTAH) return t?.ultah ? bolehLihatUltah(t.ultah, v) : false
   if (r.target_tipe === 'semua' || t?.semua) return v.idPeserta != null || v.pengurus
   if (!t) return false
@@ -441,6 +446,27 @@ export async function pastikanBarisUltah(u: OrangUltah, tanggalWib: string): Pro
     await tx.$executeRaw`
       INSERT INTO pengumuman (judul, isi, image_url, url, target_tipe, target_nilai, target_json, cocok)
       VALUES (${judul}, ${`Doakan dan ucapkan selamat untuk ${u.nama}.`}, '', '', ${TIPE_ULTAH}, ${nilai}, ${JSON.stringify(tersimpan)}, 0)`
+    const r = await tx.$queryRaw<{ id: bigint | number }[]>`SELECT LAST_INSERT_ID() AS id`
+    return Number(r[0]?.id)
+  })
+}
+
+/**
+ * Ringkasan harian untuk LevelUP Pusat: satu baris per hari (WIB), dibuat sekali lalu isinya diperbarui kalau
+ * dipanggil lagi di hari yang sama. Mengembalikan id pengumuman.
+ */
+export async function pastikanBarisRingkasan(tanggalWib: string, judul: string, isi: string): Promise<number> {
+  const ada = await db.$queryRaw<{ id: number }[]>`
+    SELECT id_pengumuman AS id FROM pengumuman WHERE target_tipe = ${TIPE_RINGKASAN} AND target_nilai = ${tanggalWib} LIMIT 1`
+  if (ada[0]) {
+    await db.$executeRaw`UPDATE pengumuman SET judul = ${judul.slice(0, 80)}, isi = ${isi} WHERE id_pengumuman = ${Number(ada[0].id)}`
+    return Number(ada[0].id)
+  }
+  const tersimpan: TargetTersimpan = { semua: false, kota: [], peserta: [], ringkasan: true }
+  return db.$transaction(async (tx) => {
+    await tx.$executeRaw`
+      INSERT INTO pengumuman (judul, isi, image_url, url, target_tipe, target_nilai, target_json, cocok)
+      VALUES (${judul.slice(0, 80)}, ${isi}, '', '', ${TIPE_RINGKASAN}, ${tanggalWib}, ${JSON.stringify(tersimpan)}, 0)`
     const r = await tx.$queryRaw<{ id: bigint | number }[]>`SELECT LAST_INSERT_ID() AS id`
     return Number(r[0]?.id)
   })

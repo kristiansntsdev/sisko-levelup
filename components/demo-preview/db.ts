@@ -169,6 +169,8 @@ export type DbWwLaporan = {
   /** Amin dari anggota lain yang tidak ada di demo (angka awal seed) */
   amin_awal: number
   created_at: string
+  /** Hari demo (yyyy-mm-dd, ikut Simulasi waktu) laporan dikirim = hari air terisi. Kosong (seed / data lama) = tanggal WW. */
+  dikirim?: string
 }
 
 export type DbSession = {

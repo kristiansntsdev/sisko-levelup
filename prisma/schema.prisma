@@ -716,7 +716,7 @@ model ww_laporan {
   id_peserta Int
   tanggal    DateTime @db.Date
   jumlah     Int
-  isi        String   @db.VarChar(280)
+  isi        String   @db.Text
   foto_url   String   @default("") @db.VarChar(500)
   created_at DateTime @default(now()) @db.DateTime(0)
 

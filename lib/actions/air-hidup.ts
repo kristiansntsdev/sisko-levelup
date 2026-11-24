@@ -67,7 +67,8 @@ export async function kirimLaporanWw(fd: FormData): Promise<KirimLaporanResult> 
     }
     let row
     try {
-      row = await db.ww_laporan.create({ data: { id_cabang: me.cabang, id_peserta: me.id, tanggal, jumlah: input.jumlah, isi, foto_url: foto } })
+      // created_at eksplisit (Prisma menulis UTC): hari WIB-nya = hari air terisi (lihat daftarKotaAir).
+      row = await db.ww_laporan.create({ data: { id_cabang: me.cabang, id_peserta: me.id, tanggal, jumlah: input.jumlah, isi, foto_url: foto, created_at: new Date() } })
     } catch (e) {
       if (foto) await del(foto, { token: process.env.BLOB_READ_WRITE_TOKEN }).catch(() => {})
       throw e

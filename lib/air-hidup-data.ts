@@ -28,7 +28,8 @@ export async function daftarKotaAir(today: string, idCabang?: number): Promise<K
   const where = idCabang != null ? Prisma.sql`WHERE c.id_cabang = ${idCabang}` : Prisma.empty
   const rows = await db.$queryRaw<KotaRow[]>`
     SELECT c.id_cabang, c.namacabang,
-           DATE_FORMAT(MAX(l.tanggal), '%Y-%m-%d') AS terakhir,
+           -- Air terisi di hari laporan DIKIRIM (bukan tanggal WW). created_at ditulis Prisma dalam UTC, +7 jam = hari WIB.
+           DATE_FORMAT(MAX(l.created_at) + INTERVAL 7 HOUR, '%Y-%m-%d') AS terakhir,
            DATE_FORMAT(k.mulai, '%Y-%m-%d') AS mulai
     FROM cabang c
     LEFT JOIN ww_laporan l ON l.id_cabang = c.id_cabang

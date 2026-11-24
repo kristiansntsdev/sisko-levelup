@@ -1,5 +1,5 @@
 /**
- * Job terjadwal push: ulang tahun, acara hari ini (LevelUP Pusat), pengingat H-1 / hari-H, absen online dibuka.
+ * Job terjadwal push: ulang tahun, ringkasan harian LevelUP Pusat (acara + ulang tahun), pengingat H-1 / hari-H, absen online dibuka.
  * Dipanggil tiap 15 menit oleh POST /api/internal/push-cron. Setiap job punya jendela jam WIB, dan push_kirim
  * (INSERT IGNORE) menjamin satu kiriman per kunci walau tick datang berkali-kali atau terlambat. Hanya server.
  */
@@ -14,7 +14,7 @@ import {
 } from './send'
 import { AIR_STAGE_LABEL, perluPush } from '@/lib/air-hidup'
 import { daftarKotaAir } from '@/lib/air-hidup-data'
-import { halamanPengumuman, pastikanBarisUltah, teksUltahDiri, type OrangUltah } from './pengumuman'
+import { halamanPengumuman, pastikanBarisRingkasan, pastikanBarisUltah, teksUltahDiri, type OrangUltah } from './pengumuman'
 import { daftarNama, ingatH0Aktif, jendelaBuka, ultahHariIni, wibIso } from './rules'
 
 type Pesan = { to: Penerima; payload: PushPayload; opts?: PushOpts }
@@ -101,12 +101,12 @@ async function pesanUltah(now: Date): Promise<Pesan[]> {
   const bucket = new Map<string, { teks: string; ids: number[] }>()
   for (const r of subs) {
     const level = Number(r.userlevel)
+    // LevelUP Pusat tidak dapat per orang: mereka dapat ringkasan harian (grupRingkasan).
+    if (level >= 5) continue
     const kotaR = kotaKey(r.kotalevelup)
     const lain = ultah.filter((u) => u.id_peserta !== r.id_peserta)
     const lihat =
-      level >= 5
-        ? lain.map((u) => `${u.nama} (${namaKota(u)})`)
-        : level === 4
+      level === 4
           ? lain.filter((u) => kotaKey(u.kotalevelup) === kotaR || u.userlevel === '4').map((u) => (kotaKey(u.kotalevelup) === kotaR ? u.nama : `${u.nama} (${namaKota(u)})`))
           : lain.filter((u) => kotaKey(u.kotalevelup) === kotaR).map((u) => u.nama)
     if (!lihat.length) continue
@@ -193,25 +193,58 @@ async function grupUltah(now: Date): Promise<Grup[]> {
   return [...diri, { kunci: `ultah:${tgl}`, pesan: () => pesanUltah(now) }]
 }
 
-async function grupAcaraHariIni(now: Date): Promise<Grup[]> {
+const MAKS_BARIS_RINGKASAN = 15
+
+function daftarBaris(baris: string[]): string[] {
+  const sisa = baris.length - MAKS_BARIS_RINGKASAN
+  return sisa > 0 ? [...baris.slice(0, MAKS_BARIS_RINGKASAN), `+${sisa} lainnya`] : baris
+}
+
+/**
+ * Ringkasan harian untuk LevelUP Pusat (level 5): satu baris di halaman Pengumuman + satu push, memuat acara hari ini
+ * dan ulang tahun. Tidak dibuat kalau keduanya kosong. Baris dibuat walau belum ada Pusat yang mengaktifkan notifikasi.
+ */
+async function grupRingkasan(now: Date): Promise<Grup[]> {
   const hari = wibToday(now)
+  const tgl = wibIso(now)
   return [
     {
-      kunci: `acara-hari-ini:${wibIso(now)}`,
-      pesan: async () => {
+      kunci: `ringkasan:${tgl}`,
+      pesan: async (tulis) => {
+        const [events, ultah, kota] = await Promise.all([
+          db.event.findMany({
+            where: { tglevent: { lte: hari }, tgleventselesai: { gte: hari }, ...DISETUJUI },
+            select: EVENT_SELECT,
+            orderBy: { jamevent: 'asc' },
+          }),
+          orangUltahHariIni(now),
+          petaKota(),
+        ])
+        if (!events.length && !ultah.length) return []
+        const namaKota = (k: string) => kota.get(kotaKey(k)) ?? 'LevelUP'
+
+        const ringkas = [events.length ? `${events.length} acara` : '', ultah.length ? `${ultah.length} ulang tahun` : ''].filter(Boolean).join(' · ')
+        const bagian: string[] = [ringkas]
+        if (events.length) {
+          bagian.push(
+            ['Acara hari ini', ...daftarBaris(events.map((e) => {
+              const lokasi = e.id_cabang === NASIONAL_EVENT_CABANG ? 'Nasional' : namaKota(e.id_cabang)
+              return `• ${e.nama_event} · ${lokasi}${e.jamevent ? ` · ${e.jamevent}` : ''}${isOnlineEvent(e.jenisevent) ? ' · Online' : ''}`
+            }))].join('\n'),
+          )
+        }
+        if (ultah.length) {
+          bagian.push(['Ulang tahun', ...daftarBaris(ultah.map((u) => `• ${u.nama} · ${namaKota(u.kotalevelup)}`))].join('\n'))
+        }
+        const tanggal = hari.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', timeZone: 'UTC' })
+        const judul = `Ringkasan hari ini · ${tanggal}`
+        const id = tulis ? await pastikanBarisRingkasan(tgl, judul, bagian.join('\n\n')) : 0
+
         const pusat = (await pesertaBerlangganan()).filter((p) => p.userlevel === '5').map((p) => p.id_peserta)
         if (!pusat.length) return []
-        const events = await db.event.findMany({
-          where: { tglevent: { lte: hari }, tgleventselesai: { gte: hari }, ...DISETUJUI },
-          select: EVENT_SELECT,
-          orderBy: { jamevent: 'asc' },
-        })
-        if (!events.length) return []
-        const kota = await petaKota()
-        const nama = events.map((e) => `${e.nama_event} (${e.id_cabang === NASIONAL_EVENT_CABANG ? 'Nasional' : (kota.get(kotaKey(e.id_cabang)) ?? 'LevelUP')})`)
         return [{
           to: { peserta: pusat },
-          payload: { title: `Acara hari ini: ${events.length}`, body: daftarNama(nama), url: '/events', tag: `acara-${wibIso(now)}` },
+          payload: { title: judul, body: ringkas, url: id ? halamanPengumuman(id) : '/dashboard/pengumuman', tag: `ringkasan-${tgl}` },
           opts: DEKAT,
         }]
       },
@@ -293,9 +326,9 @@ async function grupAir(now: Date): Promise<Grup[]> {
   })
 }
 
-const JOBS: { nama: string; jendela?: 'ultah' | 'acara-hari-ini' | 'ingat-h1' | 'air'; grup: (now: Date) => Promise<Grup[]> }[] = [
+const JOBS: { nama: string; jendela?: 'ultah' | 'ringkasan' | 'ingat-h1' | 'air'; grup: (now: Date) => Promise<Grup[]> }[] = [
   { nama: 'ultah', jendela: 'ultah', grup: grupUltah },
-  { nama: 'acara-hari-ini', jendela: 'acara-hari-ini', grup: grupAcaraHariIni },
+  { nama: 'ringkasan', jendela: 'ringkasan', grup: grupRingkasan },
   { nama: 'ingat-h1', jendela: 'ingat-h1', grup: grupIngatH1 },
   { nama: 'air', jendela: 'air', grup: grupAir },
   { nama: 'ingat-h0', grup: grupIngatH0 },

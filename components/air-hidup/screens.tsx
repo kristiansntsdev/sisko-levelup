@@ -65,7 +65,7 @@ export function PicScreen({ data, berandaHref, laporHref, feedHref, editHref, to
   )
 }
 
-export function LaporScreen({ namaKota, today, picHref, onSubmit }: { namaKota: string; today: string; picHref: string; onSubmit: LaporSubmit }) {
+export function LaporScreen({ namaKota, today, levelAwal, picHref, onSubmit }: { namaKota: string; today: string; levelAwal?: number; picHref: string; onSubmit: LaporSubmit }) {
   const router = useRouter()
   return (
     <PaperMain>
@@ -75,6 +75,7 @@ export function LaporScreen({ namaKota, today, picHref, onSubmit }: { namaKota: 
         <LaporForm
           namaKota={namaKota}
           today={today}
+          levelAwal={levelAwal}
           onSubmit={async (fd) => {
             const r = await onSubmit(fd)
             if (r.ok) router.refresh() // Dashboard PIC + Aliran dibaca ulang

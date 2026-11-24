@@ -593,7 +593,7 @@ export async function POST(req: NextRequest) {
       id_peserta INT NOT NULL,
       tanggal DATE NOT NULL,
       jumlah INT NOT NULL,
-      isi VARCHAR(280) NOT NULL,
+      isi TEXT NOT NULL,
       foto_url VARCHAR(500) NOT NULL DEFAULT '',
       created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id_laporan),
@@ -605,6 +605,16 @@ export async function POST(req: NextRequest) {
   // + migrasi dalam satu rilis membuat query error sampai migrasi selesai. Dibaca/ditulis lewat raw SQL.
   const addedWwFotoFokus = await ensureColumn('ww_laporan', 'foto_x',
     `ALTER TABLE ww_laporan ADD COLUMN foto_x TINYINT UNSIGNED NOT NULL DEFAULT 50, ADD COLUMN foto_y TINYINT UNSIGNED NOT NULL DEFAULT 50`)
+  // Isi laporan dulu VARCHAR(280); sekarang TEXT (maks 2000, kartu menampilkan 280 awal). Idempotent.
+  const wwIsiCol = (await db.$queryRaw<{ DATA_TYPE: string }[]>`
+    SELECT DATA_TYPE FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ww_laporan' AND COLUMN_NAME = 'isi'
+  `)[0]
+  let wwLaporanIsiText = false
+  if (wwIsiCol && wwIsiCol.DATA_TYPE.toLowerCase() !== 'text') {
+    await db.$executeRawUnsafe(`ALTER TABLE ww_laporan MODIFY isi TEXT NOT NULL`)
+    wwLaporanIsiText = true
+  }
   const addedWwAmin = await ensureTable('ww_amin', `
     CREATE TABLE ww_amin (
       id_laporan INT NOT NULL,
@@ -677,6 +687,7 @@ export async function POST(req: NextRequest) {
     addedWwLaporan,
     addedWwFotoFokus,
     addedWwAmin,
+    wwLaporanIsiText,
     addedWwKota,
     wwKotaDiisi,
     addedPengumumanTargetJson,

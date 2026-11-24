@@ -4,7 +4,7 @@ import { ANTON, BTN, BTN_OUTLINE, ERROR, LABEL, MONO, Strip } from '@/components
 import { ID_FONTS } from '@/components/pwa/member-card'
 import { Icon, LOGO, Sheet, SheetHead } from '@/components/pwa/ui'
 import { DropIcon, WATER } from './bar'
-import { fmtTanggal } from './feed'
+import { fmtTanggal, pratinjauIsi } from '@/lib/air-hidup'
 
 const CARD_BG = '#efe8da'
 // iOS Safari gives up on canvases over 16,777,216 px (blank image).
@@ -54,7 +54,7 @@ function ShareCard({ d }: { d: ShareData }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={d.foto || LOGO} alt="" className={`absolute inset-0 h-full w-full ${d.foto ? 'object-cover' : 'object-contain p-12'}`} />
         </div>
-        <p className={`${MONO} px-1 pt-3 text-[15px] font-bold leading-snug`}>“{d.isi}”</p>
+        <p className={`${MONO} px-1 pt-3 text-[15px] font-bold leading-snug`}>“{pratinjauIsi(d.isi).teks}”</p>
       </div>
       <div className="mt-5 flex items-end justify-between gap-4">
         <p className={`${ANTON} text-[34px] leading-none`}>

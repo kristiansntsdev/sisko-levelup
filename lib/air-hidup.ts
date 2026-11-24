@@ -4,7 +4,9 @@
 export const AIR_KERING_HARI = 40
 export const AIR_HAUS_HARI = 30
 export const AIR_SEGAR_HARI = 7
-export const AIR_ISI_MAX = 280
+/** Batas isi laporan (kolom `ww_laporan.isi` = TEXT). Kartu laporan memotong 3 baris; kartu bagikan PNG memakai AIR_ISI_PRATINJAU. */
+export const AIR_ISI_MAX = 2000
+export const AIR_ISI_PRATINJAU = 280
 export const AIR_JUMLAH_MAX = 9999
 
 export type AirStage = 'melimpah' | 'segar' | 'haus' | 'kering' | 'belum'
@@ -43,7 +45,7 @@ export type WwLaporan = {
 export type KotaAir = {
   idCabang: number
   namaKota: string
-  /** laporan WW terakhir (yyyy-mm-dd); null = belum ada laporan */
+  /** hari WIB laporan WW terakhir DIKIRIM (yyyy-mm-dd), bukan tanggal WW-nya; null = belum ada laporan */
   terakhir: string | null
   /** awal siklus air: laporan terakhir atau hari mulai kota, mana yang lebih baru */
   sejak: string | null
@@ -72,6 +74,11 @@ export type EditData = { today: string; namaKota: string; laporan: LaporanEdit }
 
 const DAY = 24 * 60 * 60 * 1000
 
+/** yyyy-mm-dd → "22 November 2026". */
+export function fmtTanggal(iso: string): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+}
+
 /** Selisih hari kalender antara dua yyyy-mm-dd. */
 export function daysBetween(from: string, to: string): number {
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY)
@@ -96,8 +103,9 @@ export function airStage(hari: number | null): AirStage {
 }
 
 /**
- * Status satu kota. Air mulai penuh di `mulai` (hari kota masuk sistem), lalu tiap laporan WW mengisi penuh lagi:
- * siklus dihitung dari yang paling baru di antara keduanya. `today` = hari WIB sekarang.
+ * Status satu kota. Air mulai penuh di `mulai` (hari kota masuk sistem), lalu tiap laporan WW mengisi penuh lagi di hari
+ * laporan itu DIKIRIM (`terakhir`), apa pun tanggal WW-nya: siklus dihitung dari yang paling baru di antara keduanya.
+ * `today` = hari WIB sekarang.
  */
 export function kotaAir(idCabang: number, namaKota: string, terakhir: string | null, today: string, mulai: string | null = null): KotaAir {
   const sejak = [terakhir, mulai].filter((d): d is string => !!d).sort().at(-1) ?? null
@@ -132,12 +140,21 @@ export function hariLabel(hari: number | null): string {
   return `${hari} hari lalu`
 }
 
+/** Potongan awal isi untuk kartu (maks AIR_ISI_PRATINJAU, dipotong di batas kata). `terpotong` = ada sisa untuk halaman detail. */
+export function pratinjauIsi(isi: string): { teks: string; terpotong: boolean } {
+  const t = isi.trim()
+  if (t.length <= AIR_ISI_PRATINJAU) return { teks: t, terpotong: false }
+  const potong = t.slice(0, AIR_ISI_PRATINJAU)
+  const spasi = potong.lastIndexOf(' ')
+  return { teks: `${(spasi > AIR_ISI_PRATINJAU * 0.6 ? potong.slice(0, spasi) : potong).trimEnd()}…`, terpotong: true }
+}
+
 export function validateLaporan(input: LaporanInput, today: string): string | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.tanggal)) return 'Tanggal WW tidak valid.'
   if (input.tanggal > today) return 'Tanggal WW tidak boleh di masa depan.'
   if (!Number.isInteger(input.jumlah) || input.jumlah < 1 || input.jumlah > AIR_JUMLAH_MAX) return `Jumlah orang 1 sampai ${AIR_JUMLAH_MAX}.`
   const isi = input.isi.trim()
-  if (!isi) return 'Tulis satu kalimat: apa yang kalian terima?'
+  if (!isi) return 'Tulis apa yang kalian terima dari WW ini.'
   if (isi.length > AIR_ISI_MAX) return `Maksimal ${AIR_ISI_MAX} karakter.`
   return null
 }

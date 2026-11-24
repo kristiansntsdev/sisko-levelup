@@ -9,5 +9,5 @@ export default async function LaporWwPage() {
   if (!me) redirect('/login?callbackUrl=/dashboard/pic/lapor')
   const data = await dataPic(me)
   if (!data) redirect('/dashboard')
-  return <LaporPage namaKota={data.namaKota} today={data.today} />
+  return <LaporPage namaKota={data.namaKota} today={data.today} levelAwal={data.kota.level} />
 }

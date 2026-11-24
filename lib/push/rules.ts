@@ -61,12 +61,13 @@ export function daftarNama(names: string[]): string {
   return tampil.join(', ') + (sisa > 0 ? ` +${sisa} lainnya` : '')
 }
 
-export type JendelaJob = 'ultah' | 'acara-hari-ini' | 'ingat-h1' | 'air'
+export type JendelaJob = 'ultah' | 'ringkasan' | 'ingat-h1' | 'air'
 
 /** Jendela jam WIB (mulai inklusif, akhir eksklusif) tiap job harian. Tick yang telat tetap dikirim selama jendela buka. */
 export const JENDELA: Record<JendelaJob, [number, number]> = {
   ultah: [7, 12],
-  'acara-hari-ini': [6, 10],
+  // Ringkasan Pusat memuat ulang tahun juga, jadi jendelanya sama dengan 'ultah'.
+  ringkasan: [7, 12],
   'ingat-h1': [18, 21],
   air: [9, 12],
 }
