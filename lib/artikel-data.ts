@@ -12,21 +12,24 @@ export type ArtikelCard = {
   publishedAt: string | null
   likes: number
   komentar: number
+  views: number
 }
 
 export type ArtikelFull = ArtikelCard & { isi: string }
 
 export type KomentarItem = { id: number; nama: string; isi: string; createdAt: string; hidden: boolean }
 
-async function countsFor(ids: number[]): Promise<{ likes: Map<number, number>; komentar: Map<number, number> }> {
-  if (ids.length === 0) return { likes: new Map(), komentar: new Map() }
-  const [likes, komentar] = await Promise.all([
+async function countsFor(ids: number[]): Promise<{ likes: Map<number, number>; komentar: Map<number, number>; views: Map<number, number> }> {
+  if (ids.length === 0) return { likes: new Map(), komentar: new Map(), views: new Map() }
+  const [likes, komentar, views] = await Promise.all([
     db.artikel_like.groupBy({ by: ['id_artikel'], where: { id_artikel: { in: ids } }, _count: { _all: true } }),
     db.artikel_komentar.groupBy({ by: ['id_artikel'], where: { id_artikel: { in: ids }, hidden: 0 }, _count: { _all: true } }),
+    db.artikel_view.groupBy({ by: ['id_artikel'], where: { id_artikel: { in: ids } }, _sum: { views: true } }),
   ])
   return {
     likes: new Map(likes.map((r) => [r.id_artikel, r._count._all])),
     komentar: new Map(komentar.map((r) => [r.id_artikel, r._count._all])),
+    views: new Map(views.map((r) => [r.id_artikel, r._sum.views ?? 0])),
   }
 }
 
@@ -44,6 +47,7 @@ function toCard(r: Row, c: Awaited<ReturnType<typeof countsFor>>): ArtikelCard {
     publishedAt: r.published_at ? r.published_at.toISOString() : null,
     likes: c.likes.get(r.id_artikel) ?? 0,
     komentar: c.komentar.get(r.id_artikel) ?? 0,
+    views: c.views.get(r.id_artikel) ?? 0,
   }
 }
 
@@ -100,6 +104,17 @@ export async function isLikedBy(idArtikel: number, visitor: string | undefined):
     return !!r
   } catch {
     return false
+  }
+}
+
+/** Which of these articles this visitor already liked (for the member list). Never throws. */
+export async function likedIdsBy(ids: number[], visitor: string | undefined): Promise<Set<number>> {
+  if (!visitor || ids.length === 0) return new Set()
+  try {
+    const rows = await db.artikel_like.findMany({ where: { id_artikel: { in: ids }, visitor }, select: { id_artikel: true } })
+    return new Set(rows.map((r) => r.id_artikel))
+  } catch {
+    return new Set()
   }
 }
 

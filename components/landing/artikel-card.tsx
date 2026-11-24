@@ -21,6 +21,7 @@ export function ArtikelPolaroid({ a, i = 0, className = '' }: { a: ArtikelCard; 
           <h3 className="mt-2.5 text-[17px] font-extrabold leading-snug text-[#161616] line-clamp-2">{a.judul}</h3>
           {a.ringkasan && <p className="mt-1.5 text-[13.5px] leading-relaxed text-stone-600 line-clamp-3">{a.ringkasan}</p>}
           <p className="mt-3 flex items-center gap-3.5 text-[12.5px] font-bold text-stone-500">
+            <span>👁 {a.views}</span>
             <span><span className="text-[#e02a2f]">♥</span> {a.likes}</span>
             <span>💬 {a.komentar}</span>
           </p>

@@ -95,7 +95,7 @@ export function ArtikelInteraksi({
   }
 
   return (
-    <section className="relative mt-14">
+    <section id="komentar" className="relative mt-14 scroll-mt-6">
       <div className="flex flex-wrap items-center gap-3.5">
         <button type="button" onClick={like} disabled={likePending} aria-pressed={liked} className={`${LIFT} ${PRESS} disabled:opacity-60`}>
           <Strip tone={liked ? 'red' : 'paper'} seed={31} className="h-11 px-5 text-[15px] -rotate-1">

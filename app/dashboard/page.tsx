@@ -51,9 +51,10 @@ const FEATURES: { i: IconName; t: string; href?: string; chip?: string; beta?: s
   { i: 'book', t: 'DeeperWP' },
   { i: 'music', t: 'WeWorship', href: WEWORSHIP_URL, chip: 'bg-[#e02a2f] text-white', beta: BETA_WEWORSHIP },
   { i: 'chat', t: 'Kesaksian', href: '/dashboard/kesaksian', chip: 'bg-[#161616] text-[#ffd83d]' },
+  { i: 'image', t: 'Artikel', href: '/dashboard/artikel', chip: 'bg-[#ffd83d] text-[#161616]' },
 ]
 
-const TILT = ['-rotate-1', 'rotate-1', '-rotate-[.5deg]', 'rotate-[.5deg]', '-rotate-1', 'rotate-1']
+const TILT = ['-rotate-1', 'rotate-1', '-rotate-[.5deg]', 'rotate-[.5deg]', '-rotate-1', 'rotate-1', '-rotate-[.5deg]']
 
 function LevelPanel({
   level,
