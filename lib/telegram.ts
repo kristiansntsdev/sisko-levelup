@@ -1,6 +1,7 @@
 import { NASIONAL_EVENT_CABANG, NASIONAL_KHUSUS_VALUE } from '@/lib/event-cabang'
 import { eventEntryPath } from '@/lib/event-link'
 import { resolveEventPosterUrl } from '@/lib/event-poster'
+import { sendWaGroup } from '@/lib/gowa'
 
 function escapeHtml(s: string): string {
   return s
@@ -289,8 +290,53 @@ export type NotifyTelegramOpts = {
   channel?: 'ops' | 'log'
 }
 
-/** Fire-and-forget Bot API sendMessage (HTML + optional URL buttons). */
+function htmlToPlain(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+}
+
+/** Label tombol Telegram → label teks WA: tanpa emoji, selalu berawalan "Link". */
+function waLinkLabel(text: string): string {
+  const clean = text.replace(/^[^\p{L}\p{N}]+/u, '').replace(/^Lihat\s+/i, '').trim()
+  return /^link\b/i.test(clean) ? clean : `Link ${clean}`
+}
+
+/** Teks WA: kartu sebagai teks polos, lalu tiap tombol jadi "Label: url" di baris sendiri. */
+export function formatWaMessage(html: string, buttons: TelegramButton[]): string {
+  const body = htmlToPlain(html).trim()
+  const links = buttons
+    .filter((b) => b.url.trim())
+    .map((b) => `${waLinkLabel(b.text)}: ${b.url.trim()}`)
+  return links.length ? `${body}\n\n${links.join('\n\n')}` : body
+}
+
+/**
+ * Kirim notif ke Telegram dan (hanya channel ops) mirror ke grup WA lewat GOWA.
+ * Fire-and-forget: kegagalan salah satu tidak menghalangi yang lain.
+ */
 export async function notifyTelegram(
+  text: string,
+  opts?: NotifyTelegramOpts,
+): Promise<void> {
+  await Promise.all([sendTelegram(text, opts), mirrorToWa(text, opts)])
+}
+
+async function mirrorToWa(text: string, opts?: NotifyTelegramOpts): Promise<void> {
+  if (opts?.channel === 'log') return
+  const buttons: TelegramButton[] = opts?.buttons?.length
+    ? opts.buttons
+    : opts?.buttonUrl
+      ? [{ text: opts.buttonText ?? 'Link Event', url: opts.buttonUrl }]
+      : []
+  const res = await sendWaGroup(formatWaMessage(text, buttons))
+  if (!res.ok) console.error('[gowa]', res.error)
+}
+
+/** Bot API sendMessage (HTML + optional URL buttons). */
+async function sendTelegram(
   text: string,
   opts?: NotifyTelegramOpts,
 ): Promise<void> {
