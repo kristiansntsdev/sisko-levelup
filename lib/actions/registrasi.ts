@@ -148,6 +148,8 @@ export async function createRegistrasi(idPeserta: number, idEvent: number): Prom
         layout: 'peserta',
       }),
       {
+        // Pengajuan tiket butuh keputusan → grup ops; registrasi biasa = log.
+        channel: pending ? 'ops' : 'log',
         buttons: [
           pending
             ? { text: '✅ Approval Tiket', url: tiketNasionalApproveLink() }
@@ -351,7 +353,7 @@ export async function approveTiketNasional(idRegistrasi: number): Promise<Result
       },
       layout: 'peserta',
     }),
-    { buttons: [{ text: '📋 Detail Event', url: eventDetailLink(row.id_event) }] },
+    { channel: 'log', buttons: [{ text: '📋 Detail Event', url: eventDetailLink(row.id_event) }] },
   )
 
   revalidateNasionalTickets()

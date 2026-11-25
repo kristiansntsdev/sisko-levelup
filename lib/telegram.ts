@@ -281,6 +281,12 @@ export type NotifyTelegramOpts = {
   /** @deprecated use buttons */
   buttonUrl?: string
   buttonText?: string
+  /**
+   * `ops` (default) = grup utama, hal yang butuh keputusan.
+   * `log` = grup terpisah untuk notif ramai (registrasi, tiket disetujui). Tanpa
+   * TELEGRAM_LOG_CHAT_ID notif log tidak dikirim (tidak jatuh ke grup ops).
+   */
+  channel?: 'ops' | 'log'
 }
 
 /** Fire-and-forget Bot API sendMessage (HTML + optional URL buttons). */
@@ -289,7 +295,10 @@ export async function notifyTelegram(
   opts?: NotifyTelegramOpts,
 ): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim()
-  const chatId = process.env.TELEGRAM_CHAT_ID?.trim()
+  const chatId =
+    opts?.channel === 'log'
+      ? process.env.TELEGRAM_LOG_CHAT_ID?.trim()
+      : process.env.TELEGRAM_CHAT_ID?.trim()
   if (!token || !chatId) return
 
   const rawButtons: TelegramButton[] = opts?.buttons?.length
