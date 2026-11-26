@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { addDays, AIR_ISI_MAX, AIR_ISI_PRATINJAU, airLevel, airStage, daysBetween, hariLabel, airAnggota, hitungNasional, perluPopup, perluPush, pratinjauIsi, ringkasKota, statusAir, terakhirMinum, urutAnggotaHaus, urutKotaHaus, validateLaporan } from './air-hidup'
+import { addDays, AIR_ISI_MAX, AIR_ISI_PRATINJAU, airLevel, airStage, daysBetween, hariLabel, airAnggota, hitungNasional, perluPopup, perluPush, pratinjauIsi, statusAir, terakhirMinum, urutAnggotaHaus, validateLaporan } from './air-hidup'
 
 assert.equal(airStage(null), 'belum')
 assert.equal(airStage(0), 'melimpah')
@@ -31,13 +31,6 @@ assert.equal(k.hari, 31)
 assert.equal(k.stage, 'haus')
 assert.equal(statusAir(null, '2026-11-10').stage, 'belum')
 assert.equal(statusAir('2026-11-12', '2026-11-10').hari, 0, 'tanggal masa depan tidak negatif')
-
-const urut = urutKotaHaus([
-  { namaKota: 'B', hari: 2 },
-  { namaKota: 'A', hari: 44 },
-  { namaKota: 'C', hari: null },
-])
-assert.deepEqual(urut.map((x) => x.namaKota), ['C', 'A', 'B'], 'belum pernah dulu, lalu terhaus')
 
 // mulai = air penuh di hari kota masuk sistem, laporan yang lebih baru menggantikannya
 const m = statusAir(null, '2026-11-10', '2026-11-01')
@@ -90,16 +83,6 @@ assert.equal(ani.stage, 'melimpah')
 assert.equal(budi.stage, 'kering')
 assert.equal(cici.stage, 'belum')
 assert.deepEqual(urutAnggotaHaus([ani, budi, cici]).map((a) => a.nama), ['Cici', 'Budi', 'Ani'], 'belum pernah dulu, lalu terhaus')
-
-const kota1 = ringkasKota(1, 'Kota 1', [ani, budi, cici])
-assert.equal(kota1.anggota, 3)
-assert.equal(kota1.perluMinum, 1, 'hanya Kering (Budi); belum pernah tidak dihitung')
-assert.equal(kota1.hariLapor, 1, 'terakhir minum = anggota yang paling baru')
-assert.ok(Math.abs(kota1.level - ani.level / 3) < 1e-9, 'level kota = rata-rata anggota (kering + belum = 0)')
-const kosong = ringkasKota(9, 'Kosong', [])
-assert.equal(kosong.stage, 'belum')
-assert.equal(kosong.anggota, 0)
-assert.equal(ringkasKota(9, 'X', [cici]).stage, 'belum', 'semua belum pernah minum = belum')
 
 // nasional: anggota yang minum dalam 30 hari terakhir (hari ke-30 dan lebih tua tidak dihitung) + kota mereka
 assert.deepEqual(hitungNasional([ani, budi, cici, dedi, agt(5, 'Eka', null, '2026-11-09')]), { orang: 3, kota: 2 }, 'Ani, Dedi, Eka (tanpa kota tidak dihitung sebagai kota)')

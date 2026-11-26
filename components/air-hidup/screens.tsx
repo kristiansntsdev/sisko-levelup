@@ -53,7 +53,7 @@ export function PicScreen({ data, berandaHref, laporHref, feedHref, editHref, to
       <BackBar title="Dashboard PIC" onBack={() => router.push(berandaHref)} />
       <PaperHeader sticker="Dashboard PIC" title={data.namaKota} />
       <div className="mt-4 px-5 pb-8">
-        <PicDashboard kota={data.kota} anggota={data.anggota} laporanKota={list} laporHref={laporHref} feedHref={feedHref} onAmin={onAmin} onSoon={setSoon} editHref={editHref} />
+        <PicDashboard saya={data.saya} laporanKota={list} laporHref={laporHref} feedHref={feedHref} onAmin={onAmin} onSoon={setSoon} editHref={editHref} />
       </div>
       <Sheet open={Boolean(soon)} onClose={() => setSoon(null)}>
         <SheetHead title={soon ?? ''} sub="Alat ini segera hadir." />
@@ -120,7 +120,7 @@ export function AliranScreen({ data, berandaHref, toggleAmin }: { data: AliranDa
       <BackBar title="Air Hidup" onBack={() => router.push(berandaHref)} />
       <PaperHeader sticker="Kabar dari kota-kota" title="Aliran Air Hidup" />
       <div className="mt-4 px-5 pb-8">
-        <AirFeed nasional={data.nasional} kota={data.kota} laporan={list} onAmin={onAmin} />
+        <AirFeed nasional={data.nasional} laporan={list} onAmin={onAmin} />
       </div>
     </PaperMain>
   )

@@ -4,8 +4,8 @@ import { Prisma } from '@/lib/generated/client'
 import { sessionPesertaId } from '@/lib/peserta-session'
 import { wibToday } from '@/lib/wib'
 import {
-  airAnggota, hitungNasional, PIC_USERLEVEL, ringkasKota, terakhirMinum,
-  type AirAnggota, type AirBeranda, type AliranData, type EditData, type KotaAir, type PicData, type WwLaporan,
+  airAnggota, hitungNasional, PIC_USERLEVEL, terakhirMinum,
+  type AirAnggota, type AirBeranda, type AliranData, type EditData, type PicData, type WwLaporan,
 } from '@/lib/air-hidup'
 
 export type AnggotaAir = { id: number; nama: string; level: number; userlevel: string; cabang: number | null }
@@ -65,16 +65,6 @@ export async function daftarAirAnggota(today: string, f: { idCabang?: number; id
     }, today))
 }
 
-/** Ringkasan per kota dari anggotanya (semua kota, juga yang belum punya anggota). */
-export async function daftarKotaAir(today: string, idCabang?: number, anggota?: AirAnggota[]): Promise<KotaAir[]> {
-  const where = idCabang != null ? Prisma.sql`WHERE id_cabang = ${idCabang}` : Prisma.empty
-  const [kota, semua] = await Promise.all([
-    db.$queryRaw<{ id_cabang: number; namacabang: string }[]>`SELECT id_cabang, namacabang FROM cabang ${where}`,
-    anggota ? Promise.resolve(anggota) : daftarAirAnggota(today, idCabang != null ? { idCabang } : {}),
-  ])
-  return kota.map((c) => ringkasKota(Number(c.id_cabang), c.namacabang, semua.filter((a) => a.idCabang === Number(c.id_cabang))))
-}
-
 type LaporanRow = {
   id_laporan: number; id_cabang: number; namacabang: string; tanggal: string; jumlah: number; isi: string
   foto_url: string; foto_x: number; foto_y: number; nama: string | null; amin: bigint | number; saya: bigint | number
@@ -108,12 +98,11 @@ export async function dataBeranda(): Promise<AirBeranda | null> {
   const isPic = me.userlevel === PIC_USERLEVEL
   // Air anggota gagal dibaca (mis. tabel ww_peserta belum dimigrasi) tidak boleh menyembunyikan Kabar Terbaru / tombol Dashboard PIC.
   const aman = <T,>(p: Promise<T>, nilai: T) => p.catch((e: unknown) => (console.error('dataBeranda air', e), nilai))
-  const [laporan, [saya], haus] = await Promise.all([
+  const [laporan, [saya]] = await Promise.all([
     daftarLaporan(me.id, 3),
     aman(daftarAirAnggota(today, { idPeserta: me.id }), [] as AirAnggota[]),
-    isPic && me.cabang ? aman(daftarKotaAir(today, me.cabang).then((k) => k[0]?.perluMinum ?? 0), 0) : Promise.resolve(null),
   ])
-  return { saya: saya ?? null, isPic, anggotaHaus: haus, pembaca: `p${me.id}`, laporan }
+  return { saya: saya ?? null, isPic, pembaca: `p${me.id}`, laporan }
 }
 
 /** Dashboard PIC. null = bukan PIC atau kotanya tidak valid. */
@@ -121,19 +110,18 @@ export async function dataPic(me: AnggotaAir): Promise<PicData | null> {
   if (me.userlevel !== PIC_USERLEVEL || !me.cabang) return null
   const today = hariIni()
   const anggota = await daftarAirAnggota(today, { idCabang: me.cabang })
-  const kota = (await daftarKotaAir(today, me.cabang, anggota))[0]
-  if (!kota) return null
-  return { today, kota, namaKota: kota.namaKota, anggota, laporanKota: await daftarLaporan(me.id, 20, me.cabang) }
+  const saya = anggota.find((a) => a.id === me.id)
+  if (!saya) return null
+  return { today, saya, namaKota: saya.namaKota, anggota, laporanKota: await daftarLaporan(me.id, 20, me.cabang) }
 }
 
-/** Aliran Air Hidup: penghitung 30 hari, air tiap kota (hanya LevelUP Pusat), laporan terbaru. */
+/** Aliran Air Hidup: penghitung 30 hari + laporan terbaru. */
 export async function dataAliran(me: AnggotaAir): Promise<AliranData> {
   const today = hariIni()
   const [anggota, laporan] = await Promise.all([daftarAirAnggota(today), daftarLaporan(me.id, 50)])
   return {
     today,
     nasional: hitungNasional(anggota),
-    kota: me.level >= 5 ? await daftarKotaAir(today, undefined, anggota) : undefined,
     laporan,
   }
 }

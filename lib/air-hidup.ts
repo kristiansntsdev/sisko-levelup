@@ -1,6 +1,6 @@
 // Air Hidup: level air tiap ANGGOTA. Murni (tanpa DB), aman dipakai client + demo.
 // Air anggota terisi penuh kalau (1) dia absen di WW Online, atau (2) PIC menandainya di laporan WW kotanya.
-// Air habis AIR_KERING_HARI hari kemudian, sama untuk semua anggota. Level kota = rata-rata anggotanya.
+// Air habis AIR_KERING_HARI hari kemudian, sama untuk semua anggota. Tidak ada level kota: anggota yang tidak aktif tidak boleh membuat kotanya tampak kering.
 
 export const AIR_KERING_HARI = 40
 export const AIR_HAUS_HARI = 30
@@ -44,7 +44,7 @@ export type WwLaporan = {
   aminSaya: boolean
 }
 
-/** Status air satu orang atau satu kota (hari dihitung dari `sejak`). */
+/** Status air satu orang (hari dihitung dari `sejak`). */
 export type AirStatus = {
   /** hari WIB terakhir minum (yyyy-mm-dd): absen WW Online atau ditandai di laporan WW PIC; null = belum pernah */
   terakhir: string | null
@@ -59,9 +59,6 @@ export type AirStatus = {
 }
 
 export type AirAnggota = AirStatus & { id: number; nama: string; idCabang: number | null; namaKota: string }
-
-/** Ringkasan kota dari anggotanya: level = rata-rata, `perluMinum` = anggota yang Haus atau Kering. */
-export type KotaAir = AirStatus & { idCabang: number; namaKota: string; anggota: number; perluMinum: number }
 
 /** `anggota` = id peserta yang ditandai PIC; jumlah orang = banyaknya. */
 export type LaporanInput = { tanggal: string; anggota: number[]; isi: string }
@@ -130,22 +127,6 @@ export function airAnggota(a: { id: number; nama: string; idCabang: number | nul
   return { id: a.id, nama: a.nama, idCabang: a.idCabang, namaKota: a.namaKota ?? '', ...statusAir(a.terakhir, today, a.mulai) }
 }
 
-/** Ringkasan satu kota dari anggotanya. Kota tanpa anggota = "belum pernah minum". */
-export function ringkasKota(idCabang: number, namaKota: string, anggota: AirAnggota[]): KotaAir {
-  const n = anggota.length
-  const terakhir = terakhirMinum(...anggota.map((a) => a.terakhir))
-  const sejak = terakhirMinum(...anggota.map((a) => a.sejak))
-  const hariLapor = anggota.reduce<number | null>((m, a) => (a.hariLapor == null ? m : m == null ? a.hariLapor : Math.min(m, a.hariLapor)), null)
-  const level = n ? anggota.reduce((s, a) => s + a.level, 0) / n : 0
-  // Hari rata-rata: anggota yang belum pernah minum dihitung kering, supaya satu kota tidak tampak segar karena separuh anggotanya kosong.
-  const hari = n ? Math.round(anggota.reduce((s, a) => s + (a.hari ?? AIR_KERING_HARI), 0) / n) : null
-  const aktif = anggota.some((a) => a.hari != null)
-  return {
-    idCabang, namaKota, anggota: n, perluMinum: anggota.filter((a) => perluPopup(a.stage)).length,
-    terakhir, sejak, hari: aktif ? hari : null, hariLapor, level, stage: airStage(aktif ? hari : null),
-  }
-}
-
 /** Pop-up "Airmu mau kering" hanya di dua tahap ini. */
 export function perluPopup(stage: AirStage): boolean {
   return stage === 'haus' || stage === 'kering'
@@ -156,7 +137,7 @@ export function perluPush(air: Pick<AirStatus, 'hari'>): boolean {
   return air.hari != null && air.hari >= AIR_HAUS_HARI && air.hari <= AIR_PUSH_MAX_HARI
 }
 
-/** Terhaus dulu: yang paling lama tidak minum (belum pernah = paling atas), lalu nama. Dipakai untuk kota dan anggota. */
+/** Terhaus dulu: yang paling lama tidak minum (belum pernah = paling atas), lalu nama. */
 export function urutHaus<T extends { hari: number | null }>(list: T[], nama: (t: T) => string): T[] {
   return [...list].sort((a, b) => {
     const ha = a.hari ?? Infinity
@@ -164,7 +145,6 @@ export function urutHaus<T extends { hari: number | null }>(list: T[], nama: (t:
     return ha === hb ? nama(a).localeCompare(nama(b)) : hb - ha
   })
 }
-export const urutKotaHaus = <T extends { hari: number | null; namaKota: string }>(kota: T[]): T[] => urutHaus(kota, (k) => k.namaKota)
 export const urutAnggotaHaus = <T extends { hari: number | null; nama: string }>(anggota: T[]): T[] => urutHaus(anggota, (a) => a.nama)
 
 export function hariLabel(hari: number | null): string {
@@ -201,14 +181,13 @@ export function hitungNasional(anggota: Pick<AirAnggota, 'idCabang' | 'hariLapor
   return { orang: minum.length, kota: new Set(minum.map((a) => a.idCabang).filter((c): c is number => !!c)).size }
 }
 
-/** saya = null kalau anggota tidak ditemukan; `anggotaHaus` hanya untuk PIC (anggota kotanya yang Haus / Kering). */
-export type AirBeranda = { saya: AirAnggota | null; isPic: boolean; anggotaHaus: number | null; pembaca: string; laporan: WwLaporan[] }
-export type PicData = { today: string; kota: KotaAir; namaKota: string; anggota: AirAnggota[]; laporanKota: WwLaporan[] }
+/** saya = null kalau anggota tidak ditemukan. */
+export type AirBeranda = { saya: AirAnggota | null; isPic: boolean; pembaca: string; laporan: WwLaporan[] }
+/** `saya` = air PIC sendiri; `anggota` hanya untuk memilih siapa yang ditandai di form Lapor WW (tidak ditampilkan sebagai daftar air). */
+export type PicData = { today: string; saya: AirAnggota; namaKota: string; anggota: AirAnggota[]; laporanKota: WwLaporan[] }
 export type AliranData = {
   today: string
   nasional: { orang: number; kota: number }
-  /** air tiap kota (rata-rata anggota): hanya LevelUP Pusat (userlevel 5) */
-  kota?: KotaAir[]
   laporan: WwLaporan[]
 }
 

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ANTON, LABEL, MONO, PANEL, Poster, PRESS, ROWS, SectionHead } from '@/components/pwa/paper-ui'
 import { AirBar, DropIcon, WATER } from './bar'
 import { Icon, Sheet } from '@/components/pwa/ui'
-import { fmtTanggal, urutKotaHaus, type KotaAir, type WwLaporan } from '@/lib/air-hidup'
+import { fmtTanggal, type WwLaporan } from '@/lib/air-hidup'
 import { ShareSheet, type ShareData } from './share-card'
 
 export { fmtTanggal }
@@ -137,36 +137,11 @@ export function LaporanCard({ l, onAmin, compact, editHref }: { l: WwLaporan; on
   )
 }
 
-/** Aliran Air Hidup: penghitung nasional, air tiap kota (rata-rata anggotanya, terhaus dulu), lalu laporan terbaru. */
-export function AirFeed({
-  nasional,
-  kota,
-  laporan,
-  onAmin,
-}: {
-  nasional: { orang: number; kota: number }
-  /** air tiap kota (rata-rata anggota); hanya LevelUP Pusat (userlevel 5), kosong untuk anggota lain */
-  kota?: KotaAir[]
-  laporan: WwLaporan[]
-  onAmin: (id: number) => void
-}) {
+/** Aliran Air Hidup: penghitung nasional, lalu laporan terbaru. */
+export function AirFeed({ nasional, laporan, onAmin }: { nasional: { orang: number; kota: number }; laporan: WwLaporan[]; onAmin: (id: number) => void }) {
   return (
     <div className="flex flex-col gap-7">
       <NasionalCounter {...nasional} />
-      {kota && (
-      <section>
-        <SectionHead title="Air Tiap Kota" count={kota.length} />
-        <div className={`px-4 ${PANEL}`}>
-          <ul className={ROWS}>
-            {urutKotaHaus(kota).map((k) => (
-              <li key={k.idCabang} className="py-3.5">
-                <AirBar air={k} nama={k.namaKota} catatan={k.anggota ? `${k.perluMinum} dari ${k.anggota} anggota Haus / Kering` : 'belum ada anggota'} />
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-      )}
       <KabarTerbaru laporan={laporan} onAmin={onAmin} />
     </div>
   )

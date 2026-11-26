@@ -7,7 +7,7 @@ import { PaperToast } from '@/components/pwa/paper-ui'
 import { AirBar, DropIcon } from './bar'
 
 /** Panel di Beranda semua anggota: air milik sendiri + tautan ke aliran dan (PIC) dashboard PIC. */
-export function AirBerandaPanel({ saya, isPic, anggotaHaus, feedHref, picHref }: { saya: AirAnggota | null; isPic: boolean; anggotaHaus: number | null; feedHref: string; picHref: string }) {
+export function AirBerandaPanel({ saya, isPic, feedHref, picHref }: { saya: AirAnggota | null; isPic: boolean; feedHref: string; picHref: string }) {
   return (
     <section aria-label="Air Hidup" className={`relative px-4 pt-4 pb-5 ${PANEL}`}>
       <span aria-hidden className={`${TAPE} -left-4 -top-1`} />
@@ -25,9 +25,6 @@ export function AirBerandaPanel({ saya, isPic, anggotaHaus, feedHref, picHref }:
           </>
         ) : (
           <p className={`${MONO} text-[12px] text-[#57534e]`}>Air Hidup belum bisa dimuat. Coba lagi sebentar.</p>
-        )}
-        {isPic && anggotaHaus != null && anggotaHaus > 0 && (
-          <p className={`${MONO} mt-2 text-[12px] font-bold text-[#c21f24]`}>{anggotaHaus} anggota kotamu Haus atau Kering.</p>
         )}
       </div>
       <div className={`mt-4 grid gap-2.5 ${isPic ? 'grid-cols-2' : ''}`}>
@@ -128,7 +125,7 @@ function subscribePopup(cb: () => void) {
 }
 
 /** Panel + pop-up di Beranda semua anggota. Data dari server; pop-up tertutup disimpan di HP ini. */
-export function AirBerandaSaya({ saya, isPic, anggotaHaus, pembaca, feedHref, picHref, laporHref }: { saya: AirAnggota | null; isPic: boolean; anggotaHaus: number | null; pembaca: string; feedHref: string; picHref: string; laporHref: string }) {
+export function AirBerandaSaya({ saya, isPic, pembaca, feedHref, picHref, laporHref }: { saya: AirAnggota | null; isPic: boolean; pembaca: string; feedHref: string; picHref: string; laporHref: string }) {
   const [toast, setToast] = useState<string | null>(null)
   // null di render server: pop-up tidak ikut HTML awal, jadi tidak berkedip.
   const tersimpan = useSyncExternalStore(subscribePopup, () => bacaPopup(pembaca), () => null)
@@ -158,7 +155,7 @@ export function AirBerandaSaya({ saya, isPic, anggotaHaus, pembaca, feedHref, pi
 
   return (
     <>
-      <AirBerandaPanel saya={saya} isPic={isPic} anggotaHaus={anggotaHaus} feedHref={feedHref} picHref={picHref} />
+      <AirBerandaPanel saya={saya} isPic={isPic} feedHref={feedHref} picHref={picHref} />
       {tampil && saya && <AirPopup saya={saya} isPic={isPic} laporHref={laporHref} onClose={tutup} onAjak={ajak} />}
       <PaperToast msg={toast} />
     </>

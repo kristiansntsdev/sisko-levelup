@@ -317,7 +317,7 @@ export default function DashboardPage() {
         {card && <MemberCard m={card} onClick={() => router.push('/dashboard/kartu')} />}
 
         {air && (air.saya || air.isPic) && (
-          <AirBerandaSaya saya={air.saya} isPic={air.isPic} anggotaHaus={air.anggotaHaus} pembaca={air.pembaca} feedHref="/dashboard/air-hidup" picHref="/dashboard/pic" laporHref="/dashboard/pic/lapor" />
+          <AirBerandaSaya saya={air.saya} isPic={air.isPic} pembaca={air.pembaca} feedHref="/dashboard/air-hidup" picHref="/dashboard/pic" laporHref="/dashboard/pic/lapor" />
         )}
 
         {at >= 0 && at < 3 && userLevel && (

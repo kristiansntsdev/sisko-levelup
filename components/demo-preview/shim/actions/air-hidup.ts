@@ -5,8 +5,8 @@ import { addLog, getDb, mutate, wibDay, type DbWwLaporan, type DemoDb } from '..
 import { fileToDataUrl, sessionPeserta } from '../util'
 import { isOnlineEvent } from '@/lib/event-link'
 import {
-  airAnggota, fokusDari, hitungNasional, laporanDari, ringkasKota, terakhirMinum, validateLaporan,
-  type AirAnggota, type AirBeranda, type AliranData, type EditData, type KotaAir, type PicData, type WwLaporan,
+  airAnggota, fokusDari, hitungNasional, laporanDari, terakhirMinum, validateLaporan,
+  type AirAnggota, type AirBeranda, type AliranData, type EditData, type PicData, type WwLaporan,
 } from '@/lib/air-hidup'
 
 const todayOf = (d: DemoDb) => wibDay(d.air_hari)
@@ -24,10 +24,6 @@ function anggotaList(d: DemoDb): AirAnggota[] {
       terakhir: terakhirMinum(...tag, ...absen), mulai: kota ? (d.air_mulai[kota.id_cabang] ?? null) : null,
     }, today)
   })
-}
-
-function kotaList(d: DemoDb, anggota = anggotaList(d)): KotaAir[] {
-  return d.cabang.map((c) => ringkasKota(c.id_cabang, c.namacabang, anggota.filter((a) => a.idCabang === c.id_cabang)))
 }
 
 /** Anggota kota ini yang sah ditandai (demo: peserta dengan kotalevelup sama). */
@@ -59,12 +55,9 @@ export async function getAirBeranda(): Promise<AirBeranda | null> {
   const me = sessionPeserta()
   if (!me) return null
   const semua = anggotaList(d)
-  const isPic = me.userlevel === '4'
-  const kota = isPic ? kotaList(d, semua).find((k) => String(k.idCabang) === me.kotalevelup) : undefined
   return {
     saya: semua.find((a) => a.id === me.id_peserta) ?? null,
-    isPic,
-    anggotaHaus: isPic ? (kota?.perluMinum ?? 0) : null,
+    isPic: me.userlevel === '4',
     pembaca: `p${me.id_peserta}`,
     laporan: [...d.ww_laporan].sort(terbaru).slice(0, 3).map((l) => toLaporan(d, l, me.id_peserta)),
   }
@@ -76,18 +69,18 @@ export async function getPicData(): Promise<PicData | null> {
   const me = sessionPeserta()
   if (!me || me.userlevel !== '4') return null
   const semua = anggotaList(d)
-  const kota = kotaList(d, semua).find((k) => String(k.idCabang) === me.kotalevelup)
-  if (!kota) return null
+  const saya = semua.find((a) => a.id === me.id_peserta)
+  if (!saya || saya.idCabang == null) return null
   return {
     today: todayOf(d),
-    kota,
-    namaKota: kota.namaKota,
-    anggota: semua.filter((a) => a.idCabang === kota.idCabang),
-    laporanKota: [...d.ww_laporan].sort(terbaru).filter((l) => l.id_cabang === kota.idCabang).map((l) => toLaporan(d, l, me.id_peserta)),
+    saya,
+    namaKota: saya.namaKota,
+    anggota: semua.filter((a) => a.idCabang === saya.idCabang),
+    laporanKota: [...d.ww_laporan].sort(terbaru).filter((l) => l.id_cabang === saya.idCabang).map((l) => toLaporan(d, l, me.id_peserta)),
   }
 }
 
-/** Aliran (anggota) dan landing (publik, hanya baca): air tiap kota hanya LevelUP Pusat. */
+/** Aliran (anggota) dan landing (publik, hanya baca). */
 export async function getAliranData(): Promise<AliranData> {
   const d = getDb()
   const me = sessionPeserta()
@@ -96,7 +89,6 @@ export async function getAliranData(): Promise<AliranData> {
   return {
     today,
     nasional: hitungNasional(semua),
-    kota: me && Number(me.userlevel) >= 5 ? kotaList(d, semua) : undefined,
     laporan: [...d.ww_laporan].sort(terbaru).map((l) => toLaporan(d, l, me?.id_peserta ?? null)),
   }
 }
