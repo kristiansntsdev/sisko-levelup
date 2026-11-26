@@ -2,9 +2,9 @@
 import { useEffect, useState } from 'react'
 import { ANTON, BTN, BTN_OUTLINE, ERROR, LABEL, MONO, PAPER_INPUT, PaperField, PANEL, PRESS, Strip } from '@/components/pwa/paper-ui'
 import { Icon } from '@/components/pwa/ui'
-import { AIR_ISI_MAX, AIR_JUMLAH_MAX, AIR_KERING_HARI, FOTO_FOKUS_TENGAH, validateLaporan, type LaporanEdit } from '@/lib/air-hidup'
+import { AIR_ISI_MAX, AIR_KERING_HARI, FOTO_FOKUS_TENGAH, urutAnggotaHaus, validateLaporan, type AirAnggota, type LaporanEdit } from '@/lib/air-hidup'
 import { shrinkPhotoForUpload } from '@/lib/shrink-photo'
-import { DropIcon, WATER } from './bar'
+import { DropIcon, StageStamp, WATER } from './bar'
 import { FotoFokus, type Fokus } from './foto-fokus'
 import { ShareSheet, type ShareData } from './share-card'
 
@@ -12,20 +12,20 @@ type Props = {
   namaKota: string
   /** hari WIB sekarang (yyyy-mm-dd) */
   today: string
-  /** FormData: tanggal, jumlah, isi, foto (opsional). Mengembalikan id laporan, atau pesan error. */
+  /** Anggota kota ini yang bisa ditandai (air masing-masing ikut tampil). */
+  anggota: AirAnggota[]
+  /** FormData: tanggal, anggota (berulang), isi, foto (opsional). Mengembalikan id laporan, atau pesan error. */
   onSubmit: (fd: FormData) => Promise<{ ok: true; id: number } | { ok: false; error: string }>
   onDone: () => void
   /** Ada = mode edit: form terisi dari laporan ini, tombol Simpan Perubahan, tanpa kartu bagikan. */
   awal?: LaporanEdit
-  /** Level air kota sebelum lapor (0-1): bar di pop-up naik dari sini ke penuh. */
-  levelAwal?: number
 }
 
 /**
  * Pop-up sesudah lapor: tiap laporan mengisi air kota penuh lagi (dihitung dari hari laporan dikirim), bar naik dari
  * level sebelumnya ke 100%, lalu Bagikan Kartu / Selesai.
  */
-function TerisiPopup({ namaKota, levelAwal, onShare, onDone }: { namaKota: string; levelAwal: number; onShare: () => void; onDone: () => void }) {
+function TerisiPopup({ namaKota, jumlah, levelAwal, onShare, onDone }: { namaKota: string; jumlah: number; levelAwal: number; onShare: () => void; onDone: () => void }) {
   const [penuh, setPenuh] = useState(false)
   useEffect(() => {
     const t = setTimeout(() => setPenuh(true), 250)
@@ -42,14 +42,14 @@ function TerisiPopup({ namaKota, levelAwal, onShare, onDone }: { namaKota: strin
           <DropIcon className="h-8 w-8" />
         </span>
         <p id="air-terisi" className={`${ANTON} mt-4 text-[30px] leading-none`}>
-          Airmu terisi kembali!
+          Air mereka terisi kembali!
         </p>
         <p className={`${MONO} mt-2 text-[12.5px] leading-relaxed text-[#44403c]`}>
-          {namaKota} sudah minum Air Hidup. Air penuh lagi untuk {AIR_KERING_HARI} hari ke depan.
+          {jumlah} anggota {namaKota} sudah minum Air Hidup. Air mereka penuh lagi untuk {AIR_KERING_HARI} hari ke depan.
         </p>
         <div
           role="progressbar"
-          aria-label={`Air Hidup ${namaKota}`}
+          aria-label={`Air Hidup ${jumlah} anggota ${namaKota}`}
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={pct}
@@ -75,10 +75,65 @@ function TerisiPopup({ namaKota, levelAwal, onShare, onDone }: { namaKota: strin
   )
 }
 
-/** Lapor WW: satu foto, tanggal, jumlah orang, cerita. Sesudahnya: pop-up air terisi + kartu bagikan. */
-export function LaporForm({ namaKota, today, onSubmit, onDone, awal, levelAwal = 0 }: Props) {
+/** Tag anggota yang ikut WW: cari nama, centang satu per satu atau semua yang tampil. Yang paling haus ada di atas. */
+function PilihAnggota({ anggota, terpilih, onChange }: { anggota: AirAnggota[]; terpilih: Set<number>; onChange: (s: Set<number>) => void }) {
+  const [cari, setCari] = useState('')
+  const urut = urutAnggotaHaus(anggota)
+  const q = cari.trim().toLowerCase()
+  const tampil = q ? urut.filter((a) => a.nama.toLowerCase().includes(q)) : urut
+  const semuaTampil = tampil.length > 0 && tampil.every((a) => terpilih.has(a.id))
+  function toggle(id: number) {
+    const n = new Set(terpilih)
+    if (n.has(id)) n.delete(id)
+    else n.add(id)
+    onChange(n)
+  }
+  function toggleSemua() {
+    const n = new Set(terpilih)
+    for (const a of tampil) {
+      if (semuaTampil) n.delete(a.id)
+      else n.add(a.id)
+    }
+    onChange(n)
+  }
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-2">
+        <span className={`${MONO} text-[12px] font-bold`}>{terpilih.size} anggota ditandai</span>
+        {tampil.length > 0 && (
+          <button type="button" onClick={toggleSemua} className={`${MONO} text-[12px] font-bold underline decoration-dotted underline-offset-4`}>
+            {semuaTampil ? (q ? 'Lepas yang tampil' : 'Kosongkan') : q ? 'Pilih yang tampil' : 'Pilih semua'}
+          </button>
+        )}
+      </div>
+      {anggota.length > 6 && <input value={cari} onChange={(e) => setCari(e.target.value)} placeholder="Cari nama anggota" className={`${PAPER_INPUT} mt-2`} />}
+      {anggota.length === 0 ? (
+        <p className={`${MONO} mt-2 rounded-[10px] border-2 border-dotted border-[#161616]/30 px-3 py-5 text-center text-[12px] text-[#57534e]`}>Belum ada anggota di kotamu.</p>
+      ) : (
+        <ul className="mt-2 max-h-[22rem] divide-y-2 divide-dotted divide-[#161616]/20 overflow-y-auto rounded-[10px] border-2 border-[#161616]/30 bg-[#fffdf7]">
+          {tampil.map((a) => {
+            const on = terpilih.has(a.id)
+            return (
+              <li key={a.id}>
+                <label className={`flex cursor-pointer items-center gap-3 px-3 py-2.5 ${on ? 'bg-[#ffd83d]/40' : ''}`}>
+                  <input type="checkbox" checked={on} onChange={() => toggle(a.id)} className="h-5 w-5 shrink-0 accent-[#161616]" />
+                  <span className={`${MONO} min-w-0 flex-1 truncate text-[13px] font-bold`}>{a.nama}</span>
+                  <StageStamp stage={a.stage} />
+                </label>
+              </li>
+            )
+          })}
+          {tampil.length === 0 && <li className={`${MONO} px-3 py-4 text-[12px] text-[#57534e]`}>Tidak ada yang cocok.</li>}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+/** Lapor WW: tanggal, anggota yang ikut (tag), cerita, satu foto. Sesudahnya: pop-up air terisi + kartu bagikan. */
+export function LaporForm({ namaKota, today, anggota, onSubmit, onDone, awal }: Props) {
   const [tanggal, setTanggal] = useState(awal?.tanggal ?? today)
-  const [jumlah, setJumlah] = useState(awal ? String(awal.jumlah) : '')
+  const [terpilih, setTerpilih] = useState<Set<number>>(() => new Set(awal?.anggota ?? []))
   const [isi, setIsi] = useState(awal?.isi ?? '')
   // blob null = foto lama dari server (belum diganti)
   const [foto, setFoto] = useState<{ blob: Blob | null; url: string } | null>(awal?.foto ? { blob: null, url: awal.foto } : null)
@@ -87,8 +142,8 @@ export function LaporForm({ namaKota, today, onSubmit, onDone, awal, levelAwal =
   const [error, setError] = useState('')
   const [done, setDone] = useState<{ share: ShareData } | null>(null)
   const [shareOpen, setShareOpen] = useState(false)
-  // Dikunci saat form dibuka: sesudah lapor halaman di-refresh dan level kota sudah 100%, padahal pop-up naik dari level lama.
-  const [levelSebelum] = useState(levelAwal)
+  // Level rata-rata anggota yang ditandai tepat sebelum kirim: setelah kirim halaman di-refresh dan semuanya sudah 100%.
+  const [levelPopup, setLevelPopup] = useState(0)
 
   useEffect(() => {
     if (!foto?.blob) return
@@ -112,14 +167,15 @@ export function LaporForm({ namaKota, today, onSubmit, onDone, awal, levelAwal =
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (busy) return
-    const input = { tanggal, jumlah: Number(jumlah), isi }
+    const ids = anggota.filter((a) => terpilih.has(a.id)).map((a) => a.id)
+    const input = { tanggal, anggota: ids, isi }
     const err = validateLaporan(input, today)
     if (err) return setError(err)
     setError('')
     setBusy(true)
     const fd = new FormData()
     fd.set('tanggal', tanggal)
-    fd.set('jumlah', String(input.jumlah))
+    for (const id of ids) fd.append('anggota', String(id))
     fd.set('isi', isi.trim())
     if (foto?.blob) fd.set('foto', foto.blob, 'foto.jpg')
     if (foto) {
@@ -136,13 +192,16 @@ export function LaporForm({ namaKota, today, onSubmit, onDone, awal, levelAwal =
     setBusy(false)
     if (!res.ok) return setError(res.error)
     if (awal) return onDone()
-    setDone({ share: { namaKota, jumlah: input.jumlah, isi: input.isi.trim(), tanggal, foto: foto?.url ?? '' } })
+    // Bar pop-up naik dari rata-rata level anggota yang ditandai SAAT form dikirim (bukan saat dibuka).
+    const sebelum = anggota.filter((a) => terpilih.has(a.id))
+    setLevelPopup(sebelum.length ? sebelum.reduce((t, a) => t + a.level, 0) / sebelum.length : 0)
+    setDone({ share: { namaKota, jumlah: ids.length, isi: input.isi.trim(), tanggal, foto: foto?.url ?? '' } })
   }
 
   if (done) {
     return (
       <>
-        <TerisiPopup namaKota={namaKota} levelAwal={levelSebelum} onShare={() => setShareOpen(true)} onDone={onDone} />
+        <TerisiPopup namaKota={namaKota} jumlah={done.share.jumlah} levelAwal={levelPopup} onShare={() => setShareOpen(true)} onDone={onDone} />
         {shareOpen && <ShareSheet data={done.share} onClose={() => setShareOpen(false)} />}
       </>
     )
@@ -153,14 +212,11 @@ export function LaporForm({ namaKota, today, onSubmit, onDone, awal, levelAwal =
       <PaperField label="Tanggal WW">
         <input type="date" value={tanggal} max={today} onChange={(e) => setTanggal(e.target.value)} className={PAPER_INPUT} required />
       </PaperField>
-      <PaperField label="Berapa orang yang hadir?">
-        <input
-          inputMode="numeric"
-          value={jumlah}
-          onChange={(e) => setJumlah(e.target.value.replace(/\D/g, '').slice(0, String(AIR_JUMLAH_MAX).length))}
-          placeholder="Contoh: 12"
-          className={PAPER_INPUT}
-        />
+      <PaperField label="Siapa saja yang ikut WW ini?">
+        <PilihAnggota anggota={anggota} terpilih={terpilih} onChange={setTerpilih} />
+        <span className={`${MONO} mt-1.5 block text-[11.5px] leading-snug text-[#57534e]`}>
+          Air tiap anggota yang kamu tandai terisi penuh hari ini. Anggota yang absen di WW Online tidak perlu ditandai.
+        </span>
       </PaperField>
       <PaperField label="Apa yang kalian terima dari WW ini?">
         <textarea

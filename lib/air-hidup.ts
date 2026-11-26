@@ -1,5 +1,6 @@
-// Air Hidup: level air tiap LevelUP Kota dari tanggal laporan WW terakhir. Murni (tanpa DB), aman dipakai client + demo.
-// Satu laporan WW mengisi penuh; air habis AIR_KERING_HARI hari kemudian, sama untuk semua kota (ritme WW tiap kota bebas).
+// Air Hidup: level air tiap ANGGOTA. Murni (tanpa DB), aman dipakai client + demo.
+// Air anggota terisi penuh kalau (1) dia absen di WW Online, atau (2) PIC menandainya di laporan WW kotanya.
+// Air habis AIR_KERING_HARI hari kemudian, sama untuk semua anggota. Level kota = rata-rata anggotanya.
 
 export const AIR_KERING_HARI = 40
 export const AIR_HAUS_HARI = 30
@@ -31,6 +32,7 @@ export type WwLaporan = {
   namaKota: string
   /** yyyy-mm-dd, hari WIB */
   tanggal: string
+  /** jumlah anggota yang ditandai di laporan ini */
   jumlah: number
   isi: string
   foto: string
@@ -42,22 +44,27 @@ export type WwLaporan = {
   aminSaya: boolean
 }
 
-export type KotaAir = {
-  idCabang: number
-  namaKota: string
-  /** hari WIB laporan WW terakhir DIKIRIM (yyyy-mm-dd), bukan tanggal WW-nya; null = belum ada laporan */
+/** Status air satu orang atau satu kota (hari dihitung dari `sejak`). */
+export type AirStatus = {
+  /** hari WIB terakhir minum (yyyy-mm-dd): absen WW Online atau ditandai di laporan WW PIC; null = belum pernah */
   terakhir: string | null
-  /** awal siklus air: laporan terakhir atau hari mulai kota, mana yang lebih baru */
+  /** awal siklus air: terakhir minum atau hari mulai, mana yang lebih baru */
   sejak: string | null
   /** hari sejak `sejak`; null = belum pernah minum */
   hari: number | null
-  /** hari sejak laporan sungguhan; null = belum ada laporan */
+  /** hari sejak minum sungguhan; null = belum pernah */
   hariLapor: number | null
   level: number
   stage: AirStage
 }
 
-export type LaporanInput = { tanggal: string; jumlah: number; isi: string }
+export type AirAnggota = AirStatus & { id: number; nama: string; idCabang: number | null; namaKota: string }
+
+/** Ringkasan kota dari anggotanya: level = rata-rata, `perluMinum` = anggota yang Haus atau Kering. */
+export type KotaAir = AirStatus & { idCabang: number; namaKota: string; anggota: number; perluMinum: number }
+
+/** `anggota` = id peserta yang ditandai PIC; jumlah orang = banyaknya. */
+export type LaporanInput = { tanggal: string; anggota: number[]; isi: string }
 
 export const FOTO_FOKUS_TENGAH = 50
 const klem = (n: number) => (Number.isFinite(n) ? Math.min(100, Math.max(0, Math.round(n))) : FOTO_FOKUS_TENGAH)
@@ -69,8 +76,8 @@ export function fokusDari(fd: FormData): { x: number; y: number } {
 }
 
 /** Data laporan yang dibuka untuk diedit. */
-export type LaporanEdit = { id: number; tanggal: string; jumlah: number; isi: string; foto: string; fotoX: number; fotoY: number }
-export type EditData = { today: string; namaKota: string; laporan: LaporanEdit }
+export type LaporanEdit = { id: number; tanggal: string; anggota: number[]; isi: string; foto: string; fotoX: number; fotoY: number }
+export type EditData = { today: string; namaKota: string; laporan: LaporanEdit; anggota: AirAnggota[] }
 
 const DAY = 24 * 60 * 60 * 1000
 
@@ -103,15 +110,40 @@ export function airStage(hari: number | null): AirStage {
 }
 
 /**
- * Status satu kota. Air mulai penuh di `mulai` (hari kota masuk sistem), lalu tiap laporan WW mengisi penuh lagi di hari
- * laporan itu DIKIRIM (`terakhir`), apa pun tanggal WW-nya: siklus dihitung dari yang paling baru di antara keduanya.
- * `today` = hari WIB sekarang.
+ * Status air satu anggota. Air mulai penuh di `mulai` (hari kota masuk sistem, atau hari anggota daftar kalau lebih baru),
+ * lalu tiap WW Online yang diabsen / laporan WW yang menandainya mengisi penuh lagi di hari itu (`terakhir`): siklus
+ * dihitung dari yang paling baru di antara keduanya. `today` = hari WIB sekarang.
  */
-export function kotaAir(idCabang: number, namaKota: string, terakhir: string | null, today: string, mulai: string | null = null): KotaAir {
+export function statusAir(terakhir: string | null, today: string, mulai: string | null = null): AirStatus {
   const sejak = [terakhir, mulai].filter((d): d is string => !!d).sort().at(-1) ?? null
   const dari = (d: string | null) => (d ? Math.max(0, daysBetween(d, today)) : null)
   const hari = dari(sejak)
-  return { idCabang, namaKota, terakhir, sejak, hari, hariLapor: dari(terakhir), level: airLevel(hari), stage: airStage(hari) }
+  return { terakhir, sejak, hari, hariLapor: dari(terakhir), level: airLevel(hari), stage: airStage(hari) }
+}
+
+/** Hari terakhir minum = yang paling baru dari absen WW Online dan penandaan di laporan WW. */
+export function terakhirMinum(...hari: (string | null)[]): string | null {
+  return hari.filter((d): d is string => !!d).sort().at(-1) ?? null
+}
+
+export function airAnggota(a: { id: number; nama: string; idCabang: number | null; namaKota: string | null; terakhir: string | null; mulai: string | null }, today: string): AirAnggota {
+  return { id: a.id, nama: a.nama, idCabang: a.idCabang, namaKota: a.namaKota ?? '', ...statusAir(a.terakhir, today, a.mulai) }
+}
+
+/** Ringkasan satu kota dari anggotanya. Kota tanpa anggota = "belum pernah minum". */
+export function ringkasKota(idCabang: number, namaKota: string, anggota: AirAnggota[]): KotaAir {
+  const n = anggota.length
+  const terakhir = terakhirMinum(...anggota.map((a) => a.terakhir))
+  const sejak = terakhirMinum(...anggota.map((a) => a.sejak))
+  const hariLapor = anggota.reduce<number | null>((m, a) => (a.hariLapor == null ? m : m == null ? a.hariLapor : Math.min(m, a.hariLapor)), null)
+  const level = n ? anggota.reduce((s, a) => s + a.level, 0) / n : 0
+  // Hari rata-rata: anggota yang belum pernah minum dihitung kering, supaya satu kota tidak tampak segar karena separuh anggotanya kosong.
+  const hari = n ? Math.round(anggota.reduce((s, a) => s + (a.hari ?? AIR_KERING_HARI), 0) / n) : null
+  const aktif = anggota.some((a) => a.hari != null)
+  return {
+    idCabang, namaKota, anggota: n, perluMinum: anggota.filter((a) => perluPopup(a.stage)).length,
+    terakhir, sejak, hari: aktif ? hari : null, hariLapor, level, stage: airStage(aktif ? hari : null),
+  }
 }
 
 /** Pop-up "Airmu mau kering" hanya di dua tahap ini. */
@@ -119,19 +151,21 @@ export function perluPopup(stage: AirStage): boolean {
   return stage === 'haus' || stage === 'kering'
 }
 
-/** Push "Airmu mau kering": Haus sampai AIR_PUSH_MAX_HARI, sekali per tahap per siklus. */
-export function perluPush(kota: Pick<KotaAir, 'hari'>): boolean {
-  return kota.hari != null && kota.hari >= AIR_HAUS_HARI && kota.hari <= AIR_PUSH_MAX_HARI
+/** Push "Airmu mau kering" ke anggota itu sendiri: Haus sampai AIR_PUSH_MAX_HARI, sekali per tahap per siklus. */
+export function perluPush(air: Pick<AirStatus, 'hari'>): boolean {
+  return air.hari != null && air.hari >= AIR_HAUS_HARI && air.hari <= AIR_PUSH_MAX_HARI
 }
 
-/** Terhaus dulu: kota yang paling lama tidak lapor (belum pernah = paling atas), lalu nama. */
-export function urutKotaHaus<T extends { hari: number | null; namaKota: string }>(kota: T[]): T[] {
-  return [...kota].sort((a, b) => {
+/** Terhaus dulu: yang paling lama tidak minum (belum pernah = paling atas), lalu nama. Dipakai untuk kota dan anggota. */
+export function urutHaus<T extends { hari: number | null }>(list: T[], nama: (t: T) => string): T[] {
+  return [...list].sort((a, b) => {
     const ha = a.hari ?? Infinity
     const hb = b.hari ?? Infinity
-    return ha === hb ? a.namaKota.localeCompare(b.namaKota) : hb - ha
+    return ha === hb ? nama(a).localeCompare(nama(b)) : hb - ha
   })
 }
+export const urutKotaHaus = <T extends { hari: number | null; namaKota: string }>(kota: T[]): T[] => urutHaus(kota, (k) => k.namaKota)
+export const urutAnggotaHaus = <T extends { hari: number | null; nama: string }>(anggota: T[]): T[] => urutHaus(anggota, (a) => a.nama)
 
 export function hariLabel(hari: number | null): string {
   if (hari == null) return 'belum ada laporan'
@@ -152,34 +186,33 @@ export function pratinjauIsi(isi: string): { teks: string; terpotong: boolean } 
 export function validateLaporan(input: LaporanInput, today: string): string | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.tanggal)) return 'Tanggal WW tidak valid.'
   if (input.tanggal > today) return 'Tanggal WW tidak boleh di masa depan.'
-  if (!Number.isInteger(input.jumlah) || input.jumlah < 1 || input.jumlah > AIR_JUMLAH_MAX) return `Jumlah orang 1 sampai ${AIR_JUMLAH_MAX}.`
+  if (!input.anggota.length) return 'Tandai anggota yang ikut WW ini.'
+  if (input.anggota.length > AIR_JUMLAH_MAX) return `Maksimal ${AIR_JUMLAH_MAX} anggota.`
+  if (input.anggota.some((id) => !Number.isInteger(id) || id <= 0) || new Set(input.anggota).size !== input.anggota.length) return 'Daftar anggota tidak valid.'
   const isi = input.isi.trim()
   if (!isi) return 'Tulis apa yang kalian terima dari WW ini.'
   if (isi.length > AIR_ISI_MAX) return `Maksimal ${AIR_ISI_MAX} karakter.`
   return null
 }
 
-/** Hitungan 30 hari terakhir untuk penghitung nasional: total orang dan jumlah kota yang sudah minum. */
-export function hitungNasional(laporan: Pick<WwLaporan, 'idCabang' | 'tanggal' | 'jumlah'>[], today: string, window = 30) {
-  const recent = laporan.filter((l) => {
-    const d = daysBetween(l.tanggal, today)
-    return d >= 0 && d < window
-  })
-  return { orang: recent.reduce((s, l) => s + l.jumlah, 0), kota: new Set(recent.map((l) => l.idCabang)).size }
+/** Hitungan 30 hari terakhir untuk penghitung nasional: anggota yang sudah minum dan jumlah kota mereka. */
+export function hitungNasional(anggota: Pick<AirAnggota, 'idCabang' | 'hariLapor'>[], window = 30) {
+  const minum = anggota.filter((a) => a.hariLapor != null && a.hariLapor < window)
+  return { orang: minum.length, kota: new Set(minum.map((a) => a.idCabang).filter((c): c is number => !!c)).size }
 }
 
-/** kota = null untuk anggota di bawah Core (hanya Kabar Terbaru) */
-export type AirBeranda = { kota: KotaAir | null; isPic: boolean; pembaca: string; laporan: WwLaporan[] }
-export type PicData = { today: string; kota: KotaAir; namaKota: string; laporanKota: WwLaporan[] }
+/** saya = null kalau anggota tidak ditemukan; `anggotaHaus` hanya untuk PIC (anggota kotanya yang Haus / Kering). */
+export type AirBeranda = { saya: AirAnggota | null; isPic: boolean; anggotaHaus: number | null; pembaca: string; laporan: WwLaporan[] }
+export type PicData = { today: string; kota: KotaAir; namaKota: string; anggota: AirAnggota[]; laporanKota: WwLaporan[] }
 export type AliranData = {
   today: string
   nasional: { orang: number; kota: number }
-  /** bar air tiap kota: hanya LevelUP Pusat (userlevel 5) */
+  /** air tiap kota (rata-rata anggota): hanya LevelUP Pusat (userlevel 5) */
   kota?: KotaAir[]
   laporan: WwLaporan[]
 }
 
-/** Mengurai FormData Lapor WW (action asli dan shim demo memakai ini). */
+/** Mengurai FormData Lapor WW (action asli dan shim demo memakai ini). Anggota = field `anggota` berulang. */
 export function laporanDari(fd: FormData): LaporanInput {
-  return { tanggal: String(fd.get('tanggal') ?? ''), jumlah: Number(fd.get('jumlah')), isi: String(fd.get('isi') ?? '') }
+  return { tanggal: String(fd.get('tanggal') ?? ''), anggota: fd.getAll('anggota').map((v) => Number(v)), isi: String(fd.get('isi') ?? '') }
 }

@@ -13,7 +13,7 @@ import {
   type Penerima, type PushOpts, type PushPayload,
 } from './send'
 import { AIR_STAGE_LABEL, perluPush } from '@/lib/air-hidup'
-import { daftarKotaAir } from '@/lib/air-hidup-data'
+import { daftarAirAnggota } from '@/lib/air-hidup-data'
 import { halamanPengumuman, pastikanBarisRingkasan, pastikanBarisUltah, teksUltahDiri, type OrangUltah } from './pengumuman'
 import { daftarNama, ingatH0Aktif, jendelaBuka, ultahHariIni, wibIso } from './rules'
 
@@ -299,31 +299,27 @@ async function grupAbsenBuka(now: Date): Promise<Grup[]> {
 }
 
 /**
- * "Airmu mau kering": ke PIC yang kotanya Haus atau Kering. Satu kunci per PIC per tahap per siklus air
- * (`sejak` = awal siklus), jadi PIC yang baru mengaktifkan notifikasi tetap kebagian dan laporan baru memulai siklus baru.
+ * "Airmu mau kering": ke anggota itu sendiri kalau airnya Haus atau Kering (air dihitung per anggota: absen WW Online atau
+ * ditandai PIC di laporan WW). Satu kunci per anggota per tahap per siklus air (`sejak` = awal siklus), jadi anggota yang
+ * baru mengaktifkan notifikasi tetap kebagian dan minum lagi memulai siklus baru.
  */
 async function grupAir(now: Date): Promise<Grup[]> {
   const today = wibIso(now)
-  const kota = (await daftarKotaAir(today)).filter(perluPush)
-  if (!kota.length) return []
-  const pic = (await pesertaBerlangganan()).filter((p) => p.userlevel === '4')
-  return pic.flatMap((p) => {
-    const k = kota.find((x) => String(x.idCabang) === kotaKey(p.kotalevelup))
-    if (!k) return []
-    return [{
-      kunci: `air:${k.stage}:${k.idCabang}:${k.sejak}:${p.id_peserta}`,
-      pesan: async (): Promise<Pesan[]> => [{
-        to: { peserta: [p.id_peserta] },
-        payload: {
-          title: k.stage === 'kering' ? 'Airmu sudah kering' : 'Airmu mau kering',
-          body: `${k.namaKota} · ${AIR_STAGE_LABEL[k.stage]}. Yuk WW lagi, lalu lapor di aplikasi.`,
-          url: '/dashboard/pic',
-          tag: `air-${k.idCabang}`,
-        },
-        opts: DEKAT,
-      }],
-    }]
-  })
+  const [subs, anggota] = await Promise.all([pesertaBerlangganan(), daftarAirAnggota(today)])
+  const berlangganan = new Set(subs.map((p) => p.id_peserta))
+  return anggota.filter((a) => berlangganan.has(a.id) && perluPush(a)).map((a) => ({
+    kunci: `air:${a.stage}:${a.id}:${a.sejak}`,
+    pesan: async (): Promise<Pesan[]> => [{
+      to: { peserta: [a.id] },
+      payload: {
+        title: a.stage === 'kering' ? 'Airmu sudah kering' : 'Airmu mau kering',
+        body: `${AIR_STAGE_LABEL[a.stage]}. Yuk ikut WW Online atau WW kotamu supaya airmu terisi lagi.`,
+        url: '/dashboard',
+        tag: `air-${a.id}`,
+      },
+      opts: DEKAT,
+    }],
+  }))
 }
 
 const JOBS: { nama: string; jendela?: 'ultah' | 'ringkasan' | 'ingat-h1' | 'air'; grup: (now: Date) => Promise<Grup[]> }[] = [

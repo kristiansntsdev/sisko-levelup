@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { BackBar, BTN, PaperHeader, PaperMain, Strip } from '@/components/pwa/paper-ui'
 import { Sheet, SheetHead } from '@/components/pwa/ui'
-import type { AliranData, EditData, PicData, WwLaporan } from '@/lib/air-hidup'
+import type { AirAnggota, AliranData, EditData, PicData, WwLaporan } from '@/lib/air-hidup'
 import { AirFeed, KabarTerbaru } from './feed'
 import { LaporForm } from './lapor-form'
 import { PicDashboard } from './pic-dashboard'
@@ -53,7 +53,7 @@ export function PicScreen({ data, berandaHref, laporHref, feedHref, editHref, to
       <BackBar title="Dashboard PIC" onBack={() => router.push(berandaHref)} />
       <PaperHeader sticker="Dashboard PIC" title={data.namaKota} />
       <div className="mt-4 px-5 pb-8">
-        <PicDashboard kota={data.kota} laporanKota={list} laporHref={laporHref} feedHref={feedHref} onAmin={onAmin} onSoon={setSoon} editHref={editHref} />
+        <PicDashboard kota={data.kota} anggota={data.anggota} laporanKota={list} laporHref={laporHref} feedHref={feedHref} onAmin={onAmin} onSoon={setSoon} editHref={editHref} />
       </div>
       <Sheet open={Boolean(soon)} onClose={() => setSoon(null)}>
         <SheetHead title={soon ?? ''} sub="Alat ini segera hadir." />
@@ -65,7 +65,7 @@ export function PicScreen({ data, berandaHref, laporHref, feedHref, editHref, to
   )
 }
 
-export function LaporScreen({ namaKota, today, levelAwal, picHref, onSubmit }: { namaKota: string; today: string; levelAwal?: number; picHref: string; onSubmit: LaporSubmit }) {
+export function LaporScreen({ namaKota, today, anggota, picHref, onSubmit }: { namaKota: string; today: string; anggota: AirAnggota[]; picHref: string; onSubmit: LaporSubmit }) {
   const router = useRouter()
   return (
     <PaperMain>
@@ -75,7 +75,7 @@ export function LaporScreen({ namaKota, today, levelAwal, picHref, onSubmit }: {
         <LaporForm
           namaKota={namaKota}
           today={today}
-          levelAwal={levelAwal}
+          anggota={anggota}
           onSubmit={async (fd) => {
             const r = await onSubmit(fd)
             if (r.ok) router.refresh() // Dashboard PIC + Aliran dibaca ulang
@@ -98,6 +98,7 @@ export function EditLaporScreen({ data, picHref, onSubmit }: { data: EditData; p
         <LaporForm
           namaKota={data.namaKota}
           today={data.today}
+          anggota={data.anggota}
           awal={data.laporan}
           onSubmit={async (fd) => {
             const r = await onSubmit(data.laporan.id, fd)

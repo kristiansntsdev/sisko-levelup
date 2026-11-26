@@ -137,7 +137,7 @@ export function LaporanCard({ l, onAmin, compact, editHref }: { l: WwLaporan; on
   )
 }
 
-/** Aliran Air Hidup: penghitung nasional, bar tiap kota (terhaus dulu), lalu laporan terbaru. */
+/** Aliran Air Hidup: penghitung nasional, air tiap kota (rata-rata anggotanya, terhaus dulu), lalu laporan terbaru. */
 export function AirFeed({
   nasional,
   kota,
@@ -145,7 +145,7 @@ export function AirFeed({
   onAmin,
 }: {
   nasional: { orang: number; kota: number }
-  /** bar air tiap kota; hanya LevelUP Pusat (userlevel 5), kosong untuk anggota lain */
+  /** air tiap kota (rata-rata anggota); hanya LevelUP Pusat (userlevel 5), kosong untuk anggota lain */
   kota?: KotaAir[]
   laporan: WwLaporan[]
   onAmin: (id: number) => void
@@ -160,7 +160,7 @@ export function AirFeed({
           <ul className={ROWS}>
             {urutKotaHaus(kota).map((k) => (
               <li key={k.idCabang} className="py-3.5">
-                <AirBar kota={k} />
+                <AirBar air={k} nama={k.namaKota} catatan={k.anggota ? `${k.perluMinum} dari ${k.anggota} anggota Haus / Kering` : 'belum ada anggota'} />
               </li>
             ))}
           </ul>

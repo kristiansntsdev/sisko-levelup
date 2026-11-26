@@ -633,6 +633,20 @@ export async function POST(req: NextRequest) {
   // Air tiap kota mulai penuh di hari kota itu pertama masuk sistem (MySQL berzona WIB, jadi CURDATE() = hari WIB).
   // INSERT IGNORE: kota yang sudah punya hari mulai tidak diubah; kota baru kelak ikut mulai penuh.
   const wwKotaDiisi = await db.$executeRaw`INSERT IGNORE INTO ww_kota (id_cabang, mulai) SELECT id_cabang, CURDATE() FROM cabang`
+  // Air Hidup per anggota: anggota yang ditandai PIC di laporan WW. `created_at` (default DB = jam dinding WIB) = hari air
+  // anggota itu terisi. Laporan lama tidak punya tanda, jadi tidak mengisi siapa pun; saat tabel ini pertama dibuat semua
+  // kota dimulai ulang penuh hari itu (ww_kota.mulai), sama seperti hari rilis Air Hidup dulu: tidak ada anggota yang
+  // langsung kering hanya karena laporan lama tidak membawa daftar anggota. Sekali saja (hanya saat tabel baru dibuat).
+  const addedWwPeserta = await ensureTable('ww_peserta', `
+    CREATE TABLE ww_peserta (
+      id_laporan INT NOT NULL,
+      id_peserta INT NOT NULL,
+      created_at DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id_laporan, id_peserta),
+      KEY idx_ww_peserta_peserta (id_peserta)
+    ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `)
+  const wwKotaDimulaiUlang = addedWwPeserta ? await db.$executeRaw`UPDATE ww_kota SET mulai = CURDATE()` : 0
 
   const brim = await db.pengurus.updateMany({
     where: { username: 'brimnasional@gmail.com' },
@@ -690,6 +704,8 @@ export async function POST(req: NextRequest) {
     wwLaporanIsiText,
     addedWwKota,
     wwKotaDiisi,
+    addedWwPeserta,
+    wwKotaDimulaiUlang,
     addedPengumumanTargetJson,
     pengumumanIsiText,
     pengumumanUrlDefault,

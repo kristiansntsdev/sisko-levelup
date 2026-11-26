@@ -4,7 +4,7 @@ import { eventDateTime, isOnlineAbsenOpen } from '@/lib/event-absen-window'
 import { parseLocalDate } from '@/lib/event-sesi'
 import type { QRPayload } from '@/lib/qr'
 import type { RecentAbsen } from '@/lib/actions/absen'
-import { addLog, getDb, mutate } from '../../db'
+import { addLog, getDb, mutate, wibDay } from '../../db'
 import { sessionPeserta, sessionPengurus } from '../util'
 
 export type * from '@/lib/actions/absen'
@@ -32,7 +32,7 @@ function record(payload: QRPayload, idSesi: number | null, by: string): RecordAb
   const dup = d.absen.some((a) => a.id_peserta === idPeserta && a.id_event === idEvent && (idSesi == null ? a.id_sesi == null : a.id_sesi === idSesi))
   if (dup) return { success: false, reason: 'already_scanned' }
   mutate((x) => {
-    x.absen.push({ id_absen: x.nextId++, id_peserta: idPeserta, id_event: idEvent, id_sesi: idSesi, email: peserta.email, timestamp: new Date().toISOString() })
+    x.absen.push({ id_absen: x.nextId++, id_peserta: idPeserta, id_event: idEvent, id_sesi: idSesi, email: peserta.email, timestamp: new Date().toISOString(), hari: wibDay(x.air_hari) })
     for (const r of x.registrasi) {
       if (r.id_peserta === idPeserta && r.id_event === idEvent && (r.status === 'confirmed' || r.status === 'absence')) r.status = 'attend'
     }

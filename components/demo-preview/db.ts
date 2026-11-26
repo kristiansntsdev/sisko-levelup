@@ -3,7 +3,7 @@
 // so the shim actions can return exactly what lib/actions/* return and the real UI renders unchanged.
 // State lives in memory + localStorage only. Never import lib/actions/*, next-auth, @/lib/db or prisma here.
 
-export const STORAGE_KEY = 'levelup-demo-preview:v10'
+export const STORAGE_KEY = 'levelup-demo-preview:v11'
 const VERSION = 3
 const DAY = 24 * 60 * 60 * 1000
 const WIB = 7 * 60 * 60 * 1000
@@ -96,6 +96,8 @@ export type DbAbsen = {
   id_sesi: number | null
   email: string
   timestamp: string // ISO instant
+  /** Hari demo (yyyy-mm-dd, ikut Simulasi waktu Air Hidup) absen ini dibuat; kosong = hari WIB dari `timestamp` */
+  hari?: string
 }
 
 /** member '1' = Tamu→Volunteer request (demo-only step), '2' = Volunteer→Squad (the real `upgrade` row). */
@@ -154,7 +156,10 @@ export type DbKasTxn = {
   id_event: number | null
 }
 
-/** Laporan WW (Air Hidup). `tanggal` = hari WIB WW dilaksanakan. */
+/** Anggota yang ditandai PIC di laporan WW (padanan tabel ww_peserta). `hari` = hari demo air anggota itu terisi. */
+export type DbWwPeserta = { id_laporan: number; id_peserta: number; hari: string }
+
+/** Laporan WW (Air Hidup). `tanggal` = hari WIB WW dilaksanakan. `jumlah` = anggota yang ditandai (laporan seed kota tanpa anggota demo: angka tetap). */
 export type DbWwLaporan = {
   id_laporan: number
   id_cabang: number
@@ -195,6 +200,7 @@ export type DemoDb = {
   kas_kota_txn: DbKasTxn[]
   ww_laporan: DbWwLaporan[]
   ww_amin: { id_laporan: number; id_peserta: number }[]
+  ww_peserta: DbWwPeserta[]
   /** Demo-only: lompatan hari untuk melihat air turun (hanya dipakai Air Hidup) */
   air_hari: number
   /** id_cabang → hari kota mulai penuh (padanan tabel ww_kota di produksi) */
@@ -374,7 +380,8 @@ export function buildSeed(now: Date = new Date()): DemoDb {
   ]
 
   const ab = (p: DbPeserta, e: DbEvent, msAgo: number): DbAbsen => ({ id_absen: id(), id_peserta: p.id_peserta, id_event: e.id_event, id_sesi: null, email: p.email, timestamp: ago(now, msAgo) })
-  const absen: DbAbsen[] = [ab(core, lalu1, 30 * DAY), ab(core, lalu2, 60 * DAY), ab(priska, lalu2, 60 * DAY)]
+  // Stefani absen di WW Online 3 hari lalu: air anggota terisi dari absen, tanpa laporan PIC.
+  const absen: DbAbsen[] = [ab(core, lalu1, 30 * DAY), ab(core, lalu2, 60 * DAY), ab(priska, lalu2, 60 * DAY), ab(stefani, wwOnline, 3 * DAY)]
 
   const upgrade: DbUpgrade[] = [
     { id_upgrade: id(), id_peserta: kevin.id_peserta, member: '1', at: ago(now, 3 * DAY) },
@@ -430,18 +437,26 @@ export function buildSeed(now: Date = new Date()): DemoDb {
     kas(-10, 'keluar', null, 'Konsumsi rapat pengurus', 250000),
   ]
 
-  // Air Hidup: setiap tahap terlihat. Medan Haus (pop-up muncul saat PIC/Core masuk), Binjai Melimpah,
-  // Deli Serdang Segar, Pematangsiantar Kering, Tebing Tinggi belum pernah.
+  // Air Hidup per anggota (semua anggota demo ada di kota 12). Core/Squad/Priska/Jonathan ditandai 31 hari lalu = Haus (pop-up
+  // muncul saat mereka masuk), Esra/Vino/Andre/Nadia/Kevin ditandai 62 hari lalu = Kering, Stefani absen WW Online = Melimpah,
+  // Tamara tidak pernah = Kering dari hari mulai. Kota lain hanya punya laporan (tanpa anggota demo).
   const ww = (cabangId: number, oleh: string, days: number, jumlah: number, isi: string, foto: string, amin = 0): DbWwLaporan => ({
     id_laporan: id(), id_cabang: cabangId, oleh, tanggal: wibDay(-days, now), jumlah, isi, foto, amin_awal: amin, created_at: ago(now, days * DAY),
   })
+  const wwLaporanKota12Haus = id()
+  const wwLaporanKota12Kering = id()
   const ww_laporan: DbWwLaporan[] = [
     ww(14, 'Daniel Ginting', 2, 22, 'Kami datang capek habis pelayanan, pulang dengan hati yang penuh lagi. Tuhan hadir sangat nyata.', '/about/hero-worship.jpg', 9),
     ww(9, 'Yohanes Sitepu', 12, 9, 'Sedikit yang datang, tapi doa kami dipecahkan. Ada yang menangis dipulihkan.', '/program/penyembahan.jpg', 5),
-    ww(12, 'Esra Londa', 31, 14, 'Lagu terakhir kami nyanyi tanpa musik, dan Tuhan memenuhi ruangan.', '/about/misi-worship.jpg', 6),
+    { ...ww(12, 'Esra Londa', 31, 4, 'Lagu terakhir kami nyanyi tanpa musik, dan Tuhan memenuhi ruangan.', '/about/misi-worship.jpg', 6), id_laporan: wwLaporanKota12Haus },
     ww(14, 'Daniel Ginting', 33, 18, 'Kami belajar bahwa sebelum melayani, kami perlu diisi dulu.', '/about/visi-pray.jpg', 3),
     ww(17, 'Samuel Simanjuntak', 44, 11, 'Malam yang sederhana di rumah salah satu anggota, tapi penuh hadirat.', '/program/kota.jpg', 2),
-    ww(12, 'Esra Londa', 62, 16, 'WW bulan lalu: kami diingatkan bahwa Dia sumber air hidup.', '/about/hero-crowd.jpg', 4),
+    { ...ww(12, 'Esra Londa', 62, 5, 'WW bulan lalu: kami diingatkan bahwa Dia sumber air hidup.', '/about/hero-crowd.jpg', 4), id_laporan: wwLaporanKota12Kering },
+  ]
+  const tanda = (idLaporan: number, hari: number, ...anggota: DbPeserta[]): DbWwPeserta[] => anggota.map((a) => ({ id_laporan: idLaporan, id_peserta: a.id_peserta, hari: wibDay(-hari, now) }))
+  const ww_peserta: DbWwPeserta[] = [
+    ...tanda(wwLaporanKota12Haus, 31, core, squad, jonathan, priska),
+    ...tanda(wwLaporanKota12Kering, 62, pic, volunteer, andre, nadia, kevin),
   ]
 
   return {
@@ -459,6 +474,7 @@ export function buildSeed(now: Date = new Date()): DemoDb {
     kas_kota_txn,
     ww_laporan,
     ww_amin: [],
+    ww_peserta,
     air_hari: 0,
     // Semua kota mulai penuh di hari masuk sistem; Tebing Tinggi (21) baru masuk 20 hari lalu, tanpa laporan.
     air_mulai: Object.fromEntries(cabang.map((c) => [c.id_cabang, wibDay(c.id_cabang === 21 ? -20 : -90, now)])),

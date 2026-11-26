@@ -11,7 +11,7 @@ import { getActiveSessions } from '@/lib/actions/pwa-auth'
 import { getBetaAksesSaya } from '@/lib/actions/beta'
 import { getAirBeranda, toggleAmin } from '@/lib/actions/air-hidup'
 import type { AirBeranda } from '@/lib/air-hidup'
-import { AirBerandaKota } from '@/components/air-hidup/beranda-panel'
+import { AirBerandaSaya } from '@/components/air-hidup/beranda-panel'
 import { KabarBeranda } from '@/components/air-hidup/screens'
 import { BETA_WEWORSHIP, WEWORSHIP_URL } from '@/lib/beta'
 import { LEVEL_STEPS, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
@@ -316,8 +316,8 @@ export default function DashboardPage() {
       <div className="px-5 mt-4 flex flex-col gap-7">
         {card && <MemberCard m={card} onClick={() => router.push('/dashboard/kartu')} />}
 
-        {air?.kota && (
-          <AirBerandaKota kota={air.kota} isPic={air.isPic} pembaca={air.pembaca} feedHref="/dashboard/air-hidup" picHref="/dashboard/pic" laporHref="/dashboard/pic/lapor" />
+        {air && (air.saya || air.isPic) && (
+          <AirBerandaSaya saya={air.saya} isPic={air.isPic} anggotaHaus={air.anggotaHaus} pembaca={air.pembaca} feedHref="/dashboard/air-hidup" picHref="/dashboard/pic" laporHref="/dashboard/pic/lapor" />
         )}
 
         {at >= 0 && at < 3 && userLevel && (

@@ -15,5 +15,5 @@ export default function LaporWwPage() {
   }, [data, router])
 
   if (!data) return <main className="flex min-h-screen items-center justify-center" />
-  return <LaporScreen namaKota={data.namaKota} today={data.today} levelAwal={data.kota.level} picHref={AIR_PIC} onSubmit={kirimLaporanWw} />
+  return <LaporScreen namaKota={data.namaKota} today={data.today} anggota={data.anggota} picHref={AIR_PIC} onSubmit={kirimLaporanWw} />
 }

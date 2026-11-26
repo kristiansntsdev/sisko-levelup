@@ -4,8 +4,8 @@ import { Prisma } from '@/lib/generated/client'
 import { sessionPesertaId } from '@/lib/peserta-session'
 import { wibToday } from '@/lib/wib'
 import {
-  addDays, AIR_MIN_USERLEVEL, hitungNasional, kotaAir, PIC_USERLEVEL,
-  type AirBeranda, type AliranData, type EditData, type KotaAir, type PicData, type WwLaporan,
+  airAnggota, hitungNasional, PIC_USERLEVEL, ringkasKota, terakhirMinum,
+  type AirAnggota, type AirBeranda, type AliranData, type EditData, type KotaAir, type PicData, type WwLaporan,
 } from '@/lib/air-hidup'
 
 export type AnggotaAir = { id: number; nama: string; level: number; userlevel: string; cabang: number | null }
@@ -22,21 +22,57 @@ export async function anggotaAir(): Promise<AnggotaAir | null> {
 
 export const hariIni = () => wibToday().toISOString().slice(0, 10)
 
-type KotaRow = { id_cabang: number; namacabang: string; terakhir: string | null; mulai: string | null }
+type AnggotaRow = {
+  id_peserta: number; nama: string; id_cabang: number | null; namacabang: string | null
+  tag: string | null; absen: string | null; mulai: string | null
+}
 
-export async function daftarKotaAir(today: string, idCabang?: number): Promise<KotaAir[]> {
-  const where = idCabang != null ? Prisma.sql`WHERE c.id_cabang = ${idCabang}` : Prisma.empty
-  const rows = await db.$queryRaw<KotaRow[]>`
-    SELECT c.id_cabang, c.namacabang,
-           -- Air terisi di hari laporan DIKIRIM (bukan tanggal WW). created_at ditulis Prisma dalam UTC, +7 jam = hari WIB.
-           DATE_FORMAT(MAX(l.created_at) + INTERVAL 7 HOUR, '%Y-%m-%d') AS terakhir,
-           DATE_FORMAT(k.mulai, '%Y-%m-%d') AS mulai
-    FROM cabang c
-    LEFT JOIN ww_laporan l ON l.id_cabang = c.id_cabang
+/**
+ * Status air anggota. Terakhir minum = yang paling baru antara (a) absen di event Online (WW Online) dan (b) penandaan di
+ * laporan WW PIC (`ww_peserta`). Air mulai penuh di hari kota masuk sistem (`ww_kota.mulai`) atau hari anggota daftar
+ * (`peserta.created_at`, kosong untuk anggota lama), mana yang lebih baru.
+ * Waktu: `absen.timestamp` ditulis Prisma dalam UTC (+7 jam = hari WIB); `ww_peserta.created_at` diisi default DB (jam dinding WIB).
+ */
+export async function daftarAirAnggota(today: string, f: { idCabang?: number; idPeserta?: number; tambahan?: number[] } = {}): Promise<AirAnggota[]> {
+  const kondisi: Prisma.Sql[] = []
+  if (f.idPeserta != null) kondisi.push(Prisma.sql`p.id_peserta = ${f.idPeserta}`)
+  if (f.idCabang != null) {
+    kondisi.push(f.tambahan?.length
+      ? Prisma.sql`(c.id_cabang = ${f.idCabang} OR p.id_peserta IN (${Prisma.join(f.tambahan)}))`
+      : Prisma.sql`c.id_cabang = ${f.idCabang}`)
+  }
+  const where = kondisi.length ? Prisma.sql`WHERE ${Prisma.join(kondisi, ' AND ')}` : Prisma.empty
+  const rows = await db.$queryRaw<AnggotaRow[]>`
+    SELECT p.id_peserta, p.nama, c.id_cabang, c.namacabang,
+           DATE_FORMAT(t.m, '%Y-%m-%d') AS tag,
+           DATE_FORMAT(o.m + INTERVAL 7 HOUR, '%Y-%m-%d') AS absen,
+           DATE_FORMAT(NULLIF(GREATEST(COALESCE(k.mulai, '1970-01-01'), COALESCE(DATE(p.created_at), '1970-01-01')), '1970-01-01'), '%Y-%m-%d') AS mulai
+    FROM peserta p
+    LEFT JOIN cabang c ON c.id_cabang = CAST(p.kotalevelup AS UNSIGNED)
     LEFT JOIN ww_kota k ON k.id_cabang = c.id_cabang
-    ${where}
-    GROUP BY c.id_cabang, c.namacabang, k.mulai`
-  return rows.map((r) => kotaAir(Number(r.id_cabang), r.namacabang, r.terakhir, today, r.mulai))
+    LEFT JOIN (SELECT id_peserta, MAX(created_at) AS m FROM ww_peserta GROUP BY id_peserta) t ON t.id_peserta = p.id_peserta
+    LEFT JOIN (
+      SELECT a.id_peserta_int AS id_peserta, MAX(a.\`timestamp\`) AS m
+      FROM absen a JOIN event e ON e.id_event = a.id_event_int
+      WHERE LOWER(TRIM(e.jenisevent)) = 'online' AND a.id_peserta_int IS NOT NULL
+      GROUP BY a.id_peserta_int
+    ) o ON o.id_peserta = p.id_peserta
+    ${where}`
+  return rows.map((r) =>
+    airAnggota({
+      id: Number(r.id_peserta), nama: r.nama, idCabang: r.id_cabang == null ? null : Number(r.id_cabang), namaKota: r.namacabang,
+      terakhir: terakhirMinum(r.tag, r.absen), mulai: r.mulai,
+    }, today))
+}
+
+/** Ringkasan per kota dari anggotanya (semua kota, juga yang belum punya anggota). */
+export async function daftarKotaAir(today: string, idCabang?: number, anggota?: AirAnggota[]): Promise<KotaAir[]> {
+  const where = idCabang != null ? Prisma.sql`WHERE id_cabang = ${idCabang}` : Prisma.empty
+  const [kota, semua] = await Promise.all([
+    db.$queryRaw<{ id_cabang: number; namacabang: string }[]>`SELECT id_cabang, namacabang FROM cabang ${where}`,
+    anggota ? Promise.resolve(anggota) : daftarAirAnggota(today, idCabang != null ? { idCabang } : {}),
+  ])
+  return kota.map((c) => ringkasKota(Number(c.id_cabang), c.namacabang, semua.filter((a) => a.idCabang === Number(c.id_cabang))))
 }
 
 type LaporanRow = {
@@ -64,55 +100,66 @@ export async function daftarLaporan(idSaya: number, limit: number, idCabang?: nu
   }))
 }
 
-/** Panel Beranda: Kabar Terbaru untuk semua anggota, bar air kota hanya Core ke atas. null = belum login. */
+/** Panel Beranda: air milik anggota itu sendiri + Kabar Terbaru untuk semua anggota. null = belum login. */
 export async function dataBeranda(): Promise<AirBeranda | null> {
   const me = await anggotaAir()
   if (!me) return null
   const today = hariIni()
-  const [laporan, kota] = await Promise.all([
+  const isPic = me.userlevel === PIC_USERLEVEL
+  // Air anggota gagal dibaca (mis. tabel ww_peserta belum dimigrasi) tidak boleh menyembunyikan Kabar Terbaru / tombol Dashboard PIC.
+  const aman = <T,>(p: Promise<T>, nilai: T) => p.catch((e: unknown) => (console.error('dataBeranda air', e), nilai))
+  const [laporan, [saya], haus] = await Promise.all([
     daftarLaporan(me.id, 3),
-    me.level >= AIR_MIN_USERLEVEL && me.cabang ? daftarKotaAir(today, me.cabang).then((k) => k[0] ?? null) : Promise.resolve(null),
+    aman(daftarAirAnggota(today, { idPeserta: me.id }), [] as AirAnggota[]),
+    isPic && me.cabang ? aman(daftarKotaAir(today, me.cabang).then((k) => k[0]?.perluMinum ?? 0), 0) : Promise.resolve(null),
   ])
-  return { kota, isPic: me.userlevel === PIC_USERLEVEL, pembaca: `p${me.id}`, laporan }
+  return { saya: saya ?? null, isPic, anggotaHaus: haus, pembaca: `p${me.id}`, laporan }
 }
 
 /** Dashboard PIC. null = bukan PIC atau kotanya tidak valid. */
 export async function dataPic(me: AnggotaAir): Promise<PicData | null> {
   if (me.userlevel !== PIC_USERLEVEL || !me.cabang) return null
   const today = hariIni()
-  const kota = (await daftarKotaAir(today, me.cabang))[0]
+  const anggota = await daftarAirAnggota(today, { idCabang: me.cabang })
+  const kota = (await daftarKotaAir(today, me.cabang, anggota))[0]
   if (!kota) return null
-  return { today, kota, namaKota: kota.namaKota, laporanKota: await daftarLaporan(me.id, 20, me.cabang) }
+  return { today, kota, namaKota: kota.namaKota, anggota, laporanKota: await daftarLaporan(me.id, 20, me.cabang) }
 }
 
-/** Aliran Air Hidup: penghitung 30 hari, bar tiap kota (hanya LevelUP Pusat), laporan terbaru. */
+/** Aliran Air Hidup: penghitung 30 hari, air tiap kota (hanya LevelUP Pusat), laporan terbaru. */
 export async function dataAliran(me: AnggotaAir): Promise<AliranData> {
   const today = hariIni()
-  const baru = await db.$queryRaw<{ id_cabang: number; tanggal: string; jumlah: number }[]>`
-    SELECT id_cabang, DATE_FORMAT(tanggal, '%Y-%m-%d') AS tanggal, jumlah FROM ww_laporan WHERE tanggal >= ${addDays(today, -30)}`
-  const [laporan, kota] = await Promise.all([
-    daftarLaporan(me.id, 50),
-    me.level >= 5 ? daftarKotaAir(today) : Promise.resolve(undefined),
-  ])
+  const [anggota, laporan] = await Promise.all([daftarAirAnggota(today), daftarLaporan(me.id, 50)])
   return {
     today,
-    nasional: hitungNasional(baru.map((r) => ({ idCabang: Number(r.id_cabang), tanggal: r.tanggal, jumlah: Number(r.jumlah) })), today),
-    kota,
+    nasional: hitungNasional(anggota),
+    kota: me.level >= 5 ? await daftarKotaAir(today, undefined, anggota) : undefined,
     laporan,
   }
+}
+
+/** Id anggota yang ditandai di satu laporan. */
+export async function anggotaLaporan(idLaporan: number): Promise<number[]> {
+  const rows = await db.$queryRaw<{ id_peserta: number }[]>`SELECT id_peserta FROM ww_peserta WHERE id_laporan = ${idLaporan}`
+  return rows.map((r) => Number(r.id_peserta))
 }
 
 /** Laporan untuk diedit: hanya PIC kota pemilik laporan. null = bukan PIC kota itu / tidak ada. */
 export async function dataEditLaporan(me: AnggotaAir, idLaporan: number): Promise<EditData | null> {
   if (me.userlevel !== PIC_USERLEVEL || !me.cabang || !Number.isInteger(idLaporan) || idLaporan <= 0) return null
-  const [r] = await db.$queryRaw<{ id_laporan: number; id_cabang: number; namacabang: string; tanggal: string; jumlah: number; isi: string; foto_url: string; foto_x: number; foto_y: number }[]>`
-    SELECT l.id_laporan, l.id_cabang, c.namacabang, DATE_FORMAT(l.tanggal, '%Y-%m-%d') AS tanggal, l.jumlah, l.isi, l.foto_url, l.foto_x, l.foto_y
+  const [r] = await db.$queryRaw<{ id_laporan: number; id_cabang: number; namacabang: string; tanggal: string; isi: string; foto_url: string; foto_x: number; foto_y: number }[]>`
+    SELECT l.id_laporan, l.id_cabang, c.namacabang, DATE_FORMAT(l.tanggal, '%Y-%m-%d') AS tanggal, l.isi, l.foto_url, l.foto_x, l.foto_y
     FROM ww_laporan l JOIN cabang c ON c.id_cabang = l.id_cabang
     WHERE l.id_laporan = ${idLaporan} AND l.id_cabang = ${me.cabang} LIMIT 1`
   if (!r) return null
+  const today = hariIni()
+  const ditandai = await anggotaLaporan(idLaporan)
+  // Yang sudah ditandai tetap tampil walau kotanya kini pindah, supaya menyimpan ulang tidak diam-diam mencoretnya.
+  const anggota = await daftarAirAnggota(today, { idCabang: me.cabang, tambahan: ditandai })
   return {
-    today: hariIni(),
+    today,
     namaKota: r.namacabang,
-    laporan: { id: Number(r.id_laporan), tanggal: r.tanggal, jumlah: Number(r.jumlah), isi: r.isi, foto: r.foto_url, fotoX: Number(r.foto_x), fotoY: Number(r.foto_y) },
+    anggota,
+    laporan: { id: Number(r.id_laporan), tanggal: r.tanggal, anggota: ditandai, isi: r.isi, foto: r.foto_url, fotoX: Number(r.foto_x), fotoY: Number(r.foto_y) },
   }
 }

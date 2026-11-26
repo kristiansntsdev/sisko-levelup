@@ -2,12 +2,12 @@
 import { useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { ANTON, BTN, BTN_OUTLINE, LABEL, MONO, PANEL, PRESS, Strip, TAPE } from '@/components/pwa/paper-ui'
-import { AIR_STAGE_LABEL, perluPopup, type KotaAir } from '@/lib/air-hidup'
+import { AIR_STAGE_LABEL, perluPopup, type AirAnggota } from '@/lib/air-hidup'
 import { PaperToast } from '@/components/pwa/paper-ui'
 import { AirBar, DropIcon } from './bar'
 
-/** Panel di Beranda untuk Core ke atas: bar air kota sendiri + tautan ke aliran dan (PIC) dashboard PIC. */
-export function AirBerandaPanel({ kota, isPic, feedHref, picHref }: { kota: KotaAir; isPic: boolean; feedHref: string; picHref: string }) {
+/** Panel di Beranda semua anggota: air milik sendiri + tautan ke aliran dan (PIC) dashboard PIC. */
+export function AirBerandaPanel({ saya, isPic, anggotaHaus, feedHref, picHref }: { saya: AirAnggota | null; isPic: boolean; anggotaHaus: number | null; feedHref: string; picHref: string }) {
   return (
     <section aria-label="Air Hidup" className={`relative px-4 pt-4 pb-5 ${PANEL}`}>
       <span aria-hidden className={`${TAPE} -left-4 -top-1`} />
@@ -16,7 +16,19 @@ export function AirBerandaPanel({ kota, isPic, feedHref, picHref }: { kota: Kota
         Air Hidup
       </h2>
       <div className="mt-4">
-        <AirBar kota={kota} />
+        {saya ? (
+          <>
+            <AirBar air={saya} nama={saya.namaKota || undefined} />
+            <p className={`${MONO} mt-2.5 text-[11.5px] leading-relaxed text-[#57534e]`}>
+              Airmu terisi penuh tiap kamu absen di WW Online, atau PIC menandaimu di laporan WW kotamu.
+            </p>
+          </>
+        ) : (
+          <p className={`${MONO} text-[12px] text-[#57534e]`}>Air Hidup belum bisa dimuat. Coba lagi sebentar.</p>
+        )}
+        {isPic && anggotaHaus != null && anggotaHaus > 0 && (
+          <p className={`${MONO} mt-2 text-[12px] font-bold text-[#c21f24]`}>{anggotaHaus} anggota kotamu Haus atau Kering.</p>
+        )}
       </div>
       <div className={`mt-4 grid gap-2.5 ${isPic ? 'grid-cols-2' : ''}`}>
         <Link href={feedHref} className={`${BTN_OUTLINE}`}>
@@ -36,19 +48,19 @@ export function AirBerandaPanel({ kota, isPic, feedHref, picHref }: { kota: Kota
 
 /** Muncul sekali per tahap (Haus, lalu Kering). PIC bisa langsung lapor; Core mengajak PIC-nya. */
 export function AirPopup({
-  kota,
+  saya,
   isPic,
   laporHref,
   onClose,
   onAjak,
 }: {
-  kota: KotaAir
+  saya: AirAnggota
   isPic: boolean
   laporHref: string
   onClose: () => void
   onAjak: () => void
 }) {
-  const kering = kota.stage === 'kering'
+  const kering = saya.stage === 'kering'
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center px-6">
       <button type="button" aria-label="Tutup" className="absolute inset-0 bg-black/50" onClick={onClose} />
@@ -58,15 +70,16 @@ export function AirPopup({
           <DropIcon className="h-7 w-7" />
         </span>
         <p className={`${LABEL} mt-3 text-[10px] font-bold text-[#c21f24]`}>
-          {kota.namaKota} · {AIR_STAGE_LABEL[kota.stage]}
+          {saya.namaKota ? `${saya.namaKota} · ` : ''}
+          {AIR_STAGE_LABEL[saya.stage]}
         </p>
         <h2 id="air-popup-title" className={`${ANTON} mt-1 text-[32px] leading-none`}>
           Airmu mau kering
         </h2>
         <p className={`${MONO} mt-3 text-[12.5px] leading-relaxed text-[#44403c]`}>
           {kering
-            ? 'Sudah 40 hari lebih tanpa minum. Yuk kembali duduk di hadirat Tuhan dan minum lagi.'
-            : 'Sudah lebih dari 30 hari. Yuk minum lagi sebelum benar-benar kering.'}
+            ? 'Sudah 40 hari lebih tanpa minum. Yuk kembali duduk di hadirat Tuhan dan minum lagi: ikut WW Online atau WW kotamu.'
+            : 'Sudah lebih dari 30 hari. Yuk minum lagi sebelum benar-benar kering: ikut WW Online atau WW kotamu.'}
         </p>
         <p className={`${MONO} mt-2 text-[11.5px] italic text-[#57534e]`}>“Barangsiapa haus, baiklah ia datang kepada-Ku dan minum.” Yohanes 7:37</p>
         <div className="mt-5 space-y-2.5">
@@ -89,13 +102,13 @@ export function AirPopup({
 }
 
 export function popupText(namaKota: string): string {
-  return `Kak, air hidup ${namaKota} mau kering nih. Yuk kita WW lagi, terus lapor di aplikasi LevelUP supaya kota lain ikut minum juga.`
+  return `Kak, air hidupku mau kering nih. Yuk kita WW${namaKota ? ` ${namaKota}` : ''} lagi, terus tolong tandai aku di laporan WW di aplikasi LevelUP ya.`
 }
 
 // Pop-up sekali per tahap per siklus air, per HP per akun (localStorage, pola lonceng Pengumuman).
 const POPUP_EVT = 'levelup-air-popup'
 const popupKey = (pembaca: string) => `levelup-air-popup:${pembaca}`
-const popupTanda = (k: KotaAir) => `${k.stage}:${k.sejak ?? ''}`
+const popupTanda = (a: AirAnggota) => `${a.stage}:${a.sejak ?? ''}`
 
 function bacaPopup(pembaca: string): string {
   try {
@@ -114,13 +127,13 @@ function subscribePopup(cb: () => void) {
   }
 }
 
-/** Panel + pop-up di Beranda (Core ke atas). Data dari server; pop-up tertutup disimpan di HP ini. */
-export function AirBerandaKota({ kota, isPic, pembaca, feedHref, picHref, laporHref }: { kota: KotaAir; isPic: boolean; pembaca: string; feedHref: string; picHref: string; laporHref: string }) {
+/** Panel + pop-up di Beranda semua anggota. Data dari server; pop-up tertutup disimpan di HP ini. */
+export function AirBerandaSaya({ saya, isPic, anggotaHaus, pembaca, feedHref, picHref, laporHref }: { saya: AirAnggota | null; isPic: boolean; anggotaHaus: number | null; pembaca: string; feedHref: string; picHref: string; laporHref: string }) {
   const [toast, setToast] = useState<string | null>(null)
   // null di render server: pop-up tidak ikut HTML awal, jadi tidak berkedip.
   const tersimpan = useSyncExternalStore(subscribePopup, () => bacaPopup(pembaca), () => null)
-  const tanda = popupTanda(kota)
-  const tampil = perluPopup(kota.stage) && tersimpan !== null && tersimpan !== tanda
+  const tanda = saya ? popupTanda(saya) : ''
+  const tampil = !!saya && perluPopup(saya.stage) && tersimpan !== null && tersimpan !== tanda
 
   function tutup() {
     try {
@@ -132,7 +145,7 @@ export function AirBerandaKota({ kota, isPic, pembaca, feedHref, picHref, laporH
   }
 
   async function ajak() {
-    const text = popupText(kota.namaKota)
+    const text = popupText(saya?.namaKota ?? '')
     try {
       await navigator.clipboard.writeText(text)
       setToast('Pesan disalin. Kirim ke PIC-mu lewat WhatsApp.')
@@ -145,8 +158,8 @@ export function AirBerandaKota({ kota, isPic, pembaca, feedHref, picHref, laporH
 
   return (
     <>
-      <AirBerandaPanel kota={kota} isPic={isPic} feedHref={feedHref} picHref={picHref} />
-      {tampil && <AirPopup kota={kota} isPic={isPic} laporHref={laporHref} onClose={tutup} onAjak={ajak} />}
+      <AirBerandaPanel saya={saya} isPic={isPic} anggotaHaus={anggotaHaus} feedHref={feedHref} picHref={picHref} />
+      {tampil && saya && <AirPopup saya={saya} isPic={isPic} laporHref={laporHref} onClose={tutup} onAjak={ajak} />}
       <PaperToast msg={toast} />
     </>
   )

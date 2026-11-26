@@ -3,8 +3,9 @@ import { del } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
 import { ARTIKEL_IMG_MAX_BYTES, putArtikelImage } from '@/lib/artikel-blob'
 import { db } from '@/lib/db'
+import { Prisma } from '@/lib/generated/client'
 import { UnreadablePhotoError } from '@/lib/profile-photo'
-import { anggotaAir, dataBeranda, hariIni } from '@/lib/air-hidup-data'
+import { anggotaAir, anggotaLaporan, dataBeranda, hariIni } from '@/lib/air-hidup-data'
 import { fokusDari, laporanDari, PIC_USERLEVEL, validateLaporan, type AirBeranda } from '@/lib/air-hidup'
 import { sessionPesertaId } from '@/lib/peserta-session'
 import { pushAminWw, pushLaporanWw } from '@/lib/push/events'
@@ -32,6 +33,19 @@ async function simpanFokus(id: number, f: { x: number; y: number }) {
 
 export type KirimLaporanResult = { ok: true; id: number } | { ok: false; error: string }
 
+/** Anggota yang boleh ditandai PIC: hanya anggota kotanya sendiri (id dari client tidak dipercaya), ditambah `tetap` (yang sudah ditandai). */
+async function anggotaSah(cabang: number, ids: number[], tetap: number[] = []): Promise<boolean> {
+  const luar = ids.filter((id) => !tetap.includes(id))
+  if (!luar.length) return true
+  const ada = await db.peserta.count({ where: { id_peserta: { in: luar }, kotalevelup: String(cabang) } })
+  return ada === luar.length
+}
+
+/** Tulis tanda anggota. INSERT IGNORE: yang sudah ditandai tidak diubah, jadi `created_at` (hari air terisi) tidak ikut bergeser. */
+function tulisTanda(tx: Pick<typeof db, '$executeRaw'>, idLaporan: number, ids: number[]) {
+  return tx.$executeRaw`INSERT IGNORE INTO ww_peserta (id_laporan, id_peserta) VALUES ${Prisma.join(ids.map((id) => Prisma.sql`(${idLaporan}, ${id})`))}`
+}
+
 /** Hanya PIC (userlevel 4), dan hanya untuk kotanya sendiri: level dan kota dibaca dari DB, tidak pernah dari client. */
 export async function kirimLaporanWw(fd: FormData): Promise<KirimLaporanResult> {
   const me = await anggotaAir()
@@ -45,11 +59,13 @@ export async function kirimLaporanWw(fd: FormData): Promise<KirimLaporanResult> 
   try {
     const kota = await db.cabang.findUnique({ where: { id_cabang: me.cabang }, select: { id_cabang: true } })
     if (!kota) return { ok: false, error: 'LevelUP Kota tidak valid.' }
+    if (!(await anggotaSah(me.cabang, input.anggota))) return { ok: false, error: 'Ada anggota yang bukan dari kotamu.' }
+    const jumlah = input.anggota.length
     const tanggal = new Date(`${input.tanggal}T00:00:00Z`)
     const isi = input.isi.trim()
     // Tap dua kali / kirim ulang: laporan yang sama persis tidak dibuat dua kali.
     const kembar = await db.ww_laporan.findFirst({
-      where: { id_peserta: me.id, id_cabang: me.cabang, tanggal, isi, jumlah: input.jumlah },
+      where: { id_peserta: me.id, id_cabang: me.cabang, tanggal, isi, jumlah },
       select: { id_laporan: true },
     })
     if (kembar) return { ok: false, error: 'Laporan ini sudah terkirim.' }
@@ -67,15 +83,19 @@ export async function kirimLaporanWw(fd: FormData): Promise<KirimLaporanResult> 
     }
     let row
     try {
-      // created_at eksplisit (Prisma menulis UTC): hari WIB-nya = hari air terisi (lihat daftarKotaAir).
-      row = await db.ww_laporan.create({ data: { id_cabang: me.cabang, id_peserta: me.id, tanggal, jumlah: input.jumlah, isi, foto_url: foto, created_at: new Date() } })
+      // Laporan + tanda anggota satu transaksi: laporan tanpa tanda tidak mengisi air siapa pun.
+      row = await db.$transaction(async (tx) => {
+        const r = await tx.ww_laporan.create({ data: { id_cabang: me.cabang!, id_peserta: me.id, tanggal, jumlah, isi, foto_url: foto, created_at: new Date() } })
+        await tulisTanda(tx, r.id_laporan, input.anggota)
+        return r
+      })
     } catch (e) {
       if (foto) await del(foto, { token: process.env.BLOB_READ_WRITE_TOKEN }).catch(() => {})
       throw e
     }
     if (foto) await simpanFokus(row.id_laporan, fokusDari(fd))
     revalidatePathAir()
-    void pushLaporanWw({ idLaporan: row.id_laporan, idKota: me.cabang, idPelapor: me.id, jumlah: input.jumlah, isi, foto })
+    void pushLaporanWw({ idLaporan: row.id_laporan, idKota: me.cabang, idPelapor: me.id, jumlah, isi, foto })
     return { ok: true, id: row.id_laporan }
   } catch (e) {
     console.error('kirimLaporanWw', e)
@@ -84,8 +104,9 @@ export async function kirimLaporanWw(fd: FormData): Promise<KirimLaporanResult> 
 }
 
 /**
- * Edit laporan WW: hanya PIC dari kota pemilik laporan (level + kota dibaca dari DB). Boleh ganti tanggal, jumlah, isi,
- * foto (ganti / hapus) dan titik fokus foto. Tidak mengirim push ulang.
+ * Edit laporan WW: hanya PIC dari kota pemilik laporan (level + kota dibaca dari DB). Boleh ganti tanggal, anggota yang
+ * ditandai, isi, foto (ganti / hapus) dan titik fokus foto. Anggota yang baru ditandai terisi airnya hari itu; yang dicoret
+ * kehilangan isinya; yang tetap ditandai tidak berubah. Tidak mengirim push ulang.
  * FormData: seperti kirimLaporanWw + `foto_x`/`foto_y`; `hapusFoto=1` membuang foto lama.
  */
 export async function perbaruiLaporanWw(idLaporan: number, fd: FormData): Promise<KirimLaporanResult> {
@@ -102,10 +123,13 @@ export async function perbaruiLaporanWw(idLaporan: number, fd: FormData): Promis
   try {
     const lama = await db.ww_laporan.findFirst({ where: { id_laporan: id, id_cabang: me.cabang }, select: { foto_url: true } })
     if (!lama) return { ok: false, error: 'Laporan tidak ditemukan.' }
+    const ditandai = await anggotaLaporan(id)
+    if (!(await anggotaSah(me.cabang, input.anggota, ditandai))) return { ok: false, error: 'Ada anggota yang bukan dari kotamu.' }
+    const jumlah = input.anggota.length
     const tanggal = new Date(`${input.tanggal}T00:00:00Z`)
     const isi = input.isi.trim()
     const kembar = await db.ww_laporan.findFirst({
-      where: { id_cabang: me.cabang, tanggal, isi, jumlah: input.jumlah, id_laporan: { not: id } },
+      where: { id_cabang: me.cabang, tanggal, isi, jumlah, id_laporan: { not: id } },
       select: { id_laporan: true },
     })
     if (kembar) return { ok: false, error: 'Laporan yang sama sudah ada.' }
@@ -123,7 +147,11 @@ export async function perbaruiLaporanWw(idLaporan: number, fd: FormData): Promis
     const buang = fd.get('hapusFoto') === '1'
     const fotoAkhir = fotoBaru || (buang ? '' : lama.foto_url)
     try {
-      await db.ww_laporan.update({ where: { id_laporan: id }, data: { tanggal, jumlah: input.jumlah, isi, foto_url: fotoAkhir } })
+      await db.$transaction(async (tx) => {
+        await tx.ww_laporan.update({ where: { id_laporan: id }, data: { tanggal, jumlah, isi, foto_url: fotoAkhir } })
+        await tx.$executeRaw`DELETE FROM ww_peserta WHERE id_laporan = ${id} AND id_peserta NOT IN (${Prisma.join(input.anggota)})`
+        await tulisTanda(tx, id, input.anggota)
+      })
     } catch (e) {
       if (fotoBaru) await del(fotoBaru, { token: process.env.BLOB_READ_WRITE_TOKEN }).catch(() => {})
       throw e

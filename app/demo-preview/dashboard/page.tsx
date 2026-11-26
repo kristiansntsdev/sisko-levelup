@@ -13,7 +13,7 @@ import { getActiveSessions } from '@/components/demo-preview/shim/actions/pwa-au
 import { getBetaAksesSaya } from '@/components/demo-preview/shim/actions/beta'
 import { getAirBeranda, toggleAmin } from '@/components/demo-preview/shim/actions/air-hidup'
 import type { AirBeranda } from '@/lib/air-hidup'
-import { AirBerandaKota } from '@/components/air-hidup/beranda-panel'
+import { AirBerandaSaya } from '@/components/air-hidup/beranda-panel'
 import { KabarBeranda } from '@/components/air-hidup/screens'
 import { BETA_WEWORSHIP, WEWORSHIP_URL } from '@/lib/beta'
 import { LEVEL_STEPS, USERLEVEL_LABEL, type MemberCardData } from '@/lib/pwa-member'
@@ -53,9 +53,10 @@ const FEATURES: { i: IconName; t: string; href?: string; chip?: string; beta?: s
   { i: 'book', t: 'DeeperWP' },
   { i: 'music', t: 'WeWorship', href: WEWORSHIP_URL, chip: 'bg-[#e02a2f] text-white', beta: BETA_WEWORSHIP },
   { i: 'chat', t: 'Kesaksian', href: '/demo-preview/dashboard/kesaksian', chip: 'bg-[#161616] text-[#ffd83d]' },
+  { i: 'image', t: 'Artikel', href: '/demo-preview/dashboard/artikel', chip: 'bg-[#ffd83d] text-[#161616]' },
 ]
 
-const TILT = ['-rotate-1', 'rotate-1', '-rotate-[.5deg]', 'rotate-[.5deg]', '-rotate-1', 'rotate-1']
+const TILT = ['-rotate-1', 'rotate-1', '-rotate-[.5deg]', 'rotate-[.5deg]', '-rotate-1', 'rotate-1', '-rotate-[.5deg]']
 
 function LevelPanel({
   level,
@@ -328,8 +329,8 @@ export default function DashboardPage() {
       <div className="px-5 mt-4 flex flex-col gap-7">
         {card && <MemberCard m={card} onClick={() => router.push('/demo-preview/dashboard/kartu')} />}
 
-        {air?.kota && (
-          <AirBerandaKota kota={air.kota} isPic={air.isPic} pembaca={air.pembaca} feedHref="/demo-preview/dashboard/air-hidup" picHref="/demo-preview/dashboard/pic" laporHref="/demo-preview/dashboard/pic/lapor" />
+        {air && (air.saya || air.isPic) && (
+          <AirBerandaSaya saya={air.saya} isPic={air.isPic} anggotaHaus={air.anggotaHaus} pembaca={air.pembaca} feedHref="/demo-preview/dashboard/air-hidup" picHref="/demo-preview/dashboard/pic" laporHref="/demo-preview/dashboard/pic/lapor" />
         )}
 
         {at >= 0 && at < 3 && userLevel && (
