@@ -75,13 +75,16 @@ function TerisiPopup({ namaKota, jumlah, levelAwal, onShare, onDone }: { namaKot
   )
 }
 
-/** Tag anggota yang ikut WW: cari nama, centang satu per satu atau semua yang tampil. Yang paling haus ada di atas. */
+/**
+ * Tag anggota yang ikut WW. Daftar kota (bisa ratusan nama) tidak ditampilkan dulu: baru muncul setelah mengetik nama.
+ * Yang sudah ditandai tampil sebagai chip (ketuk untuk melepas), jadi pilihan tetap terlihat tanpa membuka daftar.
+ */
 function PilihAnggota({ anggota, terpilih, onChange }: { anggota: AirAnggota[]; terpilih: Set<number>; onChange: (s: Set<number>) => void }) {
   const [cari, setCari] = useState('')
-  const urut = urutAnggotaHaus(anggota)
   const q = cari.trim().toLowerCase()
-  const tampil = q ? urut.filter((a) => a.nama.toLowerCase().includes(q)) : urut
+  const tampil = q ? urutAnggotaHaus(anggota.filter((a) => a.nama.toLowerCase().includes(q))) : []
   const semuaTampil = tampil.length > 0 && tampil.every((a) => terpilih.has(a.id))
+  const ditandai = anggota.filter((a) => terpilih.has(a.id))
   function toggle(id: number) {
     const n = new Set(terpilih)
     if (n.has(id)) n.delete(id)
@@ -100,16 +103,26 @@ function PilihAnggota({ anggota, terpilih, onChange }: { anggota: AirAnggota[]; 
     <div>
       <div className="flex items-center justify-between gap-2">
         <span className={`${MONO} text-[12px] font-bold`}>{terpilih.size} anggota ditandai</span>
-        {tampil.length > 0 && (
+        {tampil.length > 1 && (
           <button type="button" onClick={toggleSemua} className={`${MONO} text-[12px] font-bold underline decoration-dotted underline-offset-4`}>
-            {semuaTampil ? (q ? 'Lepas yang tampil' : 'Kosongkan') : q ? 'Pilih yang tampil' : 'Pilih semua'}
+            {semuaTampil ? 'Lepas yang tampil' : `Pilih ${tampil.length} yang tampil`}
           </button>
         )}
       </div>
-      {anggota.length > 6 && <input value={cari} onChange={(e) => setCari(e.target.value)} placeholder="Cari nama anggota" className={`${PAPER_INPUT} mt-2`} />}
-      {anggota.length === 0 ? (
-        <p className={`${MONO} mt-2 rounded-[10px] border-2 border-dotted border-[#161616]/30 px-3 py-5 text-center text-[12px] text-[#57534e]`}>Belum ada anggota di kotamu.</p>
-      ) : (
+      {ditandai.length > 0 && (
+        <ul className="mt-2 flex flex-wrap gap-1.5">
+          {ditandai.map((a) => (
+            <li key={a.id}>
+              <button type="button" onClick={() => toggle(a.id)} aria-label={`Lepas ${a.nama}`} className={`${MONO} flex items-center gap-1.5 rounded-full bg-[#161616] px-2.5 py-1 text-[12px] font-bold text-[#ffd83d] ${PRESS}`}>
+                {a.nama}
+                <span aria-hidden>×</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <input value={cari} onChange={(e) => setCari(e.target.value)} placeholder="Ketik nama anggota untuk menandai" className={`${PAPER_INPUT} mt-2`} />
+      {q && (
         <ul className="mt-2 max-h-[22rem] divide-y-2 divide-dotted divide-[#161616]/20 overflow-y-auto rounded-[10px] border-2 border-[#161616]/30 bg-[#fffdf7]">
           {tampil.map((a) => {
             const on = terpilih.has(a.id)
