@@ -60,9 +60,9 @@ export function eligible(e: Ev, a: Account) {
 
 // ---------------- Keanggotaan ----------------
 
-// Label kartu: 0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 LevelUP Pusat
+// Label kartu: 0 Guest · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 LevelUP Pusat
 export const tierOf = (level: Level) =>
-  level === 'Umum' ? 'TAMU'
+  level === 'Umum' ? 'GUEST'
     : level === 'Leader' || level === 'PIC' ? 'PIC'
     : level === 'Tim Nasional' || level === 'LevelUP Pusat' ? 'LEVELUP PUSAT'
     : level.toUpperCase()

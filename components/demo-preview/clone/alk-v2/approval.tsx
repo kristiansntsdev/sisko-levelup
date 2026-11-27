@@ -46,7 +46,7 @@ export function ApprovalV2Client({ items, namaCabang, kind = 'squad' }: { items:
               <div className="flex-1 min-w-0">
                 <p className={`${ANTON} text-[16px] leading-tight tracking-[.02em] truncate`}>{u.nama}</p>
                 <p className={`${MONO} mt-0.5 text-[10.5px] font-bold text-[#44403c]`}>
-                  {u.usercode} · {kind === 'volunteer' ? 'TAMU → VOLUNTEER' : 'VOLUNTEER → SQUAD'}
+                  {u.usercode} · {kind === 'volunteer' ? 'GUEST → VOLUNTEER' : 'VOLUNTEER → SQUAD'}
                 </p>
               </div>
               <button

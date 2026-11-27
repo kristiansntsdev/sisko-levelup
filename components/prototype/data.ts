@@ -122,10 +122,10 @@ export const GUESTS: Person[] = [
   { key: 'andre', name: 'Andre Lumbantobing', g: 'L', church: 'GPdI Bukit Sion', city: 'Kota Medan', email: 'andre.lumbantobing@gmail.com', level: 'Volunteer' },
 ]
 
-// ---------------- Keanggotaan (alur sisko: daftar → Tamu → Volunteer → Squad) ----------------
+// ---------------- Keanggotaan (alur sisko: daftar → Guest → Volunteer → Squad) ----------------
 
-// userlevel 0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 LevelUP Pusat; approval baru sampai Squad (Core belum dibuka)
-export const LEVEL_STEPS: [Level, string][] = [['Umum', 'Tamu'], ['Volunteer', 'Volunteer'], ['Squad', 'Squad'], ['Core', 'Core']]
+// userlevel 0 Guest · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 LevelUP Pusat; approval baru sampai Squad (Core belum dibuka)
+export const LEVEL_STEPS: [Level, string][] = [['Umum', 'Guest'], ['Volunteer', 'Volunteer'], ['Squad', 'Squad'], ['Core', 'Core']]
 
 // Tabel `upgrade`: pengajuan Squad, di-approve ALK kota yang dipilih (peserta.kotalevelup)
 export interface Upgrade { id: number; key: string; cabang: string; usercode: string }

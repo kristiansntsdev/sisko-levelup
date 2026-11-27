@@ -9,6 +9,7 @@ import { getCabangs, type CabangOption } from '@/components/demo-preview/shim/ac
 import { upsertJobsPlace } from '@/components/demo-preview/shim/actions/jobs-place'
 import { createRegistrasi, updatePesertaProfile } from '@/components/demo-preview/shim/actions/registrasi'
 import { completeRegistration } from '@/components/demo-preview/shim/actions/pwa-auth'
+import { KotaPicker } from '@/components/pwa/kota-picker'
 import { getPesertaById } from '@/components/demo-preview/shim/actions/peserta'
 import { LEVEL_STEPS, memberCardFromPeserta, type MemberCardData } from '@/lib/pwa-member'
 import { fit, MemberCard } from '@/components/pwa/member-card'
@@ -33,11 +34,11 @@ import {
   TAPE,
   TORN_EDGE,
 } from '@/components/pwa/paper-ui'
-import { GoogleIcon, Icon, Sheet, SheetHead, type IconName } from '@/components/pwa/ui'
+import { GoogleIcon, Icon, type IconName } from '@/components/pwa/ui'
 
 const STEPS = ['Login Google', 'Isi data', 'Kartu jadi']
 const LEVEL_ICON: IconName[] = ['user', 'userPlus', 'users', 'sparkle']
-const BLANK_CARD: MemberCardData = { no: 'LUP-••••', name: 'Namamu di sini', gender: 'L', pob: '—', dob: '—', church: '—', city: '—', tier: 'TAMU' }
+const BLANK_CARD: MemberCardData = { no: 'LUP-••••', name: 'Namamu di sini', gender: 'L', pob: '—', dob: '—', church: '—', city: '—', tier: 'GUEST' }
 const SUBLABEL = `${LABEL} text-[9.5px] font-bold text-[#57534e]`
 
 function TopRow({ children }: { children: ReactNode }) {
@@ -130,92 +131,12 @@ function Loading() {
   )
 }
 
-function KotaPicker({
-  cabangs,
-  value,
-  onChange,
-}: {
-  cabangs: CabangOption[]
-  value: string
-  onChange: (id: string) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const [q, setQ] = useState('')
-  const selected = cabangs.find((c) => c.id === value)
-  const needle = q.trim().toLowerCase()
-  const shown = needle ? cabangs.filter((c) => c.nama.toLowerCase().includes(needle)) : cabangs
-
-  function pick(id: string) {
-    onChange(id)
-    setOpen(false)
-    setQ('')
-  }
-
-  return (
-    <>
-      <PaperField label="LevelUP Kota (opsional)">
-        <button type="button" onClick={() => setOpen(true)} className={`${PAPER_INPUT} flex items-center gap-2 text-left ${selected ? '' : 'text-[#57534e]'}`}>
-          <Icon name="pin" className={`w-[18px] h-[18px] shrink-0 ${selected ? 'text-[#c21f24]' : ''}`} />
-          <span className="flex-1 min-w-0 truncate">{selected?.nama ?? 'Cari LevelUP kota...'}</span>
-          <Icon name="search" className="w-4 h-4 shrink-0" />
-        </button>
-      </PaperField>
-      <Sheet
-        open={open}
-        onClose={() => {
-          setOpen(false)
-          setQ('')
-        }}
-      >
-        <SheetHead title="Pilih LevelUP Kota" sub="Ketik nama kota buat nyari lebih cepet" />
-        <label className="flex items-center gap-2.5 rounded-full bg-[#efe8da]/50 ring-1 ring-[#161616]/15 px-4 py-3 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#161616] transition">
-          <Icon name="search" className="w-5 h-5 shrink-0 text-[#c21f24]" sw={2.2} />
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Cari kota..."
-            autoFocus
-            className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-[#161616] placeholder:text-[#57534e]/75"
-          />
-          {q && (
-            <button type="button" onClick={() => setQ('')} aria-label="Hapus pencarian" className="text-[#57534e]">
-              <Icon name="x" className="w-5 h-5" />
-            </button>
-          )}
-        </label>
-        <div className="mt-3 space-y-2 max-h-[50vh] overflow-y-auto -mx-1 px-1 py-0.5">
-          {shown.length ? (
-            shown.map((c) => {
-              const on = c.id === value
-              return (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => pick(c.id)}
-                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-left transition ${on ? 'ring-2 ring-[#161616] bg-[#ffd83d]/25' : 'ring-1 ring-[#161616]/15 bg-white'}`}
-                >
-                  <Chip name="pin" className={on ? 'bg-[#ffd83d] text-[#161616]' : 'bg-[#161616]/[.07] text-[#161616]'} />
-                  <span className="flex-1 min-w-0 font-bold text-[14.5px] text-[#161616] truncate">{c.nama}</span>
-                  {on && <Icon name="check" className="w-5 h-5 text-[#161616] shrink-0" sw={2.6} />}
-                </button>
-              )
-            })
-          ) : (
-            <p className={`${MONO} text-center text-[12px] text-[#57534e] py-8`}>Gak ketemu “{q.trim()}”</p>
-          )}
-        </div>
-      </Sheet>
-    </>
-  )
-}
-
 function DaftarIntro() {
   const router = useRouter()
   const steps: [IconName, string, string][] = [
     ['user', 'Login pakai Google', 'Gak perlu bikin password, sekali klik beres.'],
     ['edit', 'Isi data singkat', 'Nama, WA, kota, gereja, sekolah / kampus. Kurang dari semenit.'],
-    ['card', 'Kartu anggota langsung jadi', 'Mulai sebagai Tamu, terus naik level bareng LevelUP kotamu.'],
+    ['card', 'Kartu anggota langsung jadi', 'Mulai sebagai Guest, terus naik level bareng LevelUP kotamu.'],
   ]
   return (
     <PaperMain standalone>
@@ -483,7 +404,7 @@ function DaftarFormInner() {
         </PaperSection>
         {needsReg && (
           <PaperNote>
-            Kamu mulai sebagai <b>Tamu</b>. Abis ini tinggal <b>Join Volunteer</b> di Beranda, terus ajukan <b>Squad</b> ke LevelUP kotamu.
+            Kamu mulai sebagai <b>Guest</b>. Abis ini tinggal <b>Join Volunteer</b> di Beranda, terus ajukan <b>Squad</b> ke LevelUP kotamu.
           </PaperNote>
         )}
         {error && (

@@ -1,6 +1,6 @@
-/** userlevel string → display labels (0 Tamu · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 LevelUP Pusat) */
+/** userlevel string → display labels (0 Guest · 1 Volunteer · 2 Squad · 3 Core · 4 PIC · 5 LevelUP Pusat) */
 export const USERLEVEL_LABEL: Record<string, string> = {
-  '0': 'Tamu',
+  '0': 'Guest',
   '1': 'Volunteer',
   '2': 'Squad',
   '3': 'Core',
@@ -9,7 +9,7 @@ export const USERLEVEL_LABEL: Record<string, string> = {
 }
 
 export const USERLEVEL_TIER: Record<string, string> = {
-  '0': 'TAMU',
+  '0': 'GUEST',
   '1': 'VOLUNTEER',
   '2': 'SQUAD',
   '3': 'CORE',
@@ -18,7 +18,7 @@ export const USERLEVEL_TIER: Record<string, string> = {
 }
 
 export const LEVEL_STEPS: [string, string][] = [
-  ['0', 'Tamu'],
+  ['0', 'Guest'],
   ['1', 'Volunteer'],
   ['2', 'Squad'],
   ['3', 'Core'],
@@ -71,7 +71,7 @@ export function memberCardFromPeserta(p: {
     dob: p.tgllahir || '—',
     church: p.gereja || '—',
     city: p.kotaName || '—',
-    tier: USERLEVEL_TIER[p.userlevel] ?? 'TAMU',
+    tier: USERLEVEL_TIER[p.userlevel] ?? 'GUEST',
     // Uploaded photos are full Blob URLs. Legacy rows hold a bare filename that doesn't resolve here.
     photo: p.foto.startsWith('https://') ? p.foto : undefined,
   }

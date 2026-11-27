@@ -96,7 +96,7 @@ const PATCHES = {
     ['setToast(`${nama} sekarang Squad`)', "setToast(`${nama} sekarang ${kind === 'volunteer' ? 'Volunteer' : 'Squad'}`)"],
     ['sticker={`${list.length} menunggu approve squad`}', 'sticker={`${list.length} menunggu approve ${kind}`}'],
     ['title="Approval Member"', "title={kind === 'volunteer' ? 'Approval Volunteer' : 'Approval Member'}"],
-    ['{u.usercode} · VOLUNTEER → SQUAD', "{u.usercode} · {kind === 'volunteer' ? 'TAMU → VOLUNTEER' : 'VOLUNTEER → SQUAD'}"],
+    ['{u.usercode} · VOLUNTEER → SQUAD', "{u.usercode} · {kind === 'volunteer' ? 'GUEST → VOLUNTEER' : 'VOLUNTEER → SQUAD'}"],
   ],
   'components/alk-v2/beranda.tsx': [
     [

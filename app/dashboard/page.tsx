@@ -74,7 +74,7 @@ function LevelPanel({
   return (
     <section aria-label="Level Anggota" className={`relative mt-4 px-4 pt-4 pb-5 ${PANEL}`}>
       <span className={`${LABEL} absolute right-4 -top-[22px] h-7 pt-1.5 px-3 rounded-t-[10px] bg-[#fffdf7] text-[10.5px] font-bold`}>
-        Level – {USERLEVEL_LABEL[level] ?? 'Tamu'}
+        Level – {USERLEVEL_LABEL[level] ?? 'Guest'}
       </span>
       <span aria-hidden className={`${TAPE} -left-4 -top-1`} />
       <h2 className={`${ANTON} text-[24px] leading-none pb-3 border-b-2 border-dotted border-[#161616]/40`}>Level Anggota</h2>

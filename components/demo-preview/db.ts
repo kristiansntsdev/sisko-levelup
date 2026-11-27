@@ -100,7 +100,7 @@ export type DbAbsen = {
   hari?: string
 }
 
-/** member '1' = Tamu→Volunteer request (demo-only step), '2' = Volunteer→Squad (the real `upgrade` row). */
+/** member '1' = Guest→Volunteer request (demo-only step), '2' = Volunteer→Squad (the real `upgrade` row). */
 export type DbUpgrade = { id_upgrade: number; id_peserta: number; member: '1' | '2'; at: string }
 
 export type DbReimburseHistory = { stage: string; at: string; by: string; note?: string }
@@ -225,11 +225,11 @@ export type DemoAccount = {
 export const DEMO_PASSWORD = 'demo123'
 
 export const DEMO_ACCOUNTS: DemoAccount[] = [
-  { key: 'tamu', kind: 'peserta', label: 'Tamu', note: 'Level 0 · Join Volunteer lalu tunggu approval admin', email: 'tamu@demo.levelup.id', phone: '0812-0000-0001', password: DEMO_PASSWORD },
+  { key: 'tamu', kind: 'peserta', label: 'Guest', note: 'Level 0 · Join Volunteer lalu tunggu approval admin', email: 'tamu@demo.levelup.id', phone: '0812-0000-0001', password: DEMO_PASSWORD },
   { key: 'volunteer', kind: 'peserta', label: 'Volunteer', note: 'Level 1 · Join Squad pilih LevelUP Kota', email: 'volunteer@demo.levelup.id', phone: '0812-0000-0002', password: DEMO_PASSWORD },
   { key: 'squad', kind: 'peserta', label: 'Squad', note: 'Level 2 · Join Core belum dibuka', email: 'squad@demo.levelup.id', phone: '0812-0000-0003', password: DEMO_PASSWORD },
   { key: 'core', kind: 'peserta', label: 'Core', note: 'Level 3 · bisa lihat event nasional', email: 'core@demo.levelup.id', phone: '0812-0000-0004', password: DEMO_PASSWORD },
-  { key: 'baru', kind: 'google-new', label: 'Akun Google baru', note: 'Belum terdaftar · isi Daftar jadi Tamu', email: 'baru@demo.levelup.id', phone: '0812-0000-0005', password: DEMO_PASSWORD },
+  { key: 'baru', kind: 'google-new', label: 'Akun Google baru', note: 'Belum terdaftar · isi Daftar jadi Guest', email: 'baru@demo.levelup.id', phone: '0812-0000-0005', password: DEMO_PASSWORD },
   { key: 'pic', kind: 'peserta', label: 'PIC', note: 'Level 4 · dashboard PIC + lapor WW (Air Hidup)', email: 'pic@demo.levelup.id', phone: '0812-0000-0007', password: DEMO_PASSWORD },
   { key: 'admin', kind: 'pengurus', label: 'Admin LK Medan', note: 'Sekretariat · approval volunteer & squad, buat event, scan, reimburse', email: 'admin@demo.levelup.id', phone: '0812-0000-0006', password: DEMO_PASSWORD },
 ]

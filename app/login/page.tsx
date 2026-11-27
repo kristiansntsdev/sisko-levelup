@@ -204,9 +204,9 @@ function LoginForm() {
         </form>
 
         <p className={`${MONO} text-center text-[12px] text-[#44403c] mt-6`}>
-          Belum terdaftar anggota?{' '}
-          <Link href="/daftar" className="font-bold text-[#c21f24] underline underline-offset-4 decoration-dotted">
-            Pendaftaran Anggota
+          Belum punya akun?{' '}
+          <Link href={callbackParam ? `/daftar/manual?callbackUrl=${encodeURIComponent(callbackParam)}` : '/daftar/manual'} className="font-bold text-[#c21f24] underline underline-offset-4 decoration-dotted">
+            Daftar
           </Link>
         </p>
         <Link href="/" className={`${MONO} mt-5 block text-center text-[12px] font-bold text-[#44403c]`}>

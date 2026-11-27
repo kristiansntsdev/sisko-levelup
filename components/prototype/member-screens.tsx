@@ -197,7 +197,7 @@ function DaftarIntro() {
   const steps: [IconName, string, string][] = [
     ['user', 'Masuk dengan akun Google', 'Tanpa password. Login pertama otomatis membuat data anggota.'],
     ['edit', 'Isi data diri', 'Nama, nomor WA, LevelUP Kota, gereja, sekolah / kampus / tempat kerja.'],
-    ['shield', 'Naik level', 'Mulai sebagai Tamu → Join Volunteer → ajukan Squad ke ALK kota kamu.'],
+    ['shield', 'Naik level', 'Mulai sebagai Guest → Join Volunteer → ajukan Squad ke ALK kota kamu.'],
   ]
   return (
     <section>
@@ -304,7 +304,7 @@ function DaftarForm() {
           </p>
         </div>
         {error && <p className="px-4 py-3 rounded-xl bg-rose-50 ring-1 ring-rose-200 text-[13px] text-rose-700 font-medium">{error}</p>}
-        <Note>Kamu terdaftar sebagai <b>Tamu</b>. Setelah itu bisa <b>Join Volunteer</b> dari Beranda, lalu ajukan <b>Squad</b> ke ALK LevelUP Kota.</Note>
+        <Note>Kamu terdaftar sebagai <b>Guest</b>. Setelah itu bisa <b>Join Volunteer</b> dari Beranda, lalu ajukan <b>Squad</b> ke ALK LevelUP Kota.</Note>
         <button className={`w-full py-3.5 ${BTN_RED}`}>Daftar Sekarang</button>
       </form>
     </section>
@@ -313,7 +313,7 @@ function DaftarForm() {
 
 function DaftarDone() {
   const { me, go } = useProto()
-  const rows: [string, string][] = [['No. Anggota', me.no], ['Level', 'Tamu'], ['LevelUP Kota', me.city], ['Nomor WA', me.phone]]
+  const rows: [string, string][] = [['No. Anggota', me.no], ['Level', 'Guest'], ['LevelUP Kota', me.city], ['Nomor WA', me.phone]]
   return (
     <section>
       <Hero className="pt-14 md:pt-10 pb-24 text-center" decor="-right-8 top-6 w-44">

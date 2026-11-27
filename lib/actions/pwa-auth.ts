@@ -89,6 +89,76 @@ export async function getActiveSessions() {
   }
 }
 
+/**
+ * Pendaftaran manual (tanpa Google): buat peserta Guest dengan email + password.
+ * Client lanjut signIn('credentials') — resolveCredentials membuat auth_users-nya.
+ */
+export async function registerManual(data: {
+  nama: string
+  email: string
+  password: string
+  kotalevelup: string
+  gereja: string
+  nowa: string
+}): Promise<{ ok: true } | { error: string }> {
+  const nama = data.nama.trim()
+  const email = data.email.trim()
+  const password = data.password.trim()
+  const kotalevelup = data.kotalevelup.trim()
+  const gereja = data.gereja.trim()
+  const nowa = data.nowa.trim()
+
+  if (!nama) return { error: 'Nama wajib diisi.' }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: 'Email tidak valid.' }
+  if (password.length < 6) return { error: 'Password minimal 6 karakter.' }
+  if (!kotalevelup) return { error: 'Pilih LevelUP Kota.' }
+  if (!gereja) return { error: 'Nama gereja wajib diisi.' }
+
+  const cabang = await db.cabang.findFirst({
+    where: { id_cabang: Number(kotalevelup) || -1 },
+    select: { id_cabang: true },
+  })
+  if (!cabang) return { error: 'LevelUP Kota tidak ditemukan.' }
+
+  const taken = await db.peserta.findFirst({ where: { email }, select: { id_peserta: true } })
+  if (taken) return { error: 'Email sudah terdaftar. Silakan masuk.' }
+
+  const created = await db.peserta.create({
+    data: {
+      usercode: 'LUP-0',
+      nama,
+      gender: '-',
+      pendidikan: '',
+      jurusan: '',
+      pekerjaan: '',
+      provinsi: '35',
+      kabupaten: '3521',
+      kecamatan: '',
+      desa: '',
+      alamat: '',
+      tgllahir: '',
+      tempatlahir: '',
+      nowa,
+      kotalevelup,
+      gereja,
+      email,
+      password,
+      userlevel: '0',
+      verifikasi: '0',
+      foto: '',
+      status: 'active',
+      role: 'guest',
+      id_tempat_kerja: null,
+    },
+    select: { id_peserta: true },
+  })
+  await db.peserta.update({
+    where: { id_peserta: created.id_peserta },
+    data: { usercode: `LUP-${created.id_peserta}` },
+  })
+  return { ok: true }
+}
+
 /** First Google login: create peserta + link auth_users, then client updates JWT. */
 export async function completeRegistration(data: {
   nama: string
@@ -108,7 +178,7 @@ export async function completeRegistration(data: {
 
   const nama = data.nama.trim()
   const nowa = data.nowa.trim()
-  // ponytail: Tamu boleh skip WA + kota; Squad later forces kota via joinSquad
+  // ponytail: Guest boleh skip WA + kota; Squad later forces kota via joinSquad
   if (!nama) return { error: 'Nama wajib diisi.' }
 
   const created = await db.peserta.create({

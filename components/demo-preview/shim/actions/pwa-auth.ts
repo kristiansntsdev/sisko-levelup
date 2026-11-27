@@ -66,7 +66,7 @@ export async function completeRegistration(data: {
     })
     d.session.idPeserta = id
     d.session.google = null
-    addLog(d, `${data.nama.trim()} mendaftar jadi Tamu`)
+    addLog(d, `${data.nama.trim()} mendaftar jadi Guest`)
   })
   return { ok: true, idPeserta: id }
 }

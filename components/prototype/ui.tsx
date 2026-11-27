@@ -203,10 +203,10 @@ export function MemberCard({ m, photo, onClick }: { m: Account; photo?: string; 
                   <p className="text-[12px] font-bold uppercase">{m.city}</p>
                 </div>
                 <div className="w-[74px] shrink-0 flex flex-col items-center text-center -mt-1">
-                  {/* Tamu / PIC / LevelUP Pusat: no "/ MEMBER"; longer tiers move slash to second line */}
+                  {/* Guest / PIC / LevelUP Pusat: no "/ MEMBER"; longer tiers move slash to second line */}
                   {(() => {
                     const t = tierOf(m.level)
-                    if (t === 'TAMU' || t === 'PIC' || t === 'LEVELUP PUSAT') {
+                    if (t === 'GUEST' || t === 'PIC' || t === 'LEVELUP PUSAT') {
                       return (
                         <p className={`font-bold leading-[1.05] tracking-wide ${t === 'LEVELUP PUSAT' ? 'text-[13px]' : 'text-[22px]'}`}>
                           {t === 'LEVELUP PUSAT' ? <>LEVELUP<br />PUSAT</> : t}

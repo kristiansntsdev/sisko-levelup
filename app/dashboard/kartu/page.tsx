@@ -47,7 +47,7 @@ export default function KartuPage() {
   const rows: [IconName, string, string][] = [
     ['card', 'No. Anggota', card.no],
     ['user', 'Nama', card.name],
-    ['shield', 'Level', USERLEVEL_LABEL[level] ?? 'Tamu'],
+    ['shield', 'Level', USERLEVEL_LABEL[level] ?? 'Guest'],
     ['pin', 'LevelUP Kota', card.city],
     ['church', 'Gereja', card.church],
     ['mail', 'Email', email || '—'],

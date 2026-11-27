@@ -108,7 +108,7 @@ export async function daftarPengguna(f: FilterPengguna): Promise<{
         nama: p.nama,
         idKota,
         kota: namaKota.get(idKota) ?? 'Tanpa kota',
-        peran: USERLEVEL_LABEL[p.userlevel] ?? 'Tamu',
+        peran: USERLEVEL_LABEL[p.userlevel] ?? 'Guest',
         perangkat: hitungPlatform(g.ua),
         jumlah: Number(g.n),
         sejakMs: Number(g.sejak) * 1000,

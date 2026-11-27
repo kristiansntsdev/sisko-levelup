@@ -130,7 +130,7 @@ export function PesertaListClient({
                       </span>
                     )}
                   </span>
-                  <Pill tone={LEVEL_TONE[p.userlevel] ?? 'slate'}>{USERLEVEL_LABEL[p.userlevel] ?? 'Tamu'}</Pill>
+                  <Pill tone={LEVEL_TONE[p.userlevel] ?? 'slate'}>{USERLEVEL_LABEL[p.userlevel] ?? 'Guest'}</Pill>
                 </div>
               )
             })

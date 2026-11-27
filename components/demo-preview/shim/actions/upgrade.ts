@@ -9,7 +9,7 @@ type Result = { ok: true } | { ok: false; error: string }
 export async function joinVolunteer(): Promise<Result> {
   const me = sessionPeserta()
   if (!me) return { ok: false, error: 'Tidak login' }
-  if (me.userlevel !== '0') return { ok: false, error: 'Hanya Tamu yang bisa join Volunteer' }
+  if (me.userlevel !== '0') return { ok: false, error: 'Hanya Guest yang bisa join Volunteer' }
   mutate((d) => {
     if (!d.upgrade.some((u) => u.id_peserta === me.id_peserta && u.member === '1')) {
       d.upgrade.push({ id_upgrade: d.nextId++, id_peserta: me.id_peserta, member: '1', at: new Date().toISOString() })

@@ -83,7 +83,7 @@ export default function ProfilPage() {
     { icon: 'mail', k: 'Email', v: email || session?.user?.email || '—' },
     { icon: 'church', k: 'Gereja', v: gereja || '—' },
     { icon: 'pin', k: 'LevelUP Kota', v: card?.city || '—' },
-    { icon: 'shield', k: 'Level', v: USERLEVEL_LABEL[level] ?? 'Tamu' },
+    { icon: 'shield', k: 'Level', v: USERLEVEL_LABEL[level] ?? 'Guest' },
   ]
 
   const soonMenu: { icon: IconName; t: string }[] = [
