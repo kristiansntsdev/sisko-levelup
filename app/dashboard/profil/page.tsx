@@ -30,6 +30,7 @@ export default function ProfilPage() {
   const [pengurusOn, setPengurusOn] = useState(false)
   const [pengurusDest, setPengurusDest] = useState<string | null>(null)
   const [pengurusNama, setPengurusNama] = useState('')
+  const [pengurusKota, setPengurusKota] = useState<string | null>(null)
   const [pengurusSheet, setPengurusSheet] = useState(false)
   const [pwEmail, setPwEmail] = useState('')
   const [pwPass, setPwPass] = useState('')
@@ -59,6 +60,7 @@ export default function ProfilPage() {
       setPengurusOn(Boolean(s.pengurus))
       setPengurusDest(s.pengurus?.dest ?? null)
       setPengurusNama(s.pengurus?.nama ?? '')
+      setPengurusKota(s.pengurus?.kota ?? null)
     })
   }, [session, status, router])
 
@@ -75,6 +77,10 @@ export default function ProfilPage() {
       setLoading(false)
     }
   }
+
+  const alkNama = pengurusKota ? `ALK ${pengurusKota}` : 'ALK'
+  // Masuk pengurus hanya untuk Core ke atas (userlevel >= 3); sesi pengurus yang sudah aktif tetap bisa dibuka/ditutup
+  const bolehPengurus = Number(level) >= 3 || pengurusOn
 
   const infoRows: { icon: IconName; k: string; v: string }[] = [
     { icon: 'phone', k: 'Telepon', v: nowa || '—' },
@@ -109,6 +115,7 @@ export default function ProfilPage() {
           ))}
         </section>
 
+        {bolehPengurus && (
         <button
           type="button"
           onClick={() => {
@@ -120,7 +127,7 @@ export default function ProfilPage() {
           <Chip name="shield" className="bg-[#ffd83d] text-[#161616]" />
           <span className="flex-1 min-w-0">
             <span className={`${ANTON} block text-[18px] leading-tight tracking-[.02em]`}>
-              {pengurusOn ? 'Buka Akun Sekretariat' : 'Masuk sebagai Pengurus'}
+              {pengurusOn ? `Buka Akun ${alkNama}` : 'Masuk sebagai Pengurus'}
             </span>
             <span className={`${MONO} block text-[11px] text-[#fbf6ec]/75 truncate`}>
               {pengurusOn ? `Pengurus · ${pengurusNama}` : 'Email + password akun pengurus'}
@@ -128,6 +135,7 @@ export default function ProfilPage() {
           </span>
           <Icon name="chevron" className="w-5 h-5 shrink-0 text-[#ffd83d]" sw={2} />
         </button>
+        )}
 
         {pengurusOn && (
           <button
@@ -135,7 +143,7 @@ export default function ProfilPage() {
             onClick={() => void logoutPengurusKeepMember()}
             className={`${MONO} w-full text-left text-[12px] font-bold text-[#c21f24] rounded-[14px] border-2 border-dotted border-[#c21f24]/60 px-4 py-3 ${PRESS}`}
           >
-            Keluar dari Akun Sekretariat (tetap di Kartu Saya)
+            Keluar dari Akun {alkNama} (tetap di Kartu Saya)
           </button>
         )}
 

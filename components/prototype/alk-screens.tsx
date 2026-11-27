@@ -761,7 +761,7 @@ export function KEventNewScreen() {
     addEvent({
       id, no, name,
       cabang: form.wwtype === 'nasional' ? NASIONAL_CABANG : KOTA.cabang,
-      category: form.wwtype === 'jfe' ? 'WW JFE' : form.wwtype === 'nasional' ? 'Nasional' : 'WW Bulanan',
+      category: form.wwtype === 'jfe' ? 'WW WFE' : form.wwtype === 'nasional' ? 'Nasional' : 'WW Bulanan',
       jenis: form.jenis, wwtype: form.wwtype, scope,
       target: form.target, targetPengurus: form.targetPengurus,
       quota: parseInt(form.targetJumlah, 10) || 0, booked: 0,
@@ -912,8 +912,8 @@ export function KEventNewScreen() {
           <Field label="Flyer Event">
             {form.wwtype === 'jfe' && form.tgl && (
               <div className="mb-3 rounded-xl ring-1 ring-slate-200 overflow-hidden">
-                <p className="px-3 py-2 text-[12px] text-slate-500">Flyer pusat WW JFE / WFE. Sesuaikan hanya: foto pembicara, tanggal, tempat, tema, logo kota.</p>
-                <Poster p={events.find((x) => x.wwtype === 'jfe')?.poster ?? defaultPoster('WW JFE', form.tgl)} className="w-full aspect-[16/10]" />
+                <p className="px-3 py-2 text-[12px] text-slate-500">Flyer pusat WW WFE. Sesuaikan hanya: foto pembicara, tanggal, tempat, tema, logo kota.</p>
+                <Poster p={events.find((x) => x.wwtype === 'jfe')?.poster ?? defaultPoster('WW WFE', form.tgl)} className="w-full aspect-[16/10]" />
               </div>
             )}
             <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={onFlyer} className="text-[13px] text-slate-700 file:mr-3 file:px-3 file:py-1.5 file:rounded-full file:border-0 file:bg-[#c9232c] file:text-white file:text-[13px] file:font-semibold" />

@@ -20,7 +20,7 @@ export function LainnyaClient({ nama, username }: { nama: string; username: stri
           <Row icon="bell" tint="gold" title="Notifikasi HP" sub={PUSH_LABEL[push.state]} onClick={() => setPushOpen(true)} />
           <Row icon="receipt" tint="red" title="Pengajuan Dana" sub="Review dana kota sebelum dikirim ke Korwil" onClick={() => router.push(BRIM_DANA_BASE)} />
           <Row icon="image" tint="gold" title="Flyer Generator" sub="Buat pamflet acara dalam hitungan detik" onClick={() => router.push(`${BRIM_LEGACY}/pamflet`)} />
-          <Row icon="image" title="Flyer WW JFE serentak" sub="Template pusat WFE per bulan" onClick={() => router.push(`${BRIM_LEGACY}/wfe-flyer`)} />
+          <Row icon="image" title="Flyer WW WFE serentak" sub="Template pusat WFE per bulan" onClick={() => router.push(`${BRIM_LEGACY}/wfe-flyer`)} />
           <Row icon="link" tint="slate" title="Dokumentasi Kota" sub="Link Drive & akses anggota per event" onClick={() => router.push(`${BRIM_LEGACY}/dokumentasi`)} />
           <Row icon="edit" tint="slate" title="Pengaturan Logo" sub="Logo untuk elemen flyer (dashboard lama)" onClick={() => router.push(BRIM_LEGACY)} />
         </div>

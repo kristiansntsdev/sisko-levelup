@@ -6,7 +6,7 @@ export type Level = 'Umum' | 'Volunteer' | 'Squad' | 'Core' | 'Leader' | 'PIC' |
 // Same option lists as components/kota/event-form.tsx
 export const TARGET_OPTIONS: Level[] = ['Umum', 'Volunteer', 'Squad', 'Core', 'PIC', 'LevelUP Pusat']
 export const TARGET_PENGURUS_OPTIONS = ['Admin LK', 'BRIM']
-export const WWTYPE_LABEL = { bulanan: 'Bulanan', jfe: 'JFE', nasional: 'Nasional' } as const
+export const WWTYPE_LABEL = { bulanan: 'Bulanan', jfe: 'WFE', nasional: 'Nasional' } as const
 export type WwType = keyof typeof WWTYPE_LABEL
 
 // Prototype clock: Jumat 23 Okt 2026 19:25 WIB — Igniting Leader sesi 2 sedang berjalan
@@ -248,7 +248,7 @@ export const EVENTS: Ev[] = [
     poster: { bg: 'linear-gradient(160deg,#2a1416 0%,#4a1015 60%,#7c1219 100%)', lines: ['WINNER', 'PRINCIPLE'], ink: '#e6cd7e', accent: '#f1dc9a', tag: 'Batch 4', strip: '1 – 22 Nov · Minggu malam' },
   },
   {
-    id: 'jfe', no: 421, cabang: '12', name: 'WW - Jesus For Everyone', category: 'WW JFE', jenis: 'Offline', wwtype: 'jfe', scope: '',
+    id: 'jfe', no: 421, cabang: '12', name: 'WW - Jesus For Everyone', category: 'WW WFE', jenis: 'Offline', wwtype: 'jfe', scope: '',
     target: ['Umum'], targetPengurus: [], quota: 500, booked: 212,
     tgl: '2026-11-08', tglSelesai: '2026-11-08', jam: '16:00', jamSelesai: '19:00',
     venue: 'Lapangan Merdeka', alamat: 'Lapangan Merdeka, Jl. Balai Kota, Medan', latlng: '3.5911,98.6776', radius: 500,

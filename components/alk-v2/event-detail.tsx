@@ -1,5 +1,6 @@
 'use client'
 
+import { danaWindowOpen } from '@/lib/dana-aturan'
 import {
   Fragment,
   useEffect,
@@ -66,7 +67,7 @@ const TARGET_PENGURUS_LABELS: Record<string, string> = {
 }
 const WWTYPE_LABEL: Record<string, string> = {
   bulanan: 'Bulanan',
-  jfe: 'JFE',
+  jfe: 'WFE',
   nasional: 'Nasional',
 }
 const USERLEVEL_LABEL: Record<string, string> = {
@@ -673,11 +674,13 @@ export function EventDetailV2Client({
           ))}
         </ListCard>
 
-        <DanaRow
-          eventId={event.id_event}
-          reimburse={reimburse}
-          eventBasePath={eventBasePath}
-        />
+        {((event.wwtype === 'jfe' && danaWindowOpen(event.tglSelesaiRaw)) || reimburse) && (
+          <DanaRow
+            eventId={event.id_event}
+            reimburse={reimburse}
+            eventBasePath={eventBasePath}
+          />
+        )}
 
         {mapSrc && (
           <section aria-label="Lokasi Event" className={`${PANEL} overflow-hidden`}>

@@ -498,7 +498,7 @@ export async function getRegistrasiByPeserta(idPeserta: number) {
     orderBy: { event: { tglevent: 'asc' } },
   })
 
-  const WW: Record<string, string> = { bulanan: 'WW Bulanan', jfe: 'WW JFE', nasional: 'Nasional' }
+  const WW: Record<string, string> = { bulanan: 'WW Bulanan', jfe: 'WW WFE', nasional: 'Nasional' }
   const todayMs = wibToday().getTime()
 
   return rows.map((r) => {

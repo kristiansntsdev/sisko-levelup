@@ -61,7 +61,7 @@ export function BerandaClient({
     { i: 'megaphone', tint: 'gold', t: 'Artikel', href: BRIM_ARTIKEL_BASE },
     { i: 'edit', tint: 'sky', t: 'Tulis Artikel', href: `${BRIM_ARTIKEL_BASE}/baru` },
     { i: 'image', tint: 'gold', t: 'Flyer Generator', href: `${BRIM_LEGACY}/pamflet` },
-    { i: 'image', tint: 'red', t: 'Flyer WW JFE', href: `${BRIM_LEGACY}/wfe-flyer` },
+    { i: 'image', tint: 'red', t: 'Flyer WW WFE', href: `${BRIM_LEGACY}/wfe-flyer` },
     { i: 'link', tint: 'slate', t: 'Dokumentasi', href: `${BRIM_LEGACY}/dokumentasi` },
   ]
 
@@ -163,7 +163,7 @@ export function BerandaClient({
               </button>
             ))}
           </div>
-          <p className={`${MONO} mt-3 text-[11px] text-[#57534e]`}>Flyer Generator, Flyer WW JFE &amp; Dokumentasi membuka dashboard BRIM lama.</p>
+          <p className={`${MONO} mt-3 text-[11px] text-[#57534e]`}>Flyer Generator, Flyer WW WFE &amp; Dokumentasi membuka dashboard BRIM lama.</p>
         </div>
       </div>
     </PaperMain>

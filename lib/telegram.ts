@@ -241,7 +241,7 @@ export function eventFormTelegramFields(input: {
   }
   fields['Jenis'] = input.jenisevent
   fields['Tipe WW'] =
-    input.wwtype === 'jfe' ? 'JFE' : input.wwtype === 'nasional' ? 'Nasional' : 'Bulanan'
+    input.wwtype === 'jfe' ? 'WFE' : input.wwtype === 'nasional' ? 'Nasional' : 'Bulanan'
 
   const target = decodeCsvLabels(input.target, TARGET_PESERTA_LABEL)
   if (target) fields['Target Peserta'] = target

@@ -17,6 +17,7 @@ import {
 import { submitReimburse, type DanaForm, type ReimburseData } from '@/lib/actions/reimburse'
 import type { KorwilOption } from '@/lib/surat-keuangan-data'
 import { danaDigits, RupiahInput } from '@/components/ui/rupiah-input'
+import { DANA_TIERS, danaTierForPeserta } from '@/lib/dana-aturan'
 
 const inputCls =
   'w-full px-3.5 py-3 border-[1.5px] border-border rounded-input text-[15px] bg-surface text-fg outline-none focus:border-accent transition-colors disabled:opacity-60'
@@ -113,7 +114,7 @@ function KirimKorwilCard({ share }: { share: NonNullable<DanaForm['share']> }) {
         {share.korwil.koordinator ? ` — ${share.korwil.koordinator}` : ''}
       </p>
       <p className="text-[12px] text-muted mt-2">
-        Korwil membuka link tanpa login, lalu Setujui / Tolak. Setelah disetujui, PIC LevelUP Pusat dan Keuangan
+        Korwil membuka link tanpa login, lalu Setujui / Reject. Setelah disetujui, PIC LevelUP Pusat dan Keuangan
         PPHTGD dapat notif WhatsApp otomatis.
       </p>
       {share.waUrl ? (
@@ -306,6 +307,12 @@ export function DanaClient({
   const [bukti, setBukti] = useState(reimburse?.bukti ?? '')
   const [laporan, setLaporan] = useState(reimburse?.laporan ?? '')
   const [danausul, setDanausul] = useState(danaDigits(reimburse?.danausul ?? ''))
+  // Paket dana per rentang peserta; tidak cocok dengan paket mana pun (atau kasus khusus) = input manual
+  const [manual, setManual] = useState(() => {
+    const d = danaDigits(reimburse?.danausul ?? '')
+    return d !== '' && !DANA_TIERS.some((t) => String(t.dana) === d)
+  })
+  const saranTier = danaTierForPeserta(jumlahPeserta)
   const [danariil, setDanariil] = useState(danaDigits(reimburse?.danariil ?? ''))
   // Rekening tersimpan LevelUP Kota: isi otomatis yang terakhir dipakai kalau pengajuan ini belum punya rekening
   const savedRekening = form?.rekening ?? []
@@ -447,7 +454,47 @@ export function DanaClient({
             </FormField>
 
             <FormField label="Pengajuan Dana">
-              <RupiahInput value={danausul} onChange={setDanausul} disabled={isApproved} />
+              <div className="flex flex-col gap-2">
+                {DANA_TIERS.map((t) => {
+                  const on = !manual && danausul === String(t.dana)
+                  return (
+                    <label
+                      key={t.min}
+                      className={`flex items-center gap-3 px-3.5 py-2.5 border-[1.5px] rounded-input text-[14px] ${on ? 'border-accent bg-accent/10' : 'border-border bg-surface'} ${isApproved ? 'opacity-60' : 'cursor-pointer'}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        disabled={isApproved}
+                        onChange={() => {
+                          setManual(false)
+                          setDanausul(on ? '' : String(t.dana))
+                        }}
+                      />
+                      <span className="flex-1">
+                        {t.min}–{t.max} peserta
+                        {saranTier?.min === t.min && <span className="ml-2 text-[11px] text-muted">(sesuai jumlah peserta)</span>}
+                      </span>
+                      <b>Rp. {t.dana.toLocaleString('id-ID')}</b>
+                    </label>
+                  )
+                })}
+                <label
+                  className={`flex items-center gap-3 px-3.5 py-2.5 border-[1.5px] rounded-input text-[14px] ${manual ? 'border-accent bg-accent/10' : 'border-border bg-surface'} ${isApproved ? 'opacity-60' : 'cursor-pointer'}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={manual}
+                    disabled={isApproved}
+                    onChange={() => {
+                      if (manual) setDanausul('')
+                      setManual(!manual)
+                    }}
+                  />
+                  <span className="flex-1">Input manual (kasus khusus)</span>
+                </label>
+                {manual && <RupiahInput value={danausul} onChange={setDanausul} disabled={isApproved} />}
+              </div>
             </FormField>
 
             <FormField label="Penggunaan Dana Riil">

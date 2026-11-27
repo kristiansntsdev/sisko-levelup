@@ -1,3 +1,4 @@
+import { danaWindowOpen } from '@/lib/dana-aturan'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
@@ -32,6 +33,7 @@ export default async function EventDanaPage({
     // Jumlah Peserta = peserta unik yang absen (sama dengan yang dilihat Korwil + Surat Keuangan), bukan registrasi
     countHadirUnik(event.id_event),
   ])
+  if ((event.wwtype !== 'jfe' || !danaWindowOpen(event.tglSelesaiRaw)) && !reimburse) redirect(`/dashboard/kota/alk/event/${event.id_event}`)
 
   return (
     <DanaClient

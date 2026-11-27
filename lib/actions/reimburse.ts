@@ -1,4 +1,5 @@
 'use server'
+import { danaWindowOpen, DANA_WINDOW_DAYS } from '@/lib/dana-aturan'
 import { cookies } from 'next/headers'
 import { db } from '@/lib/db'
 import { setActor } from '@/lib/request-context'
@@ -128,6 +129,12 @@ export async function submitReimburse(idEvent: number, input: SubmitReimburseInp
   await requireAlkPengurus()
 
   const existing = await db.reimburse.findFirst({ where: { id_event: String(idEvent) } })
+  // Pengajuan dana hanya untuk event serentak (WFE, wwtype 'jfe' di DB); pengajuan lama tetap bisa diedit
+  const ev = await db.event.findUnique({ where: { id_event: idEvent }, select: { wwtype: true, tgleventselesai: true } })
+  if (!existing && ev?.wwtype !== 'jfe') throw new Error('Pengajuan dana hanya untuk event WFE serentak')
+  if (!ev || !danaWindowOpen(ev.tgleventselesai)) {
+    throw new Error(`Pengajuan dana ditutup, maksimal ${DANA_WINDOW_DAYS} hari setelah acara`)
+  }
   if (existing && isReimburseLocked(reimburseStage(existing))) {
     throw new Error('Pengajuan sudah disetujui Korwil, tidak bisa diedit')
   }

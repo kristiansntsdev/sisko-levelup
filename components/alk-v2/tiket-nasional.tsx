@@ -90,7 +90,7 @@ export function TiketNasionalV2Client({ items }: { items: TiketNasionalPending[]
               </div>
               <Decide
                 approve={pending && busyId === u.id_registrasi ? '...' : 'Approve'}
-                reject="Tolak"
+                reject="Reject"
                 disabled={pending && busyId === u.id_registrasi}
                 onApprove={() => handleApprove(u)}
                 onReject={() => handleReject(u)}
@@ -99,7 +99,7 @@ export function TiketNasionalV2Client({ items }: { items: TiketNasionalPending[]
           ))
         )}
         <Note tone="sky">
-          Hanya <b>Sekretariat Nasional</b> yang bisa menyetujui tiket event nasional. Tolak
+          Hanya <b>Sekretariat Nasional</b> yang bisa menyetujui tiket event nasional. Reject
           melepas kuota; peserta bisa mengajukan ulang.
         </Note>
       </div>

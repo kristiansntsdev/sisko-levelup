@@ -153,7 +153,7 @@ function Decision({
             onClick={() => setMode('tolak')}
             className={`${ANTON} w-full py-3.5 rounded-sm ring-2 ring-inset ring-[#c21f24] text-[#c21f24] text-[19px] tracking-[.03em] ${PRESS}`}
           >
-            Tolak
+            Reject
           </button>
         </>
       )}
