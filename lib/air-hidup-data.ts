@@ -4,7 +4,7 @@ import { Prisma } from '@/lib/generated/client'
 import { sessionPesertaId } from '@/lib/peserta-session'
 import { wibToday } from '@/lib/wib'
 import {
-  airAnggota, hitungNasional, PIC_USERLEVEL, terakhirMinum,
+  AIR_MIN_LEVEL, airAnggota, hitungNasional, PIC_USERLEVEL, terakhirMinum,
   type AirAnggota, type AirBeranda, type AliranData, type EditData, type PicData, type WwLaporan,
 } from '@/lib/air-hidup'
 
@@ -33,9 +33,10 @@ type AnggotaRow = {
  * (`peserta.created_at`, kosong untuk anggota lama), mana yang lebih baru.
  * Waktu: `absen.timestamp` ditulis Prisma dalam UTC (+7 jam = hari WIB); `ww_peserta.created_at` diisi default DB (jam dinding WIB).
  */
-export async function daftarAirAnggota(today: string, f: { idCabang?: number; idPeserta?: number; tambahan?: number[] } = {}): Promise<AirAnggota[]> {
+export async function daftarAirAnggota(today: string, f: { idCabang?: number; idPeserta?: number; tambahan?: number[]; minLevel?: number } = {}): Promise<AirAnggota[]> {
   const kondisi: Prisma.Sql[] = []
   if (f.idPeserta != null) kondisi.push(Prisma.sql`p.id_peserta = ${f.idPeserta}`)
+  if (f.minLevel != null) kondisi.push(Prisma.sql`CAST(p.userlevel AS UNSIGNED) >= ${f.minLevel}`)
   if (f.idCabang != null) {
     kondisi.push(f.tambahan?.length
       ? Prisma.sql`(c.id_cabang = ${f.idCabang} OR p.id_peserta IN (${Prisma.join(f.tambahan)}))`
@@ -93,7 +94,7 @@ export async function daftarLaporan(idSaya: number, limit: number, idCabang?: nu
 /** Panel Beranda: air milik anggota itu sendiri + Kabar Terbaru untuk semua anggota. null = belum login. */
 export async function dataBeranda(): Promise<AirBeranda | null> {
   const me = await anggotaAir()
-  if (!me) return null
+  if (!me || me.level < AIR_MIN_LEVEL) return null
   const today = hariIni()
   const isPic = me.userlevel === PIC_USERLEVEL
   // Air anggota gagal dibaca (mis. tabel ww_peserta belum dimigrasi) tidak boleh menyembunyikan Kabar Terbaru / tombol Dashboard PIC.

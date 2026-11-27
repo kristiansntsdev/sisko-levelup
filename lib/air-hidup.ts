@@ -6,6 +6,9 @@ export const AIR_KERING_HARI = 40
 export const AIR_HAUS_HARI = 30
 export const AIR_SEGAR_HARI = 7
 /** Batas isi laporan (kolom `ww_laporan.isi` = TEXT). Kartu laporan memotong 3 baris; kartu bagikan PNG memakai AIR_ISI_PRATINJAU. */
+/** Air Hidup mulai dari Squad (userlevel 2): Guest dan Volunteer tidak melihat panel, aliran, atau push. */
+export const AIR_MIN_LEVEL = 2
+
 export const AIR_ISI_MAX = 2000
 export const AIR_ISI_PRATINJAU = 280
 export const AIR_JUMLAH_MAX = 9999

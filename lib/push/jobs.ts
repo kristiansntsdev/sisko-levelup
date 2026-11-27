@@ -12,7 +12,7 @@ import {
   bersihkanKlaim, berlangganan, kirimPush, klaimPush, pushAktif, TTL_PENGINGAT,
   type Penerima, type PushOpts, type PushPayload,
 } from './send'
-import { AIR_STAGE_LABEL, perluPush } from '@/lib/air-hidup'
+import { AIR_MIN_LEVEL, AIR_STAGE_LABEL, perluPush } from '@/lib/air-hidup'
 import { daftarAirAnggota } from '@/lib/air-hidup-data'
 import { halamanPengumuman, pastikanBarisRingkasan, pastikanBarisUltah, teksUltahDiri, type OrangUltah } from './pengumuman'
 import { daftarNama, ingatH0Aktif, jendelaBuka, ultahHariIni, wibIso } from './rules'
@@ -305,7 +305,7 @@ async function grupAbsenBuka(now: Date): Promise<Grup[]> {
  */
 async function grupAir(now: Date): Promise<Grup[]> {
   const today = wibIso(now)
-  const [subs, anggota] = await Promise.all([pesertaBerlangganan(), daftarAirAnggota(today)])
+  const [subs, anggota] = await Promise.all([pesertaBerlangganan(), daftarAirAnggota(today, { minLevel: AIR_MIN_LEVEL })])
   const berlangganan = new Set(subs.map((p) => p.id_peserta))
   return anggota.filter((a) => berlangganan.has(a.id) && perluPush(a)).map((a) => ({
     kunci: `air:${a.stage}:${a.id}:${a.sejak}`,

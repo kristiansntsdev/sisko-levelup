@@ -5,7 +5,7 @@ import { addLog, getDb, mutate, wibDay, type DbWwLaporan, type DemoDb } from '..
 import { fileToDataUrl, sessionPeserta } from '../util'
 import { isOnlineEvent } from '@/lib/event-link'
 import {
-  airAnggota, fokusDari, hitungNasional, laporanDari, terakhirMinum, validateLaporan,
+  AIR_MIN_LEVEL, airAnggota, fokusDari, hitungNasional, laporanDari, terakhirMinum, validateLaporan,
   type AirAnggota, type AirBeranda, type AliranData, type EditData, type PicData, type WwLaporan,
 } from '@/lib/air-hidup'
 
@@ -53,7 +53,7 @@ const terbaru = (a: DbWwLaporan, b: DbWwLaporan) => (a.tanggal === b.tanggal ? b
 export async function getAirBeranda(): Promise<AirBeranda | null> {
   const d = getDb()
   const me = sessionPeserta()
-  if (!me) return null
+  if (!me || Number(me.userlevel) < AIR_MIN_LEVEL) return null
   const semua = anggotaList(d)
   return {
     saya: semua.find((a) => a.id === me.id_peserta) ?? null,
