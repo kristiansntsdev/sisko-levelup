@@ -70,7 +70,7 @@ const JENIS_OPTIONS = ['Offline', 'Online']
 
 const WWTYPE_OPTIONS_BASE: { value: event_wwtype; label: string }[] = [
   { value: 'bulanan', label: 'Bulanan' },
-  { value: 'jfe', label: 'JFE' },
+  { value: 'jfe', label: 'WFE' },
 ]
 const WWTYPE_OPTION_NASIONAL: { value: event_wwtype; label: string } = {
   value: 'nasional',
@@ -982,11 +982,11 @@ export function EventForm({
               className={`mb-3 overflow-hidden ${v2 ? 'rounded-[10px] ring-1 ring-[#161616]/15' : 'rounded-[12px] border border-border'}`}
             >
               <p className={`px-3 py-2 text-[12px] ${v2 ? 'text-[#44403c]' : 'text-muted'}`}>
-                Flyer pusat WW JFE / WFE. Sesuaikan hanya: foto pembicara, tanggal, tempat, tema, logo
+                Flyer pusat WW WFE. Sesuaikan hanya: foto pembicara, tanggal, tempat, tema, logo
                 kota.
               </p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={jfeTemplate.image_url} alt="Flyer pusat WW JFE" className="w-full object-cover" />
+              <img src={jfeTemplate.image_url} alt="Flyer pusat WW WFE" className="w-full object-cover" />
             </div>
           )}
           {form.wwtype === 'jfe' && !jfeTemplate && form.tglevent && (

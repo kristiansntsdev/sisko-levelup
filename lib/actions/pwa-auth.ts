@@ -69,6 +69,11 @@ export async function logoutPengurusKeepMember() {
 
 export async function getActiveSessions() {
   const [session, pengurus] = await Promise.all([auth(), getPengurusFromCookie()])
+  const cabangId = Number(pengurus?.kotalevelup)
+  const cabang =
+    pengurus && Number.isFinite(cabangId) && cabangId > 0
+      ? await db.cabang.findUnique({ where: { id_cabang: cabangId }, select: { namacabang: true } })
+      : null
   return {
     peserta: session?.user?.idPeserta
       ? {
@@ -83,6 +88,7 @@ export async function getActiveSessions() {
           idPengurus: pengurus.id_pengurus,
           nama: pengurus.nama,
           divisi: pengurus.divisi,
+          kota: cabang?.namacabang ?? null,
           dest: pengurusDest(pengurus.divisi, pengurus.username),
         }
       : null,

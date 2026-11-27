@@ -1,3 +1,4 @@
+import { danaWindowOpen } from '@/lib/dana-aturan'
 import { redirect } from 'next/navigation'
 import { requireAlkPengurus } from '@/lib/alk-auth'
 import { getEventDetail } from '@/lib/actions/event'
@@ -22,6 +23,7 @@ export default async function AlkV2DanaPage({
     // Jumlah Peserta = peserta unik yang absen (sama dengan yang dilihat Korwil + Surat Keuangan), bukan registrasi
     countHadirUnik(event.id_event),
   ])
+  if ((event.wwtype !== 'jfe' || !danaWindowOpen(event.tglSelesaiRaw)) && !reimburse) redirect(`${ALK_EVENT_BASE}/${event.id_event}`)
 
   return (
     <DanaClient

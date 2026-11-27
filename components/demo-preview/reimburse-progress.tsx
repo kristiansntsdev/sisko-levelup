@@ -111,7 +111,7 @@ export function ReimburseProgress({ idEvent }: { idEvent: number }) {
                 <Strip tone="ink" className="py-2.5 text-[16px]">Setujui ({who})</Strip>
               </button>
               <button type="button" onClick={() => setRejecting(true)} className={`${ANTON} flex-1 rounded-sm py-2.5 text-[16px] tracking-[.03em] text-[#c21f24] ring-2 ring-inset ring-[#c21f24] ${PRESS}`}>
-                Tolak
+                Reject
               </button>
             </div>
           )}

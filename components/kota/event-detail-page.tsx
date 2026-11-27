@@ -1,5 +1,6 @@
 'use client'
 
+import { danaWindowOpen } from '@/lib/dana-aturan'
 import { useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { ajukanEvent, type EventDetailFull } from '@/lib/actions/event'
@@ -314,7 +315,9 @@ export function EventDetailPage({
           ))}
         </div>
 
-        <DanaSupportCard eventId={event.id_event} reimburse={reimburse} eventBasePath={eventBasePath} />
+        {((event.wwtype === 'jfe' && danaWindowOpen(event.tglSelesaiRaw)) || reimburse) && (
+          <DanaSupportCard eventId={event.id_event} reimburse={reimburse} eventBasePath={eventBasePath} />
+        )}
 
         {/* Map */}
         {mapSrc && (

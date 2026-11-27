@@ -36,7 +36,7 @@ async function upgradesForCabang(kotalevelup: string) {
   if (rows.length === 0) return []
   const ids = rows.map((r) => Number(r.id_peserta)).filter((n) => Number.isFinite(n))
   const pesertas = await db.peserta.findMany({
-    where: { id_peserta: { in: ids }, kotalevelup },
+    where: { id_peserta: { in: ids }, kotalevelup: { equals: kotalevelup, not: { in: ['', '0'] } } },
     select: { id_peserta: true, nama: true, usercode: true },
   })
   const byId = new Map(pesertas.map((p) => [p.id_peserta, p]))
@@ -76,8 +76,11 @@ export async function joinSquad(kotalevelup: string): Promise<Result> {
     select: { userlevel: true },
   })
   if (!p || p.userlevel !== '1') return { ok: false, error: 'Tidak bisa join squad' }
+  // id 0 = cabang nasional, bukan kota anggota: kota kosong ('' / '0') tidak boleh lolos ke squad
+  const cabangId = Number(kotalevelup)
+  if (!Number.isInteger(cabangId) || cabangId <= 0) return { ok: false, error: 'Pilih LevelUP kota' }
   const cabang = await db.cabang.findUnique({
-    where: { id_cabang: Number(kotalevelup) || 0 },
+    where: { id_cabang: cabangId },
     select: { id_cabang: true },
   })
   if (!cabang) return { ok: false, error: 'Pilih LevelUP kota' }
@@ -149,6 +152,10 @@ export async function approveSquad(idUpgrade: number): Promise<Result> {
     where: { id_peserta: idPeserta },
     select: { kotalevelup: true },
   })
+  const kotaPeserta = Number(peserta?.kotalevelup)
+  if (!Number.isInteger(kotaPeserta) || kotaPeserta <= 0) {
+    return { ok: false, error: 'Anggota belum punya LevelUP Kota' }
+  }
   if (!peserta || peserta.kotalevelup !== pengurus.kotalevelup) {
     return { ok: false, error: 'Bukan cabang ini' }
   }

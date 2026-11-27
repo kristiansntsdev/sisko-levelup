@@ -34,7 +34,7 @@ const SCOPE_TABS: { key: ScopeFilter; label: string }[] = [
 const WW_TABS: { key: WwFilter; label: string }[] = [
   { key: 'all', label: 'Semua WW' },
   { key: 'bulanan', label: 'Bulanan' },
-  { key: 'jfe', label: 'JFE' },
+  { key: 'jfe', label: 'WFE' },
   { key: 'nasional', label: 'Nasional' },
 ]
 
@@ -144,7 +144,7 @@ function EventItem({ e }: { e: EventDashboard }) {
   const st = eventStatus(e)
   const { d, m } = monDay(e.tglMs)
   const ww =
-    e.wwtype === 'jfe' ? 'JFE' : e.wwtype === 'nasional' ? 'Nasional' : e.wwtype === 'bulanan' ? 'Bulanan' : ''
+    e.wwtype === 'jfe' ? 'WFE' : e.wwtype === 'nasional' ? 'Nasional' : e.wwtype === 'bulanan' ? 'Bulanan' : ''
   return (
     <Link href={`${ALK_EVENT_BASE}/${e.id_event}`} className={`w-full p-3.5 flex items-center gap-3.5 text-left ${PANEL} ${PRESS}`}>
       <DateBlock d={d} m={m} tone={st.bucket === 'done' ? 'slate' : st.label === 'Berlangsung' ? 'solid' : 'red'} />

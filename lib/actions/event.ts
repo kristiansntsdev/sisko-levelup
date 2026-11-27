@@ -88,7 +88,7 @@ export type EventSummary = {
 
 const WW_CATEGORY: Record<string, string> = {
   bulanan: 'WW Bulanan',
-  jfe: 'WW JFE',
+  jfe: 'WW WFE',
   nasional: 'Nasional',
 }
 

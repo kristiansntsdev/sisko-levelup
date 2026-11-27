@@ -101,7 +101,7 @@ export function PindahKotaV2Client({ items }: { items: PindahKotaPending[] }) {
               {u.catatan ? <p className={`${MONO} text-[11px] text-[#44403c] break-words`}>Catatan: {u.catatan}</p> : null}
               <Decide
                 approve={pending && busyId === u.id_pindah ? '...' : 'Approve'}
-                reject="Tolak"
+                reject="Reject"
                 disabled={pending && busyId === u.id_pindah}
                 onApprove={() => handleApprove(u)}
                 onReject={() => openReject(u)}
@@ -124,7 +124,7 @@ export function PindahKotaV2Client({ items }: { items: PindahKotaPending[] }) {
         }}
       >
         <SheetHead
-          title="Tolak pengajuan"
+          title="Reject pengajuan"
           sub={rejectTarget ? `${rejectTarget.nama} → ${rejectTarget.keNama}` : undefined}
         />
         <Field label="Alasan">
@@ -138,7 +138,7 @@ export function PindahKotaV2Client({ items }: { items: PindahKotaPending[] }) {
         </Field>
         {error ? <p role="alert" className={`${ERROR} mt-2`}>{error}</p> : null}
         <button type="button" disabled={pending} onClick={handleReject} className={`mt-4 ${BTN}`}>
-          <Strip>{pending ? '...' : 'Tolak pengajuan'}</Strip>
+          <Strip>{pending ? '...' : 'Reject pengajuan'}</Strip>
         </button>
       </Sheet>
       <Toast msg={toast} />

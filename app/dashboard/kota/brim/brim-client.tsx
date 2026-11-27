@@ -115,7 +115,7 @@ function HomeTab({ nama, kotalevelup, isNasional }: { nama: string; kotalevelup:
                     <FlyerIcon />
                   </div>
                   <div>
-                    <p className="font-semibold text-fg">Flyer WW JFE serentak</p>
+                    <p className="font-semibold text-fg">Flyer WW WFE serentak</p>
                     <p className="text-xs text-muted mt-0.5">WFE — template pusat per bulan</p>
                   </div>
                 </div>

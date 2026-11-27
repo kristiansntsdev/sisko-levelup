@@ -24,6 +24,8 @@
 
 > Project-specific conventions. Global conventions in root CLAUDE.md.
 
+- **Commit message per update** — setiap selesai update fitur / kode, akhiri jawaban dengan saran commit message untuk tiap fitur (satu pesan per fitur, format `type: ringkasan` seperti riwayat git: `feat:` / `fix:` / `refactor:`). Hanya saran di jawaban; jangan `git commit` kecuali diminta
+
 - Fonts loaded via `next/font/google`, variables set as CSS custom properties in layout
 - Tailwind utility classes only — no custom CSS files beyond `globals.css`
 

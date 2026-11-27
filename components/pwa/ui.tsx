@@ -110,7 +110,7 @@ export function SheetHead({ title, sub }: { title: string; sub?: ReactNode }) {
   )
 }
 
-export function ModeSwitch({ alk, onChange }: { alk: boolean; onChange: (alk: boolean) => void }) {
+export function ModeSwitch({ alk, onChange, alkLabel = 'Akun ALK' }: { alk: boolean; onChange: (alk: boolean) => void; alkLabel?: string }) {
   const on = 'bg-[#161616] text-[#ffd83d]'
   return (
     <div className="grid grid-cols-2 p-1 gap-1 rounded-full bg-[#fffdf7] text-[#161616] text-[13px] font-semibold">
@@ -120,7 +120,7 @@ export function ModeSwitch({ alk, onChange }: { alk: boolean; onChange: (alk: bo
       </button>
       <button type="button" aria-pressed={alk} onClick={() => onChange(true)} className={`flex items-center justify-center gap-1.5 py-2 rounded-full transition ${alk ? on : ''}`}>
         <Icon name="shield" className="w-4 h-4" />
-        Akun Sekretariat
+        {alkLabel}
       </button>
     </div>
   )

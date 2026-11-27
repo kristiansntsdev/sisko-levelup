@@ -207,7 +207,7 @@ function ReviewDecision({ review, onDone }: { review: ReimburseReview; onDone: (
           mengirim link ke Korwil PPHTGD.
         </p>
       </div>
-      <Field label="Alasan Tolak">
+      <Field label="Alasan Reject">
         <textarea
           value={alasan}
           onChange={(e) => setAlasan(e.target.value)}
@@ -220,7 +220,7 @@ function ReviewDecision({ review, onDone }: { review: ReimburseReview; onDone: (
       {error ? <p role="alert" className={ERROR}>{error}</p> : null}
       <Decide
         approve={pending && action === 'setuju' ? '…' : 'Approve'}
-        reject={pending && action === 'tolak' ? '…' : 'Tolak'}
+        reject={pending && action === 'tolak' ? '…' : 'Reject'}
         disabled={pending}
         onApprove={() => decide('setuju')}
         onReject={() => decide('tolak')}

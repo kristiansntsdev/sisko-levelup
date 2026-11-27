@@ -91,7 +91,7 @@ export function BerandaClient({
         i: 'pin',
         tint: 'amber',
         t: `${pendingPindahKota} pengajuan pindah LevelUP Kota`,
-        s: 'Approve / Tolak · Sekretariat Nasional',
+        s: 'Approve / Reject · Sekretariat Nasional',
         href: `${ALK_BASE}/pindah-kota`,
       })
     }
@@ -101,7 +101,7 @@ export function BerandaClient({
         i: 'ticket',
         tint: 'red',
         t: `${pendingTiketNasional} pengajuan tiket event nasional`,
-        s: 'Approve / Tolak · Sekretariat Nasional',
+        s: 'Approve / Reject · Sekretariat Nasional',
         href: `${ALK_BASE}/tiket-nasional`,
       })
     }
@@ -111,7 +111,7 @@ export function BerandaClient({
         i: 'receipt',
         tint: 'gold',
         t: `${pendingDana} pengajuan dana menunggu review`,
-        s: 'Approve / Tolak sebelum ke Korwil · Sekretariat Nasional',
+        s: 'Approve / Reject sebelum ke Korwil · Sekretariat Nasional',
         href: `${ALK_BASE}/reimburse`,
       })
     }
@@ -201,10 +201,11 @@ export function BerandaClient({
 
   return (
     <PaperMain>
-      <PaperHeader sticker={`Sekretariat · ${namaCabang}`} title={nama}>
+      <PaperHeader sticker={`ALK · ${namaCabang}`} title={nama}>
         <div className="mt-4">
           <ModeSwitch
             alk
+            alkLabel={`ALK ${namaCabang}`}
             onChange={(alk) => {
               if (!alk) router.push('/dashboard')
             }}
@@ -280,7 +281,7 @@ export function BerandaClient({
         </div>
 
         <div>
-          <SectionHead title="Menu Sekretariat" />
+          <SectionHead title={`Menu ALK ${namaCabang}`} />
           <div className="grid grid-cols-3 gap-2.5">
             {menu.map((x, idx) => (
               <button

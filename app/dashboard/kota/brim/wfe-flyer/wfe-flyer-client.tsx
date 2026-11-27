@@ -37,7 +37,7 @@ export function WfeFlyerClient({ campaigns }: { campaigns: WfeSerentakRow[] }) {
           ← Beranda BRIM
         </Link>
         <div>
-          <h1 className="text-[22px] font-bold text-fg">Flyer WW JFE serentak</h1>
+          <h1 className="text-[22px] font-bold text-fg">Flyer WW WFE serentak</h1>
           <p className="text-[12px] text-muted mt-0.5">WFE — template pusat. Kota hanya ganti foto pembicara, tanggal, tempat, tema, logo kota.</p>
         </div>
 

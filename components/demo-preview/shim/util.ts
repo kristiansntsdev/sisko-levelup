@@ -46,7 +46,7 @@ export function posterOf(e: DbEvent): string {
   return (e.posterevent || e.image_url || '').trim()
 }
 
-export const WW_CATEGORY: Record<string, string> = { bulanan: 'WW Bulanan', jfe: 'WW JFE', nasional: 'Nasional' }
+export const WW_CATEGORY: Record<string, string> = { bulanan: 'WW Bulanan', jfe: 'WW WFE', nasional: 'Nasional' }
 
 /** Shrink an uploaded flyer to a small JPEG data URL so it fits comfortably in localStorage. */
 export function fileToDataUrl(file: File, maxDim = 720, quality = 0.72): Promise<string> {
